@@ -321,6 +321,20 @@ escmode = [+ $escmode = 7 +]
 <a href=[+ do { local $escmode=1; '&' } +]>html escaped?</a>
 <a href=[+ do { local $escmode=2; '&' } +]>url escaped</a>
 
+[- $fdat{foobar} = "Don't go there!" -]
+
+[- $escmode = 3; -]
+<textarea name="foobar" rows="5" cols="80" wrap="off">[+ $fdat{foobar}
++]</textarea>
+[- $escmode = 0; -]
+
+This does not work:
+
+[- $escmode = 3; -]
+<textarea name="foobar" rows="5" cols="80" wrap="off"></textarea>
+[- $escmode = 0; -]
+
+
 <P>Ok.<P>
 
 

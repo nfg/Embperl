@@ -1,5 +1,6 @@
+=head1 NAME
 
-=head1 CVS - Access to the Embperl CVS development tree
+CVS - Access to the Embperl CVS development tree
 
 =head2 INTRO
 

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: EmbperlXSLT.pm,v 1.3 2004/01/23 06:50:57 richter Exp $
+#   $Id: EmbperlXSLT.pm,v 1.6 2004/08/16 07:36:21 richter Exp $
 #
 ###################################################################################
  
@@ -53,7 +53,8 @@ sub get_recipe
 
     push @$ep, {'type'   =>  'eptostring' } ;
     push @$ep, {'type'   =>  $xsltproc . '-parse-xml', } ;
-    push @$ep, {'type'   =>  $xsltproc, stylesheet => \@stylesheet, $param -> xsltparam?():(param => \%Embperl::fdat) } ;
+    push @$ep, {'type'   =>  $xsltproc, stylesheet => \@stylesheet, $param -> xsltparam?():
+                (param => { map { my $v = $Embperl::fdat{$_} ; $v =~ s/\'/&apos;/g ; ($_ => "'$v'") } keys %Embperl::fdat }) } ;
 
     return $ep ;
     }

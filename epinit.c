@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epinit.c,v 1.13 2004/01/23 06:50:55 richter Exp $
+#   $Id: epinit.c,v 1.22 2004/08/24 05:08:48 richter Exp $
 #
 ###################################################################################*/
 
@@ -25,7 +25,6 @@
 SV   ep_sv_undef ; /* we need our own undef value, because when 
                       storing a PL_sv_undef with Perl 5.8.0 in a hash
                       Perl takes it as a placeholder and pretents it isn't there :-( */
-
 
 #ifndef PERL_IMPLICIT_CONTEXT
 
@@ -201,7 +200,7 @@ tOptionEntry OptionsSESSION_MODE[] =
 *
 * \_de									   
 * Initialisiert ein Threadobjekt. Ist dem Thread schon ein Objekt zugeorndet
-* wird das bestehende genutzt, ansonsten ein neues zurück geliefert.
+* wird das bestehende genutzt, ansonsten ein neues zur?ck geliefert.
 * \endif                                                                       
 *                                                                          
 * ------------------------------------------------------------------------ */
@@ -223,7 +222,7 @@ int    embperl_SetupThread  (/*in*/ pTHX_
 #endif
     if (!ppSV)
 	{
-	//strcpy (errdat1, "PL_modglobal (key=Embperl::Thread)") ;
+	LogErrorParam (NULL, rcHashError, "PL_modglobal (key=Embperl::Thread)", "") ;
         return rcHashError ;
 	}
 	
@@ -249,7 +248,11 @@ int    embperl_SetupThread  (/*in*/ pTHX_
         pThread -> pFormArrayGV  = *((GV **)hv_fetch    (pStash, FFLD_NAME, sizeof (FFLD_NAME) - 1, 0)) ;
         pThread -> pHeaderHash   = perl_get_hv (EMBPERL_HDR_NAME, TRUE) ;
         pThread -> pInputHash    = perl_get_hv (EMBPERL_IDAT_NAME, TRUE) ;
+#ifdef DMALLOC
+        pThread -> pEnvHash      = Perl_get_hv(aTHX_ EMBPERL_ENV_NAME, TRUE) ;
+#else
         pThread -> pEnvHash      = perl_get_hv (EMBPERL_ENV_NAME, TRUE) ;
+#endif        
         pThread -> pParamArray   = perl_get_av (EMBPERL_PARAM_NAME, TRUE) ;
         pThread -> pParamArrayGV = *((GV **)hv_fetch    (pStash, PARAM_NAME, sizeof (PARAM_NAME) - 1, 0)) ;
         pThread -> pReqRV        = perl_get_sv (EMBPERL_REQ_NAME, TRUE) ;
@@ -286,7 +289,7 @@ int    embperl_SetupThread  (/*in*/ pTHX_
 * \endif                                                                       
 *
 * \_de									   
-* Liefert das diesem Thread zugeordnete Thread-Objekt zurück. Das Objekt muß
+* Liefert das diesem Thread zugeordnete Thread-Objekt zur?ck. Das Objekt mu?
 * vorher mittels embperl_SetupThread initialisiert worden sein.
 * \endif                                                                       
 *                                                                          
@@ -417,7 +420,7 @@ static int embperl_CreateSessionObject(/*in*/ tApp *       a,
     hv_magic(pHash, (GV *)pTie, 'P') ;
 
     *ppHash = pHash ;
-    *ppObj  = pTie ;
+    *ppObj  = SvREFCNT_inc(pTie) ;
 
     return ok ;
     }
@@ -560,7 +563,7 @@ int    embperl_SetupSessionObjects    (/*in*/ tApp *       a)
 *                                                                          
 * @param   pThread          per thread daten
 * @param   pApacheCfg       apache Konfigurations Vector
-* @param   pPerlParam       Parameter die von Perl aus übergeben wurden
+* @param   pPerlParam       Parameter die von Perl aus ?bergeben wurden
 * \endif                                                                       
 *                                                                          
 * ------------------------------------------------------------------------ */
@@ -840,9 +843,9 @@ int embperl_Init        (/*in*/ pTHX_
         {
         /* when running under mod_perl only register the module */
         /*  rest will be call from module initialzation when config has been read */
+        ap_s = epxs_sv2_Apache__Server(pApacheSrvSV) ;
         embperl_ApacheAddModule () ;
 #ifdef APACHE2
-        ap_s = epxs_sv2_Apache__Server(pApacheSrvSV) ;
 #else
         return ok ;
 #endif
@@ -953,7 +956,7 @@ int embperl_Init        (/*in*/ pTHX_
 * \endif                                                                       
 *
 * \_de									   
-* Nimmt die übergebenen Formulardaten und legt sie in %fdat/@ffld ab
+* Nimmt die ?bergebenen Formulardaten und legt sie in %fdat/@ffld ab
 * \endif                                                                       
 *                                                                          
 * ------------------------------------------------------------------------ */
@@ -976,8 +979,6 @@ static int embperl_GetFormData (/*i/o*/ register req * r,
 
     AV *    pFormArray      = r -> pThread -> pFormArray ;
     HV *    pFormHash       = r -> pThread -> pFormHash ;
-    HV *    pFormSplitHash  = r -> pThread -> pFormSplitHash ;
-    HV *    pInputHash      = r -> pThread -> pInputHash ;
     bool    bAll            = (r -> Config.bOptions & optAllFormData) != 0 ;
     bool    bDebug          = (r -> Config.bDebug   & dbgForm) != 0 ;
     epTHX ;
@@ -1128,7 +1129,7 @@ static int embperl_GetFormData (/*i/o*/ register req * r,
 * \endif                                                                       
 *
 * \_de									   
-* Ließt die formular daten ein und legt sie in %fdat/@ffld ab
+* Lie?t die formular daten ein und legt sie in %fdat/@ffld ab
 * \endif                                                                       
 *                                                                          
 * ------------------------------------------------------------------------ */
@@ -1257,9 +1258,6 @@ static void embperl_LogStartReq (/*i/o*/ req * r)
         time_t t = time(NULL) ;
         lprintf (r -> pApp,  "[%d]REQ: ***** Start Request at %s", r -> pThread -> nPid, ctime (&t)) ;
         lprintf (r -> pApp,  "[%d]Use App: %s\n", r -> pApp -> pThread -> nPid, r -> pApp -> Config.sAppName) ; 
-#ifdef DMALLOC
-        dmalloc_message ("[%d]REQ: Start Request at %s\n", r -> pThread -> nPid, ctime (time(NULL))) ; 
-#endif        
         }
 
 
@@ -1374,13 +1372,6 @@ int    embperl_SetupRequest (/*in*/ pTHX_
     r -> pPerlTHX = aTHX ;
 #endif
 
-#if defined (_MDEBUG) && defined (WIN32)
-    _CrtMemCheckpoint(&r -> MemCheckpoint);    
-#endif    
-#ifdef DMALLOC
-    r -> MemCheckpoint = dmalloc_mark () ;   
-#endif    
-
 
     
 #ifdef APACHE
@@ -1488,6 +1479,7 @@ int    embperl_SetupRequest (/*in*/ pTHX_
         SPAGAIN ;
         PUSHMARK(sp);
 	XPUSHs(pApp -> _perlsv); 
+	XPUSHs(r -> _perlsv); 
 	PUTBACK;                        
 	perl_call_method ("init", G_EVAL) ;
         tainted = 0 ;
@@ -1517,7 +1509,7 @@ int    embperl_SetupRequest (/*in*/ pTHX_
 * \endif                                                                       
 *
 * \_de									   
-* Räumt das Component-Ausgabe Objekt auf
+* R?umt das Component-Ausgabe Objekt auf
 * \endif                                                                       
 *                                                                          
 * ------------------------------------------------------------------------ */
@@ -1563,7 +1555,7 @@ int    embperl_CleanupOutput   (/*in*/ tReq *                r,
 * \endif                                                                       
 *
 * \_de									   
-* Component-Objekt aufräumen
+* Component-Objekt aufr?umen
 * \endif                                                                       
 *                                                                          
 * ------------------------------------------------------------------------ */
@@ -1678,7 +1670,7 @@ int    embperl_CleanupComponent  (/*in*/ tComponent *          c)
 * \endif                                                                       
 *
 * \_de									   
-* Das Requestobjekt aufräumen
+* Das Requestobjekt aufr?umen
 * \endif                                                                       
 *                                                                          
 * ------------------------------------------------------------------------ */
@@ -1734,12 +1726,28 @@ int    embperl_CleanupRequest (/*in*/ tReq *  r)
     av_clear (r -> pThread -> pFormArray) ;
     hv_clear (r -> pThread -> pFormHash) ;
     hv_clear (r -> pThread -> pFormSplitHash) ;
+    /*
+    for (i = 0 ; i <= av_len (r -> pDomTreeAV); i++)
+	{
+	SV ** ppSV = av_fetch (r -> pDomTreeAV, i, 0) ;   
+        SV * pSV = * ppSV ;
+        lprintf (r -> pApp, "r -> pDomTreeAV DomTree #%d type = %d cnt=%d n=%d\n", i, SvTYPE(pSV), SvREFCNT(pSV), SvIVX(pSV)) ;
+	}
+    */
     av_clear (r -> pDomTreeAV) ;
     SvREFCNT_dec (r -> pDomTreeAV) ;
     for (i = 0 ; i <= av_len (r -> pCleanupAV); i++)
 	{
-	sv_setsv (SvRV(*av_fetch (r -> pCleanupAV, i, 0)), &sv_undef) ;
+	SV ** ppSV = av_fetch (r -> pCleanupAV, i, 0) ;   
+        SV * pSV = * ppSV ;
+	/*
+        if (SvROK(pSV))
+            lprintf (r -> pApp, "r -> pCleanupAV DomTree #%d type = %d cnt=%d n=%d\n", i, SvTYPE(SvRV(pSV)), SvREFCNT(SvRV(pSV)), SvIVX(SvRV(pSV))) ;
+	*/
+        if (SvROK(pSV))
+            sv_setsv (SvRV(pSV), &sv_undef) ;
 	}
+    av_clear (r -> pCleanupAV) ;
 
     Cache_CleanupRequest (r) ;
 
@@ -1791,17 +1799,11 @@ int    embperl_CleanupRequest (/*in*/ tReq *  r)
     ep_destroy_pool (r -> pPool) ;
     sv_setpv(ERRSV,"");
 
-#if defined (_MDEBUG) && defined (WIN32)
-    _CrtMemDumpAllObjectsSince(&r -> MemCheckpoint);    
-#endif    
-#ifdef DMALLOC
-			    /* unsigned long mark, int not_freed_b, int freed_b, int details_b */
-    dmalloc_log_changed (r -> MemCheckpoint, 1, 0, 1) ;
-    dmalloc_message ( "[%d]%sRequest freed. Entry-SVs: %d -OBJs: %d Exit-SVs: %d -OBJs: %d\n", r -> pThread -> nPid,
-	    (r -> Component.pPrev?"Sub-":""), r -> stsv_count, r -> stsv_objcount, sv_count, sv_objcount) ;
-#endif    
     if (r -> Config.bDebug)
 	DomStats (r -> pApp) ;
+
+    r -> pThread -> pCurrReq = NULL ;
+    r -> pApp ->    pCurrReq = NULL ;
 
     return ok ;
     }
@@ -2070,7 +2072,7 @@ int    embperl_SetupComponent  (/*in*/ tReq *                 r,
 * \endif                                                                       
 *
 * \_de									   
-* Initialisiert alle nötigen Datenstrukturen um den Request zu starten, wie
+* Initialisiert alle n?tigen Datenstrukturen um den Request zu starten, wie
 * Thread-, Applikcation und Request-Objekt.
 * \endif                                                                       
 *                                                                          
@@ -2153,9 +2155,13 @@ int     embperl_InitRequest (/*in*/ pTHX_
                 {
                 strncpy (r -> errdat1, SvPV(args[0], l), sizeof(r -> errdat1) - 1) ;
                 SvREFCNT_dec(args[0]) ;
+                if (pRet)
+                    SvREFCNT_dec(pRet) ;
                 LogError (r, rcForbidden) ;
                 return rcForbidden ;
                 }
+            if (pRet)
+                SvREFCNT_dec(pRet) ;
             }
 
         if (r -> Config.pUriMatch)
@@ -2165,8 +2171,12 @@ int     embperl_InitRequest (/*in*/ pTHX_
                 {
                 strncpy (r -> errdat1, SvPV(args[0], l), sizeof(r -> errdat1) - 1) ;
                 SvREFCNT_dec(args[0]) ;
+                if (pRet)
+                    SvREFCNT_dec(pRet) ;
                 return rcDecline ;
                 }
+            if (pRet)
+                SvREFCNT_dec(pRet) ;
             }
         SvREFCNT_dec(args[0]) ;
         }    

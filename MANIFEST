@@ -325,6 +325,7 @@ test/cmp/post.htm
 test/cmp/pure.htm
 test/cmp/rawinput.htm
 test/cmp/recursexec.htm
+test/cmp/hello.htm
 test/cmp/reggetsess.htm
 test/cmp/reqrec.htm
 test/cmp/rtfadv.asc
@@ -367,6 +368,7 @@ test/cmp/varerr.htm
 test/cmp/varerr.htm56
 test/cmp/xhtml.htm
 test/conf/httpd.conf.src
+test/conf/httpd.min.conf.src
 test/conf/httpd.stop.conf.src
 test/conf/null
 test/conf/ssldisable.conf
@@ -515,6 +517,7 @@ test/html/rawinput/rawinput.htm
 test/html/recursexec.htm
 test/html/registry/Execute.htm
 test/html/registry/errpage.htm
+test/html/registry/hello.htm
 test/html/registry/reggetsess.htm
 test/html/registry/script.pl
 test/html/registry/tied.htm

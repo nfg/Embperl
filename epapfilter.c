@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epapfilter.c,v 1.4 2004/01/23 06:50:54 richter Exp $
+#   $Id: epapfilter.c,v 1.5 2004/08/16 03:38:59 richter Exp $
 #
 ###################################################################################*/
 
@@ -194,7 +194,7 @@ struct tProviderApOutFilter_CallbackData
 
 static apr_status_t ProviderApOutFilter_Callback(ap_filter_t *f, apr_bucket_brigade *bb)
     {
-    request_rec *ap_r = f->r;
+    /*request_rec *ap_r = f->r;*/
     struct tProviderApOutFilter_CallbackData * ctx = (struct tProviderApOutFilter_CallbackData *)(f->ctx);
     tReq * r = ctx -> pReq ;
     apr_bucket *b;

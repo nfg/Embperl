@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdom.c,v 1.16 2004/03/14 18:54:43 richter Exp $
+#   $Id: epdom.c,v 1.24 2004/08/17 06:17:58 richter Exp $
 #
 ###################################################################################*/
 
@@ -20,10 +20,12 @@
 
 /* --- don't use Perl's memory management here --- */
 
+#ifndef DMALLOC
 #undef malloc
 #undef realloc
 #undef strdup
 #undef free
+#endif
 
 
 HV * pStringTableHash ;	    /* Hash to translate strings to index number */
@@ -40,7 +42,6 @@ static int numLevelLookup  = 0 ;
 static int numLevelLookupItem  = 0 ;
 static int numAttr   = 0 ;
 static int numStr    = 0 ;
-static int numPads   = 0 ;
 static int numReplace   = 0 ;
 
 tIndex xNoName  = 0 ;
@@ -74,8 +75,14 @@ void mydie (/*in*/ tApp *  a,
                   char *  msg)
     {
     epaTHX_
+
     LogErrorParam (a, 9999, msg, "") ;
     puts (msg) ;
+#ifdef EPDEBUG
+#if defined (__GNUC__) && defined (__i386__)
+    __asm__ ("int   $0x03\n") ;
+#endif
+#endif
     exit (1) ;
     }
 
@@ -86,8 +93,14 @@ void mydie (/*in*/ tApp *  a,
 /* ------------------------------------------------------------------------ */
 
 
+#ifdef DMALLOC
+tNodeData * dom_malloc_dbg (/*in*/ tApp * a,
+                               size_t  nSize, int * pCounter,
+                               char * fn, int l)
+#else                              
 tNodeData * dom_malloc (/*in*/ tApp * a,
                                size_t  nSize, int * pCounter)
+#endif
     {
     epaTHX_
     int	    nFree = (nSize+7)>>3 ;
@@ -114,7 +127,11 @@ tNodeData * dom_malloc (/*in*/ tApp * a,
     
     /* --- Pad full -> alloc new one --- */
     
+#ifdef DMALLOC
+    pMemLast = _malloc_leap(fn, l, sizeof (tPad)) ;
+#else
     pMemLast = malloc(sizeof (tPad)) ;
+#endif
 
     nMemUsage += sizeof (tPad) ;
 
@@ -124,6 +141,13 @@ tNodeData * dom_malloc (/*in*/ tApp * a,
     (*pCounter)++ ;
     return pNew ;
     }
+
+
+#ifdef DMALLOC
+#undef dom_malloc
+#define dom_malloc(a,n,p) dom_malloc_dbg ((a),(n),(p),__FILE__,__LINE__)
+#endif
+
 
 
 void dom_free (/*in*/ tApp * a,
@@ -170,7 +194,7 @@ tNodeData *  dom_realloc (/*in*/ tApp * a,
     int	    nOldSize = sizeof (tNodeData) + pNode -> numAttr * sizeof (tAttrData) ;
     tNodeData * pNew ;
     int n ;
-    
+
     if (((tUInt8 *)pNode) + nOldSize == pMemLast)
 	{ /* --- expand --- */
 	if (((tUInt8 *)pNode) + nSize < pMemEnd)
@@ -211,7 +235,7 @@ void * str_malloc (/*in*/ tApp * a,
     else
         {
         char buf[256] ;
-        sprintf (buf, "%zu bytes", n) ;
+        sprintf (buf, "%u bytes", n) ;
         LogErrorParam (a, rcOutOfMemory, "str_malloc failed", buf) ;
         }
 
@@ -238,7 +262,7 @@ void * str_malloc_dbg (/*in*/ tApp * a,
     else
         {
         char buf[256] ;
-        sprintf (buf, "%zu bytes", n) ;
+        sprintf (buf, "%u bytes", n) ;
         LogErrorParam (a, rcOutOfMemory, "str_malloc_dbg failed", buf) ;
         }
 
@@ -283,7 +307,7 @@ void * str_realloc_dbg (/*in*/ tApp * a,
     void * m = ((size_t *)s) - 1 ;
     size_t * m_size;
     nMemUsage -= *((size_t *)m) ;
-    if (m = _realloc_leap (fn, l, m, n + sizeof (size_t)))
+    if ((m = _realloc_leap (fn, l, m, n + sizeof (size_t))))
 	{
 	nMemUsage += n ;
 	/* make the following in multiple step, so sun-cc is happy... */
@@ -344,9 +368,9 @@ static int DomTree_free (pTHX_ SV * pSV, MAGIC * mg) ;
 *   Erstellt eine neues dynamisches Array
 *                                                                          
 *   @param  pArray	    Zeiger auf den Zeiger der auf das neue Array zeigt
-*   @param  nAdd	    Anzahl der Element die hinzugefügt werden, wenn
-*			    das Array vergrößert werden muß
-*   @param  nElementSize    Größe eines Elements	     
+*   @param  nAdd	    Anzahl der Element die hinzugef?gt werden, wenn
+*			    das Array vergr??ert werden mu?
+*   @param  nElementSize    Gr??e eines Elements	     
 * \endif                                                                       
 *                                                                          
 * ------------------------------------------------------------------------ */
@@ -409,9 +433,9 @@ int ArrayNew (/*in*/ tApp * a,
 *   Erstellt eine neues dynamisches Array und setzt seinen Inhalt auf Null
 *                                                                          
 *   @param  pArray	    Zeiger auf den Zeiger der auf das neue Array zeigt
-*   @param  nAdd	    Anzahl der Element die hinzugefügt werden, wenn
-*			    das Array vergrößert werden muß
-*   @param  nElementSize    Größe eines Elements	     
+*   @param  nAdd	    Anzahl der Element die hinzugef?gt werden, wenn
+*			    das Array vergr??ert werden mu?
+*   @param  nElementSize    Gr??e eines Elements	     
 * \endif                                                                       
 *                                                                          
 * ------------------------------------------------------------------------ */
@@ -476,6 +500,14 @@ int ArrayFree (/*in*/ tApp * a,
         {
         struct tArrayCtrl * pCtrl = ((struct tArrayCtrl *)(*(void * *)pArray)) - 1 ;
 
+#ifdef DMALLOC
+        if (strncmp (pCtrl -> sSig, "ARY  ", sizeof (pCtrl -> sSig)) != 0)
+            {
+            LogErrorParam (a, rcCleanupErr, "ArrayFree Signature", pCtrl -> sSig) ;
+            }
+        strncpy (pCtrl -> sSig, "ARYFR", sizeof (pCtrl -> sSig)) ;
+
+#endif
         str_free (a, pCtrl) ;
 
         (*(void * *)pArray) = NULL ;
@@ -870,7 +902,6 @@ tStringIndex String2UniqueNdx (/*in*/ tApp * a,
     SV *    pSVNdx ;
     HE *    pHEKey ;
     int	    nNdx ;
-    int     bFound = 0 ;
 
     if (sText == NULL)
 	return 0 ;
@@ -945,9 +976,218 @@ void NdxStringFree (/*in*/ tApp * a,
     }
 
 
+#ifdef EPDEBUG
+
+/* ------------------------------------------------------------------------ */
+/*                                                                          */
+/* DEBUG support                                                            */
+/*                                                                          */
+/*                                                                          */
+/*                                                                          */
+/* ------------------------------------------------------------------------ */
+
+
+#define ASSERT_DOMTREE_VALID(a,n) embperl_Assert_DomTree_Valid(a,n,"",__FILE__,__LINE__)
+#define ASSERT_NODE_VALID(a,n) embperl_Assert_Node_Valid(a,n,"",__FILE__,__LINE__)
+#define ASSERT_ATTR_VALID(a,n) embperl_Assert_Attr_Valid(a,n,NULL,"",__FILE__,__LINE__)
+
+void embperl_Assert_Node_Valid (/*in*/tApp * a, tNodeData *pNode, char * prefix, char * fn, int line) ;
+
+
+void embperl_Assert_DomTree_Valid (/*in*/tApp * a, tDomTree *pDomTree, char * prefix, char * fn, int line)
+
+    {
+    tDomTree * pLookupDomTree ;
+    char buf[2048] ;
+    
+    if (!pDomTree)
+        return ;
+
+    if (pDomTree -> xNdx == 0)
+        {
+        sprintf(buf, "%s DomTree is deleted: %s(%d)\n", prefix, fn, line) ;
+        mydie (NULL, buf) ;
+        }
+
+    
+    pLookupDomTree = DomTree_self(pDomTree -> xNdx) ;
+    if (pDomTree != pLookupDomTree)
+        {
+        sprintf(buf, "%sAddress of DomTree %d does not match Lookup Table: %s(%d)\n", prefix, pDomTree -> xNdx, fn, line) ;
+        mydie (NULL, buf) ;
+        }
+    }
+
+void embperl_Assert_Attr_Valid (/*in*/tApp * a, tAttrData *pAttr, tNodeData *pNode, char * prefix, char * fn, int line)
+
+    {
+    tAttrData * pLookupAttr ;
+    tNodeData *pLookupNode ;
+    tDomTree *pLookupDomTree ;
+    char buf[2048] ;
+    tIndex xFirstAttr ;
+    
+    if (!pAttr)
+        return ;
+
+    pLookupNode = Attr_selfNode (pAttr) ;
+    pLookupDomTree = DomTree_self(pLookupNode -> xDomTree) ;
+    pLookupAttr = Attr_self (pLookupDomTree, pAttr -> xNdx) ;
+    if (pAttr != pLookupAttr)
+        {
+        sprintf(buf, "%sAddress of Attr %ld does not match Lookup Table: %s(%d)\n", prefix, pAttr -> xNdx, fn, line) ;
+        mydie (NULL, buf) ;
+        }
+
+    if (pNode)
+        {
+        if (pNode != pLookupNode)
+            {
+            sprintf(buf, "%sAddress of Node of Attr (Node %ld DomTree %d) does not match Node: %s(%d)\n", prefix, pNode -> xNdx, pNode -> xDomTree, fn, line) ;
+            mydie (NULL, buf) ;
+            }
+
+        }
+    else
+        {
+        sprintf(buf, "%sAttr %ld: ", prefix, pAttr -> xNdx) ;
+        embperl_Assert_Node_Valid(a,pLookupNode, buf, fn, line) ;
+        }
+
+    if (pAttr -> bFlags & aflgAttrChilds)
+        {
+        sprintf(buf, "%sAttr %ld aflgAttrChilds: ", prefix, pAttr -> xNdx) ;
+
+        pLookupNode = Node_selfLevel (a, pLookupDomTree, pAttr -> xValue, pLookupNode -> nRepeatLevel) ;
+    
+        xFirstAttr = pLookupNode -> xNdx ;
+   
+        while (pLookupNode)
+	    {
+            embperl_Assert_Node_Valid(a,pLookupNode, buf, fn, line) ;
+
+	    pLookupNode = Node_selfNextSibling (a, pLookupDomTree, pLookupNode, pLookupNode -> nRepeatLevel) ;
+            if (pLookupNode)
+                {
+                if (pLookupNode -> xNdx == xFirstAttr )
+                    {
+                    sprintf(buf, "%sAttr %ld aflgAttrChilds FirstNode found second time %ld", prefix, pAttr -> xNdx, pLookupNode -> xNdx) ;
+                    mydie (a, buf) ;                
+                    }
+                }
+	    }
+        }
+    }
+
+
+void embperl_Assert_Node_Valid (/*in*/tApp * a, tNodeData *pNode, char * prefix, char * fn, int line)
+
+    {
+    tDomTree * pDomTree  ;
+    tNodeData *pLookupNode ;
+    tNodeData *pFirstChild ;
+    tAttrData *pAttr ;
+    int       n ;
+    char buf[2048] ;
+    
+    if (!pNode)
+        return ;
+    
+    
+    n = ArrayGetSize (a, pDomTrees) ;
+    if (pNode -> xDomTree >= n || pNode -> xDomTree < 0)
+        {
+        sprintf(buf, "%s DomTree %d out of range (max=%d): %s(%d)\n", prefix, pNode -> xDomTree, n, fn, line) ;
+        mydie (NULL, buf) ;
+        }
+
+
+    pDomTree    = DomTree_self (pNode -> xDomTree) ;
+    sprintf(buf, "%sDomTree of Node %ld DomTree %d: ", prefix, pNode -> xNdx, pNode -> xDomTree) ;
+    embperl_Assert_DomTree_Valid(a,pDomTree, buf, fn, line) ;
+
+    pLookupNode = Node_selfLevel(a, pDomTree, pNode -> xNdx, pNode -> nRepeatLevel) ;
+    if (pNode != pLookupNode)
+        {
+        sprintf(buf, "%sAddress of Node %ld DomTree %d does not match Lookup Table: %s(%d)\n", prefix, pNode -> xNdx, pNode -> xDomTree, fn, line) ;
+        mydie (NULL, buf) ;
+        }
+
+    
+    if (pNode -> xChilds && pNode -> nType != ntypDocumentFraq  && pNode -> nType != ntypDocument)
+        {            
+        tIndex xNull = xNode_selfLevelNull(pDomTree, pNode) ;
+        pLookupNode = Node_self(pDomTree, xNull) ;
+        pFirstChild = Node_selfLevel(a, pDomTree, pNode -> xChilds, pNode -> nRepeatLevel) ;
+        if (pFirstChild -> xParent != pNode -> xNdx && pFirstChild -> xParent != xNull) 
+            {
+            sprintf(buf, "%sParent (xParent=%ld) of first Child (Node %ld DomTree %d) does not point to myself (Node %ld DomTree %d NullNode=%ld): %s(%d)\n", 
+                prefix, pFirstChild -> xParent, pFirstChild -> xNdx, pFirstChild -> xDomTree, pNode -> xNdx, pNode -> xDomTree, 
+                xNull, fn, line) ;
+            mydie (NULL, buf) ;
+            }
+
+        if (pNode -> nRepeatLevel > 0 && pFirstChild -> xParent != pNode -> xNdx)
+            {
+            tNodeData * pParent = Node_selfLevel(a, pDomTree, pFirstChild -> xParent, pNode -> nRepeatLevel) ;
+            if (pNode != pParent )
+                {
+                sprintf(buf, "%sLevel %d Level Parent of first Child (Node %ld DomTree %d) does not point to myself (Node %ld) but to Node %ld: %s(%d)\n", 
+                    prefix, pNode -> nRepeatLevel, pFirstChild -> xNdx, 
+                    pFirstChild -> xDomTree, pNode -> xNdx, pParent -> xNdx, fn, line) ;
+                mydie (NULL, buf) ;
+                }
+            
+
+            }
+        }
+
+    if (!*prefix && pNode -> xParent)
+        {            
+        sprintf(buf, "%sParent of Node %ld DomTree %d: ", prefix, pNode -> xNdx, pNode -> xDomTree) ;
+        pLookupNode = Node_selfLevel(a, pDomTree, pNode -> xParent, pNode -> nRepeatLevel) ;
+        
+        if (pLookupNode -> nType == ntypAttr)
+            embperl_Assert_Attr_Valid(a, (tAttrData *)pLookupNode, NULL, buf, fn, line) ;
+        else
+            embperl_Assert_Node_Valid(a, pLookupNode, buf, fn, line) ;
+        }    
+
+    if (!*prefix && pNode -> xNext)
+        {            
+        sprintf(buf, "%sNext of Node %ld DomTree %d: ", prefix, pNode -> xNdx, pNode -> xDomTree) ;
+        pLookupNode = Node_selfLevel(a, pDomTree, pNode -> xNext, pNode -> nRepeatLevel) ;
+        embperl_Assert_Node_Valid(a,pLookupNode, buf, fn, line) ;
+        }    
+    
+    if (!*prefix && pNode -> xPrev)
+        {            
+        sprintf(buf, "%sPrev of Node %ld DomTree %d: ", prefix, pNode -> xNdx, pNode -> xDomTree) ;
+        pLookupNode = Node_selfLevel(a, pDomTree, pNode -> xPrev, pNode -> nRepeatLevel) ;
+        embperl_Assert_Node_Valid(a,pLookupNode, buf, fn, line) ;
+        }    
+    
+    pAttr = (tAttrData * )(pNode + 1) ;
+    n     = pNode -> numAttr ;
+
+    sprintf(buf, "%sAttr of Node %ld DomTree %d: ", prefix, pNode -> xNdx, pNode -> xDomTree) ;
+    while (n)
+	{
+        embperl_Assert_Attr_Valid(a,pAttr, pNode, buf, fn, line) ;
+        n-- ;
+	pAttr++ ;
+	}
+    
+    }
 
 
 
+
+#else
+#define ASSERT_DOMTREE_VALID(a,n)
+#define ASSERT_NODE_VALID(a,n)
+#define ASSERT_ATTR_VALID(a,n)
+#endif
 
 /* ------------------------------------------------------------------------ */
 /*                                                                          */
@@ -965,6 +1205,33 @@ int DomInit (/*in*/ tApp * a)
     SV *    pSVKey ;
     SV *    pSVNdx ;
     HE *    pHEKey ;
+    
+
+    tNodeData testnode ;
+    tAttrData testattr ;
+
+    if (((char *)(&testnode.nType) - (char *)&testnode) !=
+            ((char *)(&testattr.nType) - (char *)&testattr))
+        {
+        mydie (a, "Attr.nType and Node.nType are not at the same offset. There is a problem with the typedefinitions in epdom.h") ;
+        }
+    
+    if (((char *)(&testnode.xNdx) - (char *)&testnode) !=
+            ((char *)(&testattr.xNdx) - (char *)&testattr))
+        {
+        mydie (a, "Attr.xNdx and Node.xNdx are not at the same offset. There is a problem with the typedefinitions in epdom.h") ;
+        }
+    
+    if (((char *)(&testnode.xChilds) - (char *)&testnode) !=
+            ((char *)(&testattr.xValue) - (char *)&testattr))
+        {
+        mydie (a, "Attr.xValue and Node.xChilds are not at the same offset. There is a problem with the typedefinitions in epdom.h") ;
+        }
+    
+    if (sizeof(testnode.xChilds) != sizeof (testattr.xValue))
+        {
+        mydie (a, "Attr.xValue and Node.xChilds do not have the same size. There is a problem with the typedefinitions in epdom.h") ;
+        }
     
     pStringTableHash = newHV () ;
 
@@ -1114,7 +1381,7 @@ static int DomTree_dodelete (/*in*/ tApp * a, tDomTree * pDomTree)
     int        numLookup  ;
     tIndexShort     xDomTree  = pDomTree -> xNdx ;
     tIndex     xNdx ;
-    tIndex     xNode ;
+    tIndex     xNode = -1 ;
     tRepeatLevelLookup * pLookupLevelNode  ;
     tRepeatLevelLookupItem * pLookupLevelNodeLevel  ;
     tRepeatLevelLookupItem * pItem  ;
@@ -1187,7 +1454,6 @@ static int DomTree_dodelete (/*in*/ tApp * a, tDomTree * pDomTree)
 		pLookupLevelNodeLevel++ ;
 		}
 
-	    
 	    dom_free_size (a, pLookupLevelNode, sizeof (tRepeatLevelLookup)  + sizeof (tRepeatLevelLookupItem) * (pLookupLevelNode -> numItems - 1), &numLevelLookup) ;
 	    }
 
@@ -1207,13 +1473,15 @@ static int DomTree_dodelete (/*in*/ tApp * a, tDomTree * pDomTree)
         /*
         int i ;
 
-        for (i = 0 ; i < AvFILL (pDomTree -> pDependsOn); i++)
+        for (i = 0 ; i <= AvFILL (pDomTree -> pDependsOn); i++)
 	    {
 	    SV * pSV = *av_fetch (pDomTree -> pDependsOn, i, 0) ;
-            lprintf (a, "pDependsOn #%d type = %d\n", i, SvTYPE(pSV)) ;
+            lprintf (a, "pDependsOn DomTree #%d type = %d cnt=%d n=%d\n", i, SvTYPE(pSV), SvREFCNT(pSV), SvIVX(pSV)) ;
 	    }
+        */
+
 	av_clear (pDomTree -> pDependsOn) ;
-	*/
+	
         SvREFCNT_dec (pDomTree -> pDependsOn) ;
 	}
 	
@@ -1242,7 +1510,10 @@ static int DomTree_dodelete (/*in*/ tApp * a, tDomTree * pDomTree)
 static int DomTree_free (pTHX_ SV * pSV, MAGIC * mg)
 
     {
-    return DomTree_dodelete (CurrApp, DomTree_self (mg -> mg_len)) ;
+    if (mg && mg -> mg_len && !PL_in_clean_all)
+        return DomTree_dodelete (CurrApp, DomTree_self (mg -> mg_len)) ;
+    else
+        return ok ;    
     }
 
 /* ------------------------------------------------------------------------ */
@@ -1296,7 +1567,7 @@ int DomTree_clone (/*in*/ tApp * a,
     ArrayClone (a, &pOrgDomTree -> pLookup, &pDomTree -> pLookup) ; 
     ArrayClone (a, &pOrgDomTree -> pCheckpoints, &pDomTree -> pCheckpoints) ; 
 
-    if (pDomTree -> pSV = pOrgDomTree -> pSV)
+    if ((pDomTree -> pSV = pOrgDomTree -> pSV))
         SvREFCNT_inc (pDomTree -> pSV) ;
 
     pDocument = Node_self (pDomTree, pDomTree -> xDocument) ;
@@ -1339,8 +1610,8 @@ int DomTree_clone (/*in*/ tApp * a,
 * \endif                                                                       
 *
 * \_de									   
-* Vergeleicht den Checkpoint von der Programmausführung mit dem Checkpoint 
-* beim Compilieren und ändert den DomTree entsprechend dem Programmfluß ab 
+* Vergeleicht den Checkpoint von der Programmausf?hrung mit dem Checkpoint 
+* beim Compilieren und ?ndert den DomTree entsprechend dem Programmflu? ab 
 *                                                                          
 * @param   r               Embperl Requestdaten                            
 * @param   xDomTree	   akuteller DomTree der bearbeitet wird          
@@ -1702,7 +1973,7 @@ void DomTree_checkpoint (tReq * r, tIndex nRunCheckpoint)
 
 
 
-/*---------------------------------------------------------------------------
+/*--------------------------------------------------------------------------*/
 /*                                                                          */
 /* DomTree_discardAfterCheckpoint                                           */
 /*                                                                          */
@@ -1719,7 +1990,7 @@ void DomTree_checkpoint (tReq * r, tIndex nRunCheckpoint)
 *
 * \_de									   
 * 
-* Verwrirft alles ab dem in nRunCheckpoint übergebenen Punkt
+* Verwrirft alles ab dem in nRunCheckpoint ?bergebenen Punkt
 *                                                                          
 * @param   r               Embperl Requestdaten                            
 * @param   xDomTree	   akuteller DomTree der bearbeitet wird          
@@ -1770,13 +2041,16 @@ void DomTree_discardAfterCheckpoint (tReq * r, tIndex nRunCheckpoint)
 		}
 	    }
 
-        pFirstChild = Node_selfCondCloneNode (a, pDomTree, pFirstChild, pFirstChild -> nRepeatLevel) ;
-	pFirstChild -> xPrev = pLastChild -> xNdx ;
-	pLastChild  -> xNext = pFirstChild -> xNdx ;
+        if (pFirstChild)
+            {
+            pFirstChild = Node_selfCondCloneNode (a, pDomTree, pFirstChild, pFirstChild -> nRepeatLevel) ;
+	    pFirstChild -> xPrev = pLastChild -> xNdx ;
+	    pLastChild  -> xNext = pFirstChild -> xNdx ;
 	
-	if ((a -> pCurrReq?a -> pCurrReq -> Component.Config.bDebug:a -> Config.bDebug) & dbgCheckpoint)
-	    lprintf (a, "[%d]Checkpoint: discard all from table   Parent=%d FirstChild=%d LastChild=%d\n",
+	    if ((a -> pCurrReq?a -> pCurrReq -> Component.Config.bDebug:a -> Config.bDebug) & dbgCheckpoint)
+	        lprintf (a, "[%d]Checkpoint: discard all from table   Parent=%d FirstChild=%d LastChild=%d\n",
 		     a -> pThread -> nPid, pParent -> xNdx, pFirstChild -> xNdx, pLastChild -> xNdx) ; 
+	    }
 	}
 
 
@@ -1866,9 +2140,9 @@ interface Node {
 *   \_de									   
 *   Liefert den Node mit dem Index xNode und dem RepeatLevel nLevel. Wenn
 *   dieser nicht existiert wird der Node mit Index Null aus dem Source
-*   DomTree zurück geliefert
+*   DomTree zur?ck geliefert
 *
-*   @param  pDomTree	    DomTree der den Node enthält              
+*   @param  pDomTree	    DomTree der den Node enth?lt              
 *   @param  pNode           Node Index
 *   @param  nRepeatLevel    RepeatLevel
 *
@@ -1943,9 +2217,9 @@ tNodeData * Node_selfLevelItem (/*in*/ tApp * a,
 *   \_de									   
 *   Cloned einen Node
 *
-*   @param  pDomTree	    DomTree der den Node enthält              
+*   @param  pDomTree	    DomTree der den Node enth?lt              
 *   @param  pNode           Node der gecloned werden soll
-*   @param  nRepeatLevel    RepeatLevel für neuen Node
+*   @param  nRepeatLevel    RepeatLevel f?r neuen Node
 *   @param  bDeep           legt fest wie Kindelemente behandelt werden
 *                           - 1 cloned Kindelemente 
 *                           - 0 cloned keine Kindelemente
@@ -1967,6 +2241,8 @@ tNodeData * Node_selfCloneNode (/*in*/ tApp * a,
     tNode       xNewNode ;
     tNodeData * pNew ;
 
+    ASSERT_NODE_VALID(a,pNode) ;
+    
     if ((pNew = dom_malloc (a, len, &numNodes)) == NULL)
 	return NULL ;
 
@@ -2005,6 +2281,7 @@ tNodeData * Node_selfCloneNode (/*in*/ tApp * a,
     if (bDeep < 1)
 	pNew -> xChilds = 0 ;
 
+
     return pNew ;
     }
                                 
@@ -2029,9 +2306,9 @@ tNodeData * Node_selfCloneNode (/*in*/ tApp * a,
 *   \_de									   
 *   Cloned einen Node
 *
-*   @param  pDomTree	    DomTree der den Node enthält              
+*   @param  pDomTree	    DomTree der den Node enth?lt              
 *   @param  xNode           Node der gecloned werden soll
-*   @param  nRepeatLevel    RepeatLevel für neuen Node
+*   @param  nRepeatLevel    RepeatLevel f?r neuen Node
 *   @param  bDeep           legt fest wie Kindelemente behandelt werden
 *                           - 1 cloned Kindelemente 
 *                           - 0 cloned keine Kindelemente
@@ -2083,17 +2360,17 @@ tNode Node_cloneNode (/*in*/ tApp * a,
 *   anderen RepeatLevel ist. Dies ist Teil der "copy on write" Strategie
 *   solange ein Node nicht beschrieben wird, kann dieser als Zeiger auf
 *   einen anderen Node in einem DomTree oder RepeatLevel aus dem er kopiert
-*   wurde sein. Sobald der Node geändert werden muß, muß diese Funktion
+*   wurde sein. Sobald der Node ge?ndert werden mu?, mu? diese Funktion
 *   aufgerufen werden um sicherzustellen das der korekte Node modifiziert
 *   wird.
 *
-*   @note   In den meisten Fällen ist es nicht nötig diese Funktion direkt
+*   @note   In den meisten F?llen ist es nicht n?tig diese Funktion direkt
 *           aufzurufen, da alle Funktionen die den DomTree modifizieren
 *           dies sicherstellen.
 *
-*   @param  pDomTree	    DomTree der den Node enthält              
+*   @param  pDomTree	    DomTree der den Node enth?lt              
 *   @param  pNode           Node der gecloned werden soll
-*   @param  nRepeatLevel    RepeatLevel für neuen Node
+*   @param  nRepeatLevel    RepeatLevel f?r neuen Node
 *   \endif                                                                       
 *                                                                          
 * ------------------------------------------------------------------------ */
@@ -2115,11 +2392,14 @@ tNodeData * Node_selfCondCloneNode (/*in*/ tApp * a,
     tRepeatLevelLookup * pLookupLevelNode  ;
     tRepeatLevelLookupItem * pLookupLevelNodeLevel ;
 
+    ASSERT_NODE_VALID(a,pNode) ;
     
     if (pNode -> xDomTree == pDomTree -> xNdx && pNode -> nRepeatLevel == nRepeatLevel)
         return pNode ;
 
-
+ 
+/* lprintf(a, "selfCondCloneNode 1 node=%d repeatlevel=%d\n", pNode -> xNdx, nRepeatLevel) ;    */
+ 
     if (nRepeatLevel == 0)
         {
         pLookup = pDomTree -> pLookup ;
@@ -2129,6 +2409,8 @@ tNodeData * Node_selfCondCloneNode (/*in*/ tApp * a,
         if ((pLookup[xNdx].pLookup = pNew = dom_malloc (a, len, &numNodes)) == NULL)
 	    return NULL ;
 
+        ASSERT_NODE_VALID(a,pNode) ;
+        
         memcpy (pNew, pNode, len) ;
 
         pNew -> xDomTree    = pDomTree -> xNdx ;
@@ -2150,6 +2432,8 @@ tNodeData * Node_selfCondCloneNode (/*in*/ tApp * a,
 	    pAttr++ ;
 	    }
         
+        ASSERT_NODE_VALID(a,pNew) ;
+
         return pNew ;
         }
 
@@ -2161,7 +2445,7 @@ tNodeData * Node_selfCondCloneNode (/*in*/ tApp * a,
     if (!pLookupLevelNode)
         {
         if ((pLookupLevelNode = pLookup[pNode -> xNdx].pLookupLevel = 
-		  (tRepeatLevelLookup *)dom_malloc (a, sizeof (tRepeatLevelLookup) + sizeof (tRepeatLevelLookupItem) * LEVELHASHSIZE - 1, &numLevelLookup)) == NULL)
+		  (tRepeatLevelLookup *)dom_malloc (a, sizeof (tRepeatLevelLookup) + sizeof (tRepeatLevelLookupItem) * (LEVELHASHSIZE - 1), &numLevelLookup)) == NULL)
 	    return NULL ;
         pLookupLevelNode -> nMask = LEVELHASHSIZE - 1 ;
         pLookupLevelNode -> numItems = LEVELHASHSIZE ;
@@ -2186,6 +2470,8 @@ tNodeData * Node_selfCondCloneNode (/*in*/ tApp * a,
         pLookupLevelNodeLevel -> pNode = pNew ;   
         }
 
+    ASSERT_NODE_VALID(a,pNew) ;
+
     return pNew ;
     }
 
@@ -2209,9 +2495,9 @@ tNodeData * Node_selfCondCloneNode (/*in*/ tApp * a,
 *   Existiert der Node noch nicht in diesem DomTree oder RepeatLevel wird er
 *   erzeugt
 *
-*   @param  pDomTree	    DomTree der den Node enthält              
-*   @param  xNode           index für Node
-*   @param  nRepeatLevel    RepeatLevel für Node
+*   @param  pDomTree	    DomTree der den Node enth?lt              
+*   @param  xNode           index f?r Node
+*   @param  nRepeatLevel    RepeatLevel f?r Node
 *   \endif                                                                       
 *                                                                          
 * ------------------------------------------------------------------------ */
@@ -2313,10 +2599,10 @@ tNodeData * Node_newAndAppend (/*in*/ tApp * a,
 *   Expandiert einen Node um mehr Attribute aufzunehmen
 *   
 *   @param  pNode	    Node der expandiert werden soll
-*   @param  numOldAttr	    Anzahl der Attribute die Relokiert werden müssen
+*   @param  numOldAttr	    Anzahl der Attribute die Relokiert werden m?ssen
 *			    (-1 um alle Attribute zu relokieren)
 *   @param  numNewAttr	    Neue Anzahl der Attribute
-*   @return		    Den Node mit platz für numNewAttr
+*   @return		    Den Node mit platz f?r numNewAttr
 *
 *   @warning	Der Node liegt nach dem Aufruf dieser Funktion u.U. an 
 *		anderen Speicheradresse
@@ -2704,7 +2990,6 @@ tNode Node_replaceChildWithNode (/*in*/ tApp * a,
 
     {
     epaTHX_
-    tNode	xOrgChild  = xOldChild ;
     tNodeData *	pNode      = Node_selfLevel (a, pDomTree, xNode, nRepeatLevel) ;
     tNodeData *	pOldChild   = Node_selfCondCloneNode (a, pOldChildDomTree, Node_selfLevel (a, pOldChildDomTree, xOldChild, nOldRepeatLevel), nOldRepeatLevel) ; 
     int	    len  = sizeof (tNodeData) + pNode -> numAttr * sizeof (tAttrData) ; 
@@ -2891,7 +3176,7 @@ tNode Node_insertAfter          (/*in*/ tApp * a,
 
     if (pNewNodeDomTree != pRefNodeDomTree)
         {
-        tNodeData * pNew = Node_newAndAppend (a, pRefNodeDomTree, pRefNode -> xParent, nRefRepeatLevel, NULL, pNewNode -> nLinenumber, sizeof (tNodeData) + pNewNode -> numAttr * sizeof (tAttrData)) ;        
+        tNodeData * pNew = Node_newAndAppend (a, pRefNodeDomTree, pRefNode -> xParent, nRefRepeatLevel, NULL, pNewNode -> nLinenumber, sizeof (tNodeData) /* + pNewNode -> numAttr * sizeof (tAttrData) (attributes are NOT copied !!)*/) ;        
 
         pNew -> nText   = pNewNode -> nText ;
         pNew -> xChilds = pNewNode -> xChilds ;
@@ -3052,7 +3337,6 @@ tNode Node_replaceChildWithCDATA (/*in*/ tApp * a,
 
     {
     tNodeData *	pOldChild  ;
-    tNode	xOrgChild  = xOldChild ;
     tStringIndex n ;
     
     numReplace++ ;
@@ -3658,8 +3942,6 @@ void Node_toString (/*i/o*/ register req *  r,
 
 
     {
-    int   nOrderNdx = 0 ;
-
     Node_toString2 (r, pDomTree, xNode, &nRepeatLevel) ;
     }
 
@@ -3819,6 +4101,7 @@ tAttrData *  Element_selfSetAttribut (/*in*/ tApp * a,
     tNodeData * pNewNode ;
 
     pNode = Node_selfCondCloneNode (a, pDomTree, pNode, nRepeatLevel) ;
+
     pAttr = Element_selfGetAttribut (a, pDomTree, pNode, sAttrName, nAttrNameLen) ;
 
     if (pAttr)
@@ -3967,38 +4250,62 @@ char *       Attr_selfValue (/*in*/ tApp * a,
     {
     struct tNodeData * pNode ;
     struct tNodeData * pAttrNode ;
-    
-    if (!pAttr)
+      tIndex xFirstAttr ;
+
+    ASSERT_ATTR_VALID(a,pAttr) ;
+      
+      if (!pAttr)
 	return NULL ;
+/* lprintf (a, "selvalue 1 f=%x a=%x aa=%x an=%d off=%d av=%d\n", pAttr -> bFlags , aflgAttrChilds, pAttr, pAttr -> xNdx, pAttr -> nNodeOffset, pAttr -> xValue) ; */
 
     pAttrNode = Attr_selfNode(pAttr) ;
+    ASSERT_NODE_VALID(a,pAttrNode) ;
+
+/* lprintf (a, "selvalue f=%x a=%x aa=%x an=%d off=%d av=%d na=%x nn=%d a\n", pAttr -> bFlags , aflgAttrChilds, pAttr, pAttr -> xNdx, pAttr -> nNodeOffset, pAttr -> xValue, pAttrNode, pAttrNode -> xNdx) ; */
+
+   
     pNode = Node_selfLevel (a, pDomTree, pAttrNode -> xNdx, nRepeatLevel) ;
+    ASSERT_NODE_VALID(a,pNode) ;
+
+/* lprintf (a, "selvalue f=%x a=%x aa=%x an=%d off=%d av=%d na=%x nn=%d node=%x\n", pAttr -> bFlags , aflgAttrChilds, pAttr, pAttr -> xNdx, pAttr -> nNodeOffset, pAttr -> xValue, pAttrNode, pAttrNode -> xNdx, pNode) ;*/
+       
+    
     if (pNode != pAttrNode)
         {
         pAttr = Element_selfGetAttribut (a, pDomTree, pNode, NULL, pAttr -> xName) ;
         if (!pAttr)
 	    return NULL ;
         }
+    ASSERT_ATTR_VALID(a,pAttr) ;
+    ASSERT_NODE_VALID(a,pNode) ;
+    ASSERT_NODE_VALID(a,pAttrNode) ;
 
-
-    if (!(pAttr -> bFlags & aflgAttrChilds))
-	return Ndx2String (pAttr -> xValue) ;
+/*lprintf (a, "selvalue f=%x a=%x aa=%x an=%d off=%d av=%d na=%x nn=%d a\n", pAttr -> bFlags , aflgAttrChilds, pAttr, pAttr -> xNdx, pAttr -> nNodeOffset, pAttr -> xValue, pAttrNode, pAttrNode -> xNdx) ;*/
+    if ((pAttr -> bFlags & aflgAttrChilds) == 0)
+	    return Ndx2String (pAttr -> xValue) ;
 
     pNode = Node_selfLevel (a, pDomTree, pAttr -> xValue, nRepeatLevel) ;
     
     StringNew (a, ppAttr, 512) ;
-
+    xFirstAttr = pNode -> xNdx ;
+   
     while (pNode)
 	{
 	char * s ;
 	int    l ;
 
-        if ((pNode -> bFlags & nflgIgnore) == 0)
+        ASSERT_NODE_VALID(a,pNode) ;
+
+/*lprintf (a, "selvalue f=%x node=%x nodendx=%d  aa=%x an=%d off=%d av=%d na=%x nn=%d a\n", pAttr -> bFlags , pNode, pNode -> xNdx, pAttr, pAttr -> xNdx, pAttr -> nNodeOffset, pAttr -> xValue, pAttrNode, pAttrNode -> xNdx) ;*/
+
+    if ((pNode -> bFlags & nflgIgnore) == 0)
             {                
 	    Ndx2StringLen (pNode -> nText,s,l) ;
 	    StringAdd (a, ppAttr, s, l) ;
             }
 	pNode = Node_selfNextSibling (a, pDomTree, pNode, nRepeatLevel) ;
+        if (!pNode || pNode -> xNdx == xFirstAttr)
+	            break ;
 	}
 
     return *ppAttr ;

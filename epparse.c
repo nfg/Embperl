@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epparse.c,v 1.11 2004/03/14 18:54:43 richter Exp $
+#   $Id: epparse.c,v 1.14 2004/08/16 07:36:17 richter Exp $
 #
 ###################################################################################*/
 
@@ -611,7 +611,6 @@ static int ParseTokens (/*i/o*/ register req *		r,
             { /* valid token start char found */
 	    struct tTokenTable *    pNextTokenTab   = pTokenTable ;
 	    tStringIndex 	    nNodeName	    = 0 ;
-	    tNodeType		    nNodeType	    = 0 ;
 	    char *	            pCurrTokenStart = pCurr ;
 
 	    
@@ -912,7 +911,8 @@ static int ParseTokens (/*i/o*/ register req *		r,
 			    pEndCurr = NULL ;
                             if (strcmp (pToken -> sEndText, "\n\n") == 0)
                                 {
-                                if (pEndCurr = strstr (pCurr, "\n\r\n"))
+                                if ((pEndCurr = strstr (pCurr, "\n\r\n")))
+                                    {
                                     if (pEndCurr[-1] == '\r')
                                         {
                                         pEndCurr-- ;
@@ -920,6 +920,7 @@ static int ParseTokens (/*i/o*/ register req *		r,
                                         }
                                     else
                                         nSkip = pCurr[3] == '\r'?4:3 ;
+                                    }
                                 }
                             if (!pEndCurr)
                                 {

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Embperl.pm,v 1.187 2004/03/15 06:21:31 richter Exp $
+#   $Id: Embperl.pm,v 1.193 2004/08/24 05:15:51 richter Exp $
 #
 ###################################################################################
 
@@ -47,7 +47,7 @@ use vars qw(
 
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = '2.0b11' ;
+$VERSION = '2.0rc1' ;
 
 
 if ($modperl  = $ENV{MOD_PERL})
@@ -67,7 +67,14 @@ if ($ENV{PERL_DL_NONLAZY}
 
 if ($modperl2)
     {
-    require Apache::Server ;
+    if (($modperl =~ /_(\d+)/) && $1 < 15)
+	{
+        require Apache::Server ;
+	}
+    else
+	{
+        require Apache::ServerRec ;
+	}
     require Apache::ServerUtil ;
     require Apache::RequestRec ;
     require Apache::RequestUtil ;
@@ -109,9 +116,6 @@ sub Execute
         {
         $rc = Embperl::Req::ExecuteRequest (undef, $_ep_param) ;
         }
-use Data::Dumper ;
-use Devel::Peek ;
-    #print "2 rc = $rc", Dumper ($rc), , Dump ($rc) ;
     return $rc ;
     }
 
@@ -218,8 +222,7 @@ sub get_multipart_formdata
 
     my $cgi = new CGI ;
     my $fdat = $self -> thread -> form_hash ;
-    my $fdatsplit = $self -> thread -> form_split_hash ;
-    $fdatsplit -> {'___CGI___'} = $cgi ; # keep it until then end of the request
+    $self -> param -> cgi ($cgi) ;       # keep it until then end of the request
 					 # otherwsie templ files be
 					 # destroyed in CGI.pm 3.01+
     my $ffld = $self -> thread -> form_array ;

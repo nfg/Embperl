@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: App.pm,v 1.3 2004/01/23 06:50:56 richter Exp $
+#   $Id: App.pm,v 1.4 2004/08/17 03:53:45 richter Exp $
 #
 ###################################################################################
  
@@ -248,7 +248,7 @@ sub mail_form_to
                            $self -> config -> mailhelo?(Hello => $self -> config -> mailhelo):()) 
              or die "Cannot connect to mailhost" ;
     
-    $smtp->mail($self -> config -> mailfrom || "WWW-Server\@$ENV{SERVER_NAME}");
+    $smtp->mail($self -> config -> mailfrom || ("WWW-Server\@" . ($ENV{SERVER_NAME} || 'localhost')));
     $smtp->to($to);
     $ok = $smtp->data();
     $ok = $smtp->datasend("Reply-To: $ret\n") if ($ok && $ret) ;

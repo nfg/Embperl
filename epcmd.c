@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcmd.c,v 1.48 2004/01/23 06:50:54 richter Exp $
+#   $Id: epcmd.c,v 1.49 2004/07/20 04:59:10 richter Exp $
 #
 ###################################################################################*/
 
@@ -874,8 +874,11 @@ static int CmdVar (/*i/o*/ register req * r,
     
     ppSV = hv_fetch(r -> Buf.pFile -> pCacheHash, (char *)&nFilepos, sizeof (nFilepos), 1) ;  
     if (ppSV == NULL)
+        {
+        strcpy (r -> errdat1, "CacheHash") ;
         return rcHashError ;
-    
+        }
+            
     if (SvTRUE(*ppSV))
         return ok ;
     
@@ -1700,7 +1703,10 @@ static int HtmlOption (/*i/o*/ register req * r,
     if (bSel)
         { /* -> selected */
         if (hv_store (r -> pThread -> pInputHash, pName, strlen (pName), pSV, 0) == NULL)
+            {
+            strcpy (r -> errdat1, "InputHash in HtmlOption") ;
             return rcHashError ;
+            }
 
         if (pSelected)
             return ok ;
@@ -1756,7 +1762,10 @@ static int HtmlEndselect (/*i/o*/ register req * r,
         
 	if (!hv_exists (r -> pThread -> pInputHash, pName, l))
 	    if (hv_store (r -> pThread -> pInputHash, pName, l, &sv_undef, 0) == NULL)
-		return rcHashError ;
+                {
+                strcpy (r -> errdat1, "InputHash in HtmlEndselect") ;
+                return rcHashError ;
+                }
 	}
 
     return HtmlEndtable (r, sArg) ;
@@ -1824,7 +1833,10 @@ static int HtmlInput (/*i/o*/ register req * r,
             lprintf (r -> pApp,  "[%d]INPU: %s already has a value = %s\n", r -> pThread -> nPid, sName, SvPV (pSV, na)) ; 
         
         if (hv_store (r -> pThread -> pInputHash, sName, strlen (sName), pSV, 0) == NULL)
+            {
+            strcpy (r -> errdat1, "InputHash in HtmlInput") ;
             return rcHashError ;
+            }
         
         return ok ; /* has already a value */
         }
@@ -1848,7 +1860,10 @@ static int HtmlInput (/*i/o*/ register req * r,
                 pSV = newSVpv ((char *)pVal, vlen) ;
 
                 if (hv_store (r -> pThread -> pInputHash, sName, strlen (sName), pSV, 0) == NULL)
+                    {
+                    strcpy (r -> errdat1, "InputHash in HtmlInput") ;
                     return rcHashError ;
+                    }
                 }
 
             return ok ; /* no data available */
@@ -1956,7 +1971,10 @@ static int HtmlInput (/*i/o*/ register req * r,
     
     pSV = newSVpv ((char *)pData, dlen) ;
     if (hv_store (r -> pThread -> pInputHash, sName, strlen (sName), pSV, 0) == NULL)
+        {
+        strcpy (r -> errdat1, "InputHash in HtmlInput") ;
         return rcHashError ;
+        }
 
     return ok ;
     }
@@ -2040,7 +2058,10 @@ static int HtmlEndtextarea (/*i/o*/ register req * r,
             lprintf (r -> pApp,  "[%d]TEXT: %s already has a value = %s\n", r -> pThread -> nPid, sName, SvPV (pSV, na)) ; 
         
         if (hv_store (r -> pThread -> pInputHash, sName, strlen (sName), pSV, 0) == NULL)
+            {
+            strcpy (r -> errdat1, "InputHash in HtmlEndtextarea") ;
             return rcHashError ;
+            }
         
         return ok ; /* has already a value */
         }
@@ -2068,7 +2089,10 @@ static int HtmlEndtextarea (/*i/o*/ register req * r,
     
     pSV = newSVpv ((char *)pData, dlen) ;
     if (hv_store (r -> pThread -> pInputHash, sName, strlen (sName), pSV, 0) == NULL)
+        {
+        strcpy (r -> errdat1, "InputHash in HtmlEndtextarea") ;
         return rcHashError ;
+        }
 
     return ok ;
     }

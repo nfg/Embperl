@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epeval.c,v 1.33 2004/01/23 06:50:55 richter Exp $
+#   $Id: epeval.c,v 1.36 2004/08/16 07:36:15 richter Exp $
 #
 ###################################################################################*/
 
@@ -34,7 +34,7 @@
 * \endif                                                                       
 *
 * \_de									   
-* Compiliert Perlcode und führt ihn dann direkt aus.
+* Compiliert Perlcode und f?hrt ihn dann direkt aus.
 *                                                                          
 * @param   pArg             Perlcode der compiliert werden soll als SV. 
 *                           Kann entweder eine Zeichenkette (SV) oder
@@ -106,16 +106,16 @@ int EvalDirect (/*i/o*/ register req *  r,
 * \endif                                                                       
 *
 * \_de									   
-* Liefert für einen gegeben Konfigurationsausdruck ein CV zurück.
+* Liefert f?r einen gegeben Konfigurationsausdruck ein CV zur?ck.
 * Der Ausdruck kann entweder schon ein CV sein, der Name einer
-* Perlfunktion oder eine Zeichenkette die mit "sub " anfängt sein,
+* Perlfunktion oder eine Zeichenkette die mit "sub " anf?ngt sein,
 * in welchem Fall der Code kompiliert wird.
 *                                                                          
 * @param   pSV              Konfigurationsausdruck
 * @param   numArgs          Anzahl der Argumente
 * @param   pArgs            Argumente
-* @param   sContext         Gibt Information über das Umfeld für die Fehlermeldung
-* @param   ppCV             Liefert die CV zurück
+* @param   sContext         Gibt Information ?ber das Umfeld f?r die Fehlermeldung
+* @param   ppCV             Liefert die CV zur?ck
 * \endif                                                                       
 *                                                                          
 * ------------------------------------------------------------------------ */
@@ -196,6 +196,9 @@ int EvalConfig (/*i/o*/ tApp *          a,
         LogErrorParam (a, rcEvalErr, s, sContext) ;
 	return rcEvalErr ;
 	}
+#ifdef DMALLOC
+        AddDMallocMagic (*pCV, s?s:"EvalConfig", __FILE__, __LINE__) ;
+#endif
 
     return ok ;
     }
@@ -215,11 +218,11 @@ int EvalConfig (/*i/o*/ tApp *          a,
 * \endif                                                                       
 *
 * \_de									   
-* Liefert für eine gegebenen Regulären Ausdruck ein CV zurück.
+* Liefert f?r eine gegebenen Regul?ren Ausdruck ein CV zur?ck.
 *                                                                          
-* @param   sRegex           Regulärer Ausdruck als Zeichenkette
-* @param   sContext         Gibt Information über das Umfeld für die Fehlermeldung
-* @param   ppCV             Liefert die CV zurück
+* @param   sRegex           Regul?rer Ausdruck als Zeichenkette
+* @param   sContext         Gibt Information ?ber das Umfeld f?r die Fehlermeldung
+* @param   ppCV             Liefert die CV zur?ck
 * \endif                                                                       
 *                                                                          
 * ------------------------------------------------------------------------ */
@@ -281,6 +284,9 @@ int EvalRegEx  (/*i/o*/ tApp *          a,
 	{
 	*ppCV = (CV *)SvRV (pRV) ;
 	SvREFCNT_inc (*ppCV) ;
+#ifdef DMALLOC
+        AddDMallocMagic (*ppCV, sRegex?sRegex:"EvalRegEx", __FILE__, __LINE__) ;
+#endif
 	}
     else
       	*ppCV = NULL ;
@@ -479,6 +485,9 @@ int CallCV  (/*i/o*/ register req * r,
              r -> TableStack.State.nColUsed ||
              r -> TableStack.State.nRowUsed))
             lprintf (r -> pApp,  "[%d]TAB:  nResult = %d\n", r -> pThread -> nPid, r -> TableStack.State.nResult) ;
+#ifdef DMALLOC
+        AddDMallocMagic (*pRet, sArg?sArg:"CallCV", __FILE__, __LINE__) ;
+#endif
 #endif
         }
      else if (num == 0)
@@ -758,6 +767,9 @@ int CallStoredCV  (/*i/o*/ register req * r,
             else
                 lprintf (r -> pApp,  "[%d]EVAL> <undefined>\n", r -> pThread -> nPid) ;
             }                
+#ifdef DMALLOC
+        AddDMallocMagic (*pRet, sArg?sArg:"CallStoredCV", __FILE__, __LINE__) ;
+#endif
         }
      else if (num == 0)
         {
@@ -878,7 +890,10 @@ int EvalStore (/*i/o*/ register req * r,
 
     ppSV = hv_fetch(r -> Buf.pFile -> pCacheHash, (char *)&nFilepos, sizeof (nFilepos), 1) ;  
     if (ppSV == NULL)
+        {
+        strcpy (r -> errdat1, "CacheHash in EvalStore") ;
         return rcHashError ;
+        }
 
     if (*ppSV != NULL && SvTYPE (*ppSV) == SVt_PV)
         {
@@ -940,7 +955,10 @@ int Eval (/*i/o*/ register req * r,
 
     ppSV = hv_fetch(r -> Buf.pFile -> pCacheHash, (char *)&nFilepos, sizeof (nFilepos), 1) ;  
     if (ppSV == NULL)
+        {
+        strcpy (r -> errdat1, "CacheHash in Eval") ;
         return rcHashError ;
+        }
 
     if (*ppSV != NULL && SvTYPE (*ppSV) == SVt_PV)
         {
@@ -998,7 +1016,10 @@ int EvalTransFlags (/*i/o*/ register req * r,
 
     ppSV = hv_fetch(r -> Buf.pFile -> pCacheHash, (char *)&nFilepos, sizeof (nFilepos), 1) ;  
     if (ppSV == NULL)
+        {
+        strcpy (r -> errdat1, "CacheHash in EvalTransFlags") ;
         return rcHashError ;
+        }
 
     if (*ppSV != NULL && SvTYPE (*ppSV) == SVt_PV)
         {
@@ -1063,7 +1084,10 @@ int EvalTransOnFirstCall (/*i/o*/ register req * r,
 
     ppSV = hv_fetch(r -> Buf.pFile -> pCacheHash, (char *)&nFilepos, sizeof (nFilepos), 1) ;  
     if (ppSV == NULL)
+        {
+        strcpy (r -> errdat1, "CacheHash in EvalTransOnFirstCall") ;
         return rcHashError ;
+        }
 
     if (*ppSV != NULL && SvTYPE (*ppSV) == SVt_PV)
         {
@@ -1124,7 +1148,10 @@ int EvalSub (/*i/o*/ register req * r,
 
     ppSV = hv_fetch(r -> Buf.pFile -> pCacheHash, (char *)&nFilepos, sizeof (nFilepos), 1) ;  
     if (ppSV == NULL)
+        {
+        strcpy (r -> errdat1, "CacheHash in EvalSub") ;
         return rcHashError ;
+        }
 
     if (*ppSV != NULL && SvTYPE (*ppSV) == SVt_PV)
         {
@@ -1285,7 +1312,10 @@ int EvalMain (/*i/o*/ register req *  r)
 
     ppSV = hv_fetch(r -> Buf.pFile -> pCacheHash, (char *)&nFilepos, sizeof (nFilepos), 1) ;  
     if (ppSV == NULL)
+        {
+        strcpy (r -> errdat1, "CacheHash in EvalMain") ;
         return rcHashError ;
+        }
 
     if (*ppSV != NULL && SvTYPE (*ppSV) == SVt_PV)
         {

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Object.pm,v 1.6 2004/03/15 06:21:31 richter Exp $
+#   $Id: Object.pm,v 1.12 2004/08/16 07:36:21 richter Exp $
 #
 ###################################################################################
 
@@ -48,7 +48,7 @@ use vars qw(
 @ISA = qw(Exporter DynaLoader);
 
 
-$VERSION = '2.0b11';
+$VERSION = '2.0';
 
 
 $volume = (File::Spec -> splitpath ($Embperl::cwd))[0] ;
@@ -100,6 +100,20 @@ sub norm_path
     }
 
 
+#############################################################################
+
+sub handler_dmalloc
+    {
+    my %req ;
+
+    $req{'req_rec'} = $_[0] ;
+    
+    my $n = Embperl::dmalloc_mark () ;
+    my $rc = Execute (\%req) ;
+    Embperl::dmalloc_check ($n, "Embperl::Object") ;
+    return $rc ;
+    }
+        
 #############################################################################
 
 sub handler
@@ -165,6 +179,7 @@ sub Execute
     my $basename  = $appcfg -> object_base || '_base.epl' ;
     ##$basename     =~ s/%modifier%/$req->{object_base_modifier}/ ;
     my $addpath   = $appcfg -> object_addpath ;
+    my $reqpath   = $appcfg -> object_reqpath ;
     my $directory ;
     my $rootdir   = $apr?norm_path ($apr -> document_root, $cwd):"$volume/" ;
     my $stopdir   = norm_path ($appcfg -> object_stopdir, $cwd) ;
@@ -309,7 +324,30 @@ sub Execute
                 }
             }
 
+
+
+        my $file_not_found = 0 ;
         if (!-f $filename)
+            {
+            $file_not_found = 1 ;
+            if ($reqpath)
+                {
+                my $file = basename ($filename) ;
+                foreach my $path (@$reqpath)
+                    {
+                    my $testfn = "$path/$file" ;
+                    print Embperl::LOG "[$$]Embperl::Object Search for request file $file in $path\n"  if ($debug);
+                    if (-f $testfn)
+                        {
+                        $filename = $testfn ;
+                        $file_not_found = 0 ;
+                        last ;
+                        }
+                    }
+                }
+            }
+
+        if ($file_not_found)
             {
             if ($appcfg -> object_fallback)
                 {

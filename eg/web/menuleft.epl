@@ -80,7 +80,7 @@ $app  = $r -> app ;
     <tr> 
         <td><img src="[+ $r -> {imageuri} +]linie-nav.gif" width="152" height="1"></td>
     </tr>
-    [- menuitem ($r -> {baseuri} . 'pod/doc/Embperl.-page-13-.htm', 'Beta 2.0b11', 0, 1) -]
+    [- menuitem ($r -> {baseuri} . 'pod/doc/Embperl.-page-13-.htm', 'Beta 2.0rc1', 0, 1) -]
     <tr>
         <td><img src="[+ $r -> {imageuri} +]linie-nav.gif" width="152" height="1"></td>
     </tr>

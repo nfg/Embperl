@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epmem.c,v 1.3 2004/01/23 06:50:55 richter Exp $
+#   $Id: epmem.c,v 1.5 2004/08/16 07:36:17 richter Exp $
 #
 ###################################################################################*/
 
@@ -114,10 +114,12 @@
 
 /* --- don't use Perl's memory management and io layer here --- */
 
+#ifndef DMALLOC
 #undef malloc
 #undef free
 #undef fprintf
 #undef exit
+#endif
 
 /* debugging support, define this to enable code which helps detect re-use
  * of freed memory and other such nonsense.

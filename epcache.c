@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcache.c,v 1.5 2004/01/23 06:50:54 richter Exp $
+#   $Id: epcache.c,v 1.7 2004/08/16 07:36:14 richter Exp $
 #
 ###################################################################################*/
 
@@ -19,11 +19,12 @@
 
 /* --- don't use Perl's memory management here --- */
 
+#ifndef DMALLOC
 #undef malloc
 #undef realloc
 #undef strdup
 #undef free
-
+#endif
 
 HV * pProviders ;       /**< global hash that holds all known providers classes */
 HV * pCacheItems ;      /**< hash which contains all CacheItems by Key */
@@ -690,6 +691,17 @@ int Cache_IsExpired     (/*in*/ req *           r,
     if (nLastUpdated < pItem -> nLastUpdated)
         return TRUE ;
 
+    if (pItem -> pProvider -> pProviderClass -> fExpires)
+        {
+        if ((*pItem ->  pProvider -> pProviderClass -> fExpires)(r, pItem ->  pProvider))
+            { 
+            if (r -> Component.Config.bDebug & dbgCache)
+                lprintf (r -> pApp,  "[%d]CACHE: %s expired because provider C sub returned TRUE\n", r -> pThread -> nPid,  pItem -> sKey) ; 
+            Cache_FreeContent (r, pItem) ;
+	    return pItem -> bExpired = TRUE ;
+            }
+        }
+
     if (pItem -> bExpired || pItem -> nLastChecked == r -> nRequestCount)
 	return pItem -> bExpired ; /* we already have checked this or know that is it expired */
 
@@ -707,17 +719,6 @@ int Cache_IsExpired     (/*in*/ req *           r,
             return pItem -> bExpired = TRUE ;
             }
 	}
-
-    if (pItem -> pProvider -> pProviderClass -> fExpires)
-        {
-        if ((*pItem ->  pProvider -> pProviderClass -> fExpires)(r, pItem ->  pProvider))
-            { 
-            if (r -> Component.Config.bDebug & dbgCache)
-                lprintf (r -> pApp,  "[%d]CACHE: %s expired because provider C sub returned TRUE\n", r -> pThread -> nPid,  pItem -> sKey) ; 
-            Cache_FreeContent (r, pItem) ;
-	    return pItem -> bExpired = TRUE ;
-            }
-        }
 
     if (pItem -> nExpiresInTime && pItem -> nLastModified + pItem -> nExpiresInTime < r -> nRequestTime)
         {
@@ -867,6 +868,7 @@ int Cache_GetContentSV      (/*in*/ req *             r,
                              /*in*/ bool              bUseCache) 
 
     {
+    epTHX_
     int rc ;
 
     if (!bUseCache && (Cache_IsExpired (r, pItem, pItem -> nLastUpdated) || !pItem -> pSVData))
@@ -878,6 +880,8 @@ int Cache_GetContentSV      (/*in*/ req *             r,
 		return rc ;
 		}
         Cache_SetNotExpired (r, pItem) ;
+        if (pItem -> pSVData)
+            SvREFCNT_dec (pItem -> pSVData) ;
         pItem -> pSVData = *pData ;
         }
     else
@@ -1133,7 +1137,7 @@ int Cache_GetContentSvIndex   (/*in*/ req *             r,
     else
         {
         if (r -> Component.Config.bDebug & dbgCache)
-            lprintf (r -> pApp,  "[%d]CACHE: %s take from cache\n", r -> pThread -> nPid,  pItem -> sKey) ; 
+            lprintf (r -> pApp,  "[%d]CACHE: %s taken from cache\n", r -> pThread -> nPid,  pItem -> sKey) ; 
         }
     return ok ;
     }

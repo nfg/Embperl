@@ -2,6 +2,7 @@
 BEGIN { 
     use lib qw{ . } ;
     use ExtUtils::testlib ;
+    use Cwd ;
 
     $ENV{MOD_PERL} =~ m#/(\d+)\.(\d+)# ;
     $mp2 = 1 if ($1 == 2 || ($1 == 1 && $2 >= 99)) ;
@@ -11,13 +12,17 @@ BEGIN {
         $ENV{PERL5LIB} =~ /^(.*)$/ ;
         eval 'use lib split (/:/, $1) ;' ;
         }
-
+    my $dir = Cwd::fastcwd ;
+    $dir =~ s#/#\\#g ;
+    $dir =~ /^(.+)$/ ;
+    $dir = $1 ; # untaint 
     $ENV{EMBPERL_SRC} =~ /^(.*?)$/;
     my $cwd       = $1 ; # untaint
     my $i = 0 ;
     foreach (@INC)
         {
         $INC[$i] = "$cwd/$_" if (/^\.?\/?blib/) ;
+        $INC[$i] = "$cwd/$1" if (/^\Q$dir\E\\(blib\\.+)$/i) ;
         $INC[$i] =~ s#//#/#g ;
         $i++ ;
         }

@@ -1,6 +1,10 @@
 =pod
 
 
+=head1 NAME
+
+Embperl::IntroEmbperlObject - Introduction to EmbperlObject
+ 
 =head1 Contents
 
 =over 4

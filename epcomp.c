@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcomp.c,v 1.13 2004/02/07 13:41:22 richter Exp $
+#   $Id: epcomp.c,v 1.17 2004/08/16 07:36:15 richter Exp $
 #
 ###################################################################################*/
 
@@ -487,8 +487,12 @@ static int embperl_CompileMatchStack (/*in*/  tReq * r,
 
     ppSV = hv_fetch((HV *)(pDomTree -> pSV), (char *)sStackName, strlen (sStackName), 0) ;  
     if (ppSV == NULL || *ppSV == NULL || SvTYPE (*ppSV) != SVt_RV)
+        {
+        strcpy (r -> errdat1, "CompileMatchStack") ;
+        strncat (r -> errdat1, (char *)sStackName, sizeof (r -> errdat1) - 20) ;
         return rcHashError ;
-
+        }
+        
     pSV = av_pop ((AV *)SvRV (*ppSV)) ;
 
     s = SvPV (pSV, l) ;
@@ -676,7 +680,7 @@ static int embperl_CompileAddAttribut (/*in*/  tReq * r,
 	{
 	if (pChildNode -> bFlags & aflgAttrChilds)
 	    {
-	    int l = sprintf (buf, "XML::Embperl::DOM::Attr::iValue ($_ep_DomTree,%ld)", pChildNode -> xNdx) ;
+	    sprintf (buf, "XML::Embperl::DOM::Attr::iValue ($_ep_DomTree,%ld)", pChildNode -> xNdx) ;
 	    sText = buf ;
 	    if (out == 2)
 		out = 1 ;
@@ -1876,8 +1880,7 @@ int embperl_Execute	            (/*in*/  tReq *	  r,
     {
     epTHX_
     int	    rc  = ok ;
-    /* char *  sSourcefile = DomTree_filename (xSrcDomTree)  ;*/
-    char *  sSourcefile = r -> Component.sSourcefile  ;
+    /* char *  sSourcefile = r -> Component.sSourcefile  ; */
     
     tainted         = 0 ;
 
@@ -1900,6 +1903,7 @@ int embperl_Execute	            (/*in*/  tReq *	  r,
             gv = *((GV **)hv_fetch    (pStash, "param", 5, 0)) ;
             /* gv = r -> pThread -> pParamArrayGV ; */
             save_ary (gv) ;
+            SvREFCNT_dec((SV *)GvAV(gv)) ;
             GvAV(gv) = (AV *)SvREFCNT_inc(c -> Param.pParam) ;
             }
     
@@ -1908,6 +1912,7 @@ int embperl_Execute	            (/*in*/  tReq *	  r,
             gv = *((GV **)hv_fetch    (pStash, "fdat", 4, 0)) ;
             /* gv = r -> pThread -> pFormHashGV ; */
             save_hash (gv) ;
+            SvREFCNT_dec((SV *)GvHV(gv)) ;
             GvHV(gv) = (HV *)SvREFCNT_inc(c -> Param.pFormHash) ;
             }
 
@@ -1916,10 +1921,12 @@ int embperl_Execute	            (/*in*/  tReq *	  r,
             gv = *((GV **)hv_fetch    (pStash, "ffld", 4, 0)) ;
             /* gv = r -> pThread -> pFormArrayGV ; */
             save_ary (gv) ;
+            SvREFCNT_dec((SV *)GvAV(gv)) ;
             if (c -> Param.pFormArray)
                 GvAV(gv) = (AV *)SvREFCNT_inc(c -> Param.pFormArray) ;
             else
                 {
+                /* SVREFCNT_dec (pAV) is done by LEAVE, because of save_ary above (you can savely ignore dmalloc logged error) */
                 AV * pAV = newAV ();
                 HE *   pEntry ;
                 char * pKey ;

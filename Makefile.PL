@@ -3,7 +3,7 @@
 #
 # (C) 1997-2004 G.Richter (richter@dev.ecos.de) / ECOS
 #
-# $Id: Makefile.PL,v 1.68 2004/01/23 07:37:12 richter Exp $
+# $Id: Makefile.PL,v 1.73 2004/08/17 06:17:58 richter Exp $
 #
 
 
@@ -90,8 +90,13 @@ sub MY::test_via_harness
 	{
 	my ($txt) = shift -> MM::test_via_harness (@_) ;
 	$txt =~ s/PERL_DL_NONLAZY=1/PERL_DL_NONLAZY=0/ ;
-	#$txt =~ s/\$\(FULLPERL\)/\$\(FULLPERL\) \-T / ;
-	$txt =~ s/\$\(FULLPERL\)/SET PATH=\$\(PATH\)\;$EPENVPATH\n\t\$\(FULLPERL\)/ if ($win32) ;
+	if ($win32)
+            {
+            if (!($txt =~ s/\$\(FULLPERL\)/SET PATH=\$\(PATH\)\;$EPENVPATH\n\t\$\(FULLPERL\)/ ))
+                {
+                $txt =~ s/\$\(FULLPERLRUN\)/SET PATH=\$\(PATH\)\;$EPENVPATH\n\t\$\(FULLPERLRUN\)/ 
+                }
+            }
 	return $txt ;
 	}
 
@@ -99,9 +104,13 @@ sub MY::test_via_script
 	{
 	my ($txt) = shift -> MM::test_via_script (@_) ;
 	$txt =~ s/PERL_DL_NONLAZY=1/PERL_DL_NONLAZY=0/ ;
-	#$txt =~ s/\$\(FULLPERL\)/\$\(FULLPERL\) \-T / ;
-	$txt =~ s/\$\(FULLPERL\)/SET PATH=\$\(PATH\)\;$EPENVPATH\n\t\$\(FULLPERL\)/ if ($win32) ;
-
+	if ($win32)
+            {
+            if (!($txt =~ s/\$\(FULLPERL\)/SET PATH=\$\(PATH\)\;$EPENVPATH\n\t\$\(FULLPERL\)/ ))
+                {
+                $txt =~ s/\$\(FULLPERLRUN\)/SET PATH=\$\(PATH\)\;$EPENVPATH\n\t\$\(FULLPERLRUN\)/ 
+                }
+            }
 	$txt =~ s/\$\(TEST_FILE\)/\$(TEST_FILE) \$(TESTARGS)/g ;
 
 	return $txt ;
@@ -231,10 +240,12 @@ sub MY::cflags
 
         if ($mp2cfg)
             { # with Apache 2, make sure we have the same defines as mod_perl
+            $txt =~ s/-O\d//g if ($ccdebug =~ /-O\d/) ;
             $txt =~ s/CCFLAGS\s*=.*?\n/CCFLAGS = $ccdebug $mp2cfg->{MODPERL_CCOPTS}\n/s ;
             }
         else
             {
+            $txt =~ s/-O\d//g if ($ccdebug =~ /-O\d/) ;
 	    $txt =~ s/CCFLAGS\s*=/CCFLAGS = $ccdebug / ;
             }
 
@@ -489,15 +500,15 @@ $d       = '' ;
 if ($ARGV[0] eq 'debug')
     {
     shift @ARGV;
-    $optdebug = '-g -O0' ;
+    $optdebug = '-g -O0 -Wall -DEPDEBUG' ;
     if ($win32)
         {
-        $ccdebug = '-Zi -W3' ;
+        $ccdebug = '-Zi -W3 -DEPDEBUG' ;
         $lddebug = '-debug -map -profile' ;
         }
     else
         {
-        $ccdebug = '-ggdb -O0' ;
+        $ccdebug = '-g -O0 -Wall -DEPDEBUG' ;
         $lddebug = '-g' ;
         }
     }
@@ -783,7 +794,7 @@ if ($b && $apache)
     if (!$win32)
         {
         $EPUSER  = getpwuid($>) ||  $> ;
-        $EPGROUP = getgrgid($)) || $) ;
+        $EPGROUP = getgrgid($)) || $) + 0 ;
         if ($EPUSER eq 'root')
             {
             my $nobody = (getpwnam('nobody'))[0] ;
@@ -1280,9 +1291,9 @@ WriteMakefile(
     'LIBS'	   => [$libs || ''],   			 
     'DEFINE'	   => "$d \$(DEFS)", 			 
     'INC'	   => $i,     			 
-    'EXE_FILES'    => [ 'embpexec.pl' ],
-    'clean'        => { FILES => 'dirent.h test/conf/httpd.conf test/tmp/* Embperl.c' },
-    'realclean'    => { FILES => 'embpexec.pl embpexec.bat embpcgi.pl embpcgi.test.pl embpcgi.bat epocgi.pl epocgi.bat epocgi.test.pl embpfastcgi.pl test/conf/config.pl' },
+    'EXE_FILES'    => [ 'embpexec.pl', 'embpmsgid.pl' ],
+    'clean'        => { FILES => 'dirent.h test/conf/httpd.conf test/conf/httpd.stop.conf test/conf/httpd.min.conf test/tmp/* Embperl.c $(OBJECT)' },
+    'realclean'    => { FILES => 'embpmsgid.pl embpexec.pl embpexec.bat embpcgi.pl embpcgi.test.pl embpcgi.bat epocgi.pl epocgi.bat epocgi.test.pl embpfastcgi.pl test/conf/config.pl xs/mmargs.pl' },
     'dist'         => { COMPRESS => 'gzip', SUFFIX => 'gz'},
     'dynamic_lib'  => $dynlib,
     'PREREQ_PM'    => { 'File::Spec' => 0.8 },

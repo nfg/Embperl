@@ -133,9 +133,11 @@ extern "C" {
 #undef crypt
 #endif
 
+#ifndef WIN32
 #ifdef errno
 #define apache_errno errno
 #undef errno
+#endif
 #endif
 
 #endif /* endif PERL_VERSION >= 6 */ 
@@ -165,7 +167,6 @@ extern "C" {
 #ifndef PATH_MAX
 #define PATH_MAX 512
 #endif
-
 
 
 #include "eptypes.h"
@@ -715,49 +716,52 @@ SV * AddDMallocMagic (/*in*/ SV *	pSV,
 		      /*in*/ char *     sFile,
 		      /*in*/ int        nLine) ;
 
-
 #undef newSV
-#define newSV(len) AddDMallocMagic(Perl_newSV((len)), "newSV  ", __FILE__, __LINE__) 
+#define newSV(len) AddDMallocMagic(Perl_newSV(aTHX_ (len)), "newSV  ", __FILE__, __LINE__) 
 
 #undef newSViv
-#define newSViv(i) AddDMallocMagic(Perl_newSViv((i)), "newSViv  ", __FILE__, __LINE__) 
-#define newSVivDBG1(i,txt) AddDMallocMagic(Perl_newSViv((i)), txt, __FILE__, __LINE__) 
+#define newSViv(i) AddDMallocMagic(Perl_newSViv(aTHX_ (i)), "newSViv  ", __FILE__, __LINE__) 
+#define newSVivDBG1(i,txt) AddDMallocMagic(Perl_newSViv(aTHX_ (i)), txt, __FILE__, __LINE__) 
+
 
 #undef newSVnv
-#define newSVnv(n) AddDMallocMagic(Perl_newSVnv((n)), "newSVnv  ", __FILE__, __LINE__) 
+#define newSVnv(n) AddDMallocMagic(Perl_newSVnv(aTHX_ (n)), "newSVnv  ", __FILE__, __LINE__) 
 
 #undef newSVpv
-#define newSVpv(s,len) AddDMallocMagic(Perl_newSVpv((s),(len)), "newSVpv  ", __FILE__, __LINE__) 
+#define newSVpv(s,len) AddDMallocMagic(Perl_newSVpv(aTHX_ (s),(len)), "newSVpv  ", __FILE__, __LINE__) 
 
 #undef newSVpvn
-#define newSVpvn(s,len) AddDMallocMagic(Perl_newSVpvn((s),(len)), "newSVpvn  ", __FILE__, __LINE__) 
+#define newSVpvn(s,len) AddDMallocMagic(Perl_newSVpvn(aTHX_ (s),(len)), "newSVpvn  ", __FILE__, __LINE__) 
 
 #undef newSVrv
-#define newSVrv(rv,c) AddDMallocMagic(Perl_newSVrv((rv),(c)), "newSVrv  ", __FILE__, __LINE__) 
+#define newSVrv(rv,c) AddDMallocMagic(Perl_newSVrv(aTHX_ (rv),(c)), "newSVrv  ", __FILE__, __LINE__) 
 
 #undef newSVsv
-#define newSVsv(sv) AddDMallocMagic(Perl_newSVsv((sv)), "newSVsv  ", __FILE__, __LINE__) 
+#define newSVsv(sv) AddDMallocMagic(Perl_newSVsv(aTHX_ (sv)), "newSVsv  ", __FILE__, __LINE__) 
+
 
 #undef newSVpvf2
 #define newSVpvf2(sv) AddDMallocMagic((sv), "newSVsvf  ", __FILE__, __LINE__) ; SvTAINTED_off (sv) 
 
+
+
 #undef perl_get_sv
-#define perl_get_sv(name,create) AddDMallocMagic(perl_get_sv(name,create), "perl_get_sv  ", __FILE__, __LINE__) 
-
 #undef perl_get_cv
-#define perl_get_cv(name,create) (CV *)AddDMallocMagic((SV *)perl_get_cv(name,create), "perl_get_cv  ", __FILE__, __LINE__) 
-
 #undef perl_get_hv
-#define perl_get_hv(name,create) (HV *)AddDMallocMagic((SV *)perl_get_hv(name,create), "perl_get_hv  ", __FILE__, __LINE__) 
-
 #undef perl_get_av
-#define perl_get_av(name,create) (AV *)AddDMallocMagic((SV *)perl_get_av(name,create), "perl_get_av  ", __FILE__, __LINE__) 
+
+
+#define perl_get_sv(name,create) AddDMallocMagic(Perl_get_sv(aTHX_ name,create), "perl_get_sv  ", __FILE__, __LINE__) 
+#define perl_get_cv(name,create) (CV *)AddDMallocMagic((SV *)Perl_get_cv(aTHX_ name,create), "perl_get_cv  ", __FILE__, __LINE__) 
+#define perl_get_hv(name,create) (HV *)AddDMallocMagic((SV *)Perl_get_hv(aTHX_ name,create), "perl_get_hv  ", __FILE__, __LINE__) 
+#define perl_get_av(name,create) (AV *)AddDMallocMagic((SV *)Perl_get_av(aTHX_ name,create), "perl_get_av  ", __FILE__, __LINE__) 
 
 #undef newHV
-#define newHV() (HV *)AddDMallocMagic((SV *)Perl_newHV(), "newHV  ", __FILE__, __LINE__) 
+#define newHV() (HV *)AddDMallocMagic((SV *)Perl_newHV(aTHX), "newHV  ", __FILE__, __LINE__) 
 
 #undef newAV
-#define newAV() (AV *)AddDMallocMagic((SV *)Perl_newAV(), "newAV  ", __FILE__, __LINE__) 
+#define newAV() (AV *)AddDMallocMagic((SV *)Perl_newAV(aTHX), "newAV  ", __FILE__, __LINE__) 
+
 
 #else
 

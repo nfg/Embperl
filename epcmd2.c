@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcmd2.c,v 1.12 2004/03/07 20:10:06 richter Exp $
+#   $Id: epcmd2.c,v 1.17 2004/08/16 07:36:15 richter Exp $
 #
 ###################################################################################*/
 
@@ -101,13 +101,17 @@ static void embperlCmd_SetRemove (/*i/o*/ register req * r,
     SV **   ppSV = hv_fetch(r -> pThread -> pFormHash, (char *)pName, nNameLen, 0) ;  
     tNodeData * pNode = Node_selfLevel (r -> pApp, pDomTree, xNode, nRepeatLevel) ;
     SV *    pInputHashValue = NULL ;
+    char * tmp = NULL ;
 
     if (ppSV)
 	{
 	SV **   ppSVerg = hv_fetch(r -> pThread -> pFormSplitHash, (char *)pName, nNameLen, 0) ;  
 	SV *    pSV = SplitFdat (r, ppSV, ppSVerg, (char *)pName, nNameLen) ;
-
-	if (SvTYPE (pSV) == SVt_PVHV)
+        tmp = malloc (nValLen) ;
+        memcpy (tmp, pVal, nValLen) ;
+        pVal = tmp ;
+	
+        if (SvTYPE (pSV) == SVt_PVHV)
 	    { /* -> Hash -> check if key exists */
             nValLen = TransHtml (r, (char *)pVal, nValLen) ;
             if (hv_exists ((HV *)pSV, (char *)pVal, nValLen))
@@ -165,6 +169,9 @@ static void embperlCmd_SetRemove (/*i/o*/ register req * r,
             hv_store (r -> pThread -> pInputHash, (char *)pName, nNameLen, newSVpv ("", 0), 0) ; 
         }
 
+    if (tmp)
+        free (tmp) ;
+    
     }
 
 /* ---------------------------------------------------------------------------- */
@@ -343,7 +350,8 @@ int embperlCmd_Hidden	(/*i/o*/ register req *     r,
                     sEscapedText = Escape (r, s, l, r -> Component.nCurrEscMode, NULL, '\0') ;
                     s = SV2String (sEscapedText, l) ;
 			  
-			  Node_appendChild (r -> pApp, pDomTree, xAttr, nRepeatLevel, ntypAttrValue, 0, s, l, 0, 0, NULL) ;
+	            Node_appendChild (r -> pApp, pDomTree, xAttr, nRepeatLevel, ntypAttrValue, 0, s, l, 0, 0, NULL) ;
+                    SvREFCNT_dec (sEscapedText) ;
                     }
                 }
             }
@@ -378,7 +386,8 @@ int embperlCmd_Hidden	(/*i/o*/ register req *     r,
                     sEscapedText = Escape (r, s, l, r -> Component.nCurrEscMode, NULL, '\0') ;
                     s = SV2String (sEscapedText, l) ;
 			  
-			  Node_appendChild (r -> pApp, pDomTree, xAttr, nRepeatLevel, ntypAttrValue, 0, s, l, 0, 0, NULL) ;
+	            Node_appendChild (r -> pApp, pDomTree, xAttr, nRepeatLevel, ntypAttrValue, 0, s, l, 0, 0, NULL) ;
+                    SvREFCNT_dec (sEscapedText) ;
                     }
                 }
             }
@@ -546,6 +555,8 @@ int embperlCmd_AddSessionIdToLink  (/*i/o*/ register req *     r,
     StringAdd (r -> pApp, &pAttrString, r -> sSessionID, sl) ;
 
     Element_selfSetAttribut (r -> pApp, pDomTree, pNode, nRepeatLevel, sAttrName, nAttrLen, pAttrString, ArrayGetSize (r -> pApp, pAttrString)) ;
+
+    StringFree (r -> pApp, &pAttrString) ;
 
     return ok ;
     }

@@ -1266,9 +1266,9 @@ I have tested Embperl successfully
 
 =item perl5.6.1
 
-=item perl5.8.3
+=item perl5.8.5
 
-=item apache_1.3.0 - apache_1.3.27, apache 2.0.45
+=item apache_1.3.0 - apache_1.3.31, apache 2.0.50
 
 =item apache_ssl (Ben SSL)
 
@@ -1292,7 +1292,9 @@ I know from other people that it works on many other UNIX systems
 
 =item perl5.6.1
 
-=item apache_1.3.0 - apache_1.3.27
+=item perl5.8.x
+
+=item apache_1.3.0 - apache_1.3.31
 
 =back
 

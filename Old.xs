@@ -60,8 +60,13 @@ CODE:
         r -> pApacheReqSV = pApacheReqSV ;
         }
 #endif
-     strncpy (r->errdat1, sText, sizeof (r->errdat1) - 1) ;
-     LogError (r,code) ;
+    if (r)
+         {
+         strncpy (r->errdat1, sText, sizeof (r->errdat1) - 1) ;
+         LogError (r,code) ;
+         }
+    else
+        LogErrorParam(NULL, code, sText, NULL) ;
 #ifdef APACHE
     if (bRestore)
         {
@@ -139,7 +144,7 @@ embperl_Sourcefile()
 INIT:
     tReq * r = CurrReq ;
 CODE:
-    RETVAL = r -> Component.sSourcefile ;
+    RETVAL = r?r -> Component.sSourcefile:"" ;
 OUTPUT:
     RETVAL
 
@@ -210,8 +215,13 @@ CODE:
         r -> pApacheReqSV = pApacheReqSV ;
         }
 #endif
-     strncpy (r->errdat1, sText, sizeof (r->errdat1) - 1) ;
-     LogError (r,code) ;
+    if (r)
+         {
+         strncpy (r->errdat1, sText, sizeof (r->errdat1) - 1) ;
+         LogError (r,code) ;
+         }
+    else
+        LogErrorParam(NULL, code, sText, NULL) ;
 #ifdef APACHE
     if (bRestore)
         {
@@ -269,7 +279,7 @@ PREINIT:
     STRLEN len ;
 CODE:
     str = SvPV(ST(1),len) ;
-    RETVAL = Escape(r, str, len, mode, NULL, 0) ; 
+    RETVAL = Escape(r, str, len, mode, NULL, 0) ;
 OUTPUT:
     RETVAL
 

@@ -27,15 +27,15 @@ sub new
     $self -> {root}      = $ENV{EMBPERL_SRC} . '/' ;
     
     # check if Embperl 1.3 is installed
-    my $lib_1_3 = dirname ($INC{'Apache.pm'})  ;
-    if (-e ($lib_1_3 . '/HTML/Embperl.pod'))
-        {
-        $self -> {lib_1_3}     = $lib_1_3 ;
-        }
-    else
-        {
-        $self -> {lib_1_3}     = '' ;
-        }
+    if ($INC{'Apache.pm'})
+	{
+        my $lib_1_3 = dirname ($INC{'Apache.pm'})  ;
+        if (-e ($lib_1_3 . '/HTML/Embperl.pod'))
+            {
+            $self -> {lib_1_3}     = $lib_1_3 ;
+            }
+	}
+    $self -> {lib_1_3} ||= '' ;
 
     # check if DBIx::Recordset is installed
     my $lib_dbix = $lib_1_3  ;
@@ -43,7 +43,7 @@ sub new
         {
         $self -> {lib_dbix}     = $lib_dbix ;
         }
-    elsif (-e (dirname($lib_dbix) . '/DBIx/Intrors.pod'))
+    elsif ($lib_dbix && (-e (dirname($lib_dbix) . '/DBIx/Intrors.pod')))
         {
         $self -> {lib_dbix}     = dirname($lib_dbix) ;
         }

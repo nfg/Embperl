@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: test.pl,v 1.138 2004/03/14 18:54:43 richter Exp $
+#   $Id: test.pl,v 1.145 2004/08/24 05:08:49 richter Exp $
 #
 ###################################################################################
 
@@ -235,6 +235,7 @@
         },
     'input.htm' => { 
         'query_info' => 'feld5=Wert5&feld5a=Wert4\'y\'r&feld5b="Wert5"&feld6=Wert6&feld7=Wert7&feld8=Wert8&cb5=cbv5&cb6=cbv6&cb7=cbv7&cb8=cbv8&cb9=ncbv9&cb10=ncbv10&cb11=ncbv11&mult=Wert3&mult=Wert6&esc=a<b&escmult=a>b&escmult=Wert3',
+        'repeat' => 2,
         },
     'hidden.htm' => { 
         'query_info' => 'feld1=Wert1&feld2=Wert2&feld3=Wert3&feld4=Wert4',
@@ -264,11 +265,35 @@
     'keepreq.htm' => {
         'cgi'        => 0,
         'errors'     => 1,
+        'condition'  => '!$EPWIN32', 
         },
     'keepreq.htm' => {
         'cgi'        => 0,
         'errors'     => 1,
         'cmpext'     => '.2',
+        'condition'  => '!$EPWIN32', 
+        },
+    'keepreq.htm' => {
+        'modperl'    => 0,
+        'errors'     => 1,
+        'condition'  => '$EPWIN32', 
+        },
+    'keepreq.htm' => {
+        'modperl'    => 0,
+        'errors'     => 1,
+        'cmpext'     => '.2',
+        'condition'  => '$EPWIN32', 
+        },
+    'keepreq.htm' => {
+        'modperl'    => 1,
+        'errors'     => 0,
+        'condition'  => '$EPWIN32', 
+        },
+    'keepreq.htm' => {
+        'modperl'    => 1,
+        'errors'     => 0,
+        'cmpext'     => '.2',
+        'condition'  => '$EPWIN32', 
         },
     'hostconfig.htm' => {
         'modperl'    => 1,
@@ -323,6 +348,9 @@
     'incif.htm' => { 
         'version'    => 2,
         },
+    'registry/hello.htm' => {
+        'modperl'    => 1,
+        },
     'registry/Execute.htm' => {
         'modperl'    => 1,
         },
@@ -333,11 +361,23 @@
         },
     'registry/tied.htm' => { 
         'modperl'    => 1,
-        'errors'     => '3',
+        'errors'     => 3,
+        'condition'  => '!$EPWIN32', 
         },
     'registry/tied.htm' => { 
         'modperl'    => 1,
-        'errors'     => '3',
+        'errors'     => 3,
+        'condition'  => '!$EPWIN32', 
+        },
+    'registry/tied.htm' => { 
+        'modperl'    => 1,
+        'errors'     => 0,
+        'condition'  => '$EPWIN32', 
+        },
+    'registry/tied.htm' => { 
+        'modperl'    => 1,
+        'errors'     => 0,
+        'condition'  => '$EPWIN32', 
         },
     'callsub.htm' => { 
         'repeat'     => 2,
@@ -1148,6 +1188,7 @@ die "You must install libwin32 first" if ($EPWIN32 && $win32loaderr && $EPHTTPD)
 
 $httpdconf = "$confpath/httpd.conf" ;
 $httpdstopconf = "$confpath/httpd.stop.conf" ;
+$httpdminconf = "$confpath/httpd.min.conf" ;
 $httpderr   = "$tmppath/httpd.err.log" ;
 $offlineerr = "$tmppath/test.err.log" ;
 $outfile    = "$tmppath/out.htm" ;
@@ -1602,7 +1643,10 @@ sub CheckError
             !($_ =~ /EmbperlDebug: /) &&
             $_ ne 'Use of uninitialized value.')
 	    {
-	    $cnt-- ;
+		# count literal \n as newline,
+		# because RedHat excapes newlines in error log
+	    my @cnt = split /(?:\\n(?!ot))+/ ;	
+	    $cnt -= @cnt ; 
 	    if ($cnt < 0)
 		{ 
 		print "\n\n" if ($cnt == -1) ;
@@ -1660,6 +1704,28 @@ sub CheckSVs
 
      close SVLOG ;
      }
+
+#########################
+
+
+sub run_check
+
+    {
+    my ($cmd, $cmp) = @_ ;
+
+
+    $cmd =~ s/\//\\/g if ($EPWIN32) ;
+
+    
+    open STFH, "$cmd 2>&1 |" ; 
+
+    my @x = <STFH> ; 
+
+    close STFH ;
+
+    grep (/$cmp/, @x) or die "ERROR: $cmp not found\nGot @x\n" ;
+    print "ok\n" ;
+    }
 
 
 
@@ -1905,7 +1971,7 @@ do
 		    }
 		    
 	        $errin = $err ;
-	        $err = CheckError ($errcnt) if ($err == 0 || ($errcnt > 0 && $err == 500) || $file eq 'notfound.htm'  || $file eq 'notallow.xhtm') ;
+                $err = CheckError ($errcnt) if ($err == 0 || ($errcnt > 0 && $err == 500) || $file eq 'notfound.htm'  || $file eq 'notallow.xhtm') ;
     
 	        
 	        if ($err == 0 && $errin != 500 && $file ne 'notfound.htm' && $file ne 'notallow.xhtm')
@@ -2488,14 +2554,18 @@ do
             }
                 
 	#### Start httpd
-	print "\n\nStarting httpd...       " ;
 	unlink "$tmppath/httpd.pid" ;
         unlink $httpderr ;
 
 	chmod 0666, $logfile ;
 	$XX = $opt_multchild && !($opt_gdb || $opt_ddd)?'':'-X' ;
 
+	print "\n\nPerforming httpd syntax check 1 ...  " ;
+	run_check ("\"$EPHTTPD\" " . ($opt_cfgdebug?"-D EMBPERL_APDEBUG ":'') . " -t -f \"$EPPATH/$httpdminconf\" ", 'Syntax OK') ; 
+	print "\n\nPerforming httpd syntax check 2 ...  " ;
+	run_check ("\"$EPHTTPD\" " . ($opt_cfgdebug?"-D EMBPERL_APDEBUG ":'') . " -t -f \"$EPPATH/$httpdconf\" ", 'Syntax OK') ; 
 
+	print "\n\nStarting httpd...       " ;
 	if ($EPWIN32)
 	    {
             #$ENV{PATH} .= ";$EPHTTPDDLL;$EPHTTPDDLL\\..\\os\\win32\\release;$EPHTTPDDLL\\..\\os\\win32\\debug" if ($EPWIN32) ;

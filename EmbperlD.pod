@@ -1264,9 +1264,9 @@ I<Embperl> wurde erfolgreich getestet
 
 =item perl 5.6.1
 
-=item perl 5.8.3
+=item perl 5.8.5
 
-=item apache_1.3.0 - apache_1.3.27, apache 2.0.45
+=item apache_1.3.0 - apache_1.3.31, apache 2.0.50
 
 =item apache_ssl (Ben SSL)
 
@@ -1289,9 +1289,11 @@ problemlos läuft.
 
 =item perl5.005
 
-=item perl 5.6.0
+=item perl5.6.1
 
-=item apache_1.3.0 - apache_1.3.27
+=item perl5.8.x
+
+=item apache_1.3.0 - apache_1.3.31
 
 =back
 

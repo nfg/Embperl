@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: mod_embperl.c,v 1.15 2004/03/14 20:17:41 richter Exp $
+#   $Id: mod_embperl.c,v 1.25 2004/08/17 06:17:58 richter Exp $
 #
 ###################################################################################*/
 
@@ -45,9 +45,29 @@ static int gettid()
 #endif
 #endif
 
+#ifndef APACHE2
+/* from mod_perl 1.x */
+apr_pool_t * perl_get_startup_pool (void)
+{
+    SV *sv ;
+    dTHX ;
+    sv = perl_get_sv("Apache::__POOL", FALSE);
+    if(sv) {
+        IV tmp = SvIV((SV*)SvRV(sv));
+        return (pool *)tmp;
+    }
+    return NULL;
+}
+#endif
+
+
 /* debugging by default off, enable with httpd -D EMBPERL_APDEBUG */
 static int bApDebug = 0 ;
 static int bApInit  = 0 ;
+
+/* subpool to get notified on unload */
+static apr_pool_t * unload_subpool ;
+
 
 
 /* --- declare config datastructure --- */
@@ -200,8 +220,47 @@ static module embperl_module = {
 
 int embperl_ApInitDone (void)
     {
-    return 0 ; //bInitDone ;
+    return 0 ; /* bInitDone ; */
     }
+
+/*---------------------------------------------------------------------------
+* embperl_ApacheInitUnload
+*/
+/*!
+*
+* \_en									   
+* Apache 1: Register subpool to get notified on unload
+* Apache 2: nothing
+* \endif                                                                       
+*
+* \_de									   
+* Apache 1: Subppol registrieren um einen Unload mitzubekommen
+* Apache 2: nichts
+* \endif                                                                       
+*                                                                          
+* ------------------------------------------------------------------------ */
+
+
+
+static int embperl_ApacheInitUnload (apr_pool_t *p)
+
+    {
+#ifdef APACHE2
+    /* apr_pool_sub_make(&subpool, p, NULL); */
+    /* apr_pool_cleanup_register(subpool, NULL, embperl_ApacheInitCleanup, embperl_ApacheInitCleanup); */
+#else
+    if (!unload_subpool && p)
+        {            
+        unload_subpool = ap_make_sub_pool(p);
+        ap_register_cleanup(unload_subpool, NULL, embperl_ApacheInitCleanup, embperl_ApacheInitCleanup);
+        if (bApDebug)
+            ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: ApacheInitUnload [%d/%d]\n", getpid(), gettid()) ;
+        }
+#endif
+
+
+    }
+
 
 
 /*---------------------------------------------------------------------------
@@ -224,40 +283,33 @@ int embperl_ApInitDone (void)
 void embperl_ApacheAddModule (void)
 
     {
-    /*apr_pool_t * pool ;*/
-
     bApDebug |= ap_exists_config_define("EMBPERL_APDEBUG") ;
    
 #ifdef APACHE2
     if (bApDebug)
         ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: Perl part initialization start [%d/%d]\n", getpid(), gettid()) ;
     return ;
-    /*
-    void * p = dlsym (0, "apr_global_hook_pool") ;
-
-    if (!p)
-        {
-        ap_log_error (APLOG_MARK, APLOG_ERR, APLOG_STATUSCODE NULL, "EmbperlDebug: Cannot get address of apr_global_hook_pool [%d/%d]\n", getpid(), gettid()) ;
-        return ;
-        }
-
-    pool = *((apr_pool_t * *)(p)) ;
-    */
 #else 
 
 
     if (!ap_find_linked_module("mod_embperl.c"))
         {
+        apr_pool_t * pool ;
+
         if (bApDebug)
             ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: About to add mod_embperl.c as dynamic module [%d/%d]\n", getpid(), gettid()) ;
         
         ap_add_module (&embperl_module) ;
+
+        pool = perl_get_startup_pool () ;
+        embperl_ApacheInitUnload (pool) ;
         }
     else
         if (bApDebug)
             ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: mod_embperl.c already added as dynamic module [%d/%d]\n", getpid(), gettid()) ;
 #endif
     }
+
 
 
 /*---------------------------------------------------------------------------
@@ -286,14 +338,13 @@ static void embperl_ApacheInit (server_rec *s, apr_pool_t *p)
 #endif
 
     {
-    int    rc ;
-    apr_pool_t * subpool ;
+#ifndef APACHE2
+    int     rc;
+#endif
     dTHX ;
 
-#ifdef APACHE2
-    apr_pool_sub_make(&subpool, p, NULL);
-#else
-    subpool = ap_make_sub_pool(p);
+#ifndef APACHE2
+    embperl_ApacheInitUnload (p) ;
 #endif
 
     bApDebug |= ap_exists_config_define("EMBPERL_APDEBUG") ;
@@ -306,7 +357,6 @@ static void embperl_ApacheInit (server_rec *s, apr_pool_t *p)
     bApInit = 1 ;
     return APR_SUCCESS ;
 #else
-    ap_register_cleanup(subpool, NULL, embperl_ApacheInitCleanup, embperl_ApacheInitCleanup);
     ap_add_version_component ("Embperl/"VERSION) ;
 
     if ((rc = embperl_Init (aTHX_ NULL, NULL, s)) != ok)
@@ -347,13 +397,13 @@ static void embperl_ApacheInitCleanup (void * p)
     {
     module * m ;
     /* make sure embperl module is removed before mod_perl in case mod_perl is loaded dynamicly*/
-    if (m = ap_find_linked_module("mod_perl.c"))
+    if ((m = ap_find_linked_module("mod_perl.c")))
         {
         if (m -> dynamic_load_handle)
             {
             if (bApDebug)
                 ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: ApacheInitCleanup: mod_perl.c dynamicly loaded -> remove mod_embperl.c [%d/%d]\n", getpid(), gettid()) ;
-            embperl_EndPass1 () ;
+            /*embperl_EndPass1 () ;*/
             ap_remove_module (&embperl_module) ; 
             }
         else
@@ -374,6 +424,88 @@ static void embperl_ApacheInitCleanup (void * p)
     return OK ;
 #endif
     }
+
+
+/*---------------------------------------------------------------------------
+* embperl_ApacheConfigCleanup
+*/
+/*!
+*
+* \_en									   
+* Apache Cleanup DirConfig structure
+* \endif                                                                       
+*
+* \_de									   
+* Apache Cleanup DirConfig structure
+* \endif                                                                       
+*                                                                          
+* ------------------------------------------------------------------------ */
+
+/* --- functions for merging configurations --- */
+
+#define EPCFG_APP    
+#define EPCFG_REQ   
+#define EPCFG_COMPONENT   
+
+#undef EPCFG_STR
+#undef EPCFG_INT
+#undef EPCFG_INTOPT
+#undef EPCFG_BOOL
+#undef EPCFG_CHAR
+#undef EPCFG_CV
+#undef EPCFG_SV
+#undef EPCFG_HV
+#undef EPCFG_AV
+#undef EPCFG_REGEX
+
+#define EPCFG_INT EPCFG
+#define EPCFG_INTOPT EPCFG
+#define EPCFG_BOOL EPCFG
+#define EPCFG_CHAR EPCFG
+#define EPCFG_STR EPCFG
+
+#define EPCFG_CV EPCFG_DEC
+#define EPCFG_SV EPCFG_DEC
+#define EPCFG_HV EPCFG_DEC
+#define EPCFG_REGEX EPCFG_DEC
+#define EPCFG_AV(STRUCT,TYPE,NAME,CFGNAME,X) EPCFG_DEC(STRUCT,TYPE,NAME,CFGNAME)
+
+#undef EPCFG
+#define EPCFG(STRUCT,TYPE,NAME,CFGNAME)
+
+#undef EPCFG_DEC
+#define EPCFG_DEC(STRUCT,TYPE,NAME,CFGNAME)  \
+    if (cfg -> STRUCT.NAME) \
+        { \
+        if (bApDebug) \
+            ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: ApacheConfigCleanup:SvREFCNT_dec "#CFGNAME" (name="#NAME" type="#TYPE" refcnt=%d) \n", (int)SvREFCNT ((SV *)(cfg -> STRUCT.NAME))) ; \
+        SvREFCNT_dec ((SV *)(cfg -> STRUCT.NAME)) ; \
+        cfg -> STRUCT.NAME = NULL ; \
+        }
+
+
+#ifdef APACHE2
+static apr_status_t embperl_ApacheConfigCleanup (void * p)
+#else
+static void embperl_ApacheConfigCleanup (void * p)
+#endif
+
+    {
+    tApacheDirConfig * cfg = (tApacheDirConfig *) p ;
+    dTHX ;
+
+    if (bApDebug)
+        ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: ApacheConfigCleanup [%d/%d]\n", getpid(), gettid()) ;
+
+#include "epcfg.h"
+
+#ifdef APACHE2
+    return OK ;
+#endif
+
+    }
+
+
 
 
 
@@ -420,8 +552,26 @@ int embperl_GetApacheConfig (/*in*/ tThreadData * pThread,
 static void *embperl_create_dir_config(apr_pool_t * p, char *d)
     {
     /*char buf [20] ;*/
-    tApacheDirConfig *cfg = (tApacheDirConfig *) ap_pcalloc(p, sizeof(tApacheDirConfig));
+    tApacheDirConfig *cfg ;
+    apr_pool_t * subpool ;
 
+    embperl_ApacheInitUnload (p) ;
+
+#ifdef APACHE2
+    apr_pool_sub_make(&subpool, p, NULL);
+#else
+    subpool = ap_make_sub_pool(p);
+#endif
+    cfg = (tApacheDirConfig *) ap_pcalloc(subpool, sizeof(tApacheDirConfig));
+
+#if 0
+#ifdef APACHE2
+    apr_pool_cleanup_register(subpool, cfg, embperl_ApacheConfigCleanup, embperl_ApacheConfigCleanup); 
+#else
+    ap_register_cleanup(subpool, cfg, embperl_ApacheConfigCleanup, embperl_ApacheConfigCleanup);
+#endif
+#endif
+    
     embperl_DefaultReqConfig (&cfg -> ReqConfig) ;
     embperl_DefaultAppConfig (&cfg -> AppConfig) ;
     embperl_DefaultComponentConfig (&cfg -> ComponentConfig) ;
@@ -448,6 +598,8 @@ static void *embperl_create_server_config(apr_pool_t * p, server_rec *s)
     tApacheDirConfig *cfg = (tApacheDirConfig *) ap_pcalloc(p, sizeof(tApacheDirConfig));
 
     bApDebug |= ap_exists_config_define("EMBPERL_APDEBUG") ;
+
+    embperl_ApacheInitUnload (p) ;
 
     embperl_DefaultReqConfig (&cfg -> ReqConfig) ;
     embperl_DefaultAppConfig (&cfg -> AppConfig) ;
@@ -520,6 +672,13 @@ static void *embperl_create_server_config(apr_pool_t * p, server_rec *s)
         } 
 
 #undef EPCFG_SAVE
+
+#ifdef PERL_IMPLICIT_CONTEXT
+#define dTHXCond if (!aTHX) aTHX = PERL_GET_THX ;
+#else
+#define dTHXCond 
+#endif
+
 #define EPCFG_SAVE(STRUCT,TYPE,NAME,CFGNAME)  \
     if (add -> set_##STRUCT##NAME) \
         { \
@@ -532,9 +691,13 @@ static void *embperl_create_server_config(apr_pool_t * p, server_rec *s)
     else \
         {  \
         if (bApDebug && mrg -> set_##STRUCT##NAME) \
-        ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: Merge "#CFGNAME" (type="#TYPE") stays %s\n", mrg -> save_##STRUCT##NAME?mrg -> save_##STRUCT##NAME:"<null>") ; \
-        } 
-
+            ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: Merge "#CFGNAME" (type="#TYPE") stays %s\n", mrg -> save_##STRUCT##NAME?mrg -> save_##STRUCT##NAME:"<null>") ; \
+        } \
+    if (mrg -> STRUCT.NAME) \
+        { \
+        dTHXCond  \
+        SvREFCNT_inc((SV *)mrg -> STRUCT.NAME) ; \
+        }
 
 /*---------------------------------------------------------------------------
 * embperl_merge_dir_config
@@ -549,6 +712,24 @@ static void *embperl_merge_dir_config (apr_pool_t *p, void *basev, void *addv)
         tApacheDirConfig *mrg = (tApacheDirConfig *)ap_palloc (p, sizeof(tApacheDirConfig));
         tApacheDirConfig *base = (tApacheDirConfig *)basev;
         tApacheDirConfig *add = (tApacheDirConfig *)addv;
+        apr_pool_t * subpool ;
+#ifdef PERL_IMPLICIT_CONTEXT
+        pTHX ;
+        aTHX = NULL ;
+#endif
+
+#ifdef APACHE2
+        apr_pool_sub_make(&subpool, p, NULL);
+#else
+        subpool = ap_make_sub_pool(p);
+#endif
+        mrg = (tApacheDirConfig *)ap_palloc (subpool, sizeof(tApacheDirConfig));
+
+#ifdef APACHE2
+        apr_pool_cleanup_register(subpool, mrg, embperl_ApacheConfigCleanup, embperl_ApacheConfigCleanup); 
+#else
+        ap_register_cleanup(subpool, mrg, embperl_ApacheConfigCleanup, embperl_ApacheConfigCleanup);
+#endif
 
         memcpy (mrg, base, sizeof (*mrg)) ;
 
@@ -750,7 +931,8 @@ char * embperl_GetApacheAppName (/*in*/ tApacheDirConfig * pDirCfg)
             ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: Get: about to convert "#CFGNAME" (type="#TYPE";SV) to perl data: %s\n", pDirCfg -> save_##STRUCT##NAME) ; \
 \
         pDirCfg -> STRUCT.NAME = newSVpv((char *)pDirCfg -> save_##STRUCT##NAME, 0) ; \
-        }
+        } \
+    SvREFCNT_inc((SV *)(pDirCfg -> STRUCT.NAME)) ;
 
 #undef EPCFG_CV
 #define EPCFG_CV(STRUCT,TYPE,NAME,CFGNAME) \
@@ -763,7 +945,8 @@ char * embperl_GetApacheAppName (/*in*/ tApacheDirConfig * pDirCfg)
         if ((rc = EvalConfig (pApp, sv_2mortal(newSVpv(pDirCfg -> save_##STRUCT##NAME, 0)), 0, NULL, "Configuration: EMBPERL_"#CFGNAME, &pDirCfg -> STRUCT.NAME)) != ok) \
             LogError (pReq, rc) ; \
             return rc ; \
-        }
+        } \
+    SvREFCNT_inc((SV *)(pDirCfg -> STRUCT.NAME)) ;
 
 
 #undef EPCFG_AV
@@ -775,7 +958,8 @@ char * embperl_GetApacheAppName (/*in*/ tApacheDirConfig * pDirCfg)
 \
         pDirCfg -> STRUCT.NAME = embperl_String2AV(pApp, pDirCfg -> save_##STRUCT##NAME, SEPARATOR) ;\
         tainted = 0 ; \
-        } 
+        } \
+    SvREFCNT_inc((SV *)(pDirCfg -> STRUCT.NAME)) ;
 
   
 #undef EPCFG_HV
@@ -787,7 +971,8 @@ char * embperl_GetApacheAppName (/*in*/ tApacheDirConfig * pDirCfg)
 \
         pDirCfg -> STRUCT.NAME = embperl_String2HV(pApp, pDirCfg -> save_##STRUCT##NAME, ' ', NULL) ;\
         tainted = 0 ; \
-        } 
+        } \
+    SvREFCNT_inc((SV *)(pDirCfg -> STRUCT.NAME)) ;
     
 
 #undef EPCFG_REGEX
@@ -801,7 +986,8 @@ char * embperl_GetApacheAppName (/*in*/ tApacheDirConfig * pDirCfg)
         if ((rc = EvalRegEx (pApp, pDirCfg -> save_##STRUCT##NAME, "Configuration: EMBPERL_"#CFGNAME, &pDirCfg -> STRUCT.NAME)) != ok) \
             return rc ; \
         tainted = 0 ; \
-        } 
+        } \
+    SvREFCNT_inc((SV *)(pDirCfg -> STRUCT.NAME)) ;
 
 
 /*---------------------------------------------------------------------------
@@ -827,12 +1013,6 @@ int embperl_GetApacheAppConfig (/*in*/ tThreadData * pThread,
         
         memcpy (&pConfig -> pPool + 1, &pDirCfg -> AppConfig.pPool + 1, sizeof (*pConfig) - ((tUInt8 *)(&pConfig -> pPool) - (tUInt8 *)pConfig) - sizeof (pConfig -> pPool)) ;
         pConfig -> bDebug = pDirCfg -> ComponentConfig.bDebug ;
-        if (pConfig -> pSessionArgs)
-            SvREFCNT_inc(pConfig -> pSessionArgs);
-        if (pConfig -> pSessionClasses)
-            SvREFCNT_inc(pConfig -> pSessionClasses);
-        if (pConfig -> pObjectAddpathAV)
-            SvREFCNT_inc(pConfig -> pObjectAddpathAV);
         
         if (pDirCfg -> bUseEnv)
              embperl_GetCGIAppConfig (pThread, pPool, pConfig, 1, 0, 0) ;
@@ -870,11 +1050,7 @@ int embperl_GetApacheReqConfig (/*in*/ tApp *        pApp,
         memcpy (&pConfig -> pPool + 1, &pDirCfg -> ReqConfig.pPool + 1, sizeof (*pConfig) - ((tUInt8 *)(&pConfig -> pPool) - (tUInt8 *)pConfig) - sizeof (pConfig -> pPool)) ;
         pConfig -> bDebug = pDirCfg -> ComponentConfig.bDebug ;
         pConfig -> bOptions = pDirCfg -> ComponentConfig.bOptions ;
-        if (pConfig -> pAllow)
-            SvREFCNT_inc(pConfig -> pAllow);
-        if (pConfig -> pPathAV)
-            SvREFCNT_inc(pConfig -> pPathAV);
-        
+
         if (pDirCfg -> bUseEnv)
              embperl_GetCGIReqConfig (pApp, pPool, pConfig, 1, 0, 0) ;
         }
@@ -911,13 +1087,7 @@ int embperl_GetApacheComponentConfig (/*in*/ tReq * pReq,
 #include "epcfg.h"         
 
         memcpy (&pConfig -> pPool + 1, &pDirCfg -> ComponentConfig.pPool + 1, sizeof (*pConfig) - ((tUInt8 *)(&pConfig -> pPool) - (tUInt8 *)pConfig) - sizeof (pConfig -> pPool)) ;
-        if (pConfig -> pExpiredFunc)
-            SvREFCNT_inc(pConfig -> pExpiredFunc);
-        if (pConfig -> pCacheKeyFunc)
-            SvREFCNT_inc(pConfig -> pCacheKeyFunc);
-        if (pConfig -> pRecipe)
-            SvREFCNT_inc(pConfig -> pRecipe);
-
+        
         if (pDirCfg -> bUseEnv)
              embperl_GetCGIComponentConfig (pReq, pPool, pConfig, 1, 0, 0) ;
         }
@@ -982,7 +1152,7 @@ int embperl_GetApacheReqParam  (/*in*/  tApp        * pApp,
     pParam -> sUri         = r -> uri ;
     pParam -> sPathInfo    = r -> path_info ;
     pParam -> sQueryInfo   = r -> args ;  
-    if (p = ep_pstrdup (pPool, ap_table_get (r -> headers_in, "Accept-Language")))
+    if ((p = ep_pstrdup (pPool, ap_table_get (r -> headers_in, "Accept-Language"))))
         {
         while (isspace(*p))
             p++ ;

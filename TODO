@@ -1,9 +1,23 @@
 
-TODO before Embperl 2.0 release
+TODO 
+
+- en/de select parameter passing in eg/web/header.epl
+
+- textarea escape [Doug Rayner 6.5.04]
+
+- selectbox with empty array -> perlws Neu -> Verotrag ohne Votragarten
+
+- doc that %mdat is per application
+
+- check memory on recompile of epl files
+
+
+SOLVED, need more TESTS:
+
+- Perl hash error at end of apache and apachectl restart
 
 - preload on Apache startup problem [Neil Gunton 25.1.04]
 
-- en/de select parameter passing in eg/web/header.epl
 
 
 TODO for Embperl 2.1 and later

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epmain.c,v 1.127 2004/01/23 06:50:55 richter Exp $
+#   $Id: epmain.c,v 1.132 2004/08/24 05:08:48 richter Exp $
 #
 ###################################################################################*/
 
@@ -66,7 +66,7 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
     STRLEN l ;
     pid_t  nPid ;
 
-    #ifdef PERL_IMPLICIT_CONTEXT
+#ifdef PERL_IMPLICIT_CONTEXT
     pTHX ;
     if (r)
         aTHX = r -> pPerlTHX ;
@@ -75,6 +75,7 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
     else
         aTHX = PERL_GET_THX ;
 #endif
+
 
     if (r)
         {            
@@ -245,6 +246,7 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
 
 #ifdef APACHE
     if (r && r -> pApacheReq)
+        {
 #ifdef APLOG_ERR
         if (rc != rcPerlWarn)
             ap_log_error (APLOG_MARK, APLOG_ERR | APLOG_NOERRNO, APLOG_STATUSCODE r -> pApacheReq -> server, "%s", sText) ;
@@ -253,6 +255,7 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
 #else
         log_error (sText, r -> pApacheReq -> server) ;
 #endif
+        }
     else
 #endif
         {
@@ -1338,10 +1341,12 @@ int embperl_RunRequest (/*i/o*/ register req * r)
     if (!r -> bError)
         {
         if ((rc = ProcessFile (r, 0 /*r -> Buf.pFile -> nFilesize*/)) != ok)
+            {
             if (rc == rcExit)
                 rc = ok ;
             else
                 LogError (r, rc) ;
+            }
 
         if (r -> Component.Param.nImport > 0)
             export (r) ;
@@ -1414,13 +1419,58 @@ int     embperl_ExecuteRequest  (/*in*/ pTHX_
     int rc ;
     tReq * r = NULL ;
 
+#ifdef DMALLOC
+    time_t t = time(NULL) ;
+    static unsigned long nMemCheckpoint ;
+    static unsigned long nMemCheckpoint2 ;
+    dmalloc_message ("[%d]REQ: Start Request at %s\n", getpid(), ctime (&t)) ; 
+#endif        
+
+#if defined (_MDEBUG) && defined (WIN32)
+    _CrtMemCheckpoint(&r -> MemCheckpoint);    
+#endif    
+#ifdef DMALLOC
+    nMemCheckpoint2 = nMemCheckpoint  ;   
+    nMemCheckpoint = dmalloc_mark () ;   
+#endif    
+
+    ENTER;
+    SAVETMPS ;
+	
     rc = embperl_InitRequestComponent (aTHX_ pApacheReqSV, pPerlParam, &r) ;
+
+#ifdef DMALLOC
+    r -> MemCheckpoint = nMemCheckpoint;   
+#endif    
 
     if (rc == ok)
         rc = embperl_RunRequest (r) ;
 
+#ifdef DMALLOC
+    dmalloc_message ( "[%d]%sRequest will be freed. Entry-SVs: %d: %%d\n", r -> pThread -> nPid,
+	    (r -> Component.pPrev?"Sub-":""), r -> stsv_count) ;
+#endif
+
     if (r)
         embperl_CleanupRequest (r) ;
+
+    FREETMPS ;
+    LEAVE;
+
+#if defined (_MDEBUG) && defined (WIN32)
+    _CrtMemDumpAllObjectsSince(&r -> MemCheckpoint);    
+#endif    
+#ifdef DMALLOC
+			    /* unsigned long mark, int not_freed_b, int freed_b, int details_b */
+    dmalloc_log_changed (nMemCheckpoint, 1, 0, 1) ;
+    dmalloc_message ( "[%d]Request freed. Exit-SVs: %d -OBJs: %d\n", getpid(),
+	    sv_count, sv_objcount) ;
+    if (nMemCheckpoint2)
+        {
+        dmalloc_message ( "***TO PREVIOUS REQUEST***\n") ;
+        dmalloc_log_changed (nMemCheckpoint2, 1, 0, 1) ;
+        }
+#endif    
 
     return rc ;
     }
@@ -1459,10 +1509,12 @@ int     embperl_RunComponent    (/*in*/ tComponent *     c)
         oBegin (r) ;
 
     if ((rc = ProcessFile (r, 0 /*r -> Buf.pFile -> nFilesize*/)) != ok)
+        {
         if (rc == rcExit)
             rc = ok ;
         else
             LogError (r, rc) ;
+        }
 
     if (rc == ok && (c -> Config.bOptions & optReturnError) && r -> bError)
         rc = 500 ;
@@ -1488,7 +1540,6 @@ int     embperl_RunComponent    (/*in*/ tComponent *     c)
     LEAVE;
     c -> bReqRunning = 0 ;
 
-        
     return rc ;
     }
     

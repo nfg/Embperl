@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epprovider.c,v 1.4 2004/01/23 06:50:55 richter Exp $
+#   $Id: epprovider.c,v 1.7 2004/08/16 07:36:18 richter Exp $
 #
 ###################################################################################*/
 
@@ -1559,6 +1559,9 @@ static int ProviderEpRun_AppendKey (/*in*/ req *              r,
     if ((bKeyOptions & ckoptQueryInfo) && r -> Param.sQueryInfo)
 	sv_catpv (pKey, r -> Param.sQueryInfo) ;
     
+    if (sKey)
+        sv_catpv (pKey, sKey) ;
+    
     return ok ;
     }
 
@@ -1675,7 +1678,6 @@ static int ProviderEpRun_IsExpired  (/*in*/ req *              r,
         {
         LogError (r, rc) ;
         }
-    
     if (pProvider -> pCache -> nExpiresInTime || pProvider -> pCache -> pExpiresCV)
         pProvider -> pCache -> bCache = 1 ;
     else
@@ -1683,6 +1685,7 @@ static int ProviderEpRun_IsExpired  (/*in*/ req *              r,
         pProvider -> pCache -> bCache = 0 ;
         if (bCache)
             Cache_FreeContent (r, pProvider -> pCache) ;
+        return TRUE ;
         }
         
 

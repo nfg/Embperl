@@ -109,6 +109,7 @@
    sObjectBase | object_base
    sObjectApp | object_app
    pObjectAddpathAV | object_addpath
+   pObjectReqpathAV | object_reqpath
    sObjectStopdir | object_stopdir
    sObjectFallback | object_fallback
    sObjectHandlerClass | object_handler_class
@@ -226,7 +227,7 @@
  <tReqConfig>
 !   _perlsv
    pAllow | allow
-   pURIMatch | urimatch
+   pUriMatch | urimatch
    sDecline | decline
    cMultFieldSep | mult_field_sep
    pPathAV | path
@@ -249,6 +250,7 @@
    sQueryInfo | query_info
    sLanguage | language
    pCookies | cookies
+   pCGISV | cgi
    new
 !   private
  </tReqParam>

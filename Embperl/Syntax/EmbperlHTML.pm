@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: EmbperlHTML.pm,v 1.7 2004/03/07 20:04:15 richter Exp $
+#   $Id: EmbperlHTML.pm,v 1.8 2004/07/20 04:59:11 richter Exp $
 #
 ###################################################################################
  
@@ -79,7 +79,7 @@ sub Init
                 { 
                 perlcode =>
                     [ 
-                    '$idat{%&*\'name%}=$fdat{%&*\'name%};_ep_ac(%$n%, Embperl::Syntax::ntypText, $fdat{%&*\'name%}) ;   %#!-0%',
+                    '$idat{%&*\'name%}=$fdat{%&*\'name%};_ep_ac(%$n%, Embperl::Syntax::ntypText + 0x20, $fdat{%&*\'name%}) ;   %#!-0%',
                     '$idat{%&*\'name%}=\'%#*0%\' ; ',
                     ]
                 }) ;

@@ -46,7 +46,31 @@ embperl_ApacheAddModule ()
 
 #endif
 
+#ifdef DMALLOC
 
+unsigned long
+embperl_dmalloc_mark()
+CODE:
+    RETVAL = dmalloc_mark () ; 
+OUTPUT:
+    RETVAL
+
+
+void
+embperl_dmalloc_check(nMemCheckpoint,txt)
+    unsigned long nMemCheckpoint
+    char * txt
+CODE:
+    if (nMemCheckpoint)
+        {
+        if (txt && *txt)
+            dmalloc_message (txt) ;
+        dmalloc_log_changed (nMemCheckpoint, 1, 0, 1) ;
+        }
+
+#endif    
+
+    
 
 MODULE = Embperl::Req    PACKAGE = Embperl::Req   PREFIX = embperl_
 
@@ -86,6 +110,9 @@ CODE:
     tainted = 0 ;
 OUTPUT:
     RETVAL
+
+
+
 
 
 

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: DOM.xs,v 1.9 2004/01/23 06:50:54 richter Exp $
+#   $Id: DOM.xs,v 1.11 2004/08/16 07:36:13 richter Exp $
 #
 ###################################################################################
 
@@ -299,6 +299,7 @@ CODE:
     pDomTree = DomTree_self (pDomNode -> xDomTree) ;
 
     Element_selfSetAttribut (r -> pApp, pDomTree, Node_self (pDomTree, pDomNode -> xNode), r -> Component.nCurrRepeatLevel, sA, nAttr, sT, nText) ;
+    SvREFCNT_dec (sEscapedText) ;
 
 
 void
@@ -321,6 +322,7 @@ CODE:
     pDomTree = DomTree_self (xDomTree) ;
 
     Element_selfSetAttribut (r -> pApp, pDomTree, Node_self (pDomTree, xNode), r -> Component.nCurrRepeatLevel, sA, nAttr, sT, nText) ;
+    SvREFCNT_dec (sEscapedText) ;
 
 
 

@@ -71,6 +71,7 @@ EPCFG_INT(AppConfig,     int,     nMailErrorsResendTime,    MAIL_ERRORS_RESEND_T
 EPCFG_STR(AppConfig,     char *,  sObjectBase,      OBJECT_BASE)
 EPCFG_STR(AppConfig,     char *,  sObjectApp,       OBJECT_APP)
 EPCFG_AV (AppConfig,     AV *,    pObjectAddpathAV, OBJECT_ADDPATH, SEPARATOR)
+EPCFG_AV (AppConfig,     AV *,    pObjectReqpathAV, OBJECT_REQPATH, SEPARATOR)
 EPCFG_STR(AppConfig,     char *,  sObjectStopdir,   OBJECT_STOPDIR)
 EPCFG_STR(AppConfig,     char *,  sObjectFallback,  OBJECT_FALLBACK)
 EPCFG_STR(AppConfig,     char *,  sObjectHandlerClass, OBJECT_HANDLER_CLASS)

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdat2.h,v 1.7 2004/01/23 06:50:55 richter Exp $
+#   $Id: epdat2.h,v 1.8 2004/04/02 05:10:41 richter Exp $
 #
 ###################################################################################*/
 
@@ -125,6 +125,7 @@ typedef struct tReqParam
     char *  sQueryInfo ;
     char *  sLanguage ;         /**< Language for the current request */
     HV *    pCookies ;          /**< Received Cookies */
+    SV *    pCGISV ;            /**< CGI Object which hold upload data */
     } tReqParam ;
 
 typedef struct tAppConfig
@@ -156,7 +157,8 @@ typedef struct tAppConfig
     int     nMailErrorsResendTime ;
     char *  sObjectBase ;
     char *  sObjectApp ;
-    AV *    pObjectAddpathAV ;
+    AV *    pObjectAddpathAV ;  /**< add to search path */
+    AV *    pObjectReqpathAV ;  /**< search this directries for requested documents */
     char *  sObjectStopdir ;
     char *  sObjectFallback ;
     char *  sObjectHandlerClass ;

@@ -53,7 +53,6 @@ to be handled by Embperl:
     Options     ExecCGI
     </files>
 
-
 Another possibility is to have all files under a special location processed by Embperl:
 
     PerlModule Embperl
@@ -1107,12 +1106,45 @@ $application -> config -> object_addpath
 =back
 
 
-Additional directories where Embperl::Object searches for pages. 
+Additional directories where Embperl::Object searches for pages.
+This search through the searchpath is always performed if in a call to Execute no path for the
+file is given.
+ 
 In F<httpd.conf> or as evironment variable directories are
 separated by C<;> (on Unix C<:> works also). The parameter for C<Execute> and
 the application object method expects/returns an array reference.
 This path is
 B<always> appended to the searchpath.
+
+=head2 Embperl_Object_Reqpath
+
+=over
+
+=item Env:
+
+EMBPERL_OBJECT_REQPATH
+
+=item Method:
+
+$application -> config -> object_reqpath 
+
+=item Since:
+
+2.0b12
+
+=back
+
+
+Additional directories where Embperl::Object searches for files for the inital request.
+If a file is requested, but cannot be found at the given location, the directories
+given in the this path are additionaly search for the file. This applies only to
+the initial filename given to Embperl::Object and B<not> to files called via
+Execute.  
+ 
+In F<httpd.conf> or as evironment variable directories are
+separated by C<;> (on Unix C<:> works also). The parameter for C<Execute> and
+the application object method expects/returns an array reference.
+
 
 
 =head2 Embperl_Object_Stopdir
@@ -2389,6 +2421,24 @@ $request -> param -> cookies
 
 
 A hashref that contains all cookies send by the browser to the server.
+
+=head2 cgi
+
+=over
+
+=item Method:
+
+$request -> param -> cgi 
+
+=item Since:
+
+2.0b12
+
+=back
+
+
+Holds the CGI.pm object, which is used for file upload. If no file uploaded data
+is send tho the request, this member is undefined.
 
 =head2 inputfile
 

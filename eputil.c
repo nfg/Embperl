@@ -10,14 +10,13 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eputil.c,v 1.37 2004/03/07 19:44:14 richter Exp $
+#   $Id: eputil.c,v 1.42 2004/08/16 07:36:18 richter Exp $
 #
 ###################################################################################*/
 
 
 #include "ep.h"
 #include "epmacro.h"
-
 
 
 /* ---------------------------------------------------------------------------- */
@@ -632,10 +631,12 @@ const char * GetHtmlArg (/*in*/  const char *    pTag,
 
         
         if (strnicmp (pTag, pArg, l) == 0 && (pTag[l] == '=' || isspace (pTag[l]) || pTag[l] == '>' || pTag[l] == '\0'))
+            {
             if (*pLen > 0)
                 return pVal ;
             else
                 return pTag ;
+            }
 
         pTag = pEnd ;
         }
@@ -827,10 +828,12 @@ void GetHashValueStrOrHash (/*in*/  tReq *         r,
 
     ppSV = hv_fetch(pHash, (char *)sKey, strlen (sKey), 0) ;  
     if (ppSV != NULL)
+        {
         if (!SvROK(*ppSV) || SvTYPE (SvRV(*ppSV)) != SVt_PVHV)
             *sValue = SvPV (*ppSV, l), *pHV = NULL ;
         else
             *pHV = (HV *)SvRV(*ppSV), *sValue = NULL ;
+        }
     }
 
 
@@ -1076,8 +1079,12 @@ int GetLineNoOf (/*i/o*/ register req * r,
 int GetLineNo (/*i/o*/ register req * r)
 
     {
-    char * pPos = r -> Component.pCurrPos ;
+    char * pPos  ;
+
+    if (r == NULL) 
+        return 0 ;
     
+    pPos = r -> Component.pCurrPos ;
     return GetLineNoOf (r, pPos) ;
     }
 
@@ -1468,7 +1475,9 @@ char * embperl_File2Abs  (/*i/o*/ register req * r,
                         /*in*/  const char *         sFilename)
     {
     epTHX_
+#ifdef WIN32
     char * c ;
+#endif
     char * sAbsname ;
 
     if (sFilename == NULL)
@@ -1809,10 +1818,10 @@ const char * embperl_GetText (/*in*/ tReq *       r,
     epTHX_
     char *  pMsg ;
 
-    if (pMsg = embperl_GetText1(r, sMsgId, r -> pMessages))
+    if ((pMsg = embperl_GetText1(r, sMsgId, r -> pMessages)))
         return pMsg ;
     
-    if (pMsg = embperl_GetText1(r, sMsgId, r -> pDefaultMessages))
+    if ((pMsg = embperl_GetText1(r, sMsgId, r -> pDefaultMessages)))
         return pMsg ;
 
     return sMsgId ;
@@ -2047,26 +2056,31 @@ static int RemoveDMallocMagic (pTHX_ SV * pSV, MAGIC * mg)
 
 static MGVTBL DMalloc_mvtTab = { NULL, NULL, NULL, NULL, RemoveDMallocMagic } ;
 
+#define MGTTYPE '!'
+
 SV * AddDMallocMagic (/*in*/ SV *	pSV,
 		      /*in*/ char *     sText,
 		      /*in*/ char *     sFile,
 		      /*in*/ int        nLine) 
 
     {
-    if (pSV && (!SvMAGICAL(pSV) || !mg_find (pSV, '~')))
+    dTHX ;
+
+    if (pSV && (!SvMAGICAL(pSV) || !mg_find (pSV, MGTTYPE)))
 	{
 	char * s = _strdup_leap(sFile, nLine, sText) ;
 	struct magic * pMagic ;
     
-	if ((!SvMAGICAL(pSV) || !(pMagic = mg_find (pSV, '~'))))
+	if ((!SvMAGICAL(pSV) || !(pMagic = mg_find (pSV, MGTTYPE))))
 	    {
-	    sv_magic ((SV *)pSV, NULL, '~', (char *)&s, sizeof (s)) ;
-	    pMagic = mg_find (pSV, '~') ;
+	    sv_magicext ((SV *)pSV, NULL, MGTTYPE, &DMalloc_mvtTab, (char *)&s, sizeof (s)) ;
+	    /* sv_magic ((SV *)pSV, NULL, MGTTYPE, (char *)&s, sizeof (s)) ; */
+	    pMagic = mg_find (pSV, MGTTYPE) ;
 	    }
 
 	if (pMagic)
 	    {
-	    pMagic -> mg_virtual = &DMalloc_mvtTab ;
+	    /* pMagic -> mg_virtual = &DMalloc_mvtTab ; */
 	    }
 	else
 	    {
