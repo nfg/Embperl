@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epinit.c,v 1.22 2004/08/24 05:08:48 richter Exp $
+#   $Id: epinit.c,v 1.24 2004/10/31 14:36:15 richter Exp $
 #
 ###################################################################################*/
 
@@ -333,9 +333,11 @@ int    embperl_EndPass1  (void)
 
 
     {
+    tThreadData * pThread  ;
     dTHX ;
-    tThreadData * pThread = embperl_GetThread  (aTHX) ;
-
+    
+    pThread = embperl_GetThread  (aTHX) ;
+    
     hv_clear (pThread -> pApplications) ;
 
     return ok ;

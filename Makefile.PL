@@ -3,7 +3,7 @@
 #
 # (C) 1997-2004 G.Richter (richter@dev.ecos.de) / ECOS
 #
-# $Id: Makefile.PL,v 1.73 2004/08/17 06:17:58 richter Exp $
+# $Id: Makefile.PL,v 1.74 2004/11/07 19:36:42 richter Exp $
 #
 
 
@@ -1311,7 +1311,7 @@ WriteMakefile(
 
 @bins = ('embpexec.pl','embpexec.bat', 
          'embpcgi.pl', 'embpcgi.test.pl', 'embpcgi.bat',
-	 'embpfastcgi.pl', 'embpmsgid.pl',
+	 'embpfastcgi.pl', 'embpfastcgi.test.pl','embpmsgid.pl',
          'epocgi.pl', 'epocgi.test.pl', 'epocgi.bat') ;
 
 

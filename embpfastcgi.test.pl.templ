@@ -1,4 +1,4 @@
-#!/usr/bin/perl 
+#!/opt/perlt5.8.3/bin/perl5.8.3 
 ###################################################################################
 #
 #   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
@@ -11,10 +11,9 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: embpcgi.test.pl.templ,v 1.5 2004/01/23 06:50:54 richter Exp $
+#   $Id: embpfastcgi.test.pl.templ,v 1.1 2004/11/07 19:36:42 richter Exp $
 #
 ###################################################################################
-
 
 
 BEGIN 
@@ -32,28 +31,31 @@ BEGIN
     %Embperl::initparam = (use_env => 1, use_redirect_env => 1) ;
     }	
 
+use FCGI ;
 use Embperl;
 
-$^W = 1;
-
-my $rc = Embperl::Execute ({use_env => 1, use_redirect_env => 1}) ;
-
-if ($rc)
+my $request = FCGI::Request ;
+while ($request -> Accept() >= 0)
     {
-    $time = localtime ;
+    my $rc = Embperl::Execute ({use_env => 1, use_redirect_env => 1}) ;
 
-    print <<EOT;
-Status: $rc
-Content-Type: text/html
+    if ($rc)
+        {
+        $time = localtime ;
 
-<HTML><HEAD><TITLE>Embperl Error</TITLE></HEAD>
-<BODY bgcolor=\"#FFFFFF\">
-<H1>embpcgi Server Error: $rc</H1>
-Please contact the server administrator, $ENV{SERVER_ADMIN} and inform them of the time the error occurred, and anything you might have done that may have caused the error.<P><P>
-$ENV{SERVER_SOFTWARE} Embperl $Embperl::VERSION [$time]<P>
-</BODY></HTML>
+        print <<EOT;
+    Status: $rc
+    Content-Type: text/html
+
+    <HTML><HEAD><TITLE>Embperl Error</TITLE></HEAD>
+    <BODY bgcolor=\"#FFFFFF\">
+    <H1>embpcgi Server Error: $rc</H1>
+    Please contact the server administrator, $ENV{SERVER_ADMIN} and inform them of the time the error occurred, and anything you might have done that may have caused the error.<P><P>
+    $ENV{SERVER_SOFTWARE} Embperl $Embperl::VERSION [$time]<P>
+    </BODY></HTML>
 
 EOT
+        }
     }
 
 

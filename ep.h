@@ -330,6 +330,7 @@ int CloseOutput (/*i/o*/ tReq *             r, tComponentOutput * pOutput) ;
 int owrite (/*i/o*/ register req * r,
 			/*in*/ const void * ptr, 
                         /*in*/ size_t size) ;
+void oflush (/*i/o*/ register req * r) ;
 void oputc (/*i/o*/ register req * r,
 			/*in*/ char c) ;
 int oputs (/*i/o*/ register req * r,

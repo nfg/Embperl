@@ -1,5 +1,16 @@
 =pod
 
+=head1 2.0rc2  21. November 2004
+
+   - Flush output to client and send final chuck, before cleanup runs.
+   - Fix compiler error when compiling with Perl 5.005.
+   - Fix html input tag value set, when %fdat value is 0. Reported
+     by Torsten Luettgert.
+   - Fix test, for Apache 1.3 with static mod_perl and other dynamic
+     modules, by loading Embperl first. Reported by Christophe Le Bars.
+   - Fix FastCGI read of POST data, reported by Doug Rayner.
+   - Readded tests for CGI mode.
+
 =head1 2.0rc1  24. August 2004
 
    - Addeded configuration directive Embperl_Object_Reqpath, which allows to

@@ -5,12 +5,9 @@ TODO
 
 - textarea escape [Doug Rayner 6.5.04]
 
-- selectbox with empty array -> perlws Neu -> Verotrag ohne Votragarten
-
 - doc that %mdat is per application
 
 - check memory on recompile of epl files
-
 
 SOLVED, need more TESTS:
 

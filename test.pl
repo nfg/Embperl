@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: test.pl,v 1.145 2004/08/24 05:08:49 richter Exp $
+#   $Id: test.pl,v 1.148 2004/11/13 16:47:08 richter Exp $
 #
 ###################################################################################
 
@@ -20,6 +20,7 @@
 
 # version =>
 # errors  =>
+# sleep4err =>
 # query_string =>
 # repeat =>
 # cmpext =>
@@ -67,6 +68,21 @@
         'repeat'     => 3,
         'errors'     => 5,
         'version'    => 2,
+        'cgi'        => 0,
+        },
+    'error.htm' => { 
+        'repeat'     => 3,
+        'errors'     => 5,
+        'version'    => 2,
+        'cgi'        => 1,
+        'condition'  => '!$MP2',
+        },
+    'error.htm' => { 
+        'repeat'     => 3,
+        'errors'     => 6,
+        'version'    => 2,
+        'cgi'        => 1,
+        'condition'  => '$MP2',
         },
     'errormismatch.htm' => { 
         'errors'     => '1',
@@ -266,34 +282,40 @@
         'cgi'        => 0,
         'errors'     => 1,
         'condition'  => '!$EPWIN32', 
+        'sleep4err'  => 1,
         },
     'keepreq.htm' => {
         'cgi'        => 0,
         'errors'     => 1,
         'cmpext'     => '.2',
         'condition'  => '!$EPWIN32', 
+        'sleep4err'  => 1,
         },
     'keepreq.htm' => {
         'modperl'    => 0,
         'errors'     => 1,
         'condition'  => '$EPWIN32', 
+        'sleep4err'  => 1,
         },
     'keepreq.htm' => {
         'modperl'    => 0,
         'errors'     => 1,
         'cmpext'     => '.2',
         'condition'  => '$EPWIN32', 
+        'sleep4err'  => 1,
         },
     'keepreq.htm' => {
         'modperl'    => 1,
         'errors'     => 0,
         'condition'  => '$EPWIN32', 
+        'sleep4err'  => 1,
         },
     'keepreq.htm' => {
         'modperl'    => 1,
         'errors'     => 0,
         'cmpext'     => '.2',
         'condition'  => '$EPWIN32', 
+        'sleep4err'  => 1,
         },
     'hostconfig.htm' => {
         'modperl'    => 1,
@@ -692,10 +714,12 @@
         },
     'EmbperlObject/epoincdiv.htm' => { 
         'offline'    => 0,
+        'cgi'        => 0, # input_escmode is not passed automaticly to included script in cgi mode
         },
     'EmbperlObject/epofdat.htm' => {
         'offline'    => 0,
         'query_info' => 'a=1&b=2',
+        'cgi'        => 0, # input_escmode is not passed automaticly to included script in cgi mode
         },
     'EmbperlObject/epodiv.htm' => { 
         'offline'    => 0,
@@ -1032,6 +1056,7 @@
     'app/i18n.htm' => { 
         'version'    => 2,
         'app_handler_class' => 'Embperl::TEST::App',
+        'cgi'        => 0,
         },
     'xhtml.htm' => { 
         'version'    => 2,
@@ -1195,8 +1220,9 @@ $outfile    = "$tmppath/out.htm" ;
 
 #### setup path in URL ####
 
-$embploc = 'embperl' ;
-$cgiloc  = 'cgi-bin' ; 
+$embploc     = 'embperl' ;
+$cgiloc      = 'cgi-bin' ; 
+$fastcgiloc  = 'fastcgi-bin' ; 
 
 $port    = $EPPORT ;
 $host    = 'localhost' ;
@@ -1756,7 +1782,7 @@ if (!$opt_modperl && !$opt_cgi && !$opt_offline && !$opt_execute && !$opt_cache 
 	$opt_modperl = 1 ;	
 	}
     elsif ($EPAPACHEVERSION)
-        { $opt_cache = $opt_modperl =  $opt_offline = $opt_execute = 1 }
+        { $opt_cache = $opt_modperl = $opt_cgi =  $opt_offline = $opt_execute = 1 }
     else
         { $opt_cache = $opt_offline = $opt_execute = 1 }
     #$opt_ep1 = 1 ;
@@ -2657,8 +2683,10 @@ do
 	{
 	if ($loc eq $embploc)
 	    { print "\nTesting mod_perl mode...\n\n" ; }
-	else
+	elsif ($loc eq $cgiloc)
 	    { print "\nTesting cgi mode...\n\n" ; }
+	else
+	    { print "\nTesting FastCGI mode...\n\n" ; }
 
 	$cookie = undef ;
         $t_req = 0 ;
@@ -2673,16 +2701,18 @@ do
             $testnum++ ;
             $testversion = $version == 2 && !$ep1compat?2:1 ;
 
-            last if ($testnum > 8 && $loc ne $embploc) ; 
+            #last if ($testnum > 8 && $loc ne $embploc) ; 
             next if ($test->{noloop} && $loopcnt > 0) ;
             next if ($test->{version} && $testversion != $test->{version}) ;
             next if ($loc eq $embploc && 
                       ((defined ($test -> {modperl}) && $test -> {modperl} == 0) ||
                         (!$test -> {modperl} && ($test -> {offline} || $test -> {cgi})))) ;
 
-            next if ($loc eq $cgiloc && 
+            next if (($loc eq $cgiloc || $loc eq $fastcgiloc) && 
                       ((defined ($test -> {cgi}) && $test -> {cgi} == 0) ||
-                        (!$test -> {cgi} && ($test -> {offline} || $test -> {modperl})))) ;
+                        (!$test -> {cgi} && ($test -> {offline} || $test -> {modperl})) ||
+                        ($EPWIN32 && $test -> {'errors'})
+                        )) ;
             
 
 	    next if (defined ($opt_ab) && $test -> {'errors'}) ;
@@ -2693,11 +2723,11 @@ do
                 
  
 	    #next if ($file eq 'chdir.htm' && $EPWIN32) ;
-	    next if ($file eq 'notfound.htm' && $loc eq $cgiloc && $EPWIN32) ;
+	    next if ($file eq 'notfound.htm' && ($loc eq $cgiloc || $loc eq $fastcgiloc) && $EPWIN32) ;
 	    next if ($file =~ /opmask/ && $EPSTARTUP =~ /_dso/) ;
 	    if ($file =~ /sess\.htm/)
                 { 
-                next if ($loc eq $cgiloc && $EPSESSIONCLASS ne 'Embperl') ;
+                next if (($loc eq $cgiloc || $loc eq $fastcgiloc) && $EPSESSIONCLASS ne 'Embperl') ;
                 if (!$EPSESSIONXVERSION)
                     {
 		    $txt2 = "$file...";
@@ -2708,7 +2738,7 @@ do
                 }
      
             $errcnt = $test -> {errors} || 0 ;
-	    $errcnt = -1 if ($EPWIN32 && $loc eq $cgiloc) ;
+	    $errcnt = -1 if ($EPWIN32 && ($loc eq $cgiloc || $loc eq $fastcgiloc)) ;
 
 	    $debug = $test -> {debug} || $defaultdebug ;  
 	    $page = "$inpath/$file" ;
@@ -2797,8 +2827,10 @@ do
 		last ;
 		}
 
-	    #$errcnt++ if ($loc eq $cgiloc && $file eq 'notallow.xhtm') ;   
-	    $err = CheckError ($errcnt) if (($err == 0 || $file eq 'notfound.htm' || $file eq 'notallow.xhtm')) ;
+	    #$errcnt++ if (($loc eq $cgiloc || $loc eq $fastcgiloc) && $file eq 'notallow.xhtm') ;   
+	    sleep ($test->{sleep4err}) if ($test->{sleep4err}) ;
+            sleep (1) if (($loc eq $cgiloc || $loc eq $fastcgiloc) && $errcnt) ;
+            $err = CheckError ($errcnt) if (($err == 0 || $file eq 'notfound.htm' || $file eq 'notallow.xhtm')) ;
 	    if ($err == 0 && $file ne 'notfound.htm' && $file ne 'notallow.xhtm' && !defined ($opt_ab))
 		{
 		$page =~ /.*\/(.*)$/ ;
@@ -2827,11 +2859,19 @@ do
 	    $n_cgi = $n_req ;
 	    }
 
-	if ($opt_cgi && $err == 0 && $loc ne $cgiloc && $loopcnt == 0)   
+	if ($opt_cgi && $err == 0 && $loc eq $embploc && $loopcnt == 0)   
 	    { 
-	    #$loc = $EP2?'':$cgiloc ; # currently disable cgi mode at all for Embperl 2.x
-	    $loc = $cgiloc ; 
-	    }
+            $loc = $cgiloc ; 
+            }
+	#elsif ($opt_cgi && $err == 0 && $loc eq $cgiloc && $loopcnt == 0)   
+	#    { 
+        #    eval "require FCGI" ;
+        #    $loc = $@?'':$fastcgiloc ; 
+        #    if (!$loc)
+        #        {
+        #        print "\nSkip FastCGI Tests, FCGI.pm not installed\n" ;
+        #        }
+        #    }
 	else
 	    {
 	    $loc = '' ;
@@ -2863,13 +2903,13 @@ if ($err)
         @p = map { " $_ = $test->{$_}\n" } keys %$test if (ref ($test) eq 'HASH') ;
         print "Testparameter:\n @p" if (@p) ;
         }
-    print "\n ERRORS detected! NOT all test have been passed successfully\n\n" ;
+    print "\n ERRORS detected! NOT all tests have been passed successfully\n\n" ;
     }
 else
     {
     if ($opt_modperl || $opt_cgi || $opt_offline || $opt_execute || $opt_cache || $opt_ep1)
         {
-        print "\nAll test have been passed successfully!\n\n" ;
+        print "\nAll tests have been passed successfully!\n\n" ;
         }
     elsif ($opt_start)
         {

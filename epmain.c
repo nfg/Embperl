@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epmain.c,v 1.132 2004/08/24 05:08:48 richter Exp $
+#   $Id: epmain.c,v 1.135 2004/11/13 16:47:08 richter Exp $
 #
 ###################################################################################*/
 
@@ -259,9 +259,14 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
     else
 #endif
         {
+        /*
         PerlIO_printf (PerlIO_stderr(), "%s\n", sText) ;
-        /* fflush (stderr) ; */
         PerlIO_flush (PerlIO_stderr()) ;
+        */
+#undef fprintf
+#undef fflush
+        fprintf (stderr, "%s\n", sText) ;
+        fflush (stderr) ; 
         }
     
     if (r)
@@ -1153,7 +1158,14 @@ static int EndOutput (/*i/o*/ register req * r,
     if (r -> Component.Param.pOutput)
         return OutputToMem (r) ;
     
-    return OutputToFile (r) ;
+    rc = OutputToFile (r) ;
+#ifdef APACHE
+    if (r -> pApacheReq)
+        ap_finalize_request_protocol (r -> pApacheReq) ;
+#endif
+    oflush (r) ;
+    
+    return rc ;
     }
 
 /* ---------------------------------------------------------------------------- */

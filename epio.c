@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epio.c,v 1.27 2004/07/08 08:31:00 richter Exp $
+#   $Id: epio.c,v 1.30 2004/11/07 19:36:42 richter Exp $
 #
 ###################################################################################*/
 
@@ -485,6 +485,7 @@ int iread (/*i/o*/ register req * r,
 	PUSHMARK(sp);
 	XPUSHs(r -> Component.ifdobj);
 	XPUSHs(sv_2mortal(pBufSV = NEWSV(0, 0)));
+	XPUSHs(sv_2mortal(newSViv (size)));
 	PUTBACK;
 	num = perl_call_method ("READ", G_SCALAR) ; 
 	SPAGAIN;
@@ -926,7 +927,6 @@ int owrite (/*i/o*/ register req * r,
 	return size ;
 	}
 
-
 #if defined (APACHE)
     if (r -> pApacheReq && r -> Component.pOutput -> ofd == NULL)
         {
@@ -950,6 +950,33 @@ int owrite (/*i/o*/ register req * r,
         }
 
     return n ;
+    }
+
+
+/* ---------------------------------------------------------------------------- */
+/*                                                                              */
+/* flush output                                                                 */
+/*                                                                              */
+/* ---------------------------------------------------------------------------- */
+
+void oflush (/*i/o*/ register req * r)
+
+    {
+    epTHX_
+
+#if defined (APACHE)
+    if (r -> pApacheReq && r -> Component.pOutput -> ofd == NULL)
+        {
+        ap_rflush (r -> pApacheReq) ;
+        return ;
+        }
+#endif
+    if (r -> Component.pOutput -> ofd)
+        {
+        PerlIO_flush (r -> Component.pOutput -> ofd) ;
+        }
+
+    return ;
     }
 
 

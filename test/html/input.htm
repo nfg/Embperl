@@ -73,6 +73,11 @@ $kats[2]{Id} = 'Veranstaltungen' ;
     <input type="checkbox" name="dec" checked value="a & b">
     <input type="checkbox" name="dec" checked value="a &amp; b">
 
+    [- $fdat{null1} = 0 -]	
+    <input name="null1">
+    [- $fdat{null2} = '0' -]	
+    <input name="null2">
+    [- delete $fdat{null1} ; delete $fdat{null2} -]
 
     <textarea Name=feld1></textarea>
     <textarea Name=feld5></textarea>
@@ -392,6 +397,12 @@ $kats[2]{Id} = 'Veranstaltungen' ;
 			<td>[+ $ks[$i=$row] +]</td><td>[+ $idat{$ks[$i] || '<undef>'} +]</td>
 		</tr>
 	</table>
+
+        [- @empty = () -]
+        <select name="empty">
+            <option value="[+ $empty[$row] +]">[+ $empty[$row] +]</option>
+        </select>
+
 
 </form>
 

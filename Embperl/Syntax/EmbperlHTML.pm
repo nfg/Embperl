@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: EmbperlHTML.pm,v 1.8 2004/07/20 04:59:11 richter Exp $
+#   $Id: EmbperlHTML.pm,v 1.9 2004/11/04 06:19:14 richter Exp $
 #
 ###################################################################################
  
@@ -71,7 +71,7 @@ sub Init
                 perlcode =>
                     [ 
                     'Embperl::Cmd::InputCheck (%$n%, %&*\'name%, %&*\'value%, %&\'checked%) ;  %&=-type:radio|checkbox% ',
-                    '$idat{%&*\'name%}=$fdat{%&*\'name%} ; _ep_sa(%$n%, \'value\', $fdat{%&*\'name%} || \'\') ;   %&!-value%',
+                    '$idat{%&*\'name%}=$fdat{%&*\'name%} ; _ep_sa(%$n%, \'value\', exists ($fdat{%&*\'name%})?$fdat{%&*\'name%}:\'\') ;   %&!-value%',
                     '$idat{%&*\'name%}=%&*\'value% ; ',
                     ]
                 }) ;

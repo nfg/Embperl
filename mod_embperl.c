@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: mod_embperl.c,v 1.25 2004/08/17 06:17:58 richter Exp $
+#   $Id: mod_embperl.c,v 1.27 2004/11/06 13:33:07 richter Exp $
 #
 ###################################################################################*/
 
@@ -258,7 +258,7 @@ static int embperl_ApacheInitUnload (apr_pool_t *p)
         }
 #endif
 
-
+    return ok ;
     }
 
 
@@ -583,7 +583,7 @@ static void *embperl_create_dir_config(apr_pool_t * p, char *d)
     */
 
     if (bApDebug)
-        ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: create_dir_config %s[%d/%d]\n", cfg -> AppConfig.sAppName?cfg -> AppConfig.sAppName:"", getpid(), gettid()) ;
+        ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: create_dir_config %s (0x%x) [%d/%d]\n", cfg -> AppConfig.sAppName?cfg -> AppConfig.sAppName:"", cfg, getpid(), gettid()) ;
 
     return cfg;
     }
@@ -607,7 +607,7 @@ static void *embperl_create_server_config(apr_pool_t * p, server_rec *s)
     cfg -> bUseEnv = -1 ; 
 
     if (bApDebug)
-        ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: create_server_config [%d/%d]\n", getpid(), gettid()) ;
+        ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: create_server_config (0x%x) [%d/%d]\n", cfg, getpid(), gettid()) ;
 
 
     return cfg;
@@ -697,7 +697,7 @@ static void *embperl_create_server_config(apr_pool_t * p, server_rec *s)
         { \
         dTHXCond  \
         SvREFCNT_inc((SV *)mrg -> STRUCT.NAME) ; \
-        }
+        } 
 
 /*---------------------------------------------------------------------------
 * embperl_merge_dir_config
@@ -709,7 +709,7 @@ static void *embperl_merge_dir_config (apr_pool_t *p, void *basev, void *addv)
         return addv ;
     
         {
-        tApacheDirConfig *mrg = (tApacheDirConfig *)ap_palloc (p, sizeof(tApacheDirConfig));
+        tApacheDirConfig *mrg ; /*= (tApacheDirConfig *)ap_palloc (p, sizeof(tApacheDirConfig)); */
         tApacheDirConfig *base = (tApacheDirConfig *)basev;
         tApacheDirConfig *add = (tApacheDirConfig *)addv;
         apr_pool_t * subpool ;
@@ -724,6 +724,9 @@ static void *embperl_merge_dir_config (apr_pool_t *p, void *basev, void *addv)
         subpool = ap_make_sub_pool(p);
 #endif
         mrg = (tApacheDirConfig *)ap_palloc (subpool, sizeof(tApacheDirConfig));
+
+        if (bApDebug)
+            ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: merge_dir/server_config base=0x%x add=0x%x mrg=0x%x\n", basev, addv, mrg) ;
 
 #ifdef APACHE2
         apr_pool_cleanup_register(subpool, mrg, embperl_ApacheConfigCleanup, embperl_ApacheConfigCleanup); 

@@ -162,6 +162,7 @@ embperl.h
 embpexec.bat.templ
 embpexec.pl.templ
 embpfastcgi.pl.templ
+embpfastcgi.test.pl.templ
 embpmsgid.pl.templ
 ep.h
 ep2.h

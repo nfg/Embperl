@@ -340,6 +340,12 @@ if you what a separte non Apache version. Just say yes here and compile
 and install this version too. When Embperl is loaded it detects if runs in-
 or outside of Apache and loads the correct library.
 
+=head2 Win32: Apache 2.0
+
+Embperl currently does not support Apache 2.0 on Windows (on UNIX is does). 
+This is due to the fact the Embperl is not fully thread safe yet. 
+Makeing Embperl thread safe and support for Apache 2.0 on Windows, is
+currently under development.
 
 =head2 How to continue
 
