@@ -317,6 +317,9 @@ escmode = [+ $escmode = 7 +]
     [- hello(); hello(); -]
 
 
+[- $escmode=1 -]<a href=[+ do { '&' } +]>html escaped</a>
+<a href=[+ do { local $escmode=1; '&' } +]>html escaped?</a>
+<a href=[+ do { local $escmode=2; '&' } +]>url escaped</a>
 
 <P>Ok.<P>
 

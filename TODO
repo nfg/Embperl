@@ -1,9 +1,9 @@
 
 TODO before Embperl 2.0 release
 
-- print OUT and sub [Carlos 3.7.2003]
+- preload on Apache startup problem [Neil Gunton 25.1.04]
 
-- include at top of every file [Kee Hinckley 3.8.2003]
+- en/de select parameter passing in eg/web/header.epl
 
 
 TODO for Embperl 2.1 and later

@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcomp.c,v 1.12 2004/01/23 06:50:54 richter Exp $
+#   $Id: epcomp.c,v 1.13 2004/02/07 13:41:22 richter Exp $
 #
 ###################################################################################*/
 
@@ -228,7 +228,7 @@ int embperl_CompileInitItem      (/*i/o*/ register req * r,
     pCmd -> pNext  = NULL ;
 
     pInfo -> pEmbperlCmds[nNodeName].bRemoveNode |= pCmd -> bRemoveNode ;
-    pInfo -> pEmbperlCmds[nNodeName].bPerlCodeRemove |= pCmd -> bPerlCodeRemove ;
+    /* pInfo -> pEmbperlCmds[nNodeName].bPerlCodeRemove |= pCmd -> bPerlCodeRemove ; */
     if (pCmd -> nSwitchCodeType)
 	pInfo -> pEmbperlCmds[nNodeName].nSwitchCodeType = pCmd -> nSwitchCodeType ;
     if (pCmd -> sMayJump && !pInfo -> pEmbperlCmds[nNodeName].sMayJump)

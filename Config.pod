@@ -640,7 +640,7 @@ The following forms are all valid times:
         now                               immediately
         +3M                               in three months
         +10y                              in ten years time
-        Thursday, 25-Apr-1999 00:40:33 GMT  at the indicated time & date
+        Thu, 25-Apr-1999 00:40:33 GMT     at the indicated time & date
 
 
 =head2 Embperl_Cookie_Secure

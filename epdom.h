@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdom.h,v 1.8 2004/01/23 06:50:55 richter Exp $
+#   $Id: epdom.h,v 1.9 2004/03/14 18:54:43 richter Exp $
 #
 ###################################################################################*/
 
@@ -522,6 +522,13 @@ tNode Node_removeChild (/*in*/ struct tApp * a,
 			/*in*/ tNode	    xChild,
                         /*in*/ tRepeatLevel nRepeatLevel) ;
 
+tNode Node_insertBefore_CDATA    (/*in*/ struct tApp * a, 
+                                 /*in*/ const char *    sText,
+				 /*in*/ int             nTextLen,
+			         /*in*/ int		nEscMode,
+                                 /*in*/ tDomTree *      pRefNodeDomTree,
+				 /*in*/ tNode		xRefNode,
+                                 /*in*/ tRepeatLevel    nRefRepeatLevel) ;
 
 tNode Node_insertAfter          (/*in*/ struct tApp * a, 
                                  /*in*/ tDomTree *      pNewNodeDomTree,

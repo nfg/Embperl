@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: HTML.pm,v 1.3 2004/01/23 06:50:57 richter Exp $
+#   $Id: HTML.pm,v 1.4 2004/03/07 19:36:35 richter Exp $
 #
 ###################################################################################
  
@@ -299,10 +299,10 @@ sub AddTagBlock
 sub AddTagWithStart
 
     {
-    my ($self, $tagname, $starttag, $attrs, $attrsurl, $attrsnoval, $procinfo) = @_ ;
+    my ($self, $tagname, $starttag, $attrs, $attrsurl, $attrsnoval, $procinfo, $taginfo) = @_ ;
 
 
-    my $tag = $self -> AddTag ($tagname, $attrs, $attrsurl, $attrsnoval, $procinfo) ;
+    my $tag = $self -> AddTag ($tagname, $attrs, $attrsurl, $attrsnoval, $procinfo, $taginfo) ;
 
     $tag -> {'starttag'} = $starttag ;
     }

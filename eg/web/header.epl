@@ -5,8 +5,8 @@ $r = shift ;
     <tr>
         <td valign="top" rowspan=2><img src="[+ $r -> {imageuri} +]kopf-links.gif" width="206" height="97" usemap="#Map" border="0"> 
 	    <map name="Map"> 
-		<area shape="rect" coords="90,56,151,69" href="[+ $r -> app -> languri($r, $r -> param -> uri, 'de') +]" target="_top">
-		<area shape="rect" coords="90,70,151,82" href="[+ $r -> app -> languri($r, $r -> param -> uri, 'en') +]" target="_top">
+		<area shape="rect" coords="90,56,151,69" href="[+ $r -> app -> languri($r, $r -> param -> uri, 'de') +]?[+ \%fdat +]" target="_top">
+		<area shape="rect" coords="90,70,151,82" href="[+ $r -> app -> languri($r, $r -> param -> uri, 'en') +]?[+ \%fdat +]" target="_top">
 	    </map>
         </td>
         <td valign="top" width="50%"><img src="[+ $r -> {imageuri} +]kopf-mitte.jpg" width="100%" height="46" vspace=0></td>

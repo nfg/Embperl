@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Syntax.pm,v 1.3 2004/01/23 06:50:56 richter Exp $
+#   $Id: Syntax.pm,v 1.4 2004/03/14 18:54:43 richter Exp $
 #
 ###################################################################################
  
@@ -904,6 +904,28 @@ requested
 2 means put the following code put into code which is executed direct after compilation.
 This is mainly for defining subs, or using modules etc.
 
+
+=item addflags
+
+=item cdatatype
+
+=item forcetype
+
+=item insidemustexist
+
+=item matchall
+
+=item exitinside
+
+=item addfirstchild
+
+=item starttag
+
+=item endtag
+
+=item parsetimeperlcode
+
+=item contains
 
 =back
 

@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcmd2.c,v 1.11 2004/01/23 06:50:54 richter Exp $
+#   $Id: epcmd2.c,v 1.12 2004/03/07 20:10:06 richter Exp $
 #
 ###################################################################################*/
 
@@ -521,6 +521,8 @@ int embperlCmd_AddSessionIdToLink  (/*i/o*/ register req *     r,
     pNode = Node_self(pDomTree,xNode) ;
     nAttrLen = strlen (sAttrName) ;
     pAttr = Element_selfGetAttribut (r -> pApp, pDomTree, pNode, sAttrName, nAttrLen) ;
+    if (!pAttr)
+        return ok ;
 
     pAttrValue = Attr_selfValue (r -> pApp, pDomTree, pAttr, nRepeatLevel, &pAttrString) ;
 

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Validate.pm,v 1.9 2004/01/23 06:50:57 richter Exp $
+#   $Id: Validate.pm,v 1.10 2004/02/02 19:06:15 richter Exp $
 #
 ###################################################################################
 
@@ -20,7 +20,7 @@ package Embperl::Form::Validate;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = q$Id: Validate.pm,v 1.9 2004/01/23 06:50:57 richter Exp $;
+$VERSION = q$Id: Validate.pm,v 1.10 2004/02/02 19:06:15 richter Exp $;
 
 =head1 NAME
 
@@ -580,7 +580,7 @@ sub gather_script_code
                     {
                     foreach my $k (@$keys)
                         {
-                        $script .= "obj = document.$form.$k ; if (!($code)) {" ;
+                        $script .= "obj = document.$form\['$k'\] ; if (!($code)) {" ;
                         }
                      
                     $script .= " $setmsg " . ($param{fail}?'fail=1;break;':($param{cont}?'':'break;')) . "\n" ;

@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdom.c,v 1.14 2004/01/23 06:50:55 richter Exp $
+#   $Id: epdom.c,v 1.16 2004/03/14 18:54:43 richter Exp $
 #
 ###################################################################################*/
 
@@ -2806,6 +2806,65 @@ tNode Node_replaceChildWithNode (/*in*/ tApp * a,
 /*                                                                          */
 /* ------------------------------------------------------------------------ */
 
+
+tNode Node_insertBefore_CDATA    (/*in*/ tApp * a, 
+                                 /*in*/ const char *    sText,
+				 /*in*/ int             nTextLen,
+			         /*in*/ int		nEscMode,
+                                 /*in*/ tDomTree *      pRefNodeDomTree,
+				 /*in*/ tNode		xRefNode,
+                                 /*in*/ tRepeatLevel    nRefRepeatLevel)
+
+    {
+    tNodeData *	pRefNode      = Node_selfLevel (a, pRefNodeDomTree, xRefNode, nRefRepeatLevel) ;
+    tNodeData *	pPrevNode      = Node_selfPreviousSibling (a, pRefNodeDomTree, pRefNode, nRefRepeatLevel) ;
+
+
+    tNodeData * pNew = Node_newAndAppend (a, pRefNodeDomTree, pRefNode -> xParent, nRefRepeatLevel, NULL, pRefNode -> nLinenumber, sizeof (tNodeData)) ;        
+
+    pNew -> xChilds = 0 ;
+    pNew -> bFlags  = 0 ; 
+        
+    if (nEscMode != -1)
+	{
+        pNew -> nType  = (nEscMode & 8)?ntypText:((nEscMode & 3)?ntypTextHTML:ntypCDATA) ;
+	pNew -> bFlags &= ~(nflgEscXML + nflgEscUrl + nflgEscChar) ;
+	pNew -> bFlags |= (nEscMode ^ nflgEscChar) & (nflgEscXML + nflgEscUrl + nflgEscChar) ;
+	}
+    else
+	pNew -> nType  = ntypCDATA ;
+
+    pNew -> nText = String2Ndx (a, sText, nTextLen) ;
+
+    
+    pRefNode  = Node_selfCondCloneNode (a, pRefNodeDomTree, pRefNode, nRefRepeatLevel) ; 
+    if (pPrevNode)
+        pPrevNode  = Node_selfCondCloneNode (a, pRefNodeDomTree, pPrevNode, nRefRepeatLevel) ; 
+    else
+        {
+        tNodeData * pParent  ;
+
+        if ((pParent = Node_selfLevel (a, pRefNodeDomTree, pRefNode -> xParent, nRefRepeatLevel)) == NULL ||
+            pParent -> xChilds != pRefNode -> xPrev)
+            pPrevNode = Node_selfLevel (a, pRefNodeDomTree, pRefNode -> xPrev, nRefRepeatLevel) ; /* first one */
+        else
+            pPrevNode = NULL ;
+        }
+
+    if (pPrevNode)
+        {
+        pPrevNode -> xNext = pNew -> xNdx ;
+        pNew -> xPrev = pPrevNode -> xNdx ;
+        }
+    else
+        pNew -> xPrev = pRefNode -> xPrev ;
+    pRefNode -> xPrev = pNew -> xNdx ;
+    pNew -> xNext = pRefNode -> xNdx ;
+
+    return pNew -> xNdx ;
+    }
+
+
 /* ------------------------------------------------------------------------ */
 /*                                                                          */
 /* Node_insertAfter                                                         */
@@ -2848,13 +2907,26 @@ tNode Node_insertAfter          (/*in*/ tApp * a,
     if (pNxtNode)
         pNxtNode  = Node_selfCondCloneNode (a, pRefNodeDomTree, pNxtNode, nRefRepeatLevel) ; 
     else
-        pNxtNode = Node_selfLevel (a, pRefNodeDomTree, pRefNode -> xNext, nRefRepeatLevel) ; /* first one */
+        {
+        tNodeData * pParent  ;
+
+        if ((pParent = Node_selfLevel (a, pRefNodeDomTree, pRefNode -> xParent, nRefRepeatLevel)) == NULL ||
+            pParent -> xChilds != pRefNode -> xNext)
+            pNxtNode = Node_selfLevel (a, pRefNodeDomTree, pRefNode -> xNext, nRefRepeatLevel) ; /* first one */
+        else
+            pNxtNode = NULL ;
+        }
 
     xOrgNode = pNewNode -> xNdx ;
-    pNxtNode -> xPrev = pNewNode -> xNdx ;
+    if (pNxtNode)
+        {
+        pNxtNode -> xPrev = pNewNode -> xNdx ;
+        pNewNode -> xNext = pNxtNode -> xNdx ;
+        }
+    else
+        pNewNode -> xNext = pRefNode -> xNext ;
     pRefNode -> xNext = pNewNode -> xNdx ;
     pNewNode -> xPrev = pRefNode -> xNdx ;
-    pNewNode -> xNext = pNxtNode -> xNdx ;
 
     if (pNewNode -> nType == ntypDocument)
         {

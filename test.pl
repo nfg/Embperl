@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: test.pl,v 1.133 2004/01/23 06:50:55 richter Exp $
+#   $Id: test.pl,v 1.138 2004/03/14 18:54:43 richter Exp $
 #
 ###################################################################################
 
@@ -211,6 +211,9 @@
     'lists.htm' => { 
         'query_info' => 'sel=2&SEL1=B&SEL3=D&SEL4=cc',
         },
+    'select.htm' => {},
+    'selecttab.htm' => {},
+    'selecttab2.htm' => {},
     'mix.htm' => { },
     'binary.htm' => { 
         'version'    => 1,  # needs print OUT
@@ -340,6 +343,12 @@
         'repeat'     => 2,
         },
     'sub2.htm' => { 
+        'repeat'     => 2,
+        },
+    'subout.htm' => { 
+        'repeat'     => 2,
+        },
+    'subouttab.htm' => { 
         'repeat'     => 2,
         },
     'executesub.htm' => { 
@@ -643,6 +652,10 @@
         },
     'EmbperlObject/epoincdiv.htm' => { 
         'offline'    => 0,
+        },
+    'EmbperlObject/epofdat.htm' => {
+        'offline'    => 0,
+        'query_info' => 'a=1&b=2',
         },
     'EmbperlObject/epodiv.htm' => { 
         'offline'    => 0,
@@ -2132,8 +2145,9 @@ do
 
             foreach $src ('EmbperlObject/epopage1.htm', 'EmbperlObject/sub/epopage2.htm', 'EmbperlObject/obj/epoobj3.htm',
                           'EmbperlObject/sub/epobless.htm', 'EmbperlObject/sub/epobless.htm', 
-                          #'EmbperlObject/sub/epobless2.htm', 'EmbperlObject/sub/epobless2.htm',
-                          #'EmbperlObject/sub/epobless3.htm', 'EmbperlObject/sub/epobless3.htm',
+                          'EmbperlObject/epofdat.htm',            
+                          'EmbperlObject/sub/epobless2.htm', 'EmbperlObject/sub/epobless2.htm',
+                          'EmbperlObject/sub/epobless3.htm', 'EmbperlObject/sub/epobless3.htm',
                           )
                 {
 	        if ($err == 0 || $opt_ignoreerror) # && $version == 1)
@@ -2157,7 +2171,8 @@ do
 					            'outputfile' => $outfile,
 		                                    'errors'     => \@errors,
                                                     'use_env'    => 1,
-                				    }) ;
+                				    'fdat'       => { a => 1, b => 2 },
+                                                    }) ;
 		    print "error $err\n" if ($err) ;
                     
                     $t_exec += 0 ; # Embperl::Clock () - $t1 ; 

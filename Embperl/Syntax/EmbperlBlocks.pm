@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: EmbperlBlocks.pm,v 1.4 2004/01/23 06:50:57 richter Exp $
+#   $Id: EmbperlBlocks.pm,v 1.5 2004/03/14 18:54:44 richter Exp $
 #
 ###################################################################################
  
@@ -154,12 +154,12 @@ sub AddMetaCmdBlock
 sub AddMetaStartEnd 
 
     {
-    my ($self, $cmdname, $endname, $procinfostart) = @_ ;
+    my ($self, $cmdname, $endname, $procinfostart, $taginfostart) = @_ ;
 
     my $tag ;
     my $pinfo ;
 
-    $tag = $self -> AddMetaCmd ($cmdname, $procinfostart, {'nodetype' => &ntypStartTag}) ;
+    $tag = $self -> AddMetaCmd ($cmdname, $procinfostart, {'nodetype' => &ntypStartTag, (ref($taginfostart) eq 'HASH'?%$taginfostart:())}) ;
 
     $tag = $self -> AddMetaCmd ($endname, undef, {'nodetype' => &ntypEndTag, 'starttag' => $cmdname}) ;
 
@@ -380,6 +380,12 @@ sub Init
                 switchcodetype => 2,
                 callreturn => 1,
                 },
+                {
+                addfirstchild => 1,
+                },
+                ) ;
+
+=pod
                 { 
                 perlcode => '};  sub %^subname% { my @_ep_save ; Embperl::Cmd::SubStart($_ep_DomTree,%$q%,\\@_ep_save); my $_ep_ret = _ep_sub_%^subname% (@_); Embperl::Cmd::SubEnd($_ep_DomTree,\\@_ep_save); return $_ep_ret } ; $_ep_exports{%^"subname%} = \&%^subname% ; ', 
                 removenode => 10,
@@ -388,7 +394,6 @@ sub Init
                 switchcodetype => 1,
                 callreturn => 1,
                 }) ;
-=pod
     $self -> AddMetaStartEnd ('sub', 'endsub',
                 { 
                 perlcode => 'sub _ep_sub_%&<noname>% { ', 

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: mod_embperl.c,v 1.14 2004/01/23 06:50:55 richter Exp $
+#   $Id: mod_embperl.c,v 1.15 2004/03/14 20:17:41 richter Exp $
 #
 ###################################################################################*/
 
@@ -47,6 +47,7 @@ static int gettid()
 
 /* debugging by default off, enable with httpd -D EMBPERL_APDEBUG */
 static int bApDebug = 0 ;
+static int bApInit  = 0 ;
 
 
 /* --- declare config datastructure --- */
@@ -193,6 +194,15 @@ static module embperl_module = {
 
 #endif
 
+/*---------------------------------------------------------------------------
+* embperl_ApInitDone
+*/
+
+int embperl_ApInitDone (void)
+    {
+    return 0 ; //bInitDone ;
+    }
+
 
 /*---------------------------------------------------------------------------
 * embperl_ApacheAddModule
@@ -293,6 +303,7 @@ static void embperl_ApacheInit (server_rec *s, apr_pool_t *p)
 
 #ifdef APACHE2
     ap_add_version_component (p, "Embperl/"VERSION) ;
+    bApInit = 1 ;
     return APR_SUCCESS ;
 #else
     ap_register_cleanup(subpool, NULL, embperl_ApacheInitCleanup, embperl_ApacheInitCleanup);
@@ -302,6 +313,7 @@ static void embperl_ApacheInit (server_rec *s, apr_pool_t *p)
         {
         ap_log_error (APLOG_MARK, APLOG_ERR | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "Initialization of Embperl failed (#%d)\n", rc) ;
         }
+    bApInit = 1 ;
 
 #endif
     }

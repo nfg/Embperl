@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcrypto_config.h,v 1.8 2004/01/23 06:50:57 richter Exp $
+#   $Id: epcrypto_config.h,v 1.10 2004/03/07 18:09:55 richter Exp $
 #
 ###################################################################################*/
 

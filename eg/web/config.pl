@@ -190,7 +190,7 @@ BEGIN
         },
         { menu => 'Installation',           uri => 'pod/INSTALL.htm',           file => 'INSTALL.pod', sub =>
             [
-            { menu => 'CVS',                relurl => 'pod/CVS.htm',               file => 'CVS.pod' }
+            { menu => 'CVS',                relurl => 'pod/doc/CVS.htm',               file => 'CVS.pod' }
             ]
         
          },        #{ menu => 'FAQ',                    uri => 'pod/Faq.htm',               file => 'Faq.pod' },

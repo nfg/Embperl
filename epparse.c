@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epparse.c,v 1.10 2004/01/23 06:50:55 richter Exp $
+#   $Id: epparse.c,v 1.11 2004/03/14 18:54:43 richter Exp $
 #
 ###################################################################################*/
 
@@ -333,6 +333,7 @@ int BuildTokenTable (/*i/o*/ register req *	  r,
 	    p -> bMatchAll = GetHashValueInt (aTHX_ pHash, "matchall", 0) ;
 	    p -> bDontEat  = GetHashValueInt (aTHX_ pHash, "donteat", 0) ;
 	    p -> bExitInside= GetHashValueInt (aTHX_ pHash, "exitinside", 0) ;
+	    p -> bAddFirstChild = GetHashValueInt (aTHX_ pHash, "addfirstchild", 0) ;
 	    p -> pStartTag  = (struct tToken *)GetHashValueStrDup (aTHX_ r -> pThread -> pMainPool, pHash, "starttag", NULL) ;
 	    p -> pEndTag    = (struct tToken *)GetHashValueStrDup (aTHX_ r -> pThread -> pMainPool, pHash, "endtag", NULL) ;
 	    p -> sParseTimePerlCode =  GetHashValueStrDup (aTHX_ r -> pThread -> pMainPool, pHash, "parsetimeperlcode", NULL) ;
@@ -373,7 +374,7 @@ int BuildTokenTable (/*i/o*/ register req *	  r,
                 }	    
 
 	    if (r -> Component.Config.bDebug & dbgBuildToken)
-                lprintf (r -> pApp,  "[%d]TOKEN: %*c%s ... %s  unesc=%d nodetype=%d, cdatatype=%d, nodename=%s contains='%s'\n", r -> pThread -> nPid, nLevel*2, ' ', p -> sText, p -> sEndText, p -> bUnescape, p -> nNodeType, p -> nCDataType, p -> sNodeName?p -> sNodeName:"<null>", sC?sC:"") ; 
+                lprintf (r -> pApp,  "[%d]TOKEN: %*c%s ... %s  unesc=%d nodetype=%d, cdatatype=%d, nodename=%s contains='%s' addfirstchild=%d\n", r -> pThread -> nPid, nLevel*2, ' ', p -> sText, p -> sEndText, p -> bUnescape, p -> nNodeType, p -> nCDataType, p -> sNodeName?p -> sNodeName:"<null>", sC?sC:"", p -> bAddFirstChild) ; 
         
 	    if (p -> sNodeName)
 		{
@@ -819,6 +820,17 @@ static int ParseTokens (/*i/o*/ register req *		r,
                             Node_self (pDomTree, xNewNode) -> bFlags |= pToken -> bAddFlags ;
 			if (!pToken -> pInside)
 			    bInsideMustExist = 0 ;
+
+                        if (pToken -> bAddFirstChild)
+                            {
+                            if (!(Node_appendChild (r -> pApp, pDomTree, xNewNode, 0, nCDataType,
+                                            0, 
+                                            "", 0, 
+					     0, 0, NULL)))
+			        {
+			        return rc ;
+			        }
+                            }
 			}
 		    else
 			{

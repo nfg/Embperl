@@ -27,17 +27,54 @@ int do_crypt_file(FILE *    in,
     unsigned char * key = EPC_KEY ;
     unsigned char * iv  = "\0x01\0x02\0x03\0x04\0x05\0x06\0x07\0x08" ;
     EVP_CIPHER_CTX  ctx ;
+    int klen ;
+    int ivlen ;
+
     
     if (output && do_encrypt)
         return -3 ; /* not supported */
     
-   
+    /*
+    printf("%d %d %d\n", EVP_MAX_IV_LENGTH, EVP_MAX_BLOCK_LENGTH, ((char*)&ctx.key_len) - ((char *)&ctx)) ;
 
-    EVP_CipherInit(&ctx, EPC_CHIPER, NULL, NULL, do_encrypt);
-    /* EVP_CIPHER_CTX_set_key_length(&ctx, EPC_KEYLEN); */
+    for (blen = 0; blen < EPC_KEYLEN;blen++)
+         printf("n=%d = %x\n", blen, key[blen]) ;
+    */
     
-    EVP_CipherInit(&ctx, NULL, key, iv, do_encrypt);
+    EVP_CIPHER_CTX_init(&ctx) ;
+    
+    /*
+    EVP_CipherInit(&ctx, EPC_CHIPER, NULL, NULL, do_encrypt);
+        
+    for (blen = 0; blen < sizeof(ctx);blen++)
+        printf("n=%d = %x\n", blen, ((unsigned char *)(&ctx))[blen])
+;
 
+    klen = EVP_CIPHER_CTX_key_length(&ctx) ;
+    ivlen = EVP_CIPHER_CTX_iv_length(&ctx) ;
+        
+    printf ("1 chiper=%s klen=%d ivlen=%d\n",
+    EVP_CIPHER_CTX_cipher(&ctx), klen, ivlen) ;
+    EVP_CIPHER_CTX_set_key_length(&ctx, EPC_KEYLEN);
+    klen = EVP_CIPHER_CTX_key_length(&ctx) ;
+    ivlen = EVP_CIPHER_CTX_iv_length(&ctx) ;
+            
+
+    printf ("2 chiper=%s klen=%d ivlen=%d\n",
+    EVP_CIPHER_CTX_cipher(&ctx), klen, ivlen) ;
+    */
+    
+    
+    EVP_CipherInit(&ctx, EPC_CHIPER, key, iv, do_encrypt);
+    
+    EVP_CIPHER_CTX_set_key_length(&ctx, EPC_KEYLEN);
+        
+    klen = EVP_CIPHER_CTX_key_length(&ctx) ;
+    ivlen = EVP_CIPHER_CTX_iv_length(&ctx) ;
+                
+    if (klen > EPC_KEYLEN || ivlen > 8)
+        return -6 ;
+        
     if (header)
         {
         int hlen = strlen(header) ;

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eppublic.h,v 1.3 2004/01/23 06:50:55 richter Exp $
+#   $Id: eppublic.h,v 1.4 2004/03/14 20:17:41 richter Exp $
 #
 ###################################################################################*/
 
@@ -19,6 +19,12 @@ int embperl_Init        (pTHX_
                          SV *          pApacheSrvSV,
                          SV *          pPerlParam,
                          server_rec *  ap_s) ;
+
+#ifdef APACHE
+int embperl_ApInitDone (void) ;
+#else
+#define embperl_ApInitDone 1 ;
+#endif
 
 int     embperl_InitRequest ( pTHX_     
                               SV *             pApacheReqSV,

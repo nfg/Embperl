@@ -12,6 +12,8 @@ my($r) = @_;
 # workaround for broken $r -> chdir_file in Apache::Registry on ActiveState perl
 use Cwd ;
 use File::Basename ;
+eval { require Apache::compat } ;
+$@ = '' ;
 
 my $fn = $r -> filename ;
 chdir(dirname ($fn)) ;

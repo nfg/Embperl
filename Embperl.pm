@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Embperl.pm,v 1.185 2004/01/23 06:50:54 richter Exp $
+#   $Id: Embperl.pm,v 1.187 2004/03/15 06:21:31 richter Exp $
 #
 ###################################################################################
 
@@ -47,7 +47,7 @@ use vars qw(
 
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = '2.0b10' ;
+$VERSION = '2.0b11' ;
 
 
 if ($modperl  = $ENV{MOD_PERL})
@@ -218,6 +218,10 @@ sub get_multipart_formdata
 
     my $cgi = new CGI ;
     my $fdat = $self -> thread -> form_hash ;
+    my $fdatsplit = $self -> thread -> form_split_hash ;
+    $fdatsplit -> {'___CGI___'} = $cgi ; # keep it until then end of the request
+					 # otherwsie templ files be
+					 # destroyed in CGI.pm 3.01+
     my $ffld = $self -> thread -> form_array ;
     @$ffld = $cgi->param;
 

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: EmbperlHTML.pm,v 1.4 2004/01/23 06:50:57 richter Exp $
+#   $Id: EmbperlHTML.pm,v 1.7 2004/03/07 20:04:15 richter Exp $
 #
 ###################################################################################
  
@@ -130,8 +130,9 @@ sub Init
                         {
                         perlcode => '{  my $_ep_selectname=%&*\'name%;',
                         perlcodeend => '} %&*-name%', 
-                        stackname   => 'htmltable',
-                        'push'        => '%$p%',
+                        # push/pop is not (yet) supported in secondary entry, so don't use it!!
+                        #stackname   => 'htmltable',
+                        #'push'        => '%$p%',
                         }
                     }
                 }
@@ -147,16 +148,20 @@ sub Init
                     #'_ep_opt (%$n%, %^*htmlselect%, %&*\'value%, %&\'selected%);',
                     #'_ep_opt (%$n%, %^*htmlselect%, %>*\'1%, %&\'selected%);',
                     ]
-                }) ;
-    $self -> AddTagWithStart ('/option', 'option') ;
+                },
+                { 'nodename' => ':<:>:option:', 'cdatatype' => ntypAttrValue, procinfo => {} }) ;
 
-    $self -> AddTag ('a', undef, ['href'], undef, undef, undef, 1) ;
+    $self -> AddTagWithStart ('/option', 'option', undef, undef, undef, undef,
+                               { 'nodename' => ':</:>:option:', 'cdatatype' => ntypAttrValue, procinfo => {} } ) ;
+
+    $self -> AddTag ('a', undef, ['href'], undef, undef, { 'nodename' => ':<:>:a:', 'cdatatype' => ntypAttrValue, procinfo => {} }, 1) ;
+    $self -> AddTag ('area', undef, ['href'], undef, undef, undef, 1) ;
     $self -> AddTag ('frame', undef, ['src'], undef, undef, undef, 1) ; 
     $self -> AddTag ('iframe', undef, ['src'], undef, undef, undef, 1) ; 
     $self -> AddTag ('embed', undef, ['src'], undef, undef) ; 
     $self -> AddTag ('layer', undef, ['src'], undef, undef) ; 
     $self -> AddTag ('img', undef, ['src'], undef, undef) ; 
-    $self -> AddTag ('form', undef, ['action'], undef, undef, undef, 2) ; 
+    $self -> AddTag ('form', undef, ['action'], undef, undef, { 'nodename' => ':<:>:form:', 'cdatatype' => ntypAttrValue, procinfo => {} }, 2) ; 
     
     }
 

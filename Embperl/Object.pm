@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Object.pm,v 1.4 2004/01/23 06:50:56 richter Exp $
+#   $Id: Object.pm,v 1.6 2004/03/15 06:21:31 richter Exp $
 #
 ###################################################################################
 
@@ -48,7 +48,7 @@ use vars qw(
 @ISA = qw(Exporter DynaLoader);
 
 
-$VERSION = '2.0b10';
+$VERSION = '2.0b11';
 
 
 $volume = (File::Spec -> splitpath ($Embperl::cwd))[0] ;
@@ -136,6 +136,23 @@ sub Execute
         print Embperl::LOG "[$$]Embperl::Object InitRequest returns $rc\n"  if ($debug);
         return $rc ;
         }
+
+
+    if (exists $req -> {fdat} && ref ($req -> {fdat}) eq 'HASH')
+        {
+        %Embperl::fdat = %{$req -> {fdat}} ;
+        if (ref $req -> {ffld} eq 'ARRAY')
+            {
+            @Embperl::ffld = @%{$req -> {ffld}};
+            }
+        else
+            {
+            @Embperl::ffld = keys %Embperl::fdat ;
+            }
+        delete $req -> {fdat};
+        delete $req -> {ffld} ;
+        }
+
 
     my $app    = $r -> app ;
     my $appcfg = $app -> config;

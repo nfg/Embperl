@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epio.c,v 1.25 2004/01/23 06:50:55 richter Exp $
+#   $Id: epio.c,v 1.26 2004/02/17 06:39:05 richter Exp $
 #
 ###################################################################################*/
 
@@ -615,6 +615,14 @@ int ReadHTML (/*i/o*/ register req * r,
         {
         int rc ;
         char * syntax ;
+        int fileno = PerlIO_fileno (ifd) ;
+        FILE * ifile = fdopen(fileno, "r") ;
+	if (!ifile)
+            {  
+            strncpy (r -> errdat1, sInputfile, sizeof (r -> errdat1) - 1) ;
+            strncpy (r -> errdat2, Strerror(errno), sizeof (r -> errdat2) - 1) ; 
+            return rcFileOpenErr ;
+            }
 
 #ifndef EP2
         syntax = (r -> Component.pTokenTable && strcmp ((char *)r -> Component.pTokenTable, "Text") == 0)?"Text":"Embperl" ;
@@ -622,7 +630,7 @@ int ReadHTML (/*i/o*/ register req * r,
         syntax = r -> Component.Config.sSyntax ;
 #endif
 
-        if ((rc = do_crypt_file (ifd, NULL, pData, *nFileSize, 0, syntax, EPC_HEADER)) <= 0)
+        if ((rc = do_crypt_file (ifile, NULL, pData, *nFileSize, 0, syntax, EPC_HEADER)) <= 0)
             {
             if (rc < -1 || !EPC_UNENCYRPTED)
                 {
@@ -635,7 +643,9 @@ int ReadHTML (/*i/o*/ register req * r,
             }
         else
             *nFileSize = rc ;
+        fclose (ifile) ;
         }
+
 #else
     
     if (*nFileSize)

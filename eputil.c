@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eputil.c,v 1.36 2004/01/23 06:50:55 richter Exp $
+#   $Id: eputil.c,v 1.37 2004/03/07 19:44:14 richter Exp $
 #
 ###################################################################################*/
 
@@ -1968,7 +1968,7 @@ static time_t expire_calc(const char *time_str)
     else if (*time_str == '+') {
 	++time_str;
     }
-    else if (stricmp(time_str, "now")) {
+    else if (!stricmp(time_str, "now")) {
 	/*ok*/
     }
     else {
@@ -2009,7 +2009,8 @@ const char * embperl_CalcExpires(const char *sTime, char * sResult, int bHTTP)
     when = expire_calc(sTime);
 
     if (!when) {
-	return sTime ;
+	strcpy( sResult, sTime );
+	return sResult ;
     }
 
     tms = gmtime(&when);

@@ -3,7 +3,9 @@
 <head>
 <title>Embperl Tests - File-Upload</title>
 </head>
-
+[!
+use Data::Dumper ;
+!]
 <h1>Embperl Tests - File-Upload</h1>
 
 [+ do { $cgiok = $CGI::VERSION > 2.45 ; @info = sort keys %{$fdat{-upload}} ; $cgiok?"@info":'Content-Disposition Content-Type' } +]
@@ -11,12 +13,20 @@ Filename:       [+ $cgiok?$fdat{upload}:'upload-filename' +]<br>
 Content-Type:	[+ $cgiok?$fdat{-upload} -> {'Content-Type'}:'test/plain' +]<br>
 CGI-Version:    [+ $CGI::VERSION +]
 cgiok           [+ $cgiok +]
+filehandle:	[+ ref $fdat{upload} +]
+Info:		[+ join ("\n", map { "$_ = $fdat{-upload}{$_}" } sort keys %{$fdat{-upload}}) +]
 [- 
-	$buf .= $buffer while read($fdat{upload}, $buffer, 32768);
+	$no = 1 ;
+	while ($size = read($fdat{upload}, $buffer, 2048))
+		{
+		$buf .= $buffer ;
+		print OUT 'no:   ', $no++, "\n"  ;
+		print OUT 'size: ', $size, "\n" ;
+		}
 -]
+buflen:         [+ length($buf) +]
 
-
-Your file has been the content
+Your file has the content
 ----------
 [+ $buf +]
 ----------

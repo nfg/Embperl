@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eppriv.h,v 1.8 2004/01/23 06:50:55 richter Exp $
+#   $Id: eppriv.h,v 1.9 2004/03/14 18:54:43 richter Exp $
 #
 ###################################################################################*/
 
@@ -113,6 +113,7 @@ struct tToken
     int			    bMatchAll ;	/* match any start text */
     int			    bDontEat ;	/* don't eat the characters when parsing this token (look ahead) */
     int			    bExitInside ;/* when this tag is found exit the inside table */
+    int			    bAddFirstChild;/* already add an empty CDATA node child */
     struct tTokenTable *    pFollowedBy;/* table of tokens that can follow this one */
     struct tTokenTable *    pInside ;	/* table of tokens that can apear inside this one */
     struct tToken      *    pStartTag ;	/* token that contains definition for the start of the current token */

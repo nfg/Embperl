@@ -1,4 +1,3 @@
-
 <html>
 <head>
 <title>Some tests for Embperl escaping</title>
@@ -20,69 +19,69 @@ Now lets look what we are getting from this:<BR>
 What is the EscMode? 7
 Let's set the EscMode to 3
 What is the EscMode now? 3
-Now a Url: <A HREF="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521">Here it goes</A>
-A Tag 2:   <A HREF="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521" TARGET="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? &amp; + - %21">a2</A>
-A Tag 3:   <A  TARGET="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? &amp; + - %21" HREF="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521" TARGET="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? &amp; + - %21">a3</A>
-A Tag 4:   <A TARGET="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? &amp; + - %21" HREF="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521">a4</A>
-A Tag 5:   <A  TARGET="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? &amp; + - %21">a5</A>
-A Tag 6:   <A >a6</A>
-A Tag 7:   <A  HREF="7">x</A>
-A Tag 8:   <A TARGET=8 HREF="8">x</A>
-A Tag 9:   <A HREF="9" TARGET="9">x</A>
-A Tag 10:  <A TARGET="10" HREF="10" TARGET="10">x</A>
-A Tag 11:  <A  HREF="11"  >x</A>
-^A Tag 12\:  <A HREF=(12|\"12\")>x<\/A>
-^A Tag 12b\:  <A HREF=(12b|\"12b\") >x<\/A>
-A Tag 13:  <A HREF="abcd%20%3E">x</A>
-A Tag 14:  <A HREF="abcd%20%3E">x</A>
-FRAME:	   <FRAME SRC="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521"  name="%20foo">
-IFRAME:    <IFRAME SRC="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521" name="%20foo">
-EMBED:     <EMBED SRC="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521"  name="%20foo">
-LAYER:	   <LAYER SRC="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521"  name="%20foo">
-IMG:	   <IMG SRC="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521"    name="%20foo">
-FORM:	   <FORM action="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521"    name="%20foo">
+Now a Url: <a href="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521">Here it goes</A>
+A Tag 2:   <a href="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521"  TARGET="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? &amp; + - %21">a2</A>
+A Tag 3:   <a TARGET="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? &amp; + - %21" href="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521"  TARGET="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? &amp; + - %21">a3</A>
+A Tag 4:   <a TARGET="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? &amp; + - %21" href="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521">a4</A>
+A Tag 5:   <a TARGET="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? &amp; + - %21">a5</A>
+A Tag 6:   <a>a6</A>
+A Tag 7:   <a href="7">x</A>
+A Tag 8:   <a TARGET=8  href="8">x</A>
+A Tag 9:   <a href="9"  TARGET="9">x</A>
+A Tag 10:  <a TARGET="10" href="10"  TARGET="10">x</A>
+A Tag 11:  <a href="11">x</A>
+A Tag 12:  <a href="12">x</A>
+A Tag 12b: <a href="12b">x</A>
+A Tag 13:  <a href="abcd%20%3E">x</A>
+A Tag 14:  <a href="abcd%20%3E">x</A>
+FRAME:	   <frame src="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521"   name="%20foo">
+IFRAME:    <iframe src="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521"  name="%20foo">
+EMBED:     <embed src="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521"   name="%20foo">
+LAYER:	   <layer src="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521"   name="%20foo">
+IMG:	   <img src="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521"     name="%20foo">
+FORM:	   <form action="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521"     name="%20foo">
 
-^Hash in  A <a href="http:\/\/localhost\/tests\?(A=1&amp;B=2|B=2&amp;A=1)">
+Hash in  A <a href="http://localhost/tests?A=1&amp;B=2">
 Array in A <a href="http://localhost/tests?X=9&amp;Y=8&amp;Z=7">
 
-^Hash in  H <a href="http:\/\/localhost\/tests\?(A=1&amp;B=2|B=2&amp;A=1)">
-^Array in H \<a href\=\"http\:\/\/localhost\/tests\?(X=9&amp;Y=8&amp;Z=7)|(Z=7&amp;X=9&amp;Y=8)\"\>
+Hash in  H <a href="http://localhost/tests?A=1&amp;B=2">
+^Array in H <a href=\"http\:\/\/localhost\/tests\?(X=9|Y=8|Z=7)\&amp;(X=9|Y=8|Z=7)\&amp;(X=9|Y=8|Z=7)\">
 
-^<a href="tst.html\?(par1=1&amp;par2=2)|(par2=2&amp;par1=1)">1</a>
+
+^<a href=\"tst.html\?(par1=1|par2=2)&amp;(par1=1|par2=2)\">1<\/a>
 <a href="tst.html?par1=1&amp;par2=2&amp;par3=3">2</a>
 <a href="tst.html?par1=1&amp;par2=2">3</a>
 <a href="tst.html?par1=1&amp;par2=2&amp;par3=3">4</a>
 
 
-
-			
+		
 1
 Now lets look what we are getting from this:<BR>
 (this is the value in $a) (this is the value in $a) &auml;&ouml;&uuml;&auml;&ouml;&uuml;???&lt;&amp;+  <BR>
 
 What is the EscMode? 1
-Now a Url: <A HREF="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? &amp; + - %21">Here it goes</A>
+Now a Url: <a href="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? &amp; + - %21">Here it goes</A>
 
 2
 Now lets look what we are getting from this:<BR>
 (this%20is%20the%20value%20in%20%24a) (this%20is%20the%20value%20in%20%24a)%20%E4%F6%FC%E4%F6%FC%3F%3F%3F%3C%26%2B%20%20<BR>
 
 What is the EscMode? 2
-Now a Url: <A HREF="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521">Here it goes</A>
+Now a Url: <a href="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521">Here it goes</A>
 
 0
 Now lets look what we are getting from this:<BR>
 (this is the value in $a) (this is the value in $a) äöüäöü???<&+  <BR>
 
 What is the EscMode? 0
-Now a Url: <A HREF="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? & + - %21">Here it goes</A>
+Now a Url: <a href="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? & + - %21">Here it goes</A>
 
 3
 Now lets look what we are getting from this:<BR>
 (this is the value in $a) (this is the value in $a) &auml;&ouml;&uuml;&auml;&ouml;&uuml;???&lt;&amp;+  <BR>
 
 What is the EscMode? 3
-Now a Url: <A HREF="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521">Here it goes</A>
+Now a Url: <a href="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521">Here it goes</A>
 
 What is the EscMode? 3
 15
@@ -122,14 +121,14 @@ Control Chars 129 & 130:
 &amp;#129;&amp;#130;<BR>
 
 0
-^<A HREF=('http://host/script\?name=My%20Name%20%F6%E4%FC'|"http://host/script\?name=My%20Name%20%F6%E4%FC")>
+<a href='http://host/script?name=My%20Name%20%F6%E4%FC'>
 
-^<A HREF=('http://host/script\?name=My%20Name%20%F6%E4%FC'|"http://host/script\?name=My%20Name%20%F6%E4%FC")>
+<a href='http://host/script?name=My%20Name%20%F6%E4%FC'>
 
 0
-^<A HREF=('http://host/script\?name=My%20Name%20%F6%E4%FC'|"http://host/script\?name=My%20Name%20%F6%E4%FC")>
+<a href='http://host/script?name=My%20Name%20%F6%E4%FC'>
 
-^<A HREF=('http://host/script\?name=My Name öäü'|"http://host/script\?name=My Name öäü")>
+<a href='http://host/script?name=My Name öäü'>
 
 <br>
 
@@ -139,34 +138,34 @@ We can avoid interpreting [- foo -] with a double [[ <br>
 This should also work for [* foo *]  <br>
 
 
-<A HREF="abcd%20>">x</A>
+<a href="abcd%20>">x</A>
 
 <table>
-<TR>
+<tr>
  <TD><a href="1">Link</a></TD>
-</TR>
+</tr>
 
-<TR>
+<tr>
  <TD><a href="2">Link</a></TD>
-</TR>
+</tr>
 
-<TR>
+<tr>
  <TD><a href="3">Link</a></TD>
-</TR>
+</tr>
 </table>
 
 <table>
-<TR>
+<tr>
  <TD><a href="1">Link</a></TD>
-</TR>
+</tr>
 
-<TR>
+<tr>
  <TD><a href="2">Link</a></TD>
-</TR>
+</tr>
 
-<TR>
+<tr>
  <TD><a href="3">Link</a></TD>
-</TR>
+</tr>
 </table>
 
 Escape method:
@@ -189,9 +188,9 @@ print OUT:
 0: éric
 7: &eacute;ric
 0: éric
-^<a href="0\?(!Table=interface,router&amp;\$where=interface.router_id=router.id|\$where=interface.router_id=router.id&amp;!Table=interface,router)">
+^<a href=\"0\?(\!Table=interface\,router|\$where=interface\.router_id=router\.id)\&amp;(\!Table=interface\,router|\$where=interface\.router_id=router\.id)\">
 
-^<a href="7\?(!Table=interface%2Crouter&amp;%24where=interface.router_id%3Drouter.id|%24where=interface.router_id%3Drouter.id&amp;!Table=interface%2Crouter)">
+^<a href=\"7\?(\!Table=interface%2Crouter|%24where=interface\.router_id%3Drouter\.id)\&amp;(\!Table=interface%2Crouter|%24where=interface\.router_id%3Drouter\.id)\">
   
 
 --> my
@@ -216,9 +215,12 @@ print OUT:
 <br><br>reset<br>
     <b>hello
 <b>hello
+<a href="&amp;">html escaped</a>
+<a href="&amp;">html escaped?</a>
+<a href="%26">url escaped</a>
+
 <P>Ok.<P>
 
 
 </body>
 </html>
-

@@ -205,6 +205,7 @@ test/cmp/asp.htm
 test/cmp/binary.htm
 test/cmp/callsub.htm
 test/cmp/sub2.htm
+test/cmp/subouttab.htm
 test/cmp/changeattr.htm
 test/cmp/chdir.htm
 test/cmp/clearsess.htm
@@ -224,6 +225,7 @@ test/cmp/epobless.htm
 test/cmp/epobless2.htm
 test/cmp/epobless3.htm
 test/cmp/epodiv.htm
+test/cmp/epofdat.htm
 test/cmp/epoincdiv.htm
 test/cmp/eponotfound.htm
 test/cmp/epoobj1.htm
@@ -331,6 +333,9 @@ test/cmp/rtffull.asc
 test/cmp/rtfloop.asc
 test/cmp/rtfmeta.asc
 test/cmp/safe.htm
+test/cmp/select.htm
+test/cmp/selecttab.htm
+test/cmp/selecttab2.htm
 test/cmp/setbadsess.htm
 test/cmp/setsdaturlsess.htm
 test/cmp/setsess.htm
@@ -341,6 +346,7 @@ test/cmp/ssibasic.htm
 test/cmp/ssiep.htm
 test/cmp/stdout.htm
 test/cmp/sub.htm
+test/cmp/subout.htm
 test/cmp/subreq.htm
 test/cmp/subtab.htm
 test/cmp/subtextarea.htm
@@ -371,6 +377,7 @@ test/html/EmbperlObject/base2/epostopdir.htm
 test/html/EmbperlObject/base3/epobaselib.htm
 test/html/EmbperlObject/epobase.htm
 test/html/EmbperlObject/epodiv.htm
+test/html/EmbperlObject/epofdat.htm
 test/html/EmbperlObject/epofallback.htm
 test/html/EmbperlObject/epofoot.htm
 test/html/EmbperlObject/epohead.htm
@@ -409,6 +416,7 @@ test/html/asp.htm
 test/html/binary.htm
 test/html/callsub.htm
 test/html/sub2.htm
+test/html/subouttab.htm
 test/html/changeattr.htm
 test/html/chdir.htm
 test/html/clearsess.htm
@@ -517,6 +525,9 @@ test/html/rtf/rtffull.asc
 test/html/rtf/rtfloop.asc
 test/html/rtf/rtfmeta.asc
 test/html/safe/safe.htm
+test/html/select.htm
+test/html/selecttab.htm
+test/html/selecttab2.htm
 test/html/setbadsess.htm
 test/html/setsess.htm
 test/html/setunknownsess.htm
@@ -531,6 +542,7 @@ test/html/sub.htm
 test/html/subexec.htm
 test/html/subimp.htm
 test/html/subimp.pm
+test/html/subout.htm
 test/html/subreq.htm
 test/html/subtab.htm
 test/html/subtextarea.htm
