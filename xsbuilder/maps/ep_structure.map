@@ -193,6 +193,7 @@
    sCompartment | compartment
 !   pOpcodeMask | opcode_mask
    nCleanup | cleanup
+   sTopInclude | top_include
    new
 !   private
  </tComponentConfig>

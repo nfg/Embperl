@@ -14,11 +14,11 @@ BEGIN {
 
     $ENV{EMBPERL_SRC} =~ /^(.*?)$/;
     my $cwd       = $1 ; # untaint
-    #my $cwd = '/usr/msrc/ep2a' ;
     my $i = 0 ;
     foreach (@INC)
         {
-        $INC[$i] = "$cwd/$_" if (/^(\.\/)?blib/) ;
+        $INC[$i] = "$cwd/$_" if (/^\.?\/?blib/) ;
+        $INC[$i] =~ s#//#/#g ;
         $i++ ;
         }
    
@@ -51,6 +51,8 @@ $cp -> deny (':base_loop') ;
 $testshare = "Shared Data" ;
 $cp -> share ('$testshare') ;  
 
+
+##Embperl::Execute ({ inputfile  => "$ENV{EMBPERL_SRC}/test/html/div.htm", import => 0, input_escmode => 7 }) ;
 
 
 1 ;

@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2001 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdom.c,v 1.11 2003/04/11 05:41:17 richter Exp $
+#   $Id: epdom.c,v 1.14 2004/01/23 06:50:55 richter Exp $
 #
 ###################################################################################*/
 
@@ -1587,7 +1587,12 @@ void DomTree_checkpoint (tReq * r, tIndex nRunCheckpoint)
 	    pPrevNode -> bFlags |= nflgNewLevelNext ;
 
             if ((a -> pCurrReq?a -> pCurrReq -> Component.Config.bDebug:a -> Config.bDebug) & dbgCheckpoint)
-	        lprintf (a, "[%d]Checkpoint: jump backward DomTree=%d Index=%d Node=%d RepeatLevel=%d Line=%d -> Index=%d Node=%d Line=%d SVs=%d\n", a -> pThread -> nPid, r -> Component.xCurrDomTree, nCompileCheckpoint, pPrevNode -> xNdx, r -> Component.nCurrRepeatLevel, pPrevNode -> nLinenumber, nRunCheckpoint, pRunNode -> xNdx, pRunNode -> nLinenumber, sv_count) ; 
+	        lprintf (a, "[%d]Checkpoint: jump backward DomTree=%d Index=%d Node=%d(%d) RepeatLevel=%d Line=%d -> Index=%d Node=%d(%d) Line=%d SVs=%d\n", 
+                                      a -> pThread -> nPid, r -> Component.xCurrDomTree, 
+                                      nCompileCheckpoint, pPrevNode -> xNdx, xNode_selfLevelNull(pDomTree, pPrevNode),
+                                        r -> Component.nCurrRepeatLevel, pPrevNode -> nLinenumber, 
+                                      nRunCheckpoint,     pRunNode -> xNdx, xNode_selfLevelNull(pDomTree, pRunNode),
+                                         pRunNode -> nLinenumber, sv_count) ; 
 
             }
         else if (pRunParent2 && pCompileParent2 && pCompileParent2 -> xNdx  == pRunParent2 -> xNdx)
@@ -2923,12 +2928,25 @@ tNode Node_insertAfter_CDATA    (/*in*/ tApp * a,
     if (pNxtNode)
         pNxtNode  = Node_selfCondCloneNode (a, pRefNodeDomTree, pNxtNode, nRefRepeatLevel) ; 
     else
-        pNxtNode = Node_selfLevel (a, pRefNodeDomTree, pRefNode -> xNext, nRefRepeatLevel) ; /* first one */
+        {
+        tNodeData * pParent  ;
 
-    pNxtNode -> xPrev = pNew -> xNdx ;
+        if ((pParent = Node_selfLevel (a, pRefNodeDomTree, pRefNode -> xParent, nRefRepeatLevel)) == NULL ||
+            pParent -> xChilds != pRefNode -> xNext)
+            pNxtNode = Node_selfLevel (a, pRefNodeDomTree, pRefNode -> xNext, nRefRepeatLevel) ; /* first one */
+        else
+            pNxtNode = NULL ;
+        }
+
+    if (pNxtNode)
+        {
+        pNxtNode -> xPrev = pNew -> xNdx ;
+        pNew -> xNext = pNxtNode -> xNdx ;
+        }
+    else
+        pNew -> xNext = pRefNode -> xNext ;
     pRefNode -> xNext = pNew -> xNdx ;
     pNew -> xPrev = pRefNode -> xNdx ;
-    pNew -> xNext = pNxtNode -> xNdx ;
 
     return pNew -> xNdx ;
     }
@@ -3089,6 +3107,14 @@ tNodeData * Node_selfNextSibling (/*in*/ tApp * a,
     else
 	pNxt = Node_selfLevel (a, pDomTree, pNode -> xNext, nRepeatLevel) ; 
     
+    /*
+    if (pParent && pNxt -> nRepeatLevel)
+        {
+        if (pParent -> xChilds == xNode_selfLevelNull(pDomTree,pNxt) )
+            return NULL ;
+        }
+    */
+
     if (!pParent)
         {
         if (pNxt -> nType == ntypDocumentFraq)

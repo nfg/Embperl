@@ -1,8 +1,32 @@
 =pod
 
-=head1 2.0b9  10. Juni 2003
+=head1 2.0b10 23. Jan 2004
 
-This version is currently under developement. You can get it from the L<CVS|CVS.pod>.
+   - Added -break parameter for haveing precondition to
+     Embperl::Form::Validate
+   - Added $epreq and $epapp for the request and application object, so
+     $r = shift isn't needed anymore on every page.
+   - Default for EMBPERL_DEBUG is now zero, which mean, that Embperl does
+     not write anymore to /tmp/embperl.log unless requested. Suggested by
+     Angus Lees and others.
+   - Added Embperl_Top_Include configuratin directive, which allows to add 
+     Perl code to the top of every file, for example for doing a use Module.
+   - fixed various compiler warnings reported by Angus Lees.
+   - Added missing Form/Validate modules to distribution.
+   - fixed missing $req_rec in base template call from Embperl::Object.
+     Reported by Neil Gunton.
+   - Fixed include path for non standart apr directories.
+   - Fixed epchar.c.min and epchar.c.iso-latin-2 to conatin char2xml table
+   - Fixed problem with mod_perl 1.99_12 which reports wrong return value from
+     handler when some variable inside them Embperl page get tainted.
+   - Fixed tests for Perl 5.8.2 & 5.8.3
+   - Fixed a bug with print OUT at the end of a nested tag inside a loop reported
+     by Neil Gunton
+   - Documented exit with argument behaviour.
+   - Remved use Apache::Constats from Embperl::Mail so it works without mod_perl 
+     installed. 
+
+=head1 2.0b9  10. Juni 2003
 
    - libxml now searchs through Embperl search path when includeing external entities,
      so for example <xsl:include> directives searchs files the same way as Execute

@@ -1,6 +1,6 @@
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2000 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Mail.pm,v 1.35 2003/01/07 20:43:00 richter Exp $
+#   $Id: Mail.pm,v 1.36 2004/01/23 06:50:56 richter Exp $
 #
 ###################################################################################
 
@@ -19,8 +19,6 @@ package Embperl::Mail ;
 
 require Embperl ;
 require Embperl::Constant ;
-
-use Apache::Constants qw(&OPT_EXECCGI &DECLINED &OK &FORBIDDEN &NOT_FOUND) ;
 
 
 use strict ;
@@ -33,7 +31,7 @@ use vars qw(
 @ISA = qw(Embperl);
 
 
-$VERSION = '2.0b9';
+$VERSION = '2.0b10';
 
 
 sub _quote_hdr

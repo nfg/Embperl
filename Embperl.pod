@@ -601,6 +601,17 @@ Embperl has some special variables which have a predefined meaning.
 
 Contains the environment as seen from a CGI script.
 
+=head2 $epreq
+
+Contains a reference to the Embperl request object. This is the same
+as adding C<$epreq = shift> at the top of each page.
+
+=head2 $epapp
+
+Contains a reference to the Embperl application object. This is the same
+as C<$epreq -> app> would return.
+
+
 =head2 %fdat
 
 Contains all the form data sent to the script by the calling form.
@@ -1203,7 +1214,9 @@ already-done work to the output/browser.
 B<NOTE 1:> If you are inside of an Execute, Embperl will only exit this Execute, but 
 the file which called the file containing the exit with Execute will continue.
  
-B<NOTE 2:> If you write a module which should work with Embperl under mod_perl, 
+B<NOTE 2:> If you called exit with an argument it exits the whole request.
+
+B<NOTE 3:> If you write a module which should work with Embperl under mod_perl, 
 you must use Apache::exit instead of the normal Perl exit (as always 
 when running under mod_perl).
 
@@ -1253,7 +1266,7 @@ I have tested Embperl successfully
 
 =item perl5.6.1
 
-=item perl5.8.0
+=item perl5.8.3
 
 =item apache_1.3.0 - apache_1.3.27, apache 2.0.45
 

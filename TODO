@@ -1,8 +1,11 @@
 
 TODO before Embperl 2.0 release
 
-- non standart apr include path [Andre Landwehr 6.4.03]
+- print OUT and sub [Carlos 3.7.2003]
+
+- include at top of every file [Kee Hinckley 3.8.2003]
 
 
 TODO for Embperl 2.1 and later
 
+- make Embperl run with threads and threaded Apache 2

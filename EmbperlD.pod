@@ -587,6 +587,16 @@ I<Embperl> hat einige spezielle Variablen mit einer vorgegebenen Bedeutung.
 
 Enthält die selben Umgebungsvariablen, wie bei einem CGI Skript.
 
+=head2 $epreq
+
+Enthält eine Referenz auf das Embperl Request Object. Dies ist dasselbe
+wie wenn man C<$epreq = shift> am Seitenanfang schreibt.
+
+=head2 $epapp
+
+Enthält eine Referenz auf das Embperl Application Object. Dies ist dasselbe
+wie C<$epreq -> app> zurückliefert.
+
 =head2 %fdat
 
 Enthält alle Formulardaten, die an das Dokument gesendet wurden.
@@ -1203,7 +1213,10 @@ ausgeführten Ausgaben zum Browser.
 B<Hinweis 1:> exit beendet nur die aktuelle Datei. Wurde die Datei von
 einer anderen mittels Execute aufgerufen, wird die aufrufende Datei fortgesetzt.
 
-B<Hinweis 2:> Innerhalb eines Perlmoduls, das von einer I<Embperl> Seite
+B<Hinweis 2:> Wird exit mit einem Argument aufgerufen, beendet es den
+gesamten Request, nicht nur die Ausführung der aktuellen Datei.
+
+B<Hinweis 3:> Innerhalb eines Perlmoduls, das von einer I<Embperl> Seite
 aus aufgerufenen wird, sollten sie C<Apache::exit> verwenden, da das normale
 Perl C<exit> ansonsten den kompletten Childprozeß beendet. C<Apache::exit>
 führt dazu, dass die Ausführung des Moduls, wie auch der I<Embperl> Seite,
@@ -1251,7 +1264,7 @@ I<Embperl> wurde erfolgreich getestet
 
 =item perl 5.6.1
 
-=item perl 5.8.0
+=item perl 5.8.3
 
 =item apache_1.3.0 - apache_1.3.27, apache 2.0.45
 

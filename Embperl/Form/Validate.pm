@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2002 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Validate.pm,v 1.6 2003/04/11 05:58:35 richter Exp $
+#   $Id: Validate.pm,v 1.9 2004/01/23 06:50:57 richter Exp $
 #
 ###################################################################################
 
@@ -20,7 +20,7 @@ package Embperl::Form::Validate;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = q$Id: Validate.pm,v 1.6 2003/04/11 05:58:35 richter Exp $;
+$VERSION = q$Id: Validate.pm,v 1.9 2004/01/23 06:50:57 richter Exp $;
 
 =head1 NAME
 
@@ -256,6 +256,7 @@ sub validate_rules
     my $status ;
     my $name ;
     my $msg ;
+    my $break = 0 ;
 
     while ($i < @$frules) 
         {
@@ -285,13 +286,17 @@ sub validate_rules
                 $name       = undef ;
                 $msg        = undef ;
                 }
-            if ($1 eq 'name')
+            elsif ($1 eq 'name')
                 {
                 $name    = $i++ ;
                 }
-            if ($1 eq 'msg')
+            elsif ($1 eq 'msg')
                 {
                 $msg    = $i++ ;
+                }
+            elsif ($1 eq 'break')
+                {
+                $break    = $frules->[$i++] ;
                 }
             elsif ($1 eq 'type')
                 {
@@ -321,7 +326,7 @@ sub validate_rules
         
         if ($status)
             {
-            if (@$status)
+            if (@$status && !$break)
                 { 
                 my $id = $status  -> [0] ;
                 push @$result, { typeobj => $typeobj, id => $id, key => $key, ($name?(name => $frules -> [$name]):()), ($msg?(msg => $frules -> [$msg]):()), param => $status} ;
@@ -474,6 +479,7 @@ sub gather_script_code
     my $scriptcode = $self -> {scriptcode} ||= {} ;
     my $script = '' ;
     my $form  = $self -> {form_id} ;
+    my $break = 0 ;
 
     while ($i < @$frules) 
         {
@@ -499,13 +505,17 @@ sub gather_script_code
                 $name       = undef ;
                 $msg        = undef ;
                 }
-            if ($1 eq 'name')
+            elsif ($1 eq 'name')
                 {
                 $name    = $i++ ;
                 }
-            if ($1 eq 'msg')
+            elsif ($1 eq 'msg')
                 {
                 $msg    = $i++ ;
+                }
+            elsif ($1 eq 'break')
+                {
+                $break    = $frules->[$i++] ;
                 }
             elsif ($1 eq 'type')
                 {
@@ -557,7 +567,7 @@ sub gather_script_code
                 my $nametxt = $name?$frules -> [$name]:undef ;
                 my $msgtxt  = $msg?$frules -> [$msg]:undef ;
                 my $setmsg = '' ;
-                if ($msgparam)
+                if ($msgparam && !$break)
                     {
                     my $txt = $self -> build_message ($msgparam -> [0], $key, $nametxt, $msgtxt, $msgparam, $typeobj, $pref, $epreq) ;
                     $setmsg = "msgs[i++]='$txt';" 
@@ -793,11 +803,25 @@ displayed. You can have multiple different messages for different tests, e.g.
 
 =item -fail
 
-stops further validation after the first error is found
+stops further validation of any rule after the first error is found
 
 =item -cont
 
 continues validation in the same group, also a error was found
+
+=item -break => 1
+
+errors only break current block, but does not display any message.
+-break => 0 turns bak to normal behaviour. This can be used for preconditions:
+
+    [
+    -key => 'action',  emptyok => 1, -break => 1, ne => 0, -break => 0,
+    -key => 'input', 'required' => 1
+    ]
+
+The above example will only require the field "input", when the field "action" is
+not empty and is not zero.
+
 
 =item [arrayref]
 
@@ -989,7 +1013,7 @@ only the server-side validation is performed.
 
     <p><hr>
 
-    <small>Embperl (c) 1997-2002 G.Richter / ecos gmbh <a href="http://www.ecos.de">www.ecos.de</a></small>
+    <small>Embperl (c) 1997-2004 G.Richter / ecos gmbh <a href="http://www.ecos.de">www.ecos.de</a></small>
 
     </body>
     </html>

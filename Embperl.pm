@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2002 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Embperl.pm,v 1.182 2003/04/11 05:41:16 richter Exp $
+#   $Id: Embperl.pm,v 1.185 2004/01/23 06:50:54 richter Exp $
 #
 ###################################################################################
 
@@ -41,12 +41,13 @@ use vars qw(
     $modperl
     $modperl2
     $req
+    $app
     ) ;
 
 
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = '2.0b9' ;
+$VERSION = '2.0b10' ;
 
 
 if ($modperl  = $ENV{MOD_PERL})
@@ -99,14 +100,19 @@ sub Execute
     # when called inside a Embperl Request, Execute the component only
     return Embperl::Req::ExecuteComponent ($_ep_param, @_) if ($req) ;
 
+    my $rc ;
     if (!ref $_ep_param)
         {
-        Embperl::Req::ExecuteRequest (undef, { inputfile => $_ep_param, param => [@_]}) ;
+        $rc = Embperl::Req::ExecuteRequest (undef, { inputfile => $_ep_param, param => [@_]}) ;
         }
     else
         {
-        Embperl::Req::ExecuteRequest (undef, $_ep_param) ;
+        $rc = Embperl::Req::ExecuteRequest (undef, $_ep_param) ;
         }
+use Data::Dumper ;
+use Devel::Peek ;
+    #print "2 rc = $rc", Dumper ($rc), , Dump ($rc) ;
+    return $rc ;
     }
 
 #######################################################################################
@@ -116,8 +122,12 @@ sub handler
     {
     local $SIG{__WARN__} = \&Warn ;
     $req_rec = $_[0] ;
-
-    Embperl::Req::ExecuteRequest ($_[0]) ;
+    #$req_rec -> log_error ("1 rc = ") ;
+    my $rc = Embperl::Req::ExecuteRequest ($_[0]) ;
+use Data::Dumper ;
+use Devel::Peek ;
+    #$req_rec -> log_error ( "2 rc = $rc", Dumper ($rc), Dump ($rc)) ;
+    return $rc ;
     }
 
 #######################################################################################

@@ -1,5 +1,4 @@
 
-=pod
 
 =head1 NAME
 
@@ -631,7 +630,18 @@ Session Handling
 
 
 Set the expiration date that Embperl uses for the cookie with the session id.
-You can specify the full date or relativ values. Examples: +30s +10m +1h -1d +3M +10y
+You can specify the full date or relativ values. 
+The following forms are all valid times:
+
+        +30s                              30 seconds from now
+        +10m                              ten minutes from now
+        +1h                               one hour from now
+        -1d                               yesterday (i.e. "ASAP!")
+        now                               immediately
+        +3M                               in three months
+        +10y                              in ten years time
+        Thursday, 25-Apr-1999 00:40:33 GMT  at the indicated time & date
+
 
 =head2 Embperl_Cookie_Secure
 
@@ -699,10 +709,6 @@ EMBPERL_DEBUG
 =item Method:
 
 $application -> config -> debug 
-
-=item Default:
-
-1 
 
 =back
 
@@ -1341,12 +1347,6 @@ When a file is processed and the filename isn't an absolute path or
 does not start with ./ (or .\ under windows), I<Embperl> searches all
 the specified directories for that file. 
 
-=cut
-
-Directories must end with a
-slash (C</>), otherwise the entry is treated as a file prefix. 
-
-=pod
 
 A special handling is done if the filename starts with any number
 of C<../> i.e. refers to an upper directory. Then I<Embperl> strips
@@ -1365,10 +1365,6 @@ EMBPERL_DEBUG
 =item Method:
 
 $request -> config -> debug 
-
-=item Since:
-
-yes
 
 =back
 
@@ -1867,6 +1863,40 @@ $component -> config -> input_charset
 NOT YET IMPLEMENTED!
 
 
+
+=head2 Embperl_Top_Include
+
+=over
+
+=item Env:
+
+EMBPERL_TOP_INCLUDE
+
+=item Method:
+
+$component -> config -> top_include 
+
+=item Since:
+
+2.0b10
+
+=back
+
+
+Give a pieces of code that is include at the very top of every file.
+
+Example:
+
+    Embperl_Top_Include "use MY::Module;"
+
+This will cause MY::Module to be used in every page. Note that 
+Embperl_Top_Include must contain valid Perl code and must be
+ended with a semikolon.
+
+B<NOTE:> If you pass top_include as parameter to Execute it is
+only used in case the code is compiled (or recompiled) and not cached.
+
+
 =head2 Embperl_Cache_Key
 
 =over
@@ -2202,11 +2232,6 @@ depends on compiltime options
 Tells Embperl which xslt processor to use. Current C<libxslt> and C<xalan>
 are supported by Embperl, but they must be compiled in to be available.
 
-=cut
-
- head2 *CFG $component /  / cleanup
-
-=pod
 
 =head1 Parameters
 
@@ -3592,189 +3617,6 @@ $component -> sourcefile I<[read only]>
 
 Source file of the component.
 
-=cut
-
-=head2 buf
-
-=over
-
-=item Method:
-
-$component -> buf I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=head2 end_pos
-
-=over
-
-=item Method:
-
-$component -> end_pos I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=head2 curr_pos
-
-=over
-
-=item Method:
-
-$component -> curr_pos I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=head2 sourceline
-
-=over
-
-=item Method:
-
-$component -> sourceline I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=head2 sourceline_pos
-
-=over
-
-=item Method:
-
-$component -> sourceline_pos I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=head2 line_no_curr_pos
-
-=over
-
-=item Method:
-
-$component -> line_no_curr_pos I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=head2 document
-
-=over
-
-=item Method:
-
-$component -> document I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=head2 curr_node
-
-=over
-
-=item Method:
-
-$component -> curr_node I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=head2 curr_repeat_level
-
-=over
-
-=item Method:
-
-$component -> curr_repeat_level I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=head2 curr_checkpoint
-
-=over
-
-=item Method:
-
-$component -> curr_checkpoint I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=head2 curr_dom_tree
-
-=over
-
-=item Method:
-
-$component -> curr_dom_tree I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=head2 source_dom_tree
-
-=over
-
-=item Method:
-
-$component -> source_dom_tree I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=pod
 
 =head2 syntax
 
@@ -3793,24 +3635,6 @@ $component -> syntax
 
 Syntax of the component
 
-=cut 
-
-=head2 append_to_main_req
-
-=over
-
-=item Method:
-
-$component -> append_to_main_req I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=pod
 
 =head2 prev
 
@@ -3829,24 +3653,6 @@ $component -> prev I<[read only]>
 
 Previous component, e.g. the component which called this component. 
 
-=cut
-
-=head2 strict
-
-=over
-
-=item Method:
-
-$component -> strict I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=pod
 
 =head2 import_stash
 
@@ -3900,84 +3706,6 @@ $component -> curr_package I<[read only]>
 
 Name of the package the component is executed in.
 
-=cut
-
-=head2 eval_package
-
-=over
-
-=item Method:
-
-$component -> eval_package I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=head2 main_sub
-
-=over
-
-=item Method:
-
-$component -> main_sub I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=head2 prog
-
-=over
-
-=item Method:
-
-$component -> prog I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=head2 prog_run
-
-=over
-
-=item Method:
-
-$component -> prog_run I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=head2 prog_def
-
-=over
-
-=item Method:
-
-$component -> prog_def I<[read only]>
-
-=item Since:
-
-2.0b6
-
-=back
-
-
-=pod
 
 =head2 code
 

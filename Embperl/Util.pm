@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2002 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Util.pm,v 1.2 2002/10/22 05:39:48 richter Exp $
+#   $Id: Util.pm,v 1.4 2004/01/23 06:50:56 richter Exp $
 #
 ###################################################################################
 
@@ -90,6 +90,8 @@ sub CreateAliases
             *{"$package\:\:$_"}    = \${"Embperl\:\:$_"} ;
             $dummy = ${"$package\:\:$_"} ; # necessary to make sure variable exists!
             }
+        *{"$package\:\:epreq"} = \$Embperl::req ;
+        *{"$package\:\:epapp"} = \$Embperl::app ;
 
         foreach (@AliasHash)
             {

@@ -2,7 +2,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2001 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: test.pl,v 1.129 2003/06/09 18:03:22 richter Exp $
+#   $Id: test.pl,v 1.133 2004/01/23 06:50:55 richter Exp $
 #
 ###################################################################################
 
@@ -216,7 +216,8 @@
         'version'    => 1,  # needs print OUT
         },
     'nesting.htm' => { 
-        'version'    => 1,
+        },
+    'nesting2.htm' => { 
         },
     'object.htm' => { 
         'version'    => 1,
@@ -241,6 +242,7 @@
         'version'    => 2,
      },
     'heredoc.htm' => { },
+    'epglobals.htm' => {},
     'post.htm' => {
         'offline'    => 0,
         'reqbody'    => "f1=abc1&f2=1234567890&f3=" . 'X' x 8192,
@@ -335,6 +337,9 @@
         'errors'     => '3',
         },
     'callsub.htm' => { 
+        'repeat'     => 2,
+        },
+    'sub2.htm' => { 
         'repeat'     => 2,
         },
     'executesub.htm' => { 

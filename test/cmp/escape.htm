@@ -42,10 +42,10 @@ LAYER:	   <LAYER SRC="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=
 IMG:	   <IMG SRC="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521"    name="%20foo">
 FORM:	   <FORM action="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521"    name="%20foo">
 
-Hash in  A <a href="http://localhost/tests?A=1&amp;B=2">
+^Hash in  A <a href="http:\/\/localhost\/tests\?(A=1&amp;B=2|B=2&amp;A=1)">
 Array in A <a href="http://localhost/tests?X=9&amp;Y=8&amp;Z=7">
 
-Hash in  H <a href="http://localhost/tests?A=1&amp;B=2">
+^Hash in  H <a href="http:\/\/localhost\/tests\?(A=1&amp;B=2|B=2&amp;A=1)">
 ^Array in H \<a href\=\"http\:\/\/localhost\/tests\?(X=9&amp;Y=8&amp;Z=7)|(Z=7&amp;X=9&amp;Y=8)\"\>
 
 ^<a href="tst.html\?(par1=1&amp;par2=2)|(par2=2&amp;par1=1)">1</a>

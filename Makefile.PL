@@ -1,9 +1,9 @@
 #
 # Building Makefile for Embperl
 #
-# (C) 1997-2001 G.Richter (richter@dev.ecos.de) / ECOS
+# (C) 1997-2004 G.Richter (richter@dev.ecos.de) / ECOS
 #
-# $Id: Makefile.PL,v 1.64 2003/04/11 05:41:16 richter Exp $
+# $Id: Makefile.PL,v 1.68 2004/01/23 07:37:12 richter Exp $
 #
 
 
@@ -68,7 +68,9 @@ $EP2 = -f "epcmd2.c" ;
 			win32filetext   => 'ApacheModuleCgi.dll or mod_cgi.so',
 		      },
 
-      'mod_actions.c'  => { name	    => 'action_module', 
+      'mod_actions.c'  => { 
+                        name	    => 'action_module', 
+                        name2	    => 'actions_module', 
 			path	    => ['$apache_src/modules/standard/mod_actions.so', '$EPBINDIR/modules/mod_actions.so', '$apache_src/mod_actions.so'],
 			win32path   => ['$apache_src/modules/standard/apachemoduleactions.dll', '$EPBINDIR/modules/apachemoduleactions.dll', '$EPBINDIR/modules/mod_actions.so'],
 			file	    => ['mod_actions.so','apachemoduleactions.dll'],
@@ -145,6 +147,7 @@ stop : pure_all
 	$txt =~ s/\tPERL_DL_NONLAZY=0 /\tSET PATH=\$\(PATH\)\;$EPENVPATH\n\t/g if ($win32) ;
         
         $txt =~ s/\@cd/\n#\t\@cd/ ;  # remove tests for subdirs
+        $txt =~ s/\$\(NOECHO\) cd/\n#\t\$\(NOECHO\) cd/ ;  # remove tests for subdirs
 
 	$txt =~ s/\r\n/\n/g ;  # make doesn't like \r\n!
 
@@ -178,6 +181,7 @@ sub MY::dist_test
         my $txt = $self -> MM::dist_test (@_) ;
 	$txt =~ s/-I\$\(PERL_ARCHLIB\) -I\$\(PERL_LIB\)// ;
 	$txt =~ s/\$\(PERL\)/\$\(PERLDT\)/ ;
+	$txt =~ s/\$\(ABSPERLRUN\)/\$\(PERLDT\)/ ;
 	
         $main::perlbinpath = $self -> {FULLPERL} ;
         
@@ -567,6 +571,7 @@ elsif ($apache_src ne '' && -X "$apache_src/bin/httpd")
         }
     }
 
+
 eval 'do "test/conf/config.pl"' ;
 
 
@@ -862,7 +867,7 @@ if ($b && $apache)
 		        #print "path = $_ -> $path\n" ;
 		        if (-f $path)
 			    { ## module fould
-	    		    $EPMODPERL .= "\r\nLoadModule $opt->{name} \"$path\"" ;
+	    		    $EPMODPERL .= "\r\nLoadModule ". ($mp2cfg?($opt->{name2} || $opt->{name}):$opt->{name}) . " \"$path\"" ;
 			    print " + Load dynamic module $mod\n   ($path)\n" ;
 			    $found = 1 ;
 			    last searchmod ;
@@ -1217,6 +1222,13 @@ if ($EP2)
 close FH ;
 
 $i .= " -I$EPPATH/xs" ;
+
+if ($mp2cfg && $mp2cfg->{'MP_INCLUDE_DIR'})
+    {
+    my @inc = split (/\s+/, $mp2cfg->{'MP_INCLUDE_DIR'}) ;
+    $i .= ' -I' . join (' -I', @inc) if (@inc) ;
+    }
+
 
 %MMARGS = (
     'LIBS'	   => [$libs || ''],   			 

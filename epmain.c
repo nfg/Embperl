@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2001 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epmain.c,v 1.125 2003/06/09 18:03:21 richter Exp $
+#   $Id: epmain.c,v 1.127 2004/01/23 06:50:55 richter Exp $
 #
 ###################################################################################*/
 
@@ -1422,7 +1422,6 @@ int     embperl_ExecuteRequest  (/*in*/ pTHX_
     if (r)
         embperl_CleanupRequest (r) ;
 
-
     return rc ;
     }
     
@@ -1510,7 +1509,6 @@ int     embperl_ExecuteComponent(/*in*/ tReq *           r,
     tComponent * pComponent ;
 
     rc = embperl_SetupComponent  (r, pPerlParam, &pComponent) ;
-
     if (rc == ok)
         {
         rc = embperl_RunComponent (pComponent) ;

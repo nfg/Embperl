@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2002 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Number.pm,v 1.3 2003/02/19 08:30:05 richter Exp $
+#   $Id: Number.pm,v 1.4 2004/01/23 06:50:57 richter Exp $
 #
 ###################################################################################
 
@@ -20,7 +20,7 @@ package Embperl::Form::Validate::Number ;
 use base qw(Embperl::Form::Validate::Default);
 
 my
-$VERSION = q$Id: Number.pm,v 1.3 2003/02/19 08:30:05 richter Exp $;
+$VERSION = q$Id: Number.pm,v 1.4 2004/01/23 06:50:57 richter Exp $;
 
 my %error_messages = 
 (

@@ -24,7 +24,7 @@ $f = 0 ;
 	</tr>
 </table>
 
-
+[#
 [$if $t $]
 <table>
 	<tr>
@@ -34,7 +34,7 @@ $f = 0 ;
 	</tr>
 </table>
 [$endif$]
-
+#]
 
 [$if $f $]
 <table>
@@ -45,6 +45,34 @@ $f = 0 ;
 	</tr>
 </table>
 [$endif$]
+
+
+<!-- [ + + ] -->
+
+[- $count = 0 -]
+<DL>
+     [$ while $count < 10 $]
+        <DL>
+            <DD>[+ $count +]
+        </DL>
+        [- $count++ -]
+     [$ endwhile $]
+</DL>
+
+
+<!-- print OUT -->
+
+[- $count = 0 -]
+<DL>
+     [$ while $count < 10 $]
+        <DL>
+            <DD>[- print OUT $count; -]
+        </DL>
+        [- $count++ -]
+     [$ endwhile $]
+</DL>
+
+
 
 </body>
 </html>

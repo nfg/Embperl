@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2002 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: mod_embperl.c,v 1.12 2003/06/09 18:03:21 richter Exp $
+#   $Id: mod_embperl.c,v 1.14 2004/01/23 06:50:55 richter Exp $
 #
 ###################################################################################*/
 
@@ -407,15 +407,16 @@ int embperl_GetApacheConfig (/*in*/ tThreadData * pThread,
 
 static void *embperl_create_dir_config(apr_pool_t * p, char *d)
     {
-    char buf [20] ;
+    /*char buf [20] ;*/
     tApacheDirConfig *cfg = (tApacheDirConfig *) ap_pcalloc(p, sizeof(tApacheDirConfig));
 
     embperl_DefaultReqConfig (&cfg -> ReqConfig) ;
     embperl_DefaultAppConfig (&cfg -> AppConfig) ;
     embperl_DefaultComponentConfig (&cfg -> ComponentConfig) ;
     cfg -> bUseEnv = -1 ; 
+    /*
     sprintf(buf, "%x", cfg) ;
-    /*if (d)
+    if (d)
         cfg -> AppConfig.sAppName = ap_pstrcat (p, d?d:"", ":", buf, NULL) ;
     */
 

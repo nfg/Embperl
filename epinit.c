@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2002 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epinit.c,v 1.10 2003/06/09 18:03:21 richter Exp $
+#   $Id: epinit.c,v 1.13 2004/01/23 06:50:55 richter Exp $
 #
 ###################################################################################*/
 
@@ -53,6 +53,7 @@ SV * embperl_ThreadDataRV ;
 #define PARAM_NAME              "param"
 #define EMBPERL_PARAM_NAME      EMBPERL_PACKAGE_STR"::"PARAM_NAME
 #define EMBPERL_REQ_NAME        EMBPERL_PACKAGE_STR"::req"
+#define EMBPERL_APP_NAME        EMBPERL_PACKAGE_STR"::app"
 #define EMBPERL_ENV_NAME        "ENV"
 
 #define EMBPERL_EscMode_NAME    EMBPERL_PACKAGE_STR"::escmode"
@@ -252,6 +253,7 @@ int    embperl_SetupThread  (/*in*/ pTHX_
         pThread -> pParamArray   = perl_get_av (EMBPERL_PARAM_NAME, TRUE) ;
         pThread -> pParamArrayGV = *((GV **)hv_fetch    (pStash, PARAM_NAME, sizeof (PARAM_NAME) - 1, 0)) ;
         pThread -> pReqRV        = perl_get_sv (EMBPERL_REQ_NAME, TRUE) ;
+        pThread -> pAppRV        = perl_get_sv (EMBPERL_APP_NAME, TRUE) ;
         /* avoid warnings */
         perl_get_hv (EMBPERL_FDAT_NAME, TRUE) ;
         perl_get_hv (EMBPERL_SPLIFDAT_NAME, TRUE) ;
@@ -663,6 +665,8 @@ int    embperl_SetupApp     (/*in*/ pTHX_
         embperl_SetupSessionObjects (pApp) ;
         }
 
+    sv_setsv(pThread -> pAppRV, pApp -> _perlsv) ;   
+    
     *ppApp = pApp ;
 
     return ok ;
@@ -1698,6 +1702,7 @@ int    embperl_CleanupRequest (/*in*/ tReq *  r)
 	char * sPackage = hv_iterkey (pEntry, &l) ;
         ClearSymtab (r, sPackage, r -> Config.bDebug & dbgShowCleanup) ;
         }
+    tainted = 0 ;
 
     sv_setsv(r -> pThread -> pReqRV, &sv_undef) ;   
 

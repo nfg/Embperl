@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2002 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdat2.h,v 1.4 2003/01/02 07:39:44 richter Exp $
+#   $Id: epdat2.h,v 1.7 2004/01/23 06:50:55 richter Exp $
 #
 ###################################################################################*/
 
@@ -74,6 +74,7 @@ typedef struct tComponentConfig
     bool        bUseEnv ;           /**< Take configuration values out of the environment */
     bool        bUseRedirectEnv ;   /**< Take configuration values out of the environment. Remove REDIRECT_ prefix. */
     char *      sPackage ;
+    char *      sTopInclude ;           /**< Include this text at the top of the page */
     unsigned    bDebug ;
     unsigned    bOptions ;
     int         nCleanup ;
@@ -207,6 +208,7 @@ typedef struct tThreadData
     GV *    pFormArrayGV ; 
     HV *    pHeaderHash ;/* http headers */
     SV *    pReqRV ;       /* the request object global */
+    SV *    pAppRV ;       /* the application object global */
     AV *    pParamArray ;
     GV *    pParamArrayGV ;
 

@@ -1,6 +1,6 @@
 Embperl - Building dynamic Websites with Perl
 
-Copyright (c) 1997-2002 Gerald Richter / ecos gmbh  www.ecos.de
+Copyright (c) 1997-2004 Gerald Richter / ecos gmbh  www.ecos.de
 
 You may distribute under the terms of either the GNU General Public 
 License or the Artistic License, as specified in the Perl README file.
@@ -9,20 +9,20 @@ THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF 
 MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-$Id: README.v2,v 1.2 2002/10/22 05:45:12 richter Exp $
+$Id: README.v2,v 1.3 2004/01/23 06:50:54 richter Exp $
 
 
 ### !! IMPORTANT !! IMPORTANT !! IMPORTANT !! IMPORTANT !! IMPORTANT !! 
 ###
 ###
 ### This is a BETA release of Embperl 2.0, before installing
-### please read the README.v2. Documentation is not yet updated to
-### reflect the changes in 2.0, everything that has changed is
+### please read the README.v2. Documentation is not yet fully updated to
+### reflect the changes in 2.0, important changes are
 ### documented in README.v2. 
 ### I use Embperl 2.0b in production environment on my own.
 ### But be careful, this release may still contain bugs.
 ###
-### The current stable release is Embperl 1.3.4
+### The current stable release is Embperl 1.3.6
 ###
 ### !! IMPORTANT !! IMPORTANT !! IMPORTANT !! IMPORTANT !! IMPORTANT !! 
 

@@ -93,9 +93,9 @@ INIT:
 CODE:
 	{
 	char * p = SvPV (sText, l) ;
-        /*if Node_self(DomTree_self (r -> Component.xCurrDomTree), r -> Component.xCurrNode) -> nType == ntypDocumentFraq)
-            Node_appendChild (DomTree_self (r -> Component.xCurrDomTree), r -> Component.xCurrNode, r -> Component.nCurrRepeatLevel, ntypCDATA, 0, p, l, 0, 0, NULL) ; 
-                else*/
+        if (0) //Node_self(DomTree_self (r -> Component.xCurrDomTree), r -> Component.xCurrNode) -> nType == ntypDocumentFraq)
+            Node_appendChild (r->pApp, DomTree_self (r -> Component.xCurrDomTree), r -> Component.xCurrNode, r -> Component.nCurrRepeatLevel, ntypCDATA, 0, p, l, 0, 0, NULL) ; 
+        else
         r -> Component.xCurrNode = Node_insertAfter_CDATA (r->pApp, p, l, (r -> Component.nCurrEscMode & 3)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode, DomTree_self (r -> Component.xCurrDomTree), r -> Component.xCurrNode, r -> Component.nCurrRepeatLevel) ; 
         r -> Component.bEscModeSet = 0 ;
         

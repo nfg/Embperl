@@ -12,6 +12,15 @@ Embperl/Constant.pm
 Embperl/Form/Validate.pm
 Embperl/Form/Validate/Default.pm
 Embperl/Form/Validate/Number.pm
+Embperl/Form/Validate/EMail.pm
+Embperl/Form/Validate/EMailRFC.pm
+Embperl/Form/Validate/FQDN_IPAddr.pm
+Embperl/Form/Validate/IPAddr.pm
+Embperl/Form/Validate/IPAddr_Mask.pm
+Embperl/Form/Validate/Integer.pm
+Embperl/Form/Validate/Select.pm
+Embperl/Form/Validate/TimeHHMM.pm
+Embperl/Form/Validate/TimeHHMMSS.pm
 Embperl/Log.pm
 Embperl/Mail.pm
 Embperl/Module.pm
@@ -195,6 +204,7 @@ test/cmp/ascii
 test/cmp/asp.htm
 test/cmp/binary.htm
 test/cmp/callsub.htm
+test/cmp/sub2.htm
 test/cmp/changeattr.htm
 test/cmp/chdir.htm
 test/cmp/clearsess.htm
@@ -207,6 +217,7 @@ test/cmp/discard.htm
 test/cmp/div.asc
 test/cmp/div.htm
 test/cmp/epform.htm
+test/cmp/epglobals.htm
 test/cmp/epobase.htm
 test/cmp/epobaselib.htm
 test/cmp/epobless.htm
@@ -288,6 +299,7 @@ test/cmp/mail.htm
 test/cmp/mailformto.htm
 test/cmp/mix.htm
 test/cmp/nesting.htm
+test/cmp/nesting2.htm
 test/cmp/nochdir.htm
 test/cmp/noerrpage.htm
 test/cmp/nooutput.htm
@@ -340,6 +352,7 @@ test/cmp/tagscan.htm
 test/cmp/tagscandisable.htm
 test/cmp/taint.htm
 test/cmp/tied.htm
+test/cmp/topinc.htm
 test/cmp/unclosed.htm
 test/cmp/upload.htm
 test/cmp/var.htm
@@ -395,6 +408,7 @@ test/html/ascii
 test/html/asp.htm
 test/html/binary.htm
 test/html/callsub.htm
+test/html/sub2.htm
 test/html/changeattr.htm
 test/html/chdir.htm
 test/html/clearsess.htm
@@ -405,6 +419,7 @@ test/html/delwrsess.htm
 test/html/discard.htm
 test/html/div.htm
 test/html/epform.htm
+test/html/epglobals.htm
 test/html/errdoc/epl/errdoc2.htm
 test/html/errdoc/errdoc.htm
 test/html/errmsg.htm
@@ -469,6 +484,7 @@ test/html/match/div.htm
 test/html/mdatsess.htm
 test/html/mix.htm
 test/html/nesting.htm
+test/html/nesting2.htm
 test/html/nochdir/nochdir.htm
 test/html/noerr/noerrpage.htm
 test/html/nooutput.htm
@@ -525,6 +541,7 @@ test/html/tagintag.htm
 test/html/tagscan.htm
 test/html/tagscandisable.htm
 test/html/taint.htm
+test/html/topinc.htm
 test/html/unclosed.htm
 test/html/upload.htm
 test/html/var.htm
@@ -577,3 +594,4 @@ xsbuilder/maps/ep_type.map
 xsbuilder/source_scan.pl
 xsbuilder/xs_check.pl
 xsbuilder/xs_generate.pl
+META.yml                                 Module meta-data (added by MakeMaker)

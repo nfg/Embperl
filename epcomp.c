@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2001 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcomp.c,v 1.9 2003/04/11 05:41:16 richter Exp $
+#   $Id: epcomp.c,v 1.12 2004/01/23 06:50:54 richter Exp $
 #
 ###################################################################################*/
 
@@ -943,7 +943,7 @@ static int embperl_CompileCmd  (/*in*/	tReq *	       r,
     int             nSourcefile ;
     int i ;
     SV *        args[4] ;
-    int nCodeLen  ;
+    int nCodeLen = 0 ;
     int found = 0 ;
 
     r -> Component.pCodeSV = NULL ;
@@ -1664,7 +1664,7 @@ int embperl_Compile                 (/*in*/  tReq *	  r,
     pDomTree -> pSV = NULL ;
 
     StringAdd (r -> pApp, &r -> Component.pProgRun, "", 1) ;
-    StringAdd (r -> pApp, &r -> Component.pProgDef, "", 1) ;
+    StringAdd (r -> pApp, &r -> Component.pProgDef, r -> Component.Config.sTopInclude?r -> Component.Config.sTopInclude:"", 0) ;
 
     cl2 = clock () ;
 

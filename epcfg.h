@@ -27,6 +27,7 @@ EPCFG_SV  (ComponentConfig,     SV *,        pRecipe,       RECIPE)
 EPCFG_STR (ComponentConfig,     char *,      sXsltstylesheet, XSLTSTYLESHEET) 
 EPCFG_STR (ComponentConfig,     char *,      sXsltproc,     XSLTPROC) 
 EPCFG_STR (ComponentConfig,     char *,      sCompartment,  COMPARTMENT)
+EPCFG_STR (ComponentConfig,     char *,      sTopInclude,  TOP_INCLUDE)
 #endif
 
 #ifdef EPCFG_REQ

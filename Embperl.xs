@@ -18,7 +18,7 @@
 
 
 /* for embperl_exit */
-static IV errgv_empty_set(pTHX_ IV ix, SV * sv)
+static I32 errgv_empty_set(pTHX_ IV ix, SV * sv)
 { 
     sv_setsv(sv, &sv_undef);
     return TRUE;
@@ -83,6 +83,7 @@ embperl_ExecuteRequest(pApacheReqSV=NULL, pPerlParam=NULL)
     SV * pPerlParam
 CODE:
     RETVAL = embperl_ExecuteRequest (aTHX_ pApacheReqSV, pPerlParam) ;
+    tainted = 0 ;
 OUTPUT:
     RETVAL
 
