@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epparse.c,v 1.4.2.54 2002/03/12 13:20:21 richter Exp $
+#   $Id: epparse.c,v 1.4.2.56 2002/06/18 06:27:34 richter Exp $
 #
 ###################################################################################*/
 
@@ -861,7 +861,9 @@ static int ParseTokens (/*i/o*/ register req *		r,
 				return 1 ;
 			    }
 			else if (rc != rcNotFound)
-			    return rc ;
+                            {
+                            return rc ;
+                            }
 			 if (pToken -> nNodeType == ntypStartEndTag)
 			    {
 			    xParentNode = Node_parentNode  (r -> pApp, pDomTree, xNewNode, 0) ;
@@ -949,7 +951,10 @@ static int ParseTokens (/*i/o*/ register req *		r,
                                     Node_self (pDomTree, xNewAttrNode) -> bFlags |= pToken -> bAddFlags ;
 				if (pToken -> sParseTimePerlCode)
 				    if ((rc = ExecParseTimeCode (r, pToken, pCurr, pEnd - pCurr, nLine)) != ok)
+                                        {
+                                        r -> Component.pCurrPos = pCurrTokenStart ;
 					return rc ;
+                                        }
 				}
 
 			     if (pToken -> nNodeType == ntypStartEndTag)
@@ -967,7 +972,11 @@ static int ParseTokens (/*i/o*/ register req *		r,
 			           pToken -> nNodeType == ntypEndStartTag ||
 				   pToken -> nNodeType == ntypStartEndTag))
 			{
-			level++ ;
+			if (level++ > 1000)
+                            {
+                            r -> Component.pCurrPos = pCurrTokenStart ;
+                            return rcTooDeepNested ;
+                            }
 			xParentNode = xNewNode ;
 		        nCDataType = pTokenTable -> nDefNodeType ;
 			}
@@ -1100,12 +1109,19 @@ static int embperl_ParseSource (/*i/o*/ register req * r,
     
     xDocNode2 = xDocNode ;
     if (r -> Component.pTokenTable -> sRootNode)
+        {
+        /* Add at least one child node before root node to make insertafter at the beginning of the document work */
+        if (!(Node_appendChild (r -> pApp, pDomTree,  xDocNode, 0, ntypCDATA, 0,
+                                            "", 0, 
+					     0, 0, NULL)))
+	    return rcOutOfMemory ;
+
         if (!(xDocNode2 = Node_appendChild (r -> pApp, pDomTree,  xDocNode, 0, ntypStartTag, 0,
                                             r -> Component.pTokenTable -> sRootNode,
                                             strlen (r -> Component.pTokenTable -> sRootNode), 
 					     0, 0, NULL)))
 	    return rcOutOfMemory ;
-
+        }
     
     if (!(xNode = Node_appendChild (r -> pApp, pDomTree, xDocNode, 0, ntypAttr, 0, NULL, xDomTreeAttr, 0, 0, NULL)))
 	return rcOutOfMemory ;

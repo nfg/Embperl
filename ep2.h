@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: ep2.h,v 1.1.2.31 2002/02/27 11:58:23 richter Exp $
+#   $Id: ep2.h,v 1.1.2.32 2002/06/01 23:44:25 richter Exp $
 #
 ###################################################################################*/
 
@@ -273,6 +273,9 @@ int Provider_AddDependOne   (/*in*/ req *              r,
                              /*in*/ SV *               pParam,
                              /*in*/ IV                 nParamIndex) ;
 
+#ifdef APACHE2
+int ApFilter_Init (/*in*/ tApp * a) ;
+#endif
 
 /* --- from epinit.c --- */
 

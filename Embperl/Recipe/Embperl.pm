@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Embperl.pm,v 1.1.2.19 2002/03/13 06:29:36 richter Exp $
+#   $Id: Embperl.pm,v 1.1.2.20 2002/06/01 23:44:26 richter Exp $
 #
 ###################################################################################
 
@@ -40,7 +40,7 @@ sub get_recipe
 
     if (!$src)
         {
-        push @recipe, {'type'   =>  ref ($param -> input)?'memory':'file' } ;
+        push @recipe, {'type'   =>  ref ($param -> input)?'memory':($param -> subreq?'apoutfilter':'file') } ;
         }
     else
         {

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epnames.h,v 1.19.4.19 2002/03/20 06:28:22 richter Exp $
+#   $Id: epnames.h,v 1.19.4.24 2002/05/24 07:25:35 richter Exp $
 #
 ###################################################################################*/
 
@@ -248,6 +248,10 @@
 #define dTHXsem dTHX ;
 #endif
 
+#ifndef XSprePUSH
+#define XSprePUSH (sp = PL_stack_base + ax - 1)
+#endif
+
 
 #if PERL_VERSION >= 5
 
@@ -421,13 +425,6 @@
 
 #endif /* APACHE */
 
-#ifndef APACHE
-
-typedef void request_rec ;
-typedef void server_rec ;
-
-#endif
-
 
 #ifndef INT2PTR
 
@@ -455,3 +452,41 @@ typedef void server_rec ;
 #endif
 
 #endif
+
+
+/* make some defines to use same type in Apache 1 & Apache 2 */
+
+#ifndef APACHE2
+
+#define apr_pstrdup         ap_pstrdup
+#define apr_palloc          ap_palloc
+#define apr_pool_t          pool
+#define apr_array_header_t  array_header
+#define apr_table_entry_t   table_entry
+#define apr_table_elts      table_elts
+#define apr_table_get       ap_table_get
+#define apr_table_set       ap_table_set
+#define apr_table_add       ap_table_add
+
+#endif
+
+
+/* define some types, that are necessary in non Apache mode and will be passed as dummy parameters */
+
+#ifndef APACHE
+
+typedef void request_rec ;
+typedef void server_rec ;
+typedef void apr_pool_t ;
+
+#endif
+
+
+#ifdef APACHE
+#ifdef APACHE2
+#define APLOG_STATUSCODE  0,
+#else
+#define APLOG_STATUSCODE
+#endif
+#endif
+

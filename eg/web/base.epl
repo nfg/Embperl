@@ -2,20 +2,46 @@
 $r = shift ;
 $http_headers_out{'content-type'} = 'text/html' ;
 -]
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
     <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
         <title>Embperl</title>
         <style type="text/css">
+            [-
+            $font = 'font-family: Geneva,Arial,Helvetica;' ;
+            $base = $font ; 
+            $base10 = $base . ' font-size: 10px;' ; 
+            $base12 = $base . ' font-size: 12px;' ; 
+            $base14 = $base . ' font-size: 14px;' ; 
+            $base18 = $base . ' font-size: 18px;' ; 
+            -]
+
            .cInput              {background: #DDDDDD; }
            .cText               {background: #AFBDCA; }
            .cSectionInput       {background: #ddaaaa; }
            .cSectionText        {background: #ddaaaa; }
-           .cTabsOn             {background: #ddaaaa; font-size: 14px; }
-           .cTabsOff            {background: #DDDDDD; font-size: 14px; }
-           .cMenu               {font-family: Geneva,Arial,Helvetica;  font-size: 10px; }
-           .cNews               {font-family: Geneva,Arial,Helvetica;  font-size: 10px; }
-           body                 {font-family: Geneva,Arial,Helvetica;  font-size: 12px; }
-           table                {font-family: Geneva,Arial,Helvetica;  font-size: 12px; }
+           .cTabsOn             {[+ $base14 +] background: #ddaaaa; }
+           .cTabsOff            {[+ $base14 +] background: #DDDDDD; }
+           .cMenu               {[+ $base10 +] color: #000000 ; text-align: left ;}
+           .cNews               {[+ $base10 +]}
+
+           .cPodHeaderNavLink   {[+ $base12 +]}
+           .cPodH1ContentLink   {[+ $base12 +] font-weight: bold;}
+           .cPodH2ContentLink   {[+ $base10 +]}
+
+           .cPodH1              {[+ $base18 +] padding-left: 15px; padding-right: 15px; background: #fefcad; color: #000000; font-weight: bold; }
+           .cPodH2              {[+ $base14 +] padding-left: 15px; padding-right: 15px; background: #D2E9F5; color: #000000; font-weight: bold; }
+           .cTopLink            {[+ $base10 +] }
+
+           .cItemText           {[+ $base14 +] font-weight: bold;  }
+           .cPodVerbatim        {font-family: monospace; font-size: 12px; background: #eeeeee; 
+                                 border-left: solid 1px black; border-right: solid 1px black;
+                                 padding-top: 3px}
+
+           body                 {[+ $base12 +]}
+           table                {[+ $base12 +]}
+           a:hover              { color: red ;}
         </style>
     </head>
     <body bgcolor="#ffffff">
@@ -24,11 +50,11 @@ $http_headers_out{'content-type'} = 'text/html' ;
             <tr>
                 <td valign="top">[- Execute ('menuleft.epl') -]</td>
                 <td valign="top" width="2">&nbsp;</td>
-                <td valign="top" height="100%"><img src="/eg/images/frame.jpg" width="1" height="100%"></td>
+                <td valign="top" height="100%"><img src="[+ $r -> {imageuri} +]frame.jpg" width="1" height="100%"></td>
                 <td valign="top" width="10">&nbsp;</td>
                 <td valign="top" width="90%">[- Execute ('content.epl') -]</td>
                 <td valign="top" width="2">&nbsp;</td>
-                <td valign="top" height="100%"><img src="/eg/images/frame.jpg" width="1" height="100%"></td>
+                <td valign="top" height="100%"><img src="[+ $r -> {imageuri} +]frame.jpg" width="1" height="100%"></td>
                 <td valign="top" width="10">&nbsp;</td>
             </tr>
         </table>

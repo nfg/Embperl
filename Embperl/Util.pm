@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Util.pm,v 1.1.2.7 2002/02/28 07:54:58 richter Exp $
+#   $Id: Util.pm,v 1.1.2.8 2002/05/27 17:53:13 richter Exp $
 #
 ###################################################################################
 
@@ -92,15 +92,6 @@ sub CreateAliases
             *{"$package\:\:$_"}    = \@{"Embperl\:\:$_"} ;
             }
 
-    	if (defined (&Apache::exit))
-            {
-            *{"$package\:\:exit"}    = \&Apache::exit 
-            }
-        else
-            {
-            *{"$package\:\:exit"}    = \&Embperl::exit 
-            }
-                    
 
         my $sess ;
         $sess = $Embperl::req -> app -> udat ;
@@ -110,8 +101,9 @@ sub CreateAliases
         $sess = $Embperl::req -> app -> sdat ;
         *{"$package\:\:sdat"} = $sess if ($sess) ;
 
+        *{"$package\:\:exit"}       = \&Embperl::exit ;
         *{"$package\:\:MailFormTo"} = \&Embperl::MailFormTo ;
-        *{"$package\:\:Execute"} = \&Embperl::Req::ExecuteComponent ;
+        *{"$package\:\:Execute"}    = \&Embperl::Req::ExecuteComponent ;
 
         tie *{"$package\:\:LOG"}, 'Embperl::Log' ;
         tie *{"$package\:\:OUT"}, 'Embperl::Out' ;

@@ -10,14 +10,12 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Embperl.pm,v 1.118.4.101 2002/03/21 06:04:05 richter Exp $
+#   $Id: Embperl.pm,v 1.118.4.117 2002/06/25 06:09:59 richter Exp $
 #
 ###################################################################################
 
 
 package Embperl;
-
-
 
 require Cwd ;
 
@@ -41,14 +39,22 @@ use vars qw(
     $importno 
     %initparam
     $modperl
+    $modperl2
+    $req
     ) ;
 
 
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = '2.0b7' ;
+$VERSION = '2.0b8' ;
 
-$modperl = $ENV{MOD_PERL} ;
+
+if ($modperl  = $ENV{MOD_PERL})
+    {
+    $modperl  =~ m#/(\d+)\.(\d+)# ;
+    $modperl2 = 1 if ($1 == 2 || ($1 == 1 && $2 >= 99)) ;
+    }
+
 
 if ($ENV{PERL_DL_NONLAZY}
 	&& substr($ENV{GATEWAY_INTERFACE} || '', 0, 8) ne 'CGI-Perl'
@@ -58,14 +64,22 @@ if ($ENV{PERL_DL_NONLAZY}
     DynaLoader::boot_DynaLoader ('DynaLoader');
     }
 
-
+if ($modperl2)
+    {
+    require Apache::Server ;
+    require Apache::ServerUtil ;
+    require Apache::RequestRec ;
+    require Apache::RequestUtil ;
+    require Apache::SubRequest ;
+    }
 
 if (!defined(&Embperl::Init))
     {
-    bootstrap Embperl $VERSION;
+    bootstrap Embperl $VERSION  ;
     Boot ($VERSION) ;
     Init ($modperl?Apache -> server:undef, \%initparam) ;
     }
+
 
 $cwd       = Cwd::fastcwd();
 
@@ -81,6 +95,9 @@ sub Execute
     my $_ep_param = shift ;
 
     local $SIG{__WARN__} = \&Warn ;
+
+    # when called inside a Embperl Request, Execute the component only
+    return Embperl::Req::ExecuteComponent ($_ep_param, @_) if ($req) ;
 
     if (!ref $_ep_param)
         {
@@ -130,8 +147,16 @@ use strict ;
 
 if ($Embperl::modperl)
     { 
-    eval 'use Apache::Constants qw(&OPT_EXECCGI &DECLINED &OK &FORBIDDEN)' ;
-    die "use Apache::Constants failed: $@" if ($@); 
+    if (!$Embperl::modperl2)
+        { 
+        eval 'use Apache::Constants qw(&OPT_EXECCGI &DECLINED &OK &FORBIDDEN)' ;
+        die "use Apache::Constants failed: $@" if ($@); 
+        }
+    else
+        { 
+        eval 'use Apache::Const qw(&OPT_EXECCGI &DECLINED &OK &FORBIDDEN)' ;
+        die "use Apache::Const failed: $@" if ($@); 
+        }
     }
 
 #######################################################################################
@@ -140,10 +165,11 @@ sub ExecuteComponent
     
     {
     my $_ep_param = shift ;
+    my $rc ;
 
     if (!ref $_ep_param)
         {
-        $Embperl::req -> execute_component ({ inputfile => $_ep_param, param => [@_]}) ;
+        $rc = $Embperl::req -> execute_component ({ inputfile => $_ep_param, param => [@_]}) ;
         }
     elsif ($_ep_param -> {object})
         {
@@ -161,8 +187,11 @@ sub ExecuteComponent
         }
     else
         {
-        $Embperl::req -> execute_component ($_ep_param) ;
+        $rc = $Embperl::req -> execute_component ($_ep_param) ;
         }
+    Embperl::exit() if ($Embperl::req -> had_exit) ;
+
+    return $rc ;
     }
 
 #######################################################################################
@@ -174,6 +203,7 @@ sub get_multipart_formdata
     my $dbgForm = $self -> config -> debug & Embperl::Constant::dbgForm ;
 
     # just let CGI.pm read the multipart form data, see cgi docu
+    require Apache::compat if ($Embperl::modperl2) ; # Apache::compat is need for CGI.pm
     require CGI ;
 
     my $cgi = new CGI ;

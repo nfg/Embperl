@@ -1,14 +1,14 @@
 This directory contains a few examples for use of Embperl.
 
-eg/web          This directory contains the upcoming new Embperl website.
+eg/web          This directory contains the new Embperl website.
                 It uses most of the new possibilites of Embperl 2.0b6+.
                 To take a look at it just type "make start" and then
                 request http://localhost:8531/eg/web/ . To get it
-                working you need to have libxml installed and a mysql
+                working you need to have libxml installed and a 
                 database called "embperl", which should be setup with
                 the script setupdb.pl in eg/webutil.
-                Keep in mind that this sample web isn't ready yet, it's
-                just here to give you an idea what will coming...
+                Look at eg/web/README for more informations and setup
+                instructions.
 
 eg/x		Here are the following html files
 eg/images	Here are the background  GIF

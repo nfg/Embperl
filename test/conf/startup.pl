@@ -2,9 +2,19 @@
 BEGIN { 
     use lib qw{ . } ;
     use ExtUtils::testlib ;
-    use Cwd ;
+
+    $ENV{MOD_PERL} =~ m#/(\d+)\.(\d+)# ;
+    $mp2 = 1 if ($1 == 2 || ($1 == 1 && $2 >= 99)) ;
     
-    my $cwd       = $ENV{EMBPERL_SRC} ;
+    if ($mp2 && $ENV{PERL5LIB}) 
+        {
+        $ENV{PERL5LIB} =~ /^(.*)$/ ;
+        eval 'use lib split (/:/, $1) ;' ;
+        }
+
+    $ENV{EMBPERL_SRC} =~ /^(.*?)$/;
+    my $cwd       = $1 ; # untaint
+    #my $cwd = '/usr/msrc/ep2a' ;
     my $i = 0 ;
     foreach (@INC)
         {
@@ -13,14 +23,26 @@ BEGIN {
         }
    
 
+
+    if (!$mp2)
+        {
+        require Apache ;
+        require Apache::Registry ;
+        }
+    else
+        {
+        require ModPerl::Registry ;
+        }
     } ;
 
-use Apache ;
-use Apache::Registry ;
+
 use Embperl ;
 use Embperl::Object ;
 
-require "$ENV{EMBPERL_SRC}/test/testapp.pl" ;
+$ENV{EMBPERL_SRC} =~ /^(.*?)$/;
+my $cwd       = $1 ;
+
+require "$cwd/test/testapp.pl" ;
 
 $cp = Embperl::Util::AddCompartment ('TEST') ;
 

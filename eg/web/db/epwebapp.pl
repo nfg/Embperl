@@ -1,6 +1,7 @@
 
 
 use DBIx::Recordset ;
+use Data::Dumper ;
 
 BEGIN { Execute ({isa => '../epwebapp.pl', syntax => 'Perl'}) ;  }
 
@@ -51,13 +52,13 @@ sub initdb
     {
     my $self     = shift ;
     my $r        = shift ;
+    my $config   = $r -> {config} ;
 
-
-    $DBIx::Recordset::Debug = 2 ;
-    *DBIx::Recordset::LOG = \*STDERR ;
-    my $db = DBIx::Database -> new ({'!DataSource' => $r -> {dbdsn},
-                                     '!Username'   => $r -> {dbuser},
-                                     '!Password'   => $r -> {dbpassword},
+    $DBIx::Recordset::Debug = 1 ;
+    #*DBIx::Recordset::LOG = \*STDERR ;
+    my $db = DBIx::Database -> new ({'!DataSource' => $config -> {dbdsn},
+                                     '!Username'   => $config -> {dbuser},
+                                     '!Password'   => $config -> {dbpassword},
                                      '!DBIAttr'    => { RaiseError => 1, PrintError => 1, LongReadLen => 32765, LongTruncOk => 0, },
                                      
                                      }) ;
@@ -81,6 +82,8 @@ sub current_time
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
                                              localtime(time);
 
+    $mon++ ;
+    $year += 1900 ;
     return "$year-$mon-$mday $hour:$min:$sec" ;
     }
 
@@ -173,6 +176,7 @@ sub get_item
                                                        '!Table' => 'item, itemtext', 
                                                        '!TabRelation' => 'item_id = item.id',
                                                        'language_id'  => $r -> param -> language,
+                                                       '!Order'         => 'creationtime desc',
                                                        $fdat{category_id}?(category_id => $fdat{category_id}):(),
                                                        $fdat{item_id}?(item_id => $fdat{item_id}):()}) ;
     }
@@ -188,6 +192,7 @@ sub get_item_lang
     $r -> {item_set} = DBIx::Recordset -> Search ({'!DataSource' => $r -> {db}, 
                                                        '!Table' => 'item, itemtext, language', 
                                                        '!TabRelation' => 'item_id = item.id and language_id = language.id',
+                                                       '!Order'         => 'creationtime desc',
                                                        $fdat{category_id}?(category_id => $fdat{category_id}):(),
                                                        $fdat{item_id}?(item_id => $fdat{item_id}):()}) ;
     }

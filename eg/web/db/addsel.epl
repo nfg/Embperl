@@ -1,4 +1,8 @@
 [- 
+use Embperl::Form::Validate ;
+use File::Basename ;
+
+
 $r = shift ;
 
 my $langset = $r -> {language_set} ;
@@ -18,7 +22,7 @@ while ($rec = $$langset -> Next)
 
 
 
-use Embperl::Form::Validate ;
+
 $epf = Embperl::Form::Validate -> new ([
                                         -key => \@keys,
                                         -name => { de => 'eine Kategorie', en => 'one category' },
@@ -43,7 +47,7 @@ $Embperl::Form::Validate::objects{'addsel'} = $epf ;
 </ul>
 
 
-<form action="[+ $r -> param -> uri +]"  OnSubmit="">
+<form action="[+ $r -> {action_prefix}?($r->{action_prefix} . dirname($r-> param -> uri) .'/'):''+]addsel.epl"  OnSubmit="">
 
 [= addsel2 =]<br> 
 [= addsel3 =]<br><br>

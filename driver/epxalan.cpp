@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epxalan.cpp,v 1.1.2.24 2002/03/05 12:46:02 richter Exp $
+#   $Id: epxalan.cpp,v 1.1.2.25 2002/06/24 09:22:47 richter Exp $
 #
 ###################################################################################*/
 
@@ -234,7 +234,11 @@ static int ProviderXalanXSL_GetContentPtr  (/*in*/ req *            r,
 	    }
     
 
-    
+        r -> Component.pCurrPos = NULL ;
+        r -> Component.nSourceline = 1 ;
+        r -> Component.pSourcelinePos = NULL ;    
+        r -> Component.pLineNoCurrPos = NULL ;    
+
         istrstream	theXMLStream(p, len);
 
         if (theXalanTransformer -> compileStylesheet(&theXMLStream, pCompiledStylesheet))
@@ -473,7 +477,10 @@ static int ProviderXalanXML_GetContentPtr  (/*in*/ req *            r,
 	    return rcMissingInput ;
 	    }
     
-
+        r -> Component.pCurrPos = NULL ;
+        r -> Component.nSourceline = 1 ;
+        r -> Component.pSourcelinePos = NULL ;    
+        r -> Component.pLineNoCurrPos = NULL ;    
     
         istrstream	theXMLStream(p, len);
 
@@ -974,6 +981,12 @@ static int ProviderXalan_GetContentSV      (/*in*/ req *            r,
     IV		    l ;    
     STRLEN	    len ;    
     struct iowrite iowrite ;
+    
+    r -> Component.pCurrPos = NULL ;
+    r -> Component.nSourceline = 1 ;
+    r -> Component.pSourcelinePos = NULL ;    
+    r -> Component.pLineNoCurrPos = NULL ;    
+
     
     tCacheItem * pSrcCache = Cache_GetDependency(r, pProvider -> pCache, 0) ;
     tCacheItem * pXSLCache = Cache_GetDependency(r, pProvider -> pCache, 1) ;

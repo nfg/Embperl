@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcmd2.c,v 1.4.2.19 2002/03/20 15:31:00 richter Exp $
+#   $Id: epcmd2.c,v 1.4.2.21 2002/04/08 03:39:09 richter Exp $
 #
 ###################################################################################*/
 
@@ -411,7 +411,7 @@ SV * Node_replaceChildWithUrlDATA (/*in*/ tReq *        r,
 	    if (ppSV && *ppSV)
 		{
 		s = SV2String (*ppSV, l) ;
-                xNode = Node_appendChild (r -> pApp, pDomTree, xOldChild, nRepeatLevel, ntypText, 0, s, l, 0, 0, NULL) ;
+                xNode = Node_appendChild (r -> pApp, pDomTree, xOldChild, nRepeatLevel, (r -> Component.nCurrEscMode & 3)?ntypTextHTML:ntypCDATA, 0, s, l, 0, 0, NULL) ;
 		if (r -> Component.nCurrEscMode & 2) 
                     Node_selfLevel (r -> pApp, pDomTree, xNode, nRepeatLevel) -> bFlags |= nflgEscUrl ;
                 }
@@ -432,7 +432,9 @@ SV * Node_replaceChildWithUrlDATA (/*in*/ tReq *        r,
         int         i = 0 ;
 	I32	    l32 ;
 
+        lprintf (r -> pApp, "xOldChild=%d, rl=%d\n", xOldChild, nRepeatLevel) ;
         xOldChild = Node_replaceChildWithCDATA (r -> pApp, DomTree_self(xDomTree), xOldChild, nRepeatLevel, "", 0, 4, 0) ;
+        lprintf (r -> pApp, "a xOldChild=%d, rl=%d\n", xOldChild, nRepeatLevel) ;
 
 	hv_iterinit (pHV) ;
 	while (pEntry = hv_iternext (pHV))
@@ -440,7 +442,7 @@ SV * Node_replaceChildWithUrlDATA (/*in*/ tReq *        r,
             if (i++ > 0)
                 Node_appendChild (r -> pApp, pDomTree, xOldChild, nRepeatLevel, ntypCDATA, 0, "&amp;", 5, 0, 0, NULL) ;
 	    pKey     = hv_iterkey (pEntry, &l32) ;
-            xNode = Node_appendChild (r -> pApp, pDomTree, xOldChild, nRepeatLevel, ntypText, 0, pKey, l32, 0, 0, NULL) ;
+            xNode = Node_appendChild (r -> pApp, pDomTree, xOldChild, nRepeatLevel, (r -> Component.nCurrEscMode & 3)?ntypTextHTML:ntypCDATA, 0, pKey, l32, 0, 0, NULL) ;
 	    if (r -> Component.nCurrEscMode & 2) 
                 Node_self (pDomTree, xNode) -> bFlags |= nflgEscUrl ;
 
@@ -450,7 +452,7 @@ SV * Node_replaceChildWithUrlDATA (/*in*/ tReq *        r,
 	    if (pSVValue)
 		{
 		s = SV2String (pSVValue, l) ;
-                xNode = Node_appendChild (r -> pApp, pDomTree, xOldChild, nRepeatLevel, ntypText, 0, s, l, 0, 0, NULL) ;
+                xNode = Node_appendChild (r -> pApp, pDomTree, xOldChild, nRepeatLevel, (r -> Component.nCurrEscMode & 3)?ntypTextHTML:ntypCDATA, 0, s, l, 0, 0, NULL) ;
 		if (r -> Component.nCurrEscMode & 2) 
                     Node_selfLevel (r -> pApp, pDomTree, xNode, nRepeatLevel) -> bFlags |= nflgEscUrl ;
                 }

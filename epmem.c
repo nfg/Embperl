@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epmem.c,v 1.1.2.5 2002/03/12 04:52:07 richter Exp $
+#   $Id: epmem.c,v 1.1.2.6 2002/05/20 07:04:24 richter Exp $
 #
 ###################################################################################*/
 
@@ -112,7 +112,7 @@
 #endif
 
 
-/* --- don't use Perl's memory management here and io layer --- */
+/* --- don't use Perl's memory management and io layer here --- */
 
 #undef malloc
 #undef free

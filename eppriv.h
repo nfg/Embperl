@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eppriv.h,v 1.1.2.16 2002/03/20 08:12:53 richter Exp $
+#   $Id: eppriv.h,v 1.1.2.19 2002/05/27 17:53:13 richter Exp $
 #
 ###################################################################################*/
 
@@ -210,9 +210,11 @@ int embperl_GetCGIReqParam     (/*in*/ tApp        * pApp,
 
 /* --- init --- */
 
+#if 0
 void embperl_DefaultAppConfig (/*in*/ tAppConfig  *pCfg) ;
 void embperl_DefaultReqConfig (/*in*/ tReqConfig  *pCfg) ;
 void embperl_DefaultComponentConfig (/*in*/ tComponentConfig  *pCfg) ;
+#endif
 
 void Embperl__App_new_init(pTHX_ tApp * pApp, SV * pPerlParam, int overwrite) ;
 void Embperl__App__Config_new_init(pTHX_ tAppConfig * pAppConfig, SV * pPerlParam, int overwrite) ;

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Object.pm,v 1.1.2.18 2002/03/13 06:29:36 richter Exp $
+#   $Id: Object.pm,v 1.1.2.25 2002/06/20 07:05:20 richter Exp $
 #
 ###################################################################################
 
@@ -48,7 +48,7 @@ use vars qw(
 @ISA = qw(Exporter DynaLoader);
 
 
-$VERSION = '2.0b6';
+$VERSION = '2.0b8';
 
 
 $volume = (File::Spec -> splitpath ($Embperl::cwd))[0] ;
@@ -77,6 +77,11 @@ sub norm_path
     if (File::Spec->file_name_is_absolute ($path))
         {
         $path = File::Spec -> canonpath ($path) ;
+        if (!$_[0])
+            {
+            my ($volume, $dir, $file) = File::Spec -> splitpath ($path) ;
+            $_[0] = File::Spec -> catdir ($volume, $dir) ;
+            }
         }
     else
         {            
@@ -123,7 +128,13 @@ sub Execute
     my $req = shift ;
     
     my ($rc, $r) = Embperl::Req::InitRequest ($req -> {req_rec}, $req) ;
-    return $rc if ($rc) ;
+    my $debug     = $r && ($r -> config -> debug & Embperl::Constant::dbgObjectSearch) ;
+    
+    if ($rc) 
+        {
+        print Embperl::LOG "[$$]Embperl::Object InitRequest returns $rc\n"  if ($debug);
+        return $rc ;
+        }
 
     my $app    = $r -> app ;
     my $appcfg = $app -> config;
@@ -139,7 +150,6 @@ sub Execute
     my $directory ;
     my $rootdir   = $apr?norm_path ($apr -> document_root, $cwd):"$volume/" ;
     my $stopdir   = norm_path ($appcfg -> object_stopdir, $cwd) ;
-    my $debug     = $r -> config -> debug & Embperl::Constant::dbgObjectSearch ;
     
     if (-d $filename)
         {
@@ -274,17 +284,26 @@ sub Execute
                 elsif ($status) 
                     {
                     $r -> cleanup ;
+                    print Embperl::LOG "[$$]Embperl::Object Application -> init had returned $status\n"  if ($debug);
                     return $status ;
                     }
                 $filename = norm_path ($r -> param -> filename, $cwd) ;
                 }
             }
 
-        if (!-f $filename && $appcfg -> object_fallback)
+        if (!-f $filename)
             {
-            $fallback = 1 ;
-            $filename = $appcfg -> object_fallback ;
-            print Embperl::LOG "[$$]Embperl::Object use fallback: $filename\n"  if ($debug);
+            if ($appcfg -> object_fallback)
+                {
+                $fallback = 1 ;
+                $filename = $appcfg -> object_fallback ;
+                print Embperl::LOG "[$$]Embperl::Object use fallback: $filename\n"  if ($debug);
+                }
+            else
+                {
+                print Embperl::LOG "[$$]Embperl::Object $filename not found, no fallback\n"  if ($debug);
+                return NOT_FOUND ;
+                }
             }
     
         if ($fn eq $filename) 
@@ -304,7 +323,7 @@ sub Execute
             run($c) ;
             $package = $packages{$filename} = $c -> curr_package if (!$r -> error);
             $c -> cleanup ;
-            print Embperl::LOG "[$$]Embperl::Object import finished: $filename, package = $package\n"  if ($debug);
+            print Embperl::LOG "[$$]Embperl::Object import file ", ($r -> error?'with ERRORS ':'') , "finished: $filename, package = $package\n"  if ($debug);
 
             if (!$r -> error && $package ne $basepackage)
                 {
@@ -328,9 +347,9 @@ sub Execute
         my $cparam = {%$req, inputfile => $fn } ;
         my $c = $r -> setup_component ($cparam) ;
 
-        run($r) ;
+        $rc = run($r) ;
         $r -> cleanup ;
-        return &OK ;
+        return $rc ;
         }
 
    

@@ -9,7 +9,7 @@ THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF 
 MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-$Id: README.v2,v 1.1.4.29 2002/03/21 06:04:05 richter Exp $
+$Id: README.v2,v 1.1.4.32 2002/06/25 05:59:17 richter Exp $
 
 
 ### !! IMPORTANT !! IMPORTANT !! IMPORTANT !! IMPORTANT !! IMPORTANT !! 
@@ -199,12 +199,21 @@ The following differences to Embperl 1.x apply:
 - EMBPERL_INPUT_FUNC and EMBPERL_OUTPUT_FUNC are not supported anymore
   You can the same result and much more by writing custom provider.
 
+- Embperl doesn't change the current working directory anymore to the
+  directory of the source file. This is done for performance reasons 
+  and because it won't reliable work with threads under mod_perl 2.0.
+  You can use $req -> component -> cwd to get the directotry of the
+  sourcefile (where $req is Embperl request object, which is the first
+  paramter passed to the page i.e. $_[0])
+
+
 
 The following things are not fully tested/working yet:
 ------------------------------------------------------
 
 - [- exit -]
   exit works not inside of [$ sub $], outside it works
+  (It also can now exit the whole request, see below)  
 
 - safe namespaces
 
@@ -299,7 +308,7 @@ where 'xxx' is the name of the syntax.
 
 You can also specify multiple syntaxes e.g.
 
-    PerlSetEnv EMBPERL_SYNTAX "Embperl SSI"
+    EMBPERL_SYNTAX "Embperl SSI"
 
     Execute ({inputfile => '*', syntax => 'Embperl ASP'}) ;
 
@@ -455,7 +464,6 @@ Overview Embperl objects and their methods
 
    allow
    urimatch
-   decline
    mult_field_sep
    path
    debug
@@ -524,7 +532,6 @@ Overview Embperl objects and their methods
    escmode
    input_escmode
    input_charset
-   ep1compat
    cache_key
    cache_key_options
    expires_func
@@ -637,8 +644,20 @@ use enviroment variables, you must set
 For CGI mode still use enviroment variables.
 
 
+exit
+----
 
+B<exit> will override the normal Perl exit in every Embperl document. Calling
+exit will immediately stop any further processing of that file and send the
+already-done work to the output/browser. 
 
+B<NOTE 1:> If you are inside of an Execute, Embperl will only exit this Execute, but 
+the file which called the file containing the exit with Execute will continue. If
+you want to exit the whole request, call exit with an argument e.g. exit (200)
+ 
+B<NOTE 2:> If you write a module which should work with Embperl under mod_perl, 
+you must use Embperl::exit instead of the normal Perl exit. (In 1.3.x it was
+Apache::Exit)
 
 
 Recipes

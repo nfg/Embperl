@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: test.pl,v 1.70.4.132 2002/03/21 05:37:50 richter Exp $
+#   $Id: test.pl,v 1.70.4.141 2002/06/25 06:09:59 richter Exp $
 #
 ###################################################################################
 
@@ -298,14 +298,18 @@
         },
     'includeerr1.htm' => { 
         'errors'     => '1',
+        'repeat'     => 2,
         },
     'includeerr2.htm' => { 
         'errors'     => 4,
         'version'    => 1,
+        'condition'  => '$] >= 5.006001', 
         },
     'includeerr2.htm' => { 
-        'errors'     => 1,
+        'errors'     => 5,
         'version'    => 2,
+        'repeat'     => 2,
+        'condition'  => '$] >= 5.006001', 
         },
     'includeerrbt.htm' => { 
         'errors'     => 3,
@@ -346,6 +350,9 @@
     'execprint.htm' => { 
         'version'    => 2,
         },
+    'execviamod.htm' => { 
+        'version'    => 2,
+        },
 #    'execinside.htm' => { 
 #        },
     'importsub.htm' => { 
@@ -381,17 +388,17 @@
             'version'    => 2,
         },
     'exit.htm' => { 
-        #'version'    => 1,
-        'offline'    => 0,
         'cgi'        => 0,
         },
     'exit2.htm' => { 
-        #'version'    => 1,
-        'offline'    => 0,
         },
     'exit3.htm' => { 
         'version'    => 1,
         'offline'    => 0,
+        },
+    'exitreq.htm' => { 
+        },
+    'exitcomp.htm' => { 
         },
     'chdir.htm' => { 
         'query_info' => 'a=1&b=2&c=&d=&f=5&g&h=7&=8&=',
@@ -711,6 +718,10 @@
         'version'    => 2,
         },
     'syntax.htm' => { 
+        'version'    => 2,
+        'repeat'     => 2,
+        },
+    'changeattr.htm' => { 
         'version'    => 2,
         'repeat'     => 2,
         },
@@ -1098,8 +1109,8 @@ die "You must install libwin32 first" if ($EPWIN32 && $win32loaderr && $EPHTTPD)
 
 #### setup files ####
 
-$httpdconfsrc = "$confpath/httpd.conf.src" ;
 $httpdconf = "$confpath/httpd.conf" ;
+$httpdstopconf = "$confpath/httpd.stop.conf" ;
 $httpderr   = "$tmppath/httpd.err.log" ;
 $offlineerr = "$tmppath/test.err.log" ;
 $outfile    = "$tmppath/out.htm" ;
@@ -2389,38 +2400,44 @@ do
 	        chop($httpdpid) ;       
 	        close FH ;
                 
-	        unlink "$tmppath/httpd.pid" ;
-                
                 print "Try to kill Apache pid = $httpdpid\n" ;
                 if ($EPWIN32)
                     {
-                    my $exitcode = 0 ;
-                    Win32::Process::KillProcess($httpdpid, $exitcode)
+                    system ("\"$EPHTTPD\" -k stop -f \"$EPPATH/$httpdstopconf\" ") ;
                     }
                 else
                     {
                     kill 15, $httpdpid ;
                     }
+                foreach (1..5)
+                    {
+                    last if (!-f "$tmppath/httpd.pid") ;
+                    sleep (1) ;
+                    }
+
+	        unlink "$tmppath/httpd.pid" ;
                 }
             }
 
 	#### Configure httpd conf file
 	$EPDEBUG = $defaultdebug ;
 
-	my $cf ;
-	my $rs = $/ ;
-	undef $/ ;
-
-	$ENV{EMBPERL_LOG} = $logfile ;
-	open IFH, $httpdconfsrc or die "***Cannot open $httpconfsrc" ;
-	$cf = <IFH> ;
-	close IFH ;
-	open OFH, ">$httpdconf" or die "***Cannot open $httpconf" ;
-	eval $cf ;
-	die "***Cannot eval $httpconf ($@)" if ($@) ;
-	close OFH ;
-	$/ = $rs ;
-    
+        $ENV{EMBPERL_LOG} = $logfile ;
+        foreach my $src (<$confpath/*.src>)
+            { 
+            local $^W = 0 ;
+	    my $cf ;
+	    local $/ = undef ;
+            my ($dest) = ($src =~ /^(.*)\.src$/) ;
+	    open IFH, $src or die "***Cannot open $src" ;
+	    $cf = <IFH> ;
+	    close IFH ;
+            open OFH, ">$dest" or die "***Cannot open $dest" ;
+	    eval $cf ;
+	    die "***Cannot eval $src to $dest ($@)" if ($@) ;
+	    close OFH ;
+            }
+                
 	#### Start httpd
 	print "\n\nStarting httpd...       " ;
 	unlink "$tmppath/httpd.pid" ;
@@ -2477,26 +2494,15 @@ do
                 last ;
                 }
             if ($herr || open (HERR, $httpderr))
-
                 {  
-
 	        seek HERR, 0, 1 ;
-
                 print "\n" if (!$herr) ;
-
                 $herr = 1 ;
-
                 while (<HERR>)
-
                     {
-
                     print ;
-
                     }
-
                 }
-
-
 
             sleep (1) ;
             }
@@ -2504,18 +2510,19 @@ do
 
 
         die "Cannot open $tmppath/httpd.pid" if (!$httpdpid) ;
-	
-        if ($EPWIN32)
-            {
-            $httpdpid = $HttpdObj -> GetProcessID ;
-            }
-
 
         print "pid = $httpdpid  ok\n" ;
 
 	close ERR ;
-	open (ERR, "$httpderr") ;  
-	<ERR> ; # skip first line
+	if (!open (ERR, "$httpderr"))
+            {
+            sleep (1) ;
+	    if (!open (ERR, "$httpderr"))
+                {
+                print "Cannot open Apache error log ($httpderr: $1)\n" ;
+                }
+            }
+        eval {	<ERR> ;  } ; # skip first line and ignore errors
 	
         $httpduid = getpwnam ($EPUSER) if (!$EPWIN32) ;
         }
@@ -2741,24 +2748,81 @@ if ($err)
     }
 else
     {
-    print "\nAll test have been passed successfully!\n\n" ;
+    if ($opt_modperl || $opt_cgi || $opt_offline || $opt_execute || $opt_cache || $opt_ep1)
+        {
+        print "\nAll test have been passed successfully!\n\n" ;
+        }
+    elsif ($opt_start)
+        {
+        my $make = $EPWIN32?'nmake':'make' ;
+     
+        print qq{
+
+-----------------------------------------------------------------------
+
+        Test server has been started. 
+
+ To view the Embperl web site direct your browser to 
+
+    http://localhost:$EPPORT/eg/web/
+
+ View $EPPATH/eg/web/README for more details about localy 
+ setting up the Embperl website.
+
+ To stop the test server again run
+
+    $make stop
+
+-----------------------------------------------------------------------
+
+} ;
+        }
+    elsif ($opt_kill)
+        {
+        my $make = $EPWIN32?'nmake':'make' ;
+     
+        print qq{
+
+-----------------------------------------------------------------------
+
+        Test server will be stopped now. 
+
+-----------------------------------------------------------------------
+
+} ;
+        }
+
     }
 
-if (defined ($line = <ERR>) && !defined ($opt_ab))
-	{
-	print "\nFound unexpected output in httpd errorlog:\n" ;
-	print $line ;
-	while (defined ($line = <ERR>))
-		{ print $line ; }
-	}
-close ERR ;
-		
+    {
+    local $^W = 0 ;
+    if (defined ($line = <ERR>) && !defined ($opt_ab))
+	    {
+	    print "\nFound unexpected output in httpd errorlog:\n" ;
+	    print $line ;
+	    while (defined ($line = <ERR>))
+		    { print $line ; }
+	    }
+    close ERR ;
+    } ;
+    		
 $fatal = 0 ;
 
 
 if ($EPWIN32)
     {
-    $HttpdObj->Kill(-1) if ($HttpdObj && !$opt_nokill) ;
+    if (!$opt_nokill) 
+        {
+        if ($HttpdObj)
+            {    
+            $HttpdObj->Kill(-1) ;
+            unlink "$tmppath/httpd.pid" ;
+            }
+        elsif (-f "$EPPATH/$httpdstopconf" && -f "$tmppath/httpd.pid")
+            {
+            system ("\"$EPHTTPD\" -k stop -f $EPPATH/$httpdstopconf ") ;
+            }
+        }
     }
 else
     {

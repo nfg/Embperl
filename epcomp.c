@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcomp.c,v 1.4.2.96 2002/03/20 20:38:58 richter Exp $
+#   $Id: epcomp.c,v 1.4.2.97 2002/05/28 06:56:03 richter Exp $
 #
 ###################################################################################*/
 
@@ -112,8 +112,8 @@ int embperl_CompileInitItem      (/*i/o*/ register req * r,
     
 
 
+    ArraySet (r -> pApp, &pInfo -> pEmbperlCmds, nNodeName+1) ;
 
-    ArraySet (r -> pApp, &pInfo -> pEmbperlCmds, nNodeName) ;
     if (pInfo -> nMaxEmbperlCmd < nNodeName)
 	pInfo -> nMaxEmbperlCmd = nNodeName ;
     pCmd = &pInfo -> pEmbperlCmds[nNodeName] ;

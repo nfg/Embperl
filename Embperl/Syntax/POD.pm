@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: POD.pm,v 1.1.2.15 2002/03/02 00:46:17 richter Exp $
+#   $Id: POD.pm,v 1.1.2.20 2002/06/24 09:22:47 richter Exp $
 #
 ###################################################################################
  
@@ -54,7 +54,7 @@ sub new
 	$self -> {-PODTags}	  = $self -> CloneHash (\%Search) ;
 
 	$self -> AddToRoot ($self -> {-PODTags}) ;
-        $self -> AddInitCode (undef, '$escmode = 15;', undef) ;
+        $self -> AddInitCode (undef, '$escmode=0;$_ep_node=%$x%+1;print OUT "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>"; $escmode=15; ', undef) ;
 	#$self -> AddToRoot ({'-defnodetype' => ntypText,}) ;
     
 
@@ -192,6 +192,12 @@ my %Escape2 = (
         'nodename' => 'code',
         'nodetype'  => ntypStartEndTag,
         },
+    'POD Format F' => {
+	'text' => 'F<',
+	'end'  => '>',
+        'nodename' => 'code',
+        'nodetype'  => ntypStartEndTag,
+        },
     'POD Format I' => {
 	'text' => 'I<',
 	'end'  => '>',
@@ -225,6 +231,7 @@ my %Escape2 = (
                         'nodename' => 'uri',
                         'nodetype'   => ntypAttr,
                         'cdatatype'  => ntypAttrValue,
+                        'addflags' => aflgSingleQuote,
                         },
                     'Quote \'\'' => 
                         {
@@ -233,6 +240,7 @@ my %Escape2 = (
                         'nodename' => 'uri',
                         'nodetype'   => ntypAttr,
                         'cdatatype'  => ntypAttrValue,
+                        'addflags' => aflgSingleQuote,
                         },
                     'all' => 
                         {
@@ -241,6 +249,7 @@ my %Escape2 = (
                         'nodetype'   => ntypAttr,
                         'cdatatype'  => ntypAttrValue,
                         'donteat' => 2,
+                        'addflags' => aflgSingleQuote,
                         },
                     },
                 },
@@ -266,6 +275,7 @@ my %Escape2 = (
                 'nodetype'   => ntypAttr,
                 'cdatatype'  => ntypAttrValue,
                 'donteat' => 2,
+                'addflags' => aflgSingleQuote,
                 },
 
             },
@@ -276,11 +286,19 @@ my %Escape2 = (
         'nodename' => 'xlink',
         'nodetype'  => ntypStartEndTag,
         },
+    'POD Format #' => {
+	'text' => '#<',
+	'end'  => '>',
+        'nodename' => 'id',
+        'nodetype'   => ntypAttr,
+        'cdatatype'  => ntypAttrValue,
+        'removespaces' => 72,
+        },
     'http link' => {
 	'text' => 'http://',
         'nodename' => 'xlink',
         'nodetype'  => ntypStartEndTag,
-        'contains'   => '/.-:abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789',
+        'contains'   => '/.-:~abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789',
         'cdatatype' => ntypText,
         'donteat'   => 1,
         },
@@ -288,7 +306,7 @@ my %Escape2 = (
 	'text' => 'ftp://',
         'nodename' => 'xlink',
         'nodetype'  => ntypStartEndTag,
-        'contains'   => '/.-:abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789',
+        'contains'   => '/.-:~abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789',
         'cdatatype' => ntypText,
         'donteat'   => 1,
         },
@@ -317,6 +335,15 @@ my $paraend = "\n\n" ;
         'nodename'  => 'list',
         'removespaces'  => 72,
         'exitinside' => 1,
+        },
+    'item*' => {
+        'text'      => '=item *',
+        'end'       => '=item *',
+        'donteat'   => 2,
+        'nodetype'  => ntypStartEndTag,
+        'nodename' => 'item',
+        'removespaces' => 2,
+        'inside'  => \%ParaItem,
         },
     'item' => {
         'text'      => '=item',

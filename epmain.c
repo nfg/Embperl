@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epmain.c,v 1.75.4.113 2002/03/20 08:22:37 richter Exp $
+#   $Id: epmain.c,v 1.75.4.125 2002/06/24 19:22:29 richter Exp $
 #
 ###################################################################################*/
 
@@ -116,7 +116,7 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
         case rcEndtableWithoutTable:    msg ="[%d]ERR:  %d: %s blockend <%s> does not match blockstart <%s>" ; break ;
         case rcTablerowOutsideOfTable:  msg ="[%d]ERR:  %d: %s <tr> outside of table%s%s" ; break ;
         case rcCmdNotFound:             msg ="[%d]ERR:  %d: %s Unknown Command %s%s" ; break ;
-        case rcOutOfMemory:             msg ="[%d]ERR:  %d: %s Out of memory%s%s" ; break ;
+        case rcOutOfMemory:             msg ="[%d]ERR:  %d: %s Out of memory %s %s" ; break ;
         case rcPerlVarError:            msg ="[%d]ERR:  %d: %s Perl variable error %s%s" ; break ;
         case rcHashError:               msg ="[%d]ERR:  %d: %s Perl hash error, %%%s does not exist%s" ; break ;
         case rcArrayError:              msg ="[%d]ERR:  %d: %s Perl array error , @%s does not exist%s" ; break ;
@@ -140,7 +140,7 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
         case rcUnknownVarType:          msg ="[%d]ERR:  %d: %s Type for Variable %s is unknown %s" ; break ;
         case rcPerlWarn:                msg ="[%d]ERR:  %d: %s Warning in Perl code: %s%s" ; break ;
         case rcVirtLogNotSet:           msg ="[%d]ERR:  %d: %s EMBPERL_VIRTLOG must be set, when dbgLogLink is set %s%s" ; break ;
-        case rcMissingInput:            msg ="[%d]ERR:  %d: %s Sourcedata missing %s%s" ; break ;
+        case rcMissingInput:            msg ="[%d]ERR:  %d: %s Sourcedata/-file missing %s%s" ; break ;
         case rcUntilWithoutDo:          msg ="[%d]ERR:  %d: %s until without do%s%s" ; break ;
         case rcEndforeachWithoutForeach:msg ="[%d]ERR:  %d: %s endforeach without foreach%s%s" ; break ;
         case rcMissingArgs:             msg ="[%d]ERR:  %d: %s Too few arguments%s%s" ; break ;
@@ -175,6 +175,8 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
         case rcCannotCheckUri:          msg ="[%d]ERR:  %d: %s Cannot check URI against ALLOW and/or URIMATCH because URI is unknown" ; break ; 
         case rcSetupSessionErr:         msg ="[%d]ERR:  %d: %s Embperl Session handling DISABLED because of the following error: %s\nSet EMBPERL_SESSION_HANDLER_CLASS to 'no' to avoid this message. %s" ; break ; 
         case rcRefcntNotOne:            msg ="[%d]ERR:  %d: %s There is still %s reference(s) to the %s object, while there shouldn't be any." ; break ; 
+        case rcApacheErr:               msg ="[%d]ERR:  %d: %s Apache returns Error: %s %s" ; break ; 
+        case rcTooDeepNested:           msg ="[%d]ERR:  %d: %s Source data is too deep nested %s %s" ; break ; 
 
 	default:                        msg ="[%d]ERR:  %d: %s Error (no description) %s %s" ; break ; 
         }
@@ -243,9 +245,9 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
     if (r && r -> pApacheReq)
 #ifdef APLOG_ERR
         if (rc != rcPerlWarn)
-            aplog_error (APLOG_MARK, APLOG_ERR | APLOG_NOERRNO, r -> pApacheReq -> server, "%s", sText) ;
+            ap_log_error (APLOG_MARK, APLOG_ERR | APLOG_NOERRNO, APLOG_STATUSCODE r -> pApacheReq -> server, "%s", sText) ;
         else
-            aplog_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, r -> pApacheReq -> server, "%s", sText) ;
+            ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE r -> pApacheReq -> server, "%s", sText) ;
 #else
         log_error (sText, r -> pApacheReq -> server) ;
 #endif
@@ -346,12 +348,11 @@ char * LogError (/*i/o*/ register req * r,
     }
 
 
-
-#if defined (_DEBUG) && defined (WIN32)
+#if defined (_MDEBUG) && defined (WIN32)
 
 static int EmbperlCRTDebugOutput( int reportType, char *userMessage, int *retVal )
     {   
-    lprintf (pCurrReq, "[%d]CRTDBG: %s\n", pCurrReq -> nPid, userMessage) ;  
+    lprintf (CurrReq, "[%d]CRTDBG: %s\n", pCurrReq -> nPid, userMessage) ;  
 
     return TRUE ;
     }
@@ -593,7 +594,7 @@ static int ResetRequest (/*i/o*/ register req * r,
         time (&t) ;        
         tm =localtime (&t) ;
         
-        lprintf (r -> pApp,  "[%d]PERF: input = %s\n", r -> pThread -> nPid, sInputfile) ;
+        lprintf (r -> pApp,  "[%d]PERF: input = %s\n", r -> pThread -> nPid, sInputfile?sInputfile:"???") ;
 #ifdef CLOCKS_PER_SEC
         lprintf (r -> pApp,  "[%d]PERF: Time: %d ms ", r -> pThread -> nPid, ((cl - r -> startclock) * 1000 / CLOCKS_PER_SEC)) ;
 #else
@@ -666,8 +667,10 @@ static int StartOutput (/*i/o*/ register req * r)
             }
         else
             {
+#ifndef APACHE2
             if (r -> pApacheReq -> main == NULL && (r -> Config.bOptions & optSendHttpHeader))
             	send_http_header (r -> pApacheReq) ;
+#endif
 #ifndef WIN32
 	    /* shouldn't be neccessary for newer mod_perl versions !? */
 	    /* mod_perl_sent_header(r -> pApacheReq, 1) ; */
@@ -751,6 +754,7 @@ static int GenerateErrorPage (/*i/o*/ register req * r)
             XPUSHs(r -> _perlsv) ;   
             PUTBACK;
             perl_call_method ("mail_errors", G_DISCARD) ; 
+            SPAGAIN ;
             }
         }
     
@@ -766,19 +770,23 @@ static int GenerateErrorPage (/*i/o*/ register req * r)
 	}    
     else if (r -> Component.pOutput && !(r -> Component.Config.bOptions & optDisableEmbperlErrorPage))
 	{
-	oRollbackOutput (r, NULL) ; /* forget everything outputed so far */
+        oRollbackOutput (r, NULL) ; /* forget everything outputed so far */
 	oBegin (r) ;
 
+        SPAGAIN ;
 	PUSHMARK(sp);   
         XPUSHs(r -> pApp -> _perlsv) ;   
 	XPUSHs(r -> _perlsv) ;     
 	PUTBACK;
 	perl_call_method ("send_error_page", G_DISCARD) ; 
+        SPAGAIN ;
 #ifdef APACHE
 	if (r -> pApacheReq)
 	    r -> pApacheReq -> status = 500 ;
 #endif
-	}
+        
+	SetHashValueInt (r, r -> pThread -> pHeaderHash, "Content-Length", GetContentLength (r) ) ;
+        }
     r -> bError = 1 ;
 
     return ok ;
@@ -851,7 +859,7 @@ static int SendHttpHeader (/*i/o*/ register req * r)
  			p = SvPV(pHeader, ldummy);
  			}
  		    if (p) 
-			r->pApacheReq->content_type = pstrdup(r->pApacheReq->pool, p);
+			r->pApacheReq->content_type = apr_pstrdup(r->pApacheReq->pool, p);
 		    } 
   		else if (SvROK(pHeader)  && SvTYPE(SvRV(pHeader)) == SVt_PVAV ) 
  		    {
@@ -861,8 +869,8 @@ static int SendHttpHeader (/*i/o*/ register req * r)
  			{
  			svp = av_fetch(arr, i, 0);
  			p = SvPV(*svp, ldummy);
- 			table_add( r->pApacheReq->headers_out, pstrdup(r->pApacheReq->pool, pKey),
- 				   pstrdup(r->pApacheReq->pool, p ) );
+ 			apr_table_add( r->pApacheReq->headers_out, apr_pstrdup(r->pApacheReq->pool, pKey),
+ 				   apr_pstrdup(r->pApacheReq->pool, p ) );
  			if (loc == 1) 
 			    {
 			    loc = 2;
@@ -873,7 +881,7 @@ static int SendHttpHeader (/*i/o*/ register req * r)
  		else 
  		    {
  		    p = SvPV(pHeader, ldummy);
-		    table_set(r -> pApacheReq->headers_out, pstrdup(r -> pApacheReq->pool, pKey), pstrdup(r -> pApacheReq->pool, p)) ;
+		    apr_table_set(r -> pApacheReq->headers_out, apr_pstrdup(r -> pApacheReq->pool, pKey), apr_pstrdup(r -> pApacheReq->pool, p)) ;
 		    if (loc == 1) loc = 2;
 		    }
 
@@ -883,21 +891,23 @@ static int SendHttpHeader (/*i/o*/ register req * r)
 
 
 	if (pCookie)
-	    table_add(r -> pApacheReq->headers_out, "Set-Cookie", pCookie) ;
+	    apr_table_add(r -> pApacheReq->headers_out, "Set-Cookie", pCookie) ;
 #if 0
 	if (r -> Component.Config.bEP1Compat)  /*  Embperl 2 currently cannot calc Content Length */
 	    set_content_length (r -> pApacheReq, GetContentLength (r) + (r -> Component.pCurrEscape?2:0)) ;
 #endif
+#ifndef APACHE2
 	    send_http_header (r -> pApacheReq) ;
+#endif
 
         if (r -> Component.Config.bDebug & dbgHeadersIn)
             {
             int i;
-            array_header *hdrs_arr;
-            table_entry  *hdrs;
+            const apr_array_header_t *hdrs_arr;
+            apr_table_entry_t  *hdrs;
 
-            hdrs_arr = table_elts (r -> pApacheReq->headers_out);
-	    hdrs = (table_entry *)hdrs_arr->elts;
+            hdrs_arr = apr_table_elts (r -> pApacheReq->headers_out);
+	    hdrs = (apr_table_entry_t *)hdrs_arr->elts;
 
             lprintf (r -> pApp,   "[%d]HDR:  %d\n", r -> pThread -> nPid, hdrs_arr->nelts) ; 
 	    for (i = 0; i < hdrs_arr->nelts; ++i)
@@ -908,7 +918,7 @@ static int SendHttpHeader (/*i/o*/ register req * r)
     else
 #endif
 	{ 
-	char txt[100] ;
+	/*char txt[100] ;*/
 	int  save = r -> Component.pOutput -> nMarker ;
 	SV *   pHeader ;
 	char * p ;
@@ -967,8 +977,6 @@ static int SendHttpHeader (/*i/o*/ register req * r)
 	oputs (r, "Content-Type: ") ;
 	oputs (r, pContentType) ;
 	oputs (r, "\n") ;
-	sprintf (txt, "Content-Length: %d\n", GetContentLength (r) + (r -> Component.pCurrEscape?2:0)) ;
-	oputs (r, txt) ;
 	if (pCookie)
 	    {
 	    oputs (r, "Set-Cookie") ;
@@ -1137,12 +1145,14 @@ static int export (/*in*/ tReq * r)
     XPUSHs(sCaller) ; 
     PUTBACK;                        
     perl_call_method ("export", G_SCALAR | G_EVAL) ;
+    SPAGAIN ;
     if (SvTRUE (ERRSV))
 	{
         STRLEN l ;
         strncpy (r -> errdat1, SvPV (ERRSV, l), sizeof (r -> errdat1) - 1) ;
 	LogError (r, rcEvalErr) ; 
-	sv_setpv(ERRSV,"");
+        POPs ;
+        sv_setpv(ERRSV,"");
         }
     tainted = 0 ;
 
@@ -1184,6 +1194,11 @@ static int ProcessFile (/*i/o*/ register req * r,
 	XPUSHs(pRecipe);                
 	PUTBACK;                        
 	num = perl_call_method ("get_recipe", G_SCALAR | G_EVAL) ;
+	tainted = 0 ;
+	SPAGAIN;                        
+	if (num == 1)
+	    pParamRV = POPs ;
+	PUTBACK;
         if (SvTRUE (ERRSV))
 	    {
             STRLEN l ;
@@ -1192,11 +1207,6 @@ static int ProcessFile (/*i/o*/ register req * r,
 	    sv_setpv(ERRSV,"");
             num = 0 ;
             }
-	tainted = 0 ;
-	SPAGAIN;                        
-	if (num == 1)
-	    pParamRV = POPs ;
-	PUTBACK;
 	if (num != 1 || !SvROK (pParamRV) || !(pParam = SvRV(pParamRV)) || 
             (SvTYPE((SV *)pParam) != SVt_PVHV && SvTYPE(pParam) != SVt_PVAV))
 	    {
@@ -1328,7 +1338,7 @@ int embperl_RunRequest (/*i/o*/ register req * r)
     if ((rc = ResetRequest (r, sInputfile)) != ok)
         LogError (r, rc) ;
 
-#if defined (_DEBUG) && defined (WIN32)
+#if defined (_MDEBUG) && defined (WIN32)
     _ASSERTE( _CrtCheckMemory( ) );
 #endif
 
@@ -1431,11 +1441,6 @@ int     embperl_RunComponent    (/*in*/ tComponent *     c)
     if (rc == ok && (c -> Config.bOptions & optReturnError) && r -> bError)
         rc = 500 ;
     
-    /* --- Restore Operatormask and Package, destroy temp perl sv's --- */
-    FREETMPS ;
-    LEAVE;
-    c -> bReqRunning = 0 ;
-
 
     if (!r -> bError)
         {
@@ -1451,6 +1456,12 @@ int     embperl_RunComponent    (/*in*/ tComponent *     c)
                 OutputToFile (r) ;
             }
         }
+
+    /* --- Restore Operatormask and Package, destroy temp perl sv's --- */
+    FREETMPS ;
+    LEAVE;
+    c -> bReqRunning = 0 ;
+
         
     return rc ;
     }

@@ -102,6 +102,15 @@ __
 
 - $fdat_ref = $set; [Kee Hinckley 7.3.02]
 
+- print OUT as first statement in [$sub$] doesn't work [Eric-Olivier Le Bigot 1.4.02]
+
+- Vars in @param not being undefined [Luiz Fernando B. Ribeiro 9.4.02]
+
+- Don't work on dirs
+
+- optEnableChdir [Cameron McBride 12.4.2002]
+
+- change dynamic tables/selects [Kee Hinckley 29.4.2002]
 
 Docs 2.0
 --------

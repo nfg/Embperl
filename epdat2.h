@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdat2.h,v 1.1.2.33 2002/03/10 20:27:17 richter Exp $
+#   $Id: epdat2.h,v 1.1.2.35 2002/06/19 04:22:43 richter Exp $
 #
 ###################################################################################*/
 
@@ -162,13 +162,14 @@ typedef struct tAppConfig
 
 typedef struct tComponentParam
     {
-    SV *        _perlsv ;         /**< The perl reference to this structure */
-    tMemPool *  pPool ;  /**< pool for memorymanagement */
-    char *  sInputfile ;
-    char *  sOutputfile ;
+    SV *        _perlsv ;   /**< The perl reference to this structure */
+    tMemPool *  pPool ;     /**< pool for memorymanagement */
+    char *  sInputfile ;    /**< name of sourcefile */
+    char *  sOutputfile ;   /**< name of outputfile */
+    char *  sSubreq ;       /**< sub request uri */
     SV *    pInput ;
     SV *    pOutput ;
-    char *  sSub ;            /* subroutine to call */
+    char *  sSub ;          /* subroutine to call */
     int     nImport ;
     char *  sObject ;       /**< create an object */
     char *  sISA ;          /**< make this a base class */
@@ -406,7 +407,7 @@ struct tReq
     clock_t startclock ;
     I32     stsv_count ;
 
-#if defined (_DEBUG) && defined (WIN32)
+#if defined (_MDEBUG) && defined (WIN32)
     _CrtMemState MemCheckpoint ;             /* memory leak debugging */    
 #endif    
 

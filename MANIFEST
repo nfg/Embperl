@@ -1,3 +1,4 @@
+Config.pod
 CVS.pod
 Changes.pod
 Cmd.xs
@@ -40,6 +41,7 @@ Embperl/Syntax/Perl.pm
 Embperl/Syntax/RTF.pm
 Embperl/Syntax/SSI.pm
 Embperl/Syntax/Test.pm
+Embperl/Syntax/Test2.pm
 Embperl/Syntax/Text.pm
 Embperl/Util.pm
 EmbperlD.pod
@@ -109,13 +111,16 @@ eg/web/header.epl
 eg/web/index.htm
 eg/web/indexD.htm
 eg/web/menuleft.epl
+eg/web/menulist.epl
 eg/web/messages.pl
 eg/web/news.epl
 eg/web/notfound.htm
 eg/web/pod.xsl
 eg/web/pod/content.epl
 eg/web/pod/doc/index.htm
+eg/web/pod/doc/doc13.htm
 eg/web/pod/intro/index.htm
+eg/web/README
 eg/webutil/db.schema
 eg/webutil/setupdb.pl
 eg/x/Execute.pl
@@ -142,7 +147,7 @@ embpfastcgi.pl.templ
 embpmsgid.pl.templ
 ep.h
 ep2.h
-epapinit.c
+epapfilter.c
 epcache.c
 epcfg.h
 epcgiinit.c
@@ -154,6 +159,7 @@ epcmd2.c
 epcomp.c
 epdat2.h
 epdbg.c
+epdefault.c
 epdom.c
 epdom.h
 epeval.c
@@ -172,6 +178,7 @@ epprovider.c
 eppublic.h
 eptypes.h
 eputil.c
+mod_embperl.c
 test.pl
 test/cmp/Execute.htm
 test/cmp/allform.htm
@@ -179,6 +186,7 @@ test/cmp/ascii
 test/cmp/asp.htm
 test/cmp/binary.htm
 test/cmp/callsub.htm
+test/cmp/changeattr.htm
 test/cmp/chdir.htm
 test/cmp/clearsess.htm
 test/cmp/crypto.htm
@@ -218,9 +226,12 @@ test/cmp/execnotfound.htm
 test/cmp/execprint.htm
 test/cmp/execsecond.htm
 test/cmp/executesub.htm
+test/cmp/execviamod.htm
 test/cmp/exit.htm
 test/cmp/exit2.htm
 test/cmp/exit3.htm
+test/cmp/exitcomp.htm
+test/cmp/exitreq.htm
 test/cmp/getbsess.htm
 test/cmp/getdelsess.htm
 test/cmp/getnosess.htm
@@ -342,8 +353,8 @@ test/cmp2/tagscan.htm
 test/cmp2/unclosed.htm
 test/cmp2/varerr.htm
 test/cmp2/varerr.htm56
-test/conf/config.pl
 test/conf/httpd.conf.src
+test/conf/httpd.stop.conf.src
 test/conf/null
 test/conf/ssldisable.conf
 test/conf/startup.pl
@@ -390,6 +401,7 @@ test/html/ascii
 test/html/asp.htm
 test/html/binary.htm
 test/html/callsub.htm
+test/html/changeattr.htm
 test/html/chdir.htm
 test/html/clearsess.htm
 test/html/delrdsess.htm
@@ -410,9 +422,14 @@ test/html/execnotfound.htm
 test/html/execprint.htm
 test/html/execsecond.htm
 test/html/executesub.htm
+test/html/execviamod.htm
+test/html/execviamod.pm
 test/html/exit.htm
 test/html/exit2.htm
 test/html/exit3.htm
+test/html/exitcomp.htm
+test/html/exitreq.htm
+test/html/exitsub.htm
 test/html/getbsess.htm
 test/html/getdelsess.htm
 test/html/getnosess.htm

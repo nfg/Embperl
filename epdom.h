@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdom.h,v 1.4.2.49 2002/02/27 11:58:23 richter Exp $
+#   $Id: epdom.h,v 1.4.2.50 2002/05/21 12:09:08 richter Exp $
 #
 ###################################################################################*/
 
@@ -464,6 +464,7 @@ tNode Node_previousSibling (/*in*/ struct tApp * a,
 #endif
 
 #define xNode_selfLevelNull(pDomTree,pNode)   ((pDomTree) -> pLookup[(pNode)->xNdx].pLookupLevel?(pDomTree) -> pLookup[(pNode)->xNdx].pLookupLevel -> xNullNode:(pNode) -> xNdx)
+#define xNode_levelNull(pDomTree,xNode)   ((pDomTree) -> pLookup[(xNode)].pLookupLevel?(pDomTree) -> pLookup[(xNode)].pLookupLevel -> xNullNode:(xNode))
 
 
 #define Node_parentNode(a,pDomTree,xNode,nLevel)	    (Node_selfLevel(a,pDomTree,xNode,nLevel)->xParent)

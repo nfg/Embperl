@@ -1,12 +1,17 @@
+
+# $Id: httpd.conf.src,v 1.24.4.69 2002/06/25 06:22:18 richter Exp $
+
 print OFH <<EOD ;
 #
 # Testconfig for Embperl make test
+#
+# This file is automaticly generated each time you run make test/make start/make stop
 #
 
 ServerRoot \"$EPPATH/test\"
 ServerName localhost
 DocumentRoot \"$EPPATH/test\"
-Port $EPPORT
+Listen $EPPORT
 EOD
 
 if ($^O ne 'MSWin32')
@@ -26,15 +31,20 @@ MaxRequestsPerChild 0
 EOD
     }
 
-print OFH "Listen ", $EPPORT , "\n" ;
+#print OFH "Listen ", $EPPORT , "\n" ;
 print OFH "Listen ", $EPPORT + 3, "\n" ;
 print OFH "Listen ", $EPPORT + 4, "\n" ;
 print OFH "Listen ", $EPPORT + 5, "\n" ;
 
+print OFH "$EPMODPERL\n" ;
+
+print OFH "LoadModule embperl_module \"$EPPATH/blib/arch/auto/Embperl/Embperl.so\"\n" if ($MP2) ;
+
+##print OFH "LoadModule info_module \"/usr/src/packages/apache_1.3.24_mp561_so/src/modules/standard/mod_info.so\"\n"  ;
+
+print OFH "PassEnv ACTION_PREFIX\n" ;
 
 print OFH <<EOD ;
-
-$EPMODPERL
 
 DirectoryIndex index.htm  
 
@@ -64,8 +74,28 @@ EMBPERL_INPUT_ESCMODE 7
 
 ErrorLog tmp/httpd.err.log
 PidFile tmp/httpd.pid
+EOD
+
+
+
+
+
+if (!$MP2)
+
+    {
+
+print OFH <<EOD ;
+
 AccessConfig conf/null
 ResourceConfig conf/null
+EOD
+
+    }
+
+
+
+print OFH <<EOD ;
+
 TypesConfig conf/null
 LockFile tmp/httpd.lock
 
@@ -78,7 +108,6 @@ LockFile tmp/httpd.lock
 
 
 EOD
-
 
 
 if ($EPSESSIONXVERSION)
@@ -124,7 +153,6 @@ Alias /embperl/sub/ \"$EPPATH/test/html/\"
 Alias /embperl/ \"$EPPATH/test/html/\"
 Alias /embperl2/ \"$EPPATH/test/html2/\"
 Alias /embperlmail/ \"$EPPATH/test/html/\"
-Alias /eg/ \"$EPPATH/eg/\"
 
 <Location /embperl>
 SetHandler perl-script
@@ -258,7 +286,17 @@ EMBPERL_URIMATCH \\.htm\$
 
 <Location /embperl/registry>
 SetHandler perl-script
-PerlHandler Apache::Registry
+EOD
+
+
+
+print OFH "PerlHandler ", $MP2?'ModPerl':'Apache', "::Registry\n" ;
+
+
+
+
+print OFH <<EOD ;
+
 Options ExecCGI
 </Location>
 
@@ -473,6 +511,7 @@ SetEnv EMBPERL_SYNTAX POD
 <Location /perl-status>
 SetHandler perl-script
 PerlHandler Apache::Status
+PerlSetVar StatusOptionsAll On
 </Location>
 
 <Location /server-status>
@@ -483,6 +522,13 @@ SetHandler server-status
 SetHandler server-info
 </Location>
 
+
+# redirect all languages of the web to the same directory
+Alias /eg/web/de/ \"$EPPATH/eg/web/\"
+Alias /eg/web/en/ \"$EPPATH/eg/web/\"
+
+# path for examples
+Alias /eg/ \"$EPPATH/eg/\"
 
 
 
@@ -498,17 +544,27 @@ EMBPERL_XSLTPROC libxslt
 <Location /eg/x>
 SetHandler perl-script
 PerlHandler Embperl
-Options ExecCGI
+Options ExecCGI FollowSymLinks
+EMBPERL_INPUT_ESCMODE 7
+
+EMBPERL_SYNTAX "Embperl III::RandomTag"
+
+EMBPERL_OPTIONS 262288
+
+
+
 </Location>
 
 <Location /eg/web>
 EMBPERL_APPNAME EmbperlWeb
 EMBPERL_OPTIONS 16
+EMBPERL_DEBUG 0
+EMBPERL_INPUT_ESCMODE 0
 EMBPERL_ALLOW .
 EMBPERL_OBJECT_BASE base.epl
 EMBPERL_OBJECT_APP  epwebapp.pl
 EMBPERL_OBJECT_STOPDIR \"$EPPATH/eg/web\"
-EMBPERL_URIMATCH \"\\.htm.?\$|\\.epl\$|\\.xml\$|\\.pod\$\"
+EMBPERL_URIMATCH \"\\.htm.?\$|\\.epl\$|\\.xml\$|\\.pod\$|/$\"
 SetHandler perl-script
 PerlHandler Embperl::Object 
 Options ExecCGI

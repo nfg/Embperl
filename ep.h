@@ -148,7 +148,9 @@ extern "C" {
 #include "compat.h"
 #endif
 
-
+#ifdef APACHE2
+#include <apr_strings.h>
+#endif
 
 #endif
 
@@ -166,7 +168,7 @@ extern "C" {
 #include "epnames.h"
 
 
-#if defined (_DEBUG) && defined (WIN32)
+#if defined (_MDEBUG) && defined (WIN32)
 #define _CRTDBG_MAP_ALLOC
 #undef malloc
 #undef calloc

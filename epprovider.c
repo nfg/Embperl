@@ -1,15 +1,16 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2001 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2002 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
+#   For use with Apache httpd and mod_perl, see also Apache copyright.
 #
 #   THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epprovider.c,v 1.1.2.32 2002/02/25 11:20:26 richter Exp $
+#   $Id: epprovider.c,v 1.1.2.36 2002/06/01 23:44:25 richter Exp $
 #
 ###################################################################################*/
 
@@ -479,7 +480,7 @@ tProviderClass ProviderClassFile =
 
 /* ------------------------------------------------------------------------ */
 /*                                                                          */
-/*!         Provider that reads input from file                             */
+/*!         Provider that reads input from memory                           */
 /*                                                                          */
 
 typedef struct tProviderMem
@@ -888,6 +889,7 @@ static int ProviderEpParse_New (/*in*/ req *              r,
     pSyntaxPV = sv_2mortal(newSVpv ((char *)sSyntax, 0)) ;
 
 
+    SPAGAIN ;
     PUSHMARK(sp);
     XPUSHs(pSyntaxPV);                
     PUTBACK;                        
@@ -1150,6 +1152,8 @@ static int ProviderEpCompile_New (/*in*/ req *              r,
     if ((rc = Provider_NewDependOne (r, sizeof(tProviderEpCompile), "source", pItem, pProviderClass, pProviderParam, pParam, nParamIndex)) != ok)
         return rc ;
 
+    /*if (r -> Config.bDebug)
+	lprintf (r -> pApp,  "[%d]ep_acquire_mutex(PackageCountMutex)\n", r -> pThread -> nPid) ; */
     if (sPackage = GetHashValueStrDupA (aTHX_ pProviderParam, "package", r -> Component.Config.sPackage)) 
         {
         int n ;
@@ -1171,6 +1175,8 @@ static int ProviderEpCompile_New (/*in*/ req *              r,
         sMainSub = ((tProviderEpCompile *)(pItem -> pProvider)) -> sMainSub = malloc (40) ;
         sprintf (sMainSub, "_ep_main%d", n) ;
         }
+    /*if (r -> Config.bDebug)
+	lprintf (r -> pApp,  "[%d]ep_release_mutex(PackageCountMutex)\n", r -> pThread -> nPid) ; */
 
     return ok ;
     }
@@ -1291,7 +1297,8 @@ static int ProviderEpCompile_GetContentIndex (/*in*/ req *             r,
 	    ((tProviderEpCompile *)pProvider) -> pSVData = NULL ;
 	    if (pProg)
 	        SvREFCNT_dec (pProg) ;
-
+     
+            Cache_FreeContent (r, pSrcCache) ; /* make sure we don't leave an invalid dom tree */
 	    return rc ;
 	    }
 

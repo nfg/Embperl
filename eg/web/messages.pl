@@ -16,6 +16,9 @@ $r = shift ;
         'url'     => 'URL',
         'description'  => 'Beschreibung',
         'show2'   => 'Folgender Eintrag wurde erfolgreich der Datenbank hinzugefügt',
+        'Search'  => 'Suchen',
+        'under_construction' => 'Hinweis: Dieser Teil der Website befindet sich noch im Aufbau.',
+        'more_news' => 'Weitere News...',
         },
     'en' =>
         {
@@ -30,6 +33,9 @@ $r = shift ;
         'url'     => 'URL',
         'description'  => 'Description',
         'show2'   => 'The following entry has been sucessfully added to the database',
+        'Search'  => 'Search',
+        'under_construction' => 'NOTE: This part of the site is still under contruction.',
+        'more_news' => 'more news...',
         },
     ) ;
 

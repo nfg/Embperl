@@ -1,47 +1,43 @@
-<b>Embperl</b>   ist ein System zum Erstellen dynamischer Websites mit Perl.
-      Es erlaubt das direkte <b>Einbetten von&nbsp;</b> <b>Perlcode in HTML
-    Dokumente, </b>sowie das Erstellen komplexer Websites aus kleinen,&nbsp; wiederverwendbaren <b>Objekten</b>.
-      Egal ob Sie nur eine einfache dynamische Webseite erstellen wollen oder
-      eine komplexe Site. Embperl wächst mit Ihren Anforderungen. Es macht
-      einfache Dinge einfach, komplexe Designs bleiben übersichtlich und
-      Unmögliches wird möglich.
-      <p><a href="http://perl.apache.org/" target="_blank">Perl</a> ist nicht nur die im WWW nach
-    wie vor am weitesten verbreitete Sprache, sondern ist ebenso mächtig wie einfach zu
-    erlernen. Darüber hinaus steht eine ständig wachsende Anzahl von fertigen Modulen für
-    alle Bereiche, einschließlich Datenbankzugriff, zur Verfügung.</p>
-      <p>Während es auch noch andere
-    Perlmodule gibt, die es erlauben Perl in HTML einzubetten, geht Embperl weit
-      darüber hinaus und unterstützt Sie bei der Erstellung dynamischer
-      Websites mit Features wie:<br>
- dynamischen Tabellen, Formularfeldverarbeitung, HTML/URL-Kodierung, Session Handling, Modularisierung,
-      Definition eigener Taglibs, Verwendung unterschiedlicher Syntaxen (z.B.
-      auch SSI im gleichen Dokument) und nicht zuletzt Unterstützung und
-      Verarbeitung von XML Dokumenten.</p>
-    <p>Embperl läuft auf dem <b>Webserver</b> ab, dadurch ist es völlig browserunabhängig.
-    Es kann dabei unter mod_perl, als CGI Skript oder Offline ausgeführt werden.</p>
-      <p>Embperl wird durch die ecos gmbh entwickelt, gepflegt und <a href="/ep/pod/EmbperlD.pod.15.html#Kommerzieller_Support">supported</a>.
-      Ideen, Anregungen, anderes Feedback und Patches sind jederzeit willkommen und
-    sollten an die <a href="/x/index.htm/ep/pod/EmbperlD.pod.15.html">Embperl-Mailingliste</a>
-    geschickt werden.</p>
-      <p>Embperl darf sowohl unter <b>GPL</b>, wie auch unter der <b>Artistic License</b> weiterverbreitet werden. Es gelten die
-      gleichen Lizenzbestimmungen
-    wie für Perl selbst (siehe Perl README Datei).</p>
-      <p>Diese Website enthält die <b>deutschen Übersetzungen</b> der <a href="http://perl.apache.org/embperl/" target="_blank">englischen Originaldokumentation</a>.
-    Einen ersten Eindruck vermittelt die Liste der <a href="../x/index.htm/ep/pod/FeaturesD.pod.1.html" target="_top">Features von Embperl</a>.
-    Wollen Sie mehr erfahren, dann lesen Sie die <a href="../x/index.htm/ep/pod/IntroD.pod.cont.html" target="_top">Einführung</a>,
-      um einen
-    Überblick über die Möglichkeiten von Embperl zu erhalten. Es ist auch
-      eine <a href="../x/index.htm/ep/pod/EmbperlD.pod.cont.html" target="_top">vollständige
-    Dokumentation</a> in deutsch verfügbar. Die <a href="../x/index.htm/ep/pod/IntroEmbperlObject.pod.cont.html" target="_top">Einführung</a>
-    und <a href="../x/index.htm/ep/pod/EmbperlObject.pod.cont.html" target="_top">Dokumentation</a>
-      von <b>EmbperlObject</b> (welche es erlaubt, Websites aus Objekten
-      zusammenzusetzen), <a href="../x/index.htm/ep/pod/Mail.pod.cont.html">HTML::Embperl::Mail</a>
-    sowie die <a href="../x/index.htm/ep/pod/Faq.pod.cont.html" target="_top">FAQs</a> und die <a href="../x/index.htm/ep/pod/Changes.pod.cont.html" target="_top">Liste der aktuellen
-    Änderungen</a> sind nur in englischer Sprache verfügbar. Des weiteren findet
-      man dort kurze Beispiele. Außerdem gibt es ein Perlmodul <a href="../x/index.htm/ep/pod/IntroD.pod.10.html|DBIx_Recordset" target="_top">(DBIx::Recordset)</a>,
-    welches den Datenbankzugriff wesentlich vereinfacht und nicht zuletzt gibt es für Embperl
-    natürlich auch <a href="../x/index.htm/ep/pod/EmbperlD.pod.15.html" target="_top">Support</a>
-    und eine Reihe von (englischen) <a href="../x/index.htm/ep/pod/TipsAndTricks.pod.cont.html" target="_top">Tips &amp; Tricks</a>.
-    </p>
-      <p>&nbsp;
-    </p>
+<p><b>Embperl</b> ist ein System zum Erstellen dynamischer Websites mit <b>Perl</b>.</p>
+
+<p>Für den Anfänger ist es ein einfacher Weg um dynamische Seiten 
+durch Einbetten von Perlcode in HTML zu erstellen.
+Es stellt verschiedenste Features für das Webumfeld zur Verfügung, wei z.B.
+dynamischen Tabellen, Formularfeldverarbeitung, HTML/URL-Kodierung, Session Handling, 
+Caching und mehr.</p>
+
+<p>Wenn die Anforderungen steigen ermöglicht es die Website objektorientiert,
+aus kleinen wiederverwendbaren Komponenten, aufzubauen. Wenn Sie Code und 
+Layout nicht mixen wollen, unterstützt Sie Embperl, indem es erlaubt beides
+in verschiedene Objekte zu trennen (um z.B. MVC Applikationen zu bauen).
+Selbstverständlich kann Embperl nicht nur HTML verarbeiten, sondern ist in der Lage 
+Komponenten in verschiedenen Quellenformaten (z.B. HTML, WML, XML, POD, ...)
+zu bearbeiten und diese, soweit nötig, in andere Ausgabeformate (z.B. via XSLT)
+zu transformieren. Dies wird dadurch erreicht, das die Ausgabeerzeugung in
+kleine Schritte zerlegt wird, wovon jeder von einem austauschbaren Provider
+bearbeitet wird.</p>
+
+<p>Für fortgeschrittenen Anwender bietet Embperl weitere Möglichkeiten, wie
+das Erstellen von eigenen Grammatiken (z.b. Tag-Bibiliotheken) oder das
+schreiben von benutzerspezifischen Providern.</p>
+
+<p>Embperl läuft auf dem <b>Webserver</b> ab und ist dadurch völlig browserunabhängig.
+Es kann dabei unter <a href="http://perl.apache.org/">mod_perl</a>, 
+als CGI Skript oder Offline ausgeführt werden.</p>
+
+<p>Die <a href="pod/Features.htm">Liste der Features</a> 
+und die <a href="pod/intro/">Einführungsartikel</a> zur verschieden Aspekten und Bereichen
+von Embperl geben eine weiteren Überblick über die Möglichkeiten.</p>
+
+
+<p>Embperl wird durch die <a href="http://www.ecos.de/">ecos gmbh</a> entwickelt, gepflegt und 
+<a href="pod/doc/doc13/HTML/Embperl.-page-16-.htm#sect_80">supported</a>.
+Ideen, Anregungen, anderes Feedback und Patches sind jederzeit willkommen und
+sollten an die <a href="pod/doc/doc13/HTML/Embperl.-page-16-.htm">Embperl-Mailingliste</a>
+geschickt werden.</p>
+
+<p>Embperl darf sowohl unter <b>GPL</b>, wie auch unter der <b>Artistic License</b> 
+weiterverbreitet werden. Es gelten die gleichen Lizenzbestimmungen
+wie für Perl selbst (siehe Perl README Datei).</p>
+
+

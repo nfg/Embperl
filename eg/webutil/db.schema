@@ -1,22 +1,21 @@
-
-###############################################################################
-###############################################################################
-###                                                                         ###
-###   perlwww - Copyright (c) 1999, 2000  ecos                              ###
-###                                                                         ###
-###   Technische Realisierung: G. Richter / ecos GmbH  (http://www.ecos.de) ###
-###                                                                         ###
-###   - Datenbankschema -                                                   ###
-###                                                                         ###
-###   $Id: db.schema,v 1.1.2.2 2002/02/12 16:55:01 richter Exp $                 ###
-###                                                                         ###
-###############################################################################
-###############################################################################
-
+##############################################################################
+#
+#   Embperl - Copyright (c) 1997-2002 Gerald Richter / ecos gmbh   www.ecos.de
+#
+#   You may distribute under the terms of either the GNU General Public
+#   License or the Artistic License, as specified in the Perl README file.
+#   For use with Apache httpd and mod_perl, see also Apache copyright.
+#
+#   THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+#   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+#   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+#
+#   $Id: db.schema,v 1.1.2.6 2002/06/25 06:22:18 richter Exp $
+#
+##############################################################################
 
 
 %DBDefault = 
-
     (
     '!Grant' => 
         [
@@ -31,8 +30,6 @@
 # ----------------------------------------------------------------------
 
 @DBSchema = (
-
-
 
 # ----------------------------------------------------------------------
 
@@ -50,12 +47,24 @@
         'checkcount'		        => 'integer',
 	],
     '!PrimKey' => 'id',
+    '!Init' =>
+        [
+        { id => 1, category_id => 1, state => 1, creationtime => '2001-07-28' },
+        { id => 2, category_id => 1, state => 1, creationtime => '2001-11-20' },
+        { id => 3, category_id => 1, state => 1, creationtime => '2001-11-27' },
+        { id => 4, category_id => 1, state => 1, creationtime => '2001-12-05' },
+        { id => 5, category_id => 1, state => 1, creationtime => '2002-03-13' },
+        { id => 6, category_id => 1, state => 1, creationtime => '2002-03-21' },
+        { id => 7, category_id => 1, state => 1, creationtime => '2002-05-28' },
+        { id => 8, category_id => 1, state => 1, creationtime => '2002-06-25' },
+        { id => 9, category_id => 2, state => 1, creationtime => '2002-06-25' },
+        ]
     },
 
 # ----------------------------------------------------------------------
 
     {
-    '!Table' => 'itemtext',
+   '!Table' => 'itemtext',
     '!Fields' => 
         [
         'id'                            => 'counter',
@@ -67,6 +76,35 @@
         'url'				=> 'tinytext',
 	],
     '!PrimKey' => 'id',
+    '!Init' =>
+        [
+        { id => 1, item_id => 1, heading => '28.7.2001', language_id => 'de', description => 'David Lloyd wird einen Vortrag über Embperl auf der L<"AUUG Annual Conference"|http://www.auug.org.au/winter/auug2001/> in Sydney, Australien, am 26, 27 and 28 September 2001 halten.' },
+        { id => 2, item_id => 1, heading => '7/28/2001', language_id => 'en', description => 'David Lloyd is makeing a talk at the L<"AUUG Annual Conference"|http://www.auug.org.au/winter/auug2001/>, which will be held in Sydney, Australia, on 26, 27 and 28 September 2001 ' },
+
+        { id => 3, item_id => 2, heading => '20.11.2001', language_id => 'de', description => 'Embperl 2.0b4 freigegeben. Neu ist die Unterstützung für XML und XSLT, sowie das Zusammensetzen des Ergebnisses eines Requests durch mehrere frei kombinierbare Provider.' },
+        { id => 4, item_id => 2, heading => '11/20/2001', language_id => 'en', description => 'Embperl 2.0b4 released. This release introduces XML and XSLT support into Embperl, along with a new way of creating a request from a series of providers, which pluged together in a hierachial tree structure.' },
+
+        { id => 5, item_id => 3, heading => '27.11.2001', language_id => 'de', description => 'Embperl 2.0b5 freigegeben' },
+        { id => 6, item_id => 3, heading => '11/27/2001', language_id => 'en', description => 'Embperl 2.0b5 released' },
+
+        { id => 7, item_id => 4, heading => '12/5/2001', language_id => 'en', description => 'Embperl 1.3.4 released.' },
+        { id => 8, item_id => 4, heading => '5.12.2001', language_id => 'de', description => 'Embperl 1.3.4 freigegeben' },
+
+        { id => 9, item_id => 5, heading => '3/13/2002', language_id => 'en', description => 'Embperl 2.0b6 released: Enhancements of the Embperl object modell, form validation, internationalization speed improvments. Embperl 2.0 is now feature complete, mainly bugfixing and documetation will be done before final 2.0 release. Test it out!' },
+        { id =>10, item_id => 5, heading => '13.3.2002', language_id => 'de', description => 'Embperl 2.0b6 freigegeben: Verbesserungen des Embperl-Objekt-Modells, Formular Validierung, Internationalisierung, Performance Verbesserungen. Embperl 2 ist jetzt komplett und vor dem endgültigen Release werden hauptsächlich noch Fehler beseitigt.' },
+
+        { id =>11, item_id => 6, heading => '3/21/2002', language_id => 'en', description => 'Embperl 2.0b7 released ' },
+        { id =>12, item_id => 6, heading => '21.3.2002', language_id => 'de', description => 'Embperl 2.0b7 freigegeben' },
+
+        { id =>13, item_id => 7, heading => '28.5.2002', language_id => 'de', description => 'Auch auf der diesjährigen L<"O\'Reilly Open-Source Convention"|http://conferences.oreillynet.com/os2002/> in San Diego wird es wieder ein Vortrag über Embperl geben.' },
+        { id =>14, item_id => 7, heading => '5/28/2002', language_id => 'en', description => 'Again this year there will be a talk about Embperl at the L<"O\'Reilly Open-Source Convention"|http://conferences.oreillynet.com/os2002/> in San Diego in July.' },
+
+        { id =>15, item_id => 8, heading => '6/25/2002', language_id => 'en', description => 'Embperl 2.0b8 released. Contains many bugfixes, runs with mod_perl 2.' },
+        { id =>16, item_id => 8, heading => '25.6.2002', language_id => 'de', description => 'Embperl 2.0b8 freigegeben. Enthält viel Fehlerkorrekturen und läuft mit mod_perl 2.' },
+
+        { id => 17, item_id => 9, heading => 'http://bilder.ecos.de - Gerald Richter [richter@ecos.de]', language_id => 'de', description => 'Dies ist die Site für die Embperl ursprünglich geschrieben wurde. Es ist eine einfache Bilddatenbank die touristische Bilder aus Rheinland-Pflaz enthält. ' },
+        { id => 18, item_id => 9, heading => 'http://bilder.ecos.de - Gerald Richter [richter@ecos.de]', language_id => 'en', description => 'This was the site Embperl was originally written for. It\'s a simple picture database which contains pictures and tourist information for Rheinland-Pfalz/Germany. It\'s intended as press information, to reduce the need for sending photographs by real mail. You can view and search the pictures via the Internet or via a direct dial-in. Download is only available for valid users and via direct dial-in. It is also possible to maintain the database via the web and insert new pictures and descriptions and change or delete old ones.' },
+        ]
     },
 
 # ----------------------------------------------------------------------
@@ -121,15 +159,15 @@
     '!PrimKey' => 'id',
     '!Init' =>
         [
-            { id => 1, category_id => 1, language_id => 'de', 'category' => 'Neuigkeiten' } ,
-            { id => 2, category_id => 1, language_id => 'en', 'category' => 'News' } ,
-            { id => 3, category_id => 2, language_id => 'de', 'category' => 'Websites die Embperl nutzen' } ,
-            { id => 4, category_id => 2, language_id => 'en', 'category' => 'Sites using Embperl' } ,
-            { id => 5, category_id => 3, language_id => 'de', 'category' => 'Bücher die Embperl behandeln' } ,
-            { id => 6, category_id => 3, language_id => 'en', 'category' => 'Books that talk about Embperl' } ,
-            { id => 7, category_id => 4, language_id => 'de', 'category' => 'Artikel über Embperl (on- und offline)' } ,
-            { id => 8, category_id => 4, language_id => 'en', 'category' => 'Article about Embperl (on- and offline)' } ,
-            { id => 9, category_id => 5, language_id => 'de', 'category' => 'Syntaxhervorhebungen für Texteditoren' } ,
+            { id =>  1, category_id => 1, language_id => 'de', 'category' => 'Neuigkeiten' } ,
+            { id =>  2, category_id => 1, language_id => 'en', 'category' => 'News' } ,
+            { id =>  3, category_id => 2, language_id => 'de', 'category' => 'Websites die Embperl nutzen' } ,
+            { id =>  4, category_id => 2, language_id => 'en', 'category' => 'Sites using Embperl' } ,
+            { id =>  5, category_id => 3, language_id => 'de', 'category' => 'Bücher die Embperl behandeln' } ,
+            { id =>  6, category_id => 3, language_id => 'en', 'category' => 'Books that talk about Embperl' } ,
+            { id =>  7, category_id => 4, language_id => 'de', 'category' => 'Artikel über Embperl (on- und offline)' } ,
+            { id =>  8, category_id => 4, language_id => 'en', 'category' => 'Article about Embperl (on- and offline)' } ,
+            { id =>  9, category_id => 5, language_id => 'de', 'category' => 'Syntaxhervorhebungen für Texteditoren' } ,
             { id => 10, category_id => 5, language_id => 'en', 'category' => 'Syntaxhighlighting for texteditors' } ,
             { id => 11, category_id => 6, language_id => 'de', 'category' => 'Module und Beispiele für Embperl' } ,
             { id => 12, category_id => 6, language_id => 'en', 'category' => 'Modules and examples for Embperl' } ,

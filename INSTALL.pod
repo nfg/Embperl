@@ -4,9 +4,13 @@
 
 =head2 UNIX
 
-- B<Unpack the archive>
+To install on unix perform the following steps:
 
-- B<perl Makefile.PL>
+=over
+
+=item B<Unpack the archive>
+
+=item B<perl Makefile.PL>
 
 You will be asked if you want to compile in support for Apache mod_perl. If
 you say yes, the source of Apache is searched (for headerfiles). If 
@@ -15,11 +19,14 @@ mod_perl is already installed. If you have installed mod_perl-0.96 or
 higher, Makefile.PL automatically suggests the same source path as was 
 used to build mod_perl.
 
-- B<make>
+=item B<make>
 
-- B<make test>
+=item B<make test>
 
-- B<make install>
+=item  B<make install>
+
+=back
+
 
 B<NOTE 1:> For using session handling you need
 Apache::Session 1.53 and Apache::SessionX 2.00b3 or higher. 
@@ -138,19 +145,33 @@ a DSO mod-perl (ie: apache + libapache-mod-perl) for now.
 If you have an UNIX with preinstalled Apache and mod_perl (e.g. a Linux 
 distribution), you need to locate the following files on your disk:
 
- - httpd.h
- - httpd
- - mod_env.so
+=over
+
+=item httpd.h
+
+=item httpd
+
+=item mod_env.so
+
+=back
 
 For example in SuSE Linux 7.1 they could be found at
 
- - /usr/include/apache/httpd.h
- - /usr/sbin/httpd
- - /usr/lib/apache/mod_env.so
+=over
+
+=item /usr/include/apache/httpd.h
+
+=item /usr/sbin/httpd
+
+=item /usr/lib/apache/mod_env.so
+
+=back
 
 Now go to the Embperl directory and start 
 
- perl Makefile.PL
+=over
+
+=item perl Makefile.PL
 
 When get asked for the Apache sources, enter the directory where you
 found C<httpd.h> (e.g. C</usr/include/apache>). For the Apache executable
@@ -158,9 +179,12 @@ enter the path to C<httpd>. If the Apache modules are loaded dynamicly,
 the you will get ask for C<mod_env.so>, enter it's directory. Now you can
 continue as normal with
 
- make test
- make install
-  
+=item make test
+
+=item make install
+
+=back
+
 
 =head2 WIN 32 (non ActiveState Perl)
 
@@ -170,10 +194,13 @@ B<NOTE:> You need mod_perl >= 1.12 on win32
 
 On Windows 95/NT you have to do the following:
 
-B<perl Makefile.PL>
+=over
 
-B<nmake> (you must have the c compiler in your path)
+=item B<perl Makefile.PL>
 
+=item B<nmake> 
+
+(you must have the c compiler in your path)
 if you get an error about compiling Embperl.c. Edit Embperl.c and change
 
 -#line  "Embperl.xs"
@@ -184,11 +211,14 @@ to
 
 now re-run nmake and it should compile.
 
-B<nmake test>
+=item B<nmake test>
 
 B<NOTE:> nmake test needs libwin32, libwww and HTML::Parser installed to work
 
-B<nmake install>
+=item B<nmake install>
+
+=back
+
 
 B<NOTE 1:> For using session handling you need
 Apache::Session 1.53 and Apache::SessionX 2.00b3 or higher. 
@@ -299,7 +329,7 @@ You can view the documentation at any time from the Embperl source directory,
 by using the following commands metioned below. After the installation you can
 also view documention by specifying the full module name: e.g.
 
-perldoc HTML::Embperl, perldoc HTML::Embperl::Intro etc.
+perldoc Embperl, perldoc Embperl::Intro etc.
 
 To get familiar how Embperl works, read the L<"Intro"|"Intro.pod"> and
 L<"IntroEmbperlObject"|"IntroEmbperlObject.pod"> documents. 
@@ -316,6 +346,8 @@ introduction to Embperl.
 
 See L<"perldoc IntroEmbperlObject"|"IntroEmbperlObject.pod"> for an step by step 
 introduction to the OO features of Embperl.
+
+See L<"perldoc Config"|"Config.pod"> for configuration and calling Embperl.
 
 See L<"perldoc Embperl"|"Embperl.pod"> for complete documentation.
 
@@ -372,23 +404,25 @@ ftp://ftp.mcc.ac.uk/pub/gnu/tar/tar-1.13.tar.gz
 
 There must be one typecast inserted in the following three files:
 
-    "c/src/XSLT/ExtensionFunctionHandler.cpp", line 156
-    156c156
-    < 	return m_functions.find(function) != m_functions.end();
-    ---
-    > 	return StringSetType::const_iterator(m_functions.find(function)) != m_functions.end();
+ "c/src/XSLT/ExtensionFunctionHandler.cpp", line 156
+ 156c156
+ < return m_functions.find(function) != m_functions.end();
+ ---
+ > return StringSetType::const_iterator(m_functions.find(function)) != m_functions.end();
 
-    "c/src/XSLT/ExtensionNSHandler.cpp", line 200
-    200c200
-    <     return (m_elements.find(element) != m_elements.end());
-    ---
-    >     return (ExtensionSetType::const_iterator(m_elements.find(element)) !=  m_elements.end());
+ "c/src/XSLT/ExtensionNSHandler.cpp", line 200
+ 200c200
+ < return (m_elements.find(element) != m_elements.end());
+ ---
+ > return (ExtensionSetType::const_iterator(m_elements.find(element)) !=  m_elements.end());
 
-    "c/src/XSLT/NamespacesHandler.cpp", line 366
-    366c366
-    < 			|| m_extensionNamespaceURIs.find(theURI) != m_extensionNamespaceURIs.end()
-    ---
-    > 			|| ExtensionNamespaceURISetType::const_iterator(m_extensionNamespaceURIs.find(theURI)) != m_extensionNamespaceURIs.end()
+ "c/src/XSLT/NamespacesHandler.cpp", line 366
+ 366c366
+ < || m_extensionNamespaceURIs.find(theURI) != m_extensionNamespaceURIs.end()
+ ---
+ > || ExtensionNamespaceURISetType::const_iterator(m_extensionNamespaceURIs.find(theURI)) 
+ >    != m_extensionNamespaceURIs.end()
+
 
 =item * Compile XALAN
 

@@ -9,13 +9,22 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdom.c,v 1.4.2.84 2002/03/20 15:31:00 richter Exp $
+#   $Id: epdom.c,v 1.4.2.95 2002/06/19 04:22:43 richter Exp $
 #
 ###################################################################################*/
 
 
 #include "ep.h"
 #include "epmacro.h"
+
+
+/* --- don't use Perl's memory management here --- */
+
+#undef malloc
+#undef realloc
+#undef strdup
+#undef free
+
 
 HV * pStringTableHash ;	    /* Hash to translate strings to index number */
 HE * * pStringTableArray  ;   /* Array with pointers to strings */
@@ -40,7 +49,7 @@ tIndex xDocument ;
 tIndex xDocumentFraq ;
 tIndex xOrderIndexAttr ;
 
-static tUInt8 * MemFree[512] ;
+static tUInt8 * MemFree[4196] ;
 static tUInt8 * pMemLast = NULL ;
 static tUInt8 * pMemEnd = NULL ;
 
@@ -51,6 +60,7 @@ struct tPad
 
 typedef struct tPad tPad ;
 
+#define LEVELHASHSIZE 8
 
 /* ------------------------------------------------------------------------ */
 /*                                                                          */
@@ -198,6 +208,12 @@ void * str_malloc (/*in*/ tApp * a,
 	m_size++;
 	m = (void *) m_size ;
 	}
+    else
+        {
+        char buf[256] ;
+        sprintf (buf, "%d bytes", n) ;
+        LogErrorParam (a, rcOutOfMemory, "str_malloc failed", buf) ;
+        }
 
     return m ;
     }
@@ -219,6 +235,12 @@ void * str_malloc_dbg (/*in*/ tApp * a,
 	m_size++;
 	m = (void *) m_size ;
 	}
+    else
+        {
+        char buf[256] ;
+        sprintf (buf, "%d bytes", n) ;
+        LogErrorParam (a, rcOutOfMemory, "str_malloc_dbg failed", buf) ;
+        }
 
     return m ;
     }
@@ -241,6 +263,13 @@ void * str_realloc (/*in*/ tApp * a,
 	m_size++;
 	m = (void *) m_size ;
 	}
+    else
+        {
+        char buf[256] ;
+        sprintf (buf, "%d bytes", n) ;
+        LogErrorParam (a, rcOutOfMemory, "str_realloc failed", buf) ;
+        }
+    
     return m ;
     }
 
@@ -263,6 +292,13 @@ void * str_realloc_dbg (/*in*/ tApp * a,
 	m_size++;
 	m = (void *) m_size ;
 	}
+    else
+        {
+        char buf[256] ;
+        sprintf (buf, "%d bytes", n) ;
+        LogErrorParam (a, rcOutOfMemory, "str_realloc failed", buf) ;
+        }
+
     return m ;
     }
 
@@ -591,7 +627,9 @@ int ArraySet (/*in*/ tApp * a,
 	    return 0 ;
 #else	
 	if ((pNew = str_realloc (a, pCtrl, nNewMax * pCtrl -> nElementSize + sizeof (struct tArrayCtrl))) == NULL)
+            {
 	    return 0 ;
+            }
 #endif
 	
 	p = (char *)(pNew + 1) ;
@@ -716,9 +754,14 @@ int StringAdd (/*in*/ tApp * a,
 
     {	      
     int nIndex ;
-    
+    int nFill ;
+
     if (nLen == 0)
 	nLen = strlen (sAdd) ;
+
+    nFill = ArrayGetSize (a, *pArray) ;
+    /* make sure we always have a trailing zero */
+    ArraySet(a, pArray, nFill + nLen + 1) ;
 
     nIndex = ArrayAdd (a, pArray, nLen) ;
 
@@ -846,9 +889,10 @@ tStringIndex String2UniqueNdx (/*in*/ tApp * a,
 
     if (!pHEKey)
 	{
-	pSVNdx = newSViv (nNdx) ;
+	pSVNdx = newSVivDBG1 (nNdx, sText) ;
 	SvTAINTED_off (pSVNdx) ;
-	pHEKey = hv_store_ent (pStringTableHash, pSVKey, pSVNdx, 0) ;
+        SvREFCNT_inc (pSVNdx) ;
+        pHEKey = hv_store_ent (pStringTableHash, pSVKey, pSVNdx, 0) ;
 	}
 
     pStringTableArray[nNdx] = pHEKey ;
@@ -884,11 +928,12 @@ void NdxStringFree (/*in*/ tApp * a,
     	   lprintf (a, "free string %s (#%d) refcnt=%d\n", Ndx2String (nNdx), nNdx, SvREFCNT(pSVNdx)) ;
         */
 
+        
         if (SvREFCNT(pSVNdx) == 1)
 	   {
 	   int n ;
 	
-	   /* lprintf (a, "delete string %s (#%d)\n", Ndx2String (nNdx), nNdx) ; */
+           /* lprintf (a, "delete string %s (#%d)\n", Ndx2String (nNdx), nNdx) ; */
 	   hv_delete (pStringTableHash, HeKEY (pHE), HeKLEN(pHE), 0) ;
 	   pStringTableArray[nNdx] = NULL ;
 	   n = ArrayAdd (a, &pFreeStringsNdx, 1) ;
@@ -1173,7 +1218,7 @@ static int DomTree_dodelete (/*in*/ tApp * a, tDomTree * pDomTree)
     pDomTree -> xNdx = 0 ;
     pFreeDomTrees[xNdx] = xDomTree ;
 
-#if defined (_DEBUG) && defined (WIN32)
+#if defined (_MDEBUG) && defined (WIN32)
     _ASSERTE( _CrtCheckMemory( ) );
 #endif
 
@@ -2084,12 +2129,12 @@ tNodeData * Node_selfCondCloneNode (/*in*/ tApp * a,
     if (!pLookupLevelNode)
         {
         if ((pLookupLevelNode = pLookup[pNode -> xNdx].pLookupLevel = 
-		  (tRepeatLevelLookup *)dom_malloc (a, sizeof (tRepeatLevelLookup) + sizeof (tRepeatLevelLookupItem) * 7, &numLevelLookup)) == NULL)
+		  (tRepeatLevelLookup *)dom_malloc (a, sizeof (tRepeatLevelLookup) + sizeof (tRepeatLevelLookupItem) * LEVELHASHSIZE - 1, &numLevelLookup)) == NULL)
 	    return NULL ;
-        pLookupLevelNode -> nMask = 7 ;
-        pLookupLevelNode -> numItems = 8 ;
+        pLookupLevelNode -> nMask = LEVELHASHSIZE - 1 ;
+        pLookupLevelNode -> numItems = LEVELHASHSIZE ;
         pLookupLevelNode -> xNullNode = pNode -> xNdx ;
-        memset (pLookupLevelNode -> items, 0, sizeof (*pLookupLevelNodeLevel) * 8) ;
+        memset (pLookupLevelNode -> items, 0, sizeof (*pLookupLevelNodeLevel) * LEVELHASHSIZE) ;
         }
     pLookup[pNew -> xNdx].pLookupLevel = pLookupLevelNode ;
     pLookupLevelNodeLevel= &pLookupLevelNode -> items[nRepeatLevel & pLookupLevelNode -> nMask] ;
@@ -2718,7 +2763,7 @@ tNode Node_replaceChildWithNode (/*in*/ tApp * a,
         av_push (pOldChildDomTree -> pDependsOn, SvREFCNT_inc (pDomTree -> pDomTreeSV)) ;
 	}
     
-    return xOldChild ;
+    return pOldChild -> xNdx ;
     }
 
 /* ------------------------------------------------------------------------ */
@@ -2916,7 +2961,7 @@ tNode Node_replaceChildWithCDATA (/*in*/ tApp * a,
 	NdxStringFree (a, n) ;
 
     /* *** lprintf (a, "rp<-- nText=%d sText=>%*.*s< nTextLen = %d  SVs=%d\n", pOldChild -> nText, nTextLen,nTextLen, sText?sText:"<null>",  nTextLen, sv_count) ; */
-    return xOldChild ;
+    return pOldChild -> xNdx ;
     }
 
 
@@ -3006,7 +3051,7 @@ tNodeData * Node_selfNextSibling (/*in*/ tApp * a,
     if (pNode -> xNext == pNode -> xNdx)
         return NULL ;
     
-    if ((pParent = Node_self (pDomTree, pNode -> xParent)) != NULL)
+    if ((pParent = Node_selfLevel (a, pDomTree, pNode -> xParent, nRepeatLevel)) != NULL)
         {
         if (pParent -> xChilds == pNode -> xNext)
             return NULL ;
@@ -3048,7 +3093,7 @@ tNode Node_nextSibling (/*in*/ tApp * a,
     if (pNode -> xNext == pNode -> xNdx)
         return 0 ;
     
-    pParent = Node_self (pDomTree, pNode -> xParent) ;
+    pParent = Node_selfLevel (a, pDomTree, pNode -> xParent, nRepeatLevel) ;
     if (pParent -> xChilds == pNode -> xNext)
         return 0 ;
     
@@ -3076,7 +3121,7 @@ tNodeData * Node_selfPreviousSibling (/*in*/ tApp * a,
     if (pNode -> xPrev == pNode -> xNdx)
         return 0 ;
     
-    pParent = Node_self (pDomTree, pNode -> xParent) ;
+    pParent = Node_selfLevel (a, pDomTree, pNode -> xParent, nRepeatLevel) ;
     if (pParent -> xChilds == pNode -> xNdx)
         return 0 ;
     
@@ -3109,7 +3154,7 @@ tNode Node_previousSibling (/*in*/ tApp * a,
     if (pNode -> xPrev == pNode -> xNdx)
         return 0 ;
     
-    pParent = Node_self (pDomTree, pNode -> xParent) ;
+    pParent = Node_selfLevel (a, pDomTree, pNode -> xParent, nRepeatLevel) ;
     if (pParent -> xChilds == pNode -> xNdx)
         return 0 ;
     
@@ -3232,7 +3277,7 @@ static tNodeData * Node_toString2 (/*i/o*/ register req *   r,
             {
             if (pNode -> bFlags & nflgIgnore)
                 ;
-            else if (pNode -> nType == ntypTag || pNode -> nType == ntypStartTag)
+            else if (pNode -> nType == ntypTag || pNode -> nType == ntypStartTag || pNode -> nType == ntypProcessingInstr)
 	        {
 	        int n = pNode -> numAttr ;
 	        struct tAttrData * pAttr = (struct tAttrData *)(pNode + 1) ;
@@ -3277,7 +3322,15 @@ static tNodeData * Node_toString2 (/*i/o*/ register req *   r,
 			    nNodeNameLen++ ;
 			    }
 		        }
-		    else
+		    else if (pNode -> nType == ntypProcessingInstr)
+                        {
+		        pNodeStart = "<?" ;
+		        pNodeEnd = "?>" ;
+		        nNodeStartLen = 2 ;
+		        nNodeEndLen = 2 ;
+		        nNodeNameLen = strlen (pNodeName) ;
+                        }
+                    else
 		        {
 		        pNodeStart = "<" ;
 		        pNodeEnd = ">" ;
@@ -3645,7 +3698,10 @@ tAttrData *  Element_selfSetAttribut (/*in*/ tApp * a,
 	if (pAttr -> xValue && (pAttr -> bFlags & aflgAttrValue))
 	    NdxStringFree (a, pAttr -> xValue) ;
 
-	pAttr -> xValue = xValue ;
+      	pAttr -> bFlags |= aflgAttrValue ;
+        pAttr -> bFlags &= ~aflgAttrChilds ;
+
+        pAttr -> xValue = xValue ;
 	return pAttr ;
 	}
 
@@ -3779,9 +3835,20 @@ char *       Attr_selfValue (/*in*/ tApp * a,
 
     {
     struct tNodeData * pNode ;
+    struct tNodeData * pAttrNode ;
     
     if (!pAttr)
 	return NULL ;
+
+    pAttrNode = Attr_selfNode(pAttr) ;
+    pNode = Node_selfLevel (a, pDomTree, pAttrNode -> xNdx, nRepeatLevel) ;
+    if (pNode != pAttrNode)
+        {
+        pAttr = Element_selfGetAttribut (a, pDomTree, pNode, NULL, pAttr -> xName) ;
+        if (!pAttr)
+	    return NULL ;
+        }
+
 
     if (!(pAttr -> bFlags & aflgAttrChilds))
 	return Ndx2String (pAttr -> xValue) ;
@@ -3795,8 +3862,11 @@ char *       Attr_selfValue (/*in*/ tApp * a,
 	char * s ;
 	int    l ;
 
-	Ndx2StringLen (pNode -> nText,s,l) ;
-	StringAdd (a, ppAttr, s, l) ;
+        if ((pNode -> bFlags & nflgIgnore) == 0)
+            {                
+	    Ndx2StringLen (pNode -> nText,s,l) ;
+	    StringAdd (a, ppAttr, s, l) ;
+            }
 	pNode = Node_selfNextSibling (a, pDomTree, pNode, nRepeatLevel) ;
 	}
 

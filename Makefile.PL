@@ -3,7 +3,7 @@
 #
 # (C) 1997-2001 G.Richter (richter@dev.ecos.de) / ECOS
 #
-# $Id: Makefile.PL,v 1.31.4.52 2002/03/11 14:15:08 richter Exp $
+# $Id: Makefile.PL,v 1.31.4.58 2002/06/25 07:05:25 richter Exp $
 #
 
 
@@ -27,7 +27,7 @@ $EP2 = -f "epcmd2.c" ;
 %neededmodules =
     ( 
       'mod_perl.c' => { name	    => 'perl_module', 
-			path	    => ['$apache_src/modules/perl/libperl.so', '$EPBINDIR/modules/libperl.so', '$apache_src/mod_perl.so'],
+			path	    => ['$apache_src/modules/perl/libperl.so', '$EPBINDIR/modules/libperl.so', '$apache_src/mod_perl.so', '$apache_src/modules/mod_perl.so'],
 			win32path   => ['$mpdll', '$mpdll/apachemoduleperl.dll', '$mpdll/mod_perl.so', '$EPBINDIR/modules/apachemoduleperl.dll', '$EPBINDIR/modules/mod_perl.so'],
 			file	    => ['libperl.so', 'apachemoduleperl.dll', 'mod_perl.so'],
 			filetext    => 'libperl.so or mod_perl.so',
@@ -214,7 +214,16 @@ sub MY::cflags
 	my $self = shift ;
         
         my $txt = $self -> MM::cflags (@_) ;
-	$txt =~ s/CCFLAGS\s*=/CCFLAGS = $ccdebug / ;
+
+        if ($mp2cfg)
+            { # with Apache 2, make sure we have the same defines as mod_perl
+            $txt =~ s/CCFLAGS\s*=.*?\n/CCFLAGS = $ccdebug $mp2cfg->{MODPERL_CCOPTS}\n/s ;
+            }
+        else
+            {
+	    $txt =~ s/CCFLAGS\s*=/CCFLAGS = $ccdebug / ;
+            }
+
         
         return $txt ;
 	}
@@ -498,15 +507,27 @@ elsif (defined ($ENV{APACHE_SRC}))
 
 if (!$apache && $apache_src eq '')
     {
-    eval 'use Apache::MyConfig' ;
+    # check for mod_perl 2.0
+    eval 'use Apache::BuildConfig' ;
 
     if ($@ eq '')
         { 
-        $apache_src = $Apache::MyConfig::Setup{Apache_Src} ; 
+        $mp2cfg = Apache::BuildConfig -> new ;
+        $apache_src = $mp2cfg -> {APXS_INCLUDEDIR} ;
+        print "Found mod_perl 2.0\n" ;
         }
     else
         {
-        $apache_src = '' ;
+        eval 'use Apache::MyConfig' ;
+
+        if ($@ eq '')
+            { 
+            $apache_src = $Apache::MyConfig::Setup{Apache_Src} ; 
+            }
+        else
+            {
+            $apache_src = '' ;
+            }
         }
     }
 
@@ -661,12 +682,13 @@ if ($b && $apache && $apache_src ne '')
         $o = '' ;
         }
     $d .= ' -DAPACHE' ;
+    $d .= ' -DAPACHE2' if ($mp2cfg) ;
     $EPNOAPACHELIB = 0 ;
     }
 else
     {
     $apache = 0 ;
-    if ($win32 && ($EPAPACHESRC || $EPNOAPACHELIB) && -f 'blib/arch/auto/HTML/Embperl/Embperl.dll')
+    if ($win32 && ($EPAPACHESRC || $EPNOAPACHELIB) && -f 'blib/arch/auto/Embperl/Embperl.dll')
         {
         print "\nYou have already build Embperl with support for Apache mod_perl\n" ;
         $EPNOAPACHELIB = GetYesNo ("Do you want to build a separate dynamic library for use without Apache?", 'y') ;
@@ -737,6 +759,7 @@ if ($b && $apache)
         $EPHTTPD = "$apache_src/httpd" ;
         $EPHTTPD = $ENV{EPHTTPD} if (defined ($ENV{EPHTTPD})) ;
         $EPHTTPD = "$apache_src/httpsd" if (!-e $EPHTTPD && -e "$apache_src/httpsd") ;
+        $EPHTTPD = "$apache_src/bin/httpd" if (!-e $EPHTTPD && -e "$apache_src/bin/httpd") ;
         
         if (!-e $EPHTTPD)
             {
@@ -782,7 +805,7 @@ if ($b && $apache)
     $EPBINDIR	  = dirname ($EPHTTPD) ;    
     $EPMODPERL	  = '' ;
     
-    $addmodpath = '' ;
+    $addmodpath = $mp2cfg?$mp2cfg -> {MODPERL_AP_LIBEXECDIR}:'' ;
     while (($mod, $opt) = each %neededmodules)
 	{
 	if (!grep (/$mod/, @modules))
@@ -858,9 +881,16 @@ if ($b && $apache)
 	$use_dso = 1 ;
         }
 
-    require Apache::src;
-    $dynlib->{'OTHERLDFLAGS'} = Apache::src->new->otherldflags if (defined (&Apache::src::otherldflags)) ;
-
+    if ($mp2cfg)
+        {
+        require Apache::Build ;
+        $dynlib->{'OTHERLDFLAGS'} = Apache::Build->new->otherldflags  ;
+        }
+    else
+        {
+        require Apache::src;
+        $dynlib->{'OTHERLDFLAGS'} = Apache::src->new->otherldflags if (defined (&Apache::src::otherldflags)) ;
+        }
 
     if ($EPSTRONGHOLD) 
         {
@@ -878,7 +908,7 @@ if ($b && $apache)
         $sslbase = search_config ('SSL_BASE', "$apache_src/Configuration.apaci") ;
         $sslbase = search_config ('SSL_BASE', "$apache_src/Configuration") if (!$sslbase) ;
         print " + found mod_ssl\n" ;
-        $EPSSLDISABLE = !start_errcode ("\"$EPHTTPD\" -t -f $EPPATH/test/conf/ssldisable.conf") ;
+        $EPSSLDISABLE = $mp2cfg?0:!start_errcode ("\"$EPHTTPD\" -t -f $EPPATH/test/conf/ssldisable.conf") ;
         }
 
 
@@ -1004,6 +1034,7 @@ if ($b && $apache)
     print FH "\$EPSESSIONVERSION='$SessVer';\n" ;
     print FH "\$EPSESSIONXVERSION='$SessXVer';\n" ;
     print FH "\$EP2='$EP2';\n" ;
+    print FH "\$MP2='". ($mp2cfg?'1':'0') . "';\n" ;
     print FH "\$EPMODPERLVERSION='$MPVer';\n" ;
     print FH "\$EPC_ENABLE='$epc_enable';\n" ;
     print FH "\$EPNOAPACHELIB='$EPNOAPACHELIB';\n" ;
@@ -1188,8 +1219,11 @@ $o .= $sublibs ;
 WriteMakefile(
     'NAME'	   => 'Embperl',
     'VERSION_FROM' => 'Embperl.pm', 		# finds $VERSION
-    'OBJECT'       => 'Embperl$(OBJ_EXT) epmain$(OBJ_EXT) epio$(OBJ_EXT) epchar$(OBJ_EXT) eputil$(OBJ_EXT) epeval$(OBJ_EXT) epapinit$(OBJ_EXT) ' . 
-                       ($EP2?'epmem$(OBJ_EXT) epinit$(OBJ_EXT) epcgiinit$(OBJ_EXT) epcmd2$(OBJ_EXT) epparse$(OBJ_EXT) epdom$(OBJ_EXT) epcomp$(OBJ_EXT) epcache$(OBJ_EXT) epprovider$(OBJ_EXT)':'epcmd$(OBJ_EXT) ') . $o,
+    'OBJECT'       => 'Embperl$(OBJ_EXT) epmain$(OBJ_EXT) epio$(OBJ_EXT) epchar$(OBJ_EXT) eputil$(OBJ_EXT) epeval$(OBJ_EXT) ' . 
+                       ($EP2?'epmem$(OBJ_EXT) epinit$(OBJ_EXT) epcgiinit$(OBJ_EXT) epcmd2$(OBJ_EXT) epparse$(OBJ_EXT) epdom$(OBJ_EXT) epcomp$(OBJ_EXT) epcache$(OBJ_EXT) epprovider$(OBJ_EXT) ':'epcmd$(OBJ_EXT) ') . 
+                       ($apache?'mod_embperl$(OBJ_EXT) ':' ') .
+                       ($mp2cfg?'epapfilter$(OBJ_EXT) ':' ') .
+                       $o ,
     'LIBS'	   => [$libs || ''],   			 
     'DEFINE'	   => "$d \$(DEFS)", 			 
     'INC'	   => $i,     			 

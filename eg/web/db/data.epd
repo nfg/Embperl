@@ -16,14 +16,3 @@ $escmode = 0 ;
 
 [+ $rec -> {description} +]
 [$endwhile$]
-
-
-
-
-
- 
-
-
-
-
-

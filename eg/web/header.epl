@@ -1,14 +1,16 @@
-[- $r = shift -]
+[- 
+$r = shift ;
+-]
 <table width="100%" cellspacing="0" cellpadding="0" border="0">
     <tr>
-        <td valign="top" rowspan=2><img src="/eg/images/kopf-links.gif" width="206" height="97" usemap="#Map" border="0"> 
+        <td valign="top" rowspan=2><img src="[+ $r -> {imageuri} +]kopf-links.gif" width="206" height="97" usemap="#Map" border="0"> 
 	    <map name="Map"> 
-		<area shape="rect" coords="90,56,151,69" href="../index-d.htm" target="_top">
-		<area shape="rect" coords="90,70,151,82" href="index-e.htm" target="_top">
+		<area shape="rect" coords="90,56,151,69" href="[+ $r -> app -> languri($r, $r -> param -> uri, 'de') +]" target="_top">
+		<area shape="rect" coords="90,70,151,82" href="[+ $r -> app -> languri($r, $r -> param -> uri, 'en') +]" target="_top">
 	    </map>
         </td>
-        <td valign="top" width="50%"><img src="/eg/images/kopf-mitte.jpg" width="100%" height="46" vspace=0></td>
-        <td valign="top"><img src="/eg/images/kopf-rechts-engl.jpg" width="568" height="46" vspace=0></td>
+        <td valign="top" width="50%"><img src="[+ $r -> {imageuri} +]kopf-mitte.jpg" width="100%" height="46" vspace=0></td>
+        <td valign="top"><img src="[+ $r -> {imageuri} +]kopf-rechts-[+ $r -> param -> language eq 'de'?'deutsch':'engl' +].jpg" width="568" height="46" vspace=0></td>
     </tr>
     <tr>
         <td colspan=2 valign="top" align=left>
@@ -18,12 +20,12 @@
 			[$if @{$r -> {menuitems}} > 1 || $r -> {menuitems}[0]{menu} ne 'Home' $]
                             <a href="[+ $r -> {baseuri} +]">Home</a>
                             [- $i = 0 -]
-			    [$foreach $level (@{$r -> {menuitems}}) $]
-			        : <a href="[+ $level -> {url} +]">[+ $r -> gettext($level -> {menu}) +]</a>
+			    [$foreach $item (@{$r -> {menuitems}}) $]
+			        : <a href="[+ !$item -> {url}?$r -> {baseuri} . $item -> {relurl}:$item -> {url} +]">[+ $r -> gettext($item -> {menu}) +]</a>
 			    [$endforeach$] 
                         [$endif$]
 		    </td>
-		    <td align="right" valign="middle" height="99%">Suchen: <input type="text" name="search"></td>
+		    <td align="right" valign="middle" height="99%">[# search is comeing soon -> [= Search =]: <input type="text" name="search"> #]</td>
 		</tr>
 	    </table>
         </td>

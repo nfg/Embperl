@@ -8,6 +8,7 @@ AV *    T_MYAVREF
 HV *    T_MYHVREF
 Apache::Server T_PTROBJ
 
+
 INPUT
 T_MYAVREF
     $var = (AV *)SvRV($arg);
@@ -16,10 +17,10 @@ T_MYHVREF
     $var = (HV *)SvRV($arg);
 
 T_PTROBJ_CONF
-    if (sv_derived_from ($arg, \"HTML::Embperl::Conf\"))
+    if (sv_derived_from ($arg, \"Embperl::Conf\"))
         $var = (tConf *)(SvIV((SV *)SvRV($arg))) ;
     else
-        croak (\"$var is not of type HTML::Embperl::Conf\") ;
+        croak (\"$var is not of type Embperl::Conf\") ;
 
 T_PTROBJ_REQ
     {
@@ -27,15 +28,15 @@ T_PTROBJ_REQ
     if (mg = mg_find (SvRV($arg), '~'))
         $var = *((tReq **)(mg -> mg_ptr)) ;
     else
-        croak (\"$var is not of type HTML::Embperl::Req\") ;
+        croak (\"$var is not of type Embperl::Req\") ;
     }
 
 
 T_PTROBJ_FILE
-    if (sv_derived_from ($arg, \"HTML::Embperl::File\"))
+    if (sv_derived_from ($arg, \"Embperl::File\"))
         $var = (tFile *)(SvIV((SV *)SvRV($arg))) ;
     else
-        croak (\"$var is not of type HTML::Embperl::File\") ;
+        croak (\"$var is not of type Embperl::File\") ;
 
 T_PTROBJ_DOMNODE
     {
@@ -52,14 +53,14 @@ T_PTROBJ_SYNTAX
     if (SvROK ($arg) && (mg = mg_find (SvRV($arg), '~')))
         $var = *((tTokenTable **)(mg -> mg_ptr)) ;
     else
-        croak (\"$var is not of type HTML::Embperl::Syntax\") ;
+        croak (\"$var is not of type Embperl::Syntax\") ;
     }
 
 
 
 OUTPUT
 T_PTROBJ_CONF
-    sv_setref_pv ($arg, \"HTML::Embperl::Conf\", (void *)$var) ;
+    sv_setref_pv ($arg, \"Embperl::Conf\", (void *)$var) ;
 
 T_PTROBJ_REQ
     {
@@ -71,7 +72,7 @@ T_PTROBJ_REQ
     }
  
 T_PTROBJ_FILE
-    sv_setref_pv ($arg, \"HTML::Embperl::File\", (void *)$var) ;
+    sv_setref_pv ($arg, \"Embperl::File\", (void *)$var) ;
 
 T_PTROBJ_DOMNODE
     {

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: EmbperlBlocks.pm,v 1.1.2.23 2002/02/27 08:19:43 richter Exp $
+#   $Id: EmbperlBlocks.pm,v 1.1.2.25 2002/05/28 18:58:01 richter Exp $
 #
 ###################################################################################
  
@@ -43,18 +43,19 @@ use vars qw{@ISA %Blocks %BlocksOutput %BlocksOutputLink} ;
 sub new
 
     {
-    my $self = shift ;
+    my $self        = shift ;
+    my $exchange    = shift ;
 
     $self = Embperl::Syntax::new ($self) ;
 
     if (!$self -> {-epbBlocks})
         {
-        $self -> {-epbBlocks}     = $self -> CloneHash ({ %Blocks, %BlocksOutput }) ;
+        $self -> {-epbBlocks}     = $self -> CloneHash ({ %Blocks, %BlocksOutput }, ref $exchange?$exchange:undef) ;
         $self -> {-epbBlocksLink} = $self -> CloneHash ({ %Blocks, %BlocksOutputLink }, { 'unescape' => 2 }) ;
 
         $self -> AddToRoot ($self -> {-epbBlocks}) ;
 
-        Init ($self) ;
+        Init ($self, ref $exchange?$exchange:undef) ;
         }
 
     return $self ;
@@ -533,10 +534,10 @@ sub Init
             embperl => { 
                     perlcode => 
                         [
-                        'if (!defined (_ep_rpurl(%$x%,scalar(do{%#~0:$col%})))) %#~-0:$row% { if ($col == 0) { _ep_dcp (%^*htmltable%) ; last l%^*htmltable% ; } else { _ep_dcp (%^*htmlrow%) ; last l%^*htmlrow% ; }}',
-                        'if (!defined (_ep_rpurl(%$x%,scalar(do{%#~0:$col%})))) { _ep_dcp (%^*htmlrow%) ; last l%^*htmlrow% ; }',
-                        'if (!defined (_ep_rpurl(%$x%,scalar(do{%#~0:$row%;})))) {  _ep_dcp (%^*htmltable%) ; last l%^*htmltable% ; }',
-                        '_ep_rpurl(%$x%,scalar(do{%#0%}));', 
+                        'if (!defined (_ep_rpurl(%$x%,scalar(%#~0:$col%)))) %#~-0:$row% { if ($col == 0) { _ep_dcp (%^*htmltable%) ; last l%^*htmltable% ; } else { _ep_dcp (%^*htmlrow%) ; last l%^*htmlrow% ; }}',
+                        'if (!defined (_ep_rpurl(%$x%,scalar(%#~0:$col%)))) { _ep_dcp (%^*htmlrow%) ; last l%^*htmlrow% ; }',
+                        'if (!defined (_ep_rpurl(%$x%,scalar(%#~0:$row%)))) {  _ep_dcp (%^*htmltable%) ; last l%^*htmltable% ; }',
+                        '_ep_rpurl(%$x%,scalar(%#0%));', 
                         ],
                     removenode  => 4,
                     mayjump => '%#~0:$col|$row|$cnt% %?*htmlrow% %?*htmltable%',

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eplibxslt.c,v 1.1.2.17 2002/02/25 11:20:28 richter Exp $
+#   $Id: eplibxslt.c,v 1.1.2.21 2002/06/24 09:22:47 richter Exp $
 #
 ###################################################################################*/
 
@@ -30,6 +30,7 @@
 #include <libxslt/xsltInternals.h>
 #include <libxslt/transform.h>
 #include <libxslt/xsltutils.h>
+#include <libxslt/imports.h>
 
 #ifdef WIN32
 extern __declspec( dllimport ) int xmlLoadExtDtdDefaultValue;
@@ -140,7 +141,7 @@ int embperl_LibXSLT_Text2Text   (/*in*/  tReq *	  r,
     xmlLoadExtDtdDefaultValue = 1;
     xmlSetGenericErrorFunc (stderr, NULL) ;
     
-    cur = xsltParseStylesheetFile(sStylesheet);
+    cur = xsltParseStylesheetFile((const xmlChar *)sStylesheet);
     p   = SvPV (pSource, len) ;
     doc = xmlParseMemory(p, len);
     res = xsltApplyStylesheet(cur, doc, pParamArray);
@@ -225,6 +226,54 @@ static int ProviderLibXSLTXSL_New (/*in*/ req *              r,
 
     return ok ;
     }
+
+/* ------------------------------------------------------------------------ */
+/*                                                                          */
+/* ProviderLibXSLTXSL_ErrorFunc					            */
+/*                                                                          */
+/*! 
+*   \_en
+*   Callback which is called when an error occurs
+*   \endif                                                                       
+*
+*   \_de									   
+*   Callback das im Fehlerfall aufgerufen wird
+*   \endif                                                                       
+*/
+
+void ProviderLibXSLT_ErrorFunc      (void *ctx, const char *msg, ...)
+
+    {
+    tReq * r ;
+    SV * pSV  ;
+    STRLEN l ;
+    va_list args ;
+    dTHX ;
+
+    r = CurrReq ; /* we cannot use ctx to pass the request, because it's not thread safe */
+    
+    pSV = newSV (256) ;
+
+    va_start(args, msg) ;
+    sv_vsetpvfn(pSV, msg, strlen(msg), &args, Null(SV**), 0, Null(bool*)) ;
+    va_end(args) ;
+    
+    if (!r)
+        fputs (SvPV(pSV, l), stderr) ;
+    else
+        {
+        char * p = SvPV(pSV, l) ;
+        if (l && p[l-1] == '\n')
+            p[l-1] = '\0' ;
+        
+        strncpy (r -> errdat1, p, sizeof (r -> errdat1) - 1) ;
+        LogError (r, rcLibXSLTError) ;
+        }
+
+    SvREFCNT_dec(pSV) ;
+    }
+
+
 
 /* ------------------------------------------------------------------------ */
 /*                                                                          */
@@ -342,6 +391,15 @@ static int ProviderLibXSLTXSL_GetContentPtr     (/*in*/ req *            r,
 	    return rcMissingInput ;
 	    }
 
+        r -> Component.pCurrPos = NULL ;
+        r -> Component.nSourceline = 1 ;
+        r -> Component.pSourcelinePos = NULL ;    
+        r -> Component.pLineNoCurrPos = NULL ;    
+
+        xmlSubstituteEntitiesDefault(1);
+        xmlLoadExtDtdDefaultValue = 1;
+        xmlSetGenericErrorFunc (NULL, &ProviderLibXSLT_ErrorFunc) ;
+        
         if ((doc = xmlParseMemory(p, len)) == NULL)
       	    {
 	    Cache_ReleaseContent (r, pFileCache) ;
@@ -588,6 +646,15 @@ static int ProviderLibXSLTXML_GetContentPtr     (/*in*/ req *            r,
 	    strncpy (r -> errdat1, "LibXSLT XML source", sizeof (r -> errdat1)) ;
 	    return rcMissingInput ;
 	    }
+
+        r -> Component.pCurrPos = NULL ;
+        r -> Component.nSourceline = 1 ;
+        r -> Component.pSourcelinePos = NULL ;    
+        r -> Component.pLineNoCurrPos = NULL ;    
+
+        xmlSubstituteEntitiesDefault(1);
+        xmlLoadExtDtdDefaultValue = 1;
+        xmlSetGenericErrorFunc (NULL, &ProviderLibXSLT_ErrorFunc) ;
 
         if ((doc = xmlParseMemory(p, len)) == NULL)
       	    {
@@ -867,27 +934,18 @@ static int ProviderLibXSLT_UpdateParam(/*in*/ req *              r,
     if (pParamHV)
 	{
 	n = hv_iterinit (pParamHV) ;
-	lprintf (r -> pApp, "libxslt param number %d\n", n) ;
 	if (!(pParamArray = malloc(sizeof (const char *) * (n + 1) * 2)))
 	    return rcOutOfMemory ;
 
-	lprintf (r -> pApp, "libxslt param number %d\n", n) ;
 	n = 0 ;
 	while ((pEntry = hv_iternext (pParamHV)))
 	    {
-	lprintf (r -> pApp, "libxslt param 2 number %d\n", n) ;
 	    pKey     = hv_iterkey (pEntry, &l) ;
-	lprintf (r -> pApp, "libxslt param 3 number %d\n", n) ;
 	    pValue   = hv_iterval (pParamHV, pEntry) ;
-	lprintf (r -> pApp, "libxslt param 4 number %d\n", n) ;
 	    pParamArray[n++] = pKey ;
-	lprintf (r -> pApp, "libxslt param 5 number %d\n", n) ;
 	    pParamArray[n++] = SvPV (pValue, len) ;
-	lprintf (r -> pApp, "libxslt param 6 number %d\n", n) ;
-	    lprintf (r -> pApp, "libxslt param input %s = %s\n", pParamArray[n-2], pParamArray[n-1]) ;
 	    }
 	pParamArray[n++] = NULL ;
-	lprintf (r -> pApp, "libxslt param 99 number %d\n", n) ;
 	((tProviderLibXSLT *)pProvider) -> pParamArray = pParamArray ;
 	}
     return ok ;
@@ -937,6 +995,7 @@ static int ProviderLibXSLT_GetContentSV    (/*in*/ req *            r,
     xmlDocPtr	    doc ;
     xmlDocPtr	    res;
     xmlOutputBufferPtr obuf ;
+    const xmlChar *encoding;
     struct iowrite iowrite ;
     
     tCacheItem * pSrcCache = Cache_GetDependency(r, pProvider -> pCache, 0) ;
@@ -955,6 +1014,15 @@ static int ProviderLibXSLT_GetContentSV    (/*in*/ req *            r,
 
         ((tProviderLibXSLT *)pProvider) -> pOutputSV = newSVpv("", 0) ;
 
+        r -> Component.pCurrPos = NULL ;
+        r -> Component.nSourceline = 1 ;
+        r -> Component.pSourcelinePos = NULL ;    
+        r -> Component.pLineNoCurrPos = NULL ;    
+
+        xmlSubstituteEntitiesDefault(1);
+        xmlLoadExtDtdDefaultValue = 1;
+        xmlSetGenericErrorFunc (NULL, &ProviderLibXSLT_ErrorFunc) ;
+
         res = xsltApplyStylesheet(cur, doc, ((tProviderLibXSLT *)pProvider) -> pParamArray);
         if(res == NULL)
 	    {
@@ -965,8 +1033,27 @@ static int ProviderLibXSLT_GetContentSV    (/*in*/ req *            r,
         iowrite.pProvider = (tProviderLibXSLT *)pProvider ;
         iowrite.pReq = r ;
 
-        obuf = xmlOutputBufferCreateIO (ProviderLibXSLT_iowrite, NULL, &iowrite, NULL) ;
+        XSLT_GET_IMPORT_PTR(encoding, cur, encoding)
+        if (encoding != NULL) 
+            {
+	    xmlCharEncodingHandlerPtr encoder;
+
+	    encoder = xmlFindCharEncodingHandler((char *)encoding);
+	    if ((encoder != NULL) &&
+	        (xmlStrEqual((const xmlChar *)encoder->name,
+			     (const xmlChar *) "UTF-8")))
+	        encoder = NULL;
+            obuf = xmlOutputBufferCreateIO (ProviderLibXSLT_iowrite, NULL, &iowrite, encoder) ;
+            } 
+        else 
+            obuf = xmlOutputBufferCreateIO (ProviderLibXSLT_iowrite, NULL, &iowrite, NULL) ;
     
+        if(obuf == NULL)
+	    {
+	    strncpy (r -> errdat1, "Cannot allocate output buffer", sizeof (r -> errdat1)) ;
+	    return rcLibXSLTError ;
+	    }
+
         xsltSaveResultTo(obuf, res, cur);
 
         xmlFreeDoc(res);

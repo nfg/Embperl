@@ -1,20 +1,22 @@
 #!/usr/bin/perl
+##############################################################################
+#
+#   Embperl - Copyright (c) 1997-2002 Gerald Richter / ecos gmbh   www.ecos.de
+#
+#   You may distribute under the terms of either the GNU General Public
+#   License or the Artistic License, as specified in the Perl README file.
+#   For use with Apache httpd and mod_perl, see also Apache copyright.
+#
+#   THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+#   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+#   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+#
+#   $Id: setupdb.pl,v 1.1.2.3 2002/06/24 19:22:31 richter Exp $
+#
+##############################################################################
 
 
-###############################################################################
-###############################################################################
-###                                                                         ###
-###   perlwww - Copyright (c) 1999, 2000  ecos                              ###
-###                                                                         ###
-###   - Setup -                                                             ###
-###                                                                         ###
-###   $Id: setupdb.pl,v 1.1.2.1 2002/02/12 07:20:36 richter Exp $                 ###
-###                                                                         ###
-###############################################################################
-###############################################################################
-
-
-
+use FindBin ;
 use DBIx::Recordset ;
 use Getopt::Long ;
 
@@ -43,7 +45,7 @@ else
     
 $DBIx::Recordset::Debug = $opt_debug ;
 
-my $dbshema     = "db.schema" ;
+my $dbshema     = "$FindBin::Bin/db.schema" ;
 
     
 my $db = DBIx::Database -> new ({'!DataSource' => $ds,

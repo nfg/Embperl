@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epeval.c,v 1.23.4.24 2002/02/27 11:58:23 richter Exp $
+#   $Id: epeval.c,v 1.23.4.25 2002/05/28 06:56:03 richter Exp $
 #
 ###################################################################################*/
 
@@ -776,6 +776,7 @@ int CallStoredCV  (/*i/o*/ register req * r,
      FREETMPS ;
      LEAVE ;
 
+    /*
      if (r -> bExit || r -> Component.bExit)
 	 {
 	 if (*pRet)
@@ -785,7 +786,8 @@ int CallStoredCV  (/*i/o*/ register req * r,
             lprintf (r -> pApp,  "[%d]EVAL> exit passed through\n", r -> pThread -> nPid) ;
 	 return rcExit ;
 	 }
-     
+     */
+
      pSVErr = ERRSV ;
      if (SvTRUE (pSVErr))
         {
@@ -802,18 +804,21 @@ int CallStoredCV  (/*i/o*/ register req * r,
 
             tDomTree * pDomTree = DomTree_self (r -> Component.xCurrDomTree) ;
             tIndex n = ArrayGetSize (r -> pApp, pDomTree -> pCheckpoints) ;
-                lprintf (r -> pApp,  "[%d]EVAL> exit called n = %d\n", r -> pThread -> nPid, n) ;
             if (n > 2)
                 DomTree_checkpoint (r, n-1) ;
 
+            p = SvPV(ERRSV, l) ;
+            if (l > 0 && strncmp (p, "request ",8) == 0)
+                r -> bExit = 1 ;
+            
             if (r -> Component.Config.bDebug & dbgEval)
-                lprintf (r -> pApp,  "[%d]EVAL> exit called\n", r -> pThread -> nPid) ;
+                lprintf (r -> pApp,  "[%d]EVAL> %s exit called (%s)\n", r -> pThread -> nPid, r -> bExit?"request":"component", p?p:"") ;
             
 	    sv_unmagic(pSVErr,'U');
 	    sv_setpv(pSVErr,"");
 
 	    r -> Component.Config.bOptions |= optNoUncloseWarn ;
-	    r -> bExit = 1 ;
+	    r -> Component.bExit = 1 ;
 
             return rcExit ;
             }

@@ -14,7 +14,7 @@ The server encountered an internal error or misconfiguration and was unable to c
 ^<br>&nbsp;&nbsp;&nbsp;&nbsp;Global symbol &quot;\$d&quot; requires explicit package name at 
 ^<br>&nbsp;&nbsp;&nbsp;&nbsp;Global symbol &quot;\$e&quot; requires explicit package name at 
 
-^ Embperl.*?<P>
+^Embperl
 
 </BODY></HTML>
 

@@ -1,4 +1,8 @@
-[- $r = shift -]
+[- 
+use File::Basename ;
+
+$r = shift 
+-]
 
 <table width="100%">
     <tr bgcolor="#fefcad">
@@ -8,7 +12,7 @@
 
 
 
-<form action="show.epl" method="POST">
+<form action="[+ $r -> {action_prefix}?($r->{action_prefix} . dirname($r-> param -> uri) .'/'):'' +]show.epl" method="POST">
 
 [= add2 =]<br><br>
 

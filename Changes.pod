@@ -1,5 +1,61 @@
 =pod
 
+=head1 2.0b8  (BETA)  25. Juni 2002
+
+   - exit can now exit the whole request. When called without argument
+     it exits the current component, like before, when called with argument
+     it exits the whole request.
+   - Added support for Apache 2.0 / mod_perl 2.0 (prefork MPM).   
+   - Added the possibility to catch the output of a sub-request
+     (e.g. a CGI script, Java or PHP output) when running under Apache 2.0
+   - when setting $r -> param -> filename in an application object
+     to a relativ path it is interpreted relativ to original request
+   - Start to catch up with new features of Embperl 2 in the docs. Added
+     Config.pod for configuration and calling. 
+   - Lots of improvments in the new Embperl website, which serves as best
+     example for using the new Embperl 2 features. It's part of the distribution
+     and can be found under eg/web. See eg/web/README.
+   - fixed bug with setting of escmode and print Out reported by
+     Eric-Olivier Le Bigot.
+   - fixed incorrected escaping inside of an URL when expanding an hash
+     or array reference. Reported by Axel Beckert.
+   - fixed possible endless loop when expanding hash or array inside of
+     an URL.
+   - fixed a segfault that occured when source file encryption was enabled.
+     Reported by Edwin Ramirez.     
+   - fixed a segfault that occured when no input file is given. Reported by 
+     Edwin Ramirez.     
+   - fixed a segfault that occured on solaris when input comes from memory.
+     Reported by Mike Wesemann.
+   - readd possibility to build version with and without Apache support 
+     on windows.
+   - Remove Content-Length: 0 HTTP-Header in CGI Mode
+   - Fixed segfault when replacing an attribute. Reported by Michael Stevens.
+   - Fixed random segfaults, that had occured when Perl had reallocated it's
+     internal Stack.
+   - When apache is started with -D EMBPERL_APDEBUG, it outputs a 
+     configuration trace.
+   - When file is not found, Embperl::Object now returns status 404, instead 
+     of 500. Reported by Cameron McBride.
+   - When optReturnError is set, Embperl::Object now really returns the error code.
+     Reported by Cameron McBride.
+   - Fixed a reference count error when using the import parameter. Reported
+     by Michael Smith.
+   - Fixed string reference counting problem in RTF&POD syntax.
+   - Fixed a segfault that had occured when a file with a syntax error is 
+     compiled the second time within the same process. Reported by 
+     Michael Smith.
+   - removed do { } around expressions of [+ +] blocks inside urls, because 
+     this cost performance and now all [+ +] behaves the same. Reported by 
+     Michael Smith.
+   - make stop now works also on windows.
+   - make start, which can be used to view/test the Embperl website localy,
+     now displays the URL how to request the site.
+   - libxslt does correct error reporting now.
+   - libxslt output encoding is now recognized correctly. 
+   - set Content-Length when sending error page, so Internet Explorer won't show
+     his own error page.
+
 =head1 2.0b7 (BETA) 21. Mar. 2002
 
    - Changed default for EMBPERL_ESCMODE from 3 to 7. This disables

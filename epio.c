@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epio.c,v 1.16.4.10 2002/03/12 08:58:44 richter Exp $
+#   $Id: epio.c,v 1.16.4.15 2002/05/23 22:24:45 richter Exp $
 #
 ###################################################################################*/
 
@@ -413,6 +413,7 @@ int CloseInput (/*i/o*/ register req * r)
 	XPUSHs(r -> Component.ifdobj);
 	PUTBACK;
 	perl_call_method ("CLOSE", G_VOID | G_EVAL) ; 
+        SPAGAIN ;
 	FREETMPS;
 	LEAVE;
 	r -> Component.ifdobj = NULL ;
@@ -491,14 +492,14 @@ int iread (/*i/o*/ register req * r,
 #if defined (APACHE)
     if (r -> pApacheReq)
         {
-        setup_client_block(r -> pApacheReq, REQUEST_CHUNKED_ERROR); 
-        if(should_client_block(r -> pApacheReq))
+        ap_setup_client_block(r -> pApacheReq, REQUEST_CHUNKED_ERROR); 
+        if(ap_should_client_block(r -> pApacheReq))
             {
             int c ;
             int n = 0 ;
             while (1)
                 {
-                c = get_client_block(r -> pApacheReq, p, size); 
+                c = ap_get_client_block(r -> pApacheReq, p, size); 
                 if (c < 0 || c == 0)
                     return n ;
                 n    	     += c ;
@@ -598,7 +599,7 @@ int ReadHTML (/*i/o*/ register req * r,
 #ifndef EP2
         syntax = (r -> Component.pTokenTable && strcmp ((char *)r -> Component.pTokenTable, "Text") == 0)?"Text":"Embperl" ;
 #else
-        syntax = r -> Component.pTokenTable -> sName ;
+        syntax = r -> Component.Config.sSyntax ;
 #endif
 
         if ((rc = do_crypt_file (ifd, NULL, pData, *nFileSize, 0, syntax, EPC_HEADER)) <= 0)
@@ -734,6 +735,9 @@ int CloseOutput (/*in*/ tReq *             r,
     {
     epTHX ;
     
+    if (!pOutput)
+        return ok ;
+
 #if 0
     if (0) /* r -> Component.pOutput -> ofdobj) */
 	{	    
@@ -744,6 +748,7 @@ int CloseOutput (/*in*/ tReq *             r,
 	XPUSHs(pOutput -> ofdobj);
 	PUTBACK;
 	perl_call_method ("CLOSE", G_VOID | G_EVAL) ; 
+        SPAGAIN ;
 	FREETMPS;
 	LEAVE;
 	pOutput -> ofdobj = NULL ;
@@ -879,6 +884,7 @@ int owrite (/*i/o*/ register req * r,
 	XPUSHs(sv_2mortal(newSVpv((char *)ptr,size)));
 	PUTBACK;
 	perl_call_method ("PRINT", G_SCALAR) ; 
+        SPAGAIN ;
 	FREETMPS;
 	LEAVE;
 	return size ;
@@ -890,9 +896,9 @@ int owrite (/*i/o*/ register req * r,
         {
         if (n > 0)
             {
-            n = rwrite (ptr, n, r -> pApacheReq) ;
+            n = ap_rwrite (ptr, n, r -> pApacheReq) ;
             if (r -> Component.Config.bDebug & dbgFlushOutput)
-                rflush (r -> pApacheReq) ;
+                ap_rflush (r -> pApacheReq) ;
             return n ;
             }
         else
@@ -934,9 +940,9 @@ void oputc (/*i/o*/ register req * r,
 #if defined (APACHE)
     if (r -> pApacheReq && r -> Component.pOutput -> ofd == NULL)
         {
-        rputc (c, r -> pApacheReq) ;
+        ap_rputc (c, r -> pApacheReq) ;
         if (r -> Component.Config.bDebug & dbgFlushOutput)
-            rflush (r -> pApacheReq) ;
+            ap_rflush (r -> pApacheReq) ;
         return ;
         }
 #endif
@@ -1187,7 +1193,7 @@ void * _malloc (/*i/o*/ register req * r,
 
     if (r -> pApacheReq)
         {
-        p = palloc (r -> pApacheReq -> pool, size + sizeof (size)) ;
+        p = apr_palloc (r -> pApacheReq -> pool, size + sizeof (size)) ;
         }
     else
 #endif
@@ -1222,7 +1228,7 @@ void * _realloc (/*i/o*/ register req * r,  void * ptr, size_t oldsize, size_t  
 #ifdef APACHE
     if (r -> pApacheReq)
         {
-        p = palloc (r -> pApacheReq -> pool, size + sizeof (size)) ;
+        p = apr_palloc (r -> pApacheReq -> pool, size + sizeof (size)) ;
         if (p == NULL)
             return NULL ;
         

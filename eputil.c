@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eputil.c,v 1.15.4.51 2002/03/14 15:29:07 richter Exp $
+#   $Id: eputil.c,v 1.15.4.53 2002/05/20 07:04:25 richter Exp $
 #
 ###################################################################################*/
 
@@ -385,6 +385,21 @@ int   TransHtml (/*i/o*/ register req * r,
 
     EPENTRY (TransHtml) ;
 	
+    if (bInUrl == 16)
+	{ 
+	/* Just remove \ for rtf */
+	if (nLen == 0)
+	    nLen = strlen (sData) ;
+	e = sData + nLen ;
+	while (p < e)
+	    {
+	    if (*p == '\\' && p[1] != '\0')
+	    	*p++ = ' ' ;
+	    p++ ;
+	    }	
+	return nLen ; 	
+        }
+
     if (r -> Component.Config.nInputEscMode == iescNone)
 	{ 
 #if PERL_VERSION < 5
@@ -402,23 +417,6 @@ int   TransHtml (/*i/o*/ register req * r,
 	return nLen ; 	
         }
         
-#ifdef EP2
-    if (bInUrl == 16)
-	{ 
-	/* Just remove \ for rtf */
-	if (nLen == 0)
-	    nLen = strlen (sData) ;
-	e = sData + nLen ;
-	while (p < e)
-	    {
-	    if (*p == '\\' && p[1] != '\0')
-	    	*p++ = ' ' ;
-	    p++ ;
-	    }	
-	return nLen ; 	
-        }
-#endif
-
     s = NULL ;
     if (nLen == 0)
         nLen = strlen (sData) ;
@@ -725,9 +723,13 @@ UV    GetHashValueUInt (/*in*/  tReq *         r,
 #ifdef PERL_IMPLICIT_CONTEXT
     pTHX ;
     if (r)
+        {
         aTHX = r -> pPerlTHX ;
+        }
     else
+        {
         aTHX = PERL_GET_THX ;
+        }
 #endif
 
     /*EPENTRY (GetHashValueInt) ;*/

@@ -9,7 +9,15 @@
 
 [- Execute ( {inputfile => 'incsub.htm', req_rec => $req_rec, param => [undef, 'main']}) -]
 
+[# cause runtime error #]
 [- Execute ( {inputfile => 'incerr.htm', req_rec => $req_rec, param => ['err', 'main']}) -]
+
+[- Execute ( {inputfile => 'incerr.htm', debug => 0x7ffffffe} ) -]
+
+[# cause compiletime error #]
+[- Execute ( {inputfile => 'incerr.htm', debug => 0x7ffffffe, syntax => 'Perl'} ) -]
+
+[- Execute ( {inputfile => 'incerr.htm', debug => 0x7ffffffe, syntax => 'Perl'} ) -]
 
 [- Execute ( {inputfile => 'inc.htm', req_rec => $req_rec}) -]
 

@@ -11,7 +11,6 @@ This page is shown due to an ErrorDocument redirection<p>
 main: [+ $req_rec -> main +]
 prev: [+ $req_rec -> prev +]
 next: [+ $req_rec -> next +]
-last: [+ $req_rec -> last +]
 
 [-
 $errors = $req_rec -> prev -> pnotes('EMBPERL_ERRORS') ;

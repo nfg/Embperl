@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epinit.c,v 1.1.2.45 2002/03/20 08:12:53 richter Exp $
+#   $Id: epinit.c,v 1.1.2.57 2002/06/19 04:22:43 richter Exp $
 #
 ###################################################################################*/
 
@@ -20,6 +20,7 @@
 #include "xs/ep_xs_typedefs.h"
 #include "xs/ep_xs_sv_convert.h"
 
+#include "epdefault.c"
 
 
 
@@ -54,10 +55,6 @@ SV * embperl_ThreadDataRV ;
 #define EMBPERL_EscMode_NAME    EMBPERL_PACKAGE_STR"::escmode"
 #define EMBPERL_CurrNode_NAME    EMBPERL_PACKAGE_STR"::_ep_node"
 
-
-static char sUserHashName  [] = "HTML::Embperl::udat" ;
-static char sStateHashName [] = "HTML::Embperl::sdat" ;
-static char sModHashName  []  = "HTML::Embperl::mdat" ;
 
 static int  bInitDone = 0 ; /* c part is already initialized */
 static int  nRequestCount = 1 ;
@@ -185,39 +182,6 @@ tThreadData * embperl_GetThread  (/*in*/ pTHX)
     }
 
 /*---------------------------------------------------------------------------
-* embperl_DefaultAppConfig
-*/
-/*!
-*
-* \_en									   
-* initialze Config defaults
-* \endif                                                                       
-*
-* \_de									   
-* Initialisiert Config Defaults
-* \endif                                                                       
-*                                                                          
-* ------------------------------------------------------------------------ */
-
-
-void embperl_DefaultAppConfig (/*in*/ tAppConfig  *pCfg) 
-
-    {
-    pCfg -> sAppName    = "Embperl" ;
-    pCfg -> sCookieName = "EMBPERL_UID" ;
-    pCfg -> sSessionHandlerClass = "Apache::SessionX" ;
-#ifdef WIN32
-    pCfg -> sLog        = "\\embperl.log" ;
-#else
-    pCfg -> sLog        = "/tmp/embperl.log" ;
-#endif
-    pCfg -> bDebug      = dbgStd ;
-    pCfg -> nMailErrorsResetTime = 60 ;
-    pCfg -> nMailErrorsResendTime = 60 * 15 ;
-    }
-
-
-/*---------------------------------------------------------------------------
 * embperl_CreateSessionObject
 */
 /*!
@@ -255,7 +219,7 @@ static int embperl_CreateSessionObject(/*in*/ tApp *       a,
     pSVCode = newSVpvf ("require %s", sPackage) ; 
     newSVpvf2(pSVCode) ;
     /* there is no c api to the require function, eval it... */
-    perl_eval_sv(pSVCode, G_EVAL) ;
+    perl_eval_sv(pSVCode, G_EVAL | G_DISCARD) ;
     SvREFCNT_dec(pSVCode);
     tainted = 0 ;
 
@@ -269,12 +233,17 @@ static int embperl_CreateSessionObject(/*in*/ tApp *       a,
         return rcEvalErr ;
         }
 
+    SPAGAIN;
     PUSHMARK(sp);
     XPUSHs(sv_2mortal(newSVpv(sPackage, 0))); 
     XPUSHs(&sv_undef); /* id */ 
     XPUSHs(sv_2mortal (newRV((SV *)pArgs))); 
     PUTBACK;                        
-    n = perl_call_method ("TIEHASH", G_EVAL) ;
+    n = perl_call_method ("TIEHASH", G_EVAL | G_SCALAR) ;
+    SPAGAIN;
+    if (n > 0)
+        pTie = POPs ;
+    PUTBACK;
     if (SvTRUE (ERRSV))
 	{
         STRLEN l ;
@@ -282,10 +251,6 @@ static int embperl_CreateSessionObject(/*in*/ tApp *       a,
         sv_setpv(ERRSV,"");
         return rcEvalErr ;
         }
-    SPAGAIN;
-    if (n > 0)
-        pTie = POPs ;
-    PUTBACK;
     if (n == 0 || !SvROK(pTie))
         {
         LogErrorParam (a, rcSetupSessionErr, "TIEHASH didn't returns a hashref", sPackage) ;
@@ -396,6 +361,7 @@ int    embperl_SetupSessionObjects    (/*in*/ tApp *       a)
     if ((rc = embperl_CreateSessionObject (a, pArgs1, &a -> pAppHash, &a -> pAppObj)) != ok)
         return rc ;
 
+    SPAGAIN ;
     PUSHMARK(sp);
     XPUSHs(a -> pAppObj); 
     XPUSHs(sv_2mortal (newSVpv(a -> Config.sAppName, 0))); 
@@ -713,7 +679,11 @@ int embperl_Init        (/*in*/ pTHX_
         /* when running under mod_perl only register the module */
         /*  rest will be call from module initialzation when config has been read */
         embperl_ApacheAddModule () ;
+#ifdef APACHE2
+        ap_s = epxs_sv2_Apache__Server(pApacheSrvSV) ;
+#else
         return ok ;
+#endif
         }
 #endif
 
@@ -725,7 +695,9 @@ int embperl_Init        (/*in*/ pTHX_
     
 #ifdef APACHE
     if (ap_s)
+        {
         embperl_GetApacheConfig (pThread, NULL, ap_s, &pApacheCfg) ;
+        }
 #endif
 
     if ((rc = embperl_SetupApp (aTHX_ pThread, pApacheCfg, pPerlParam, &pApp)) != ok)
@@ -784,13 +756,16 @@ int embperl_Init        (/*in*/ pTHX_
     if (bInitDone)
         return ok ; /* the rest needs to be done only once per process */
 
-#if defined (_DEBUG) && defined (WIN32)
+#if defined (_MDEBUG) && defined (WIN32)
     _CrtSetReportHook( EmbperlCRTDebugOutput );
 #endif
 
     DomInit (pApp) ;
     Cache_Init (pApp) ;
     Provider_Init (pApp) ;
+#ifdef APACHE2
+    ApFilter_Init (pApp) ;
+#endif
 #ifdef XALAN
     embperl_Xalan_Init () ;
 #endif
@@ -805,30 +780,6 @@ int embperl_Init        (/*in*/ pTHX_
     return rc ;
     }
     
-    
-/*---------------------------------------------------------------------------
-* embperl_DefaultReqConfig
-*/
-/*!
-*
-* \_en									   
-* initialze ReqConfig defaults
-* \endif                                                                       
-*
-* \_de									   
-* Initialisiert ReqConfig Defaults
-* \endif                                                                       
-*                                                                          
-* ------------------------------------------------------------------------ */
-
-
-void embperl_DefaultReqConfig (/*in*/ tReqConfig  *pCfg) 
-
-    {
-    pCfg -> cMultFieldSep = '\t' ;
-    pCfg -> nSessionMode = smodeUDatCookie ;
-    }
-
 
 /*---------------------------------------------------------------------------
 * embperl_GetFormData
@@ -1042,8 +993,8 @@ static int embperl_SetupFormData (/*i/o*/ register req * r)
 #ifdef APACHE
     if (r -> pApacheReq)
         {
-        const char * sLength = table_get(r -> pApacheReq->headers_in, "Content-Length") ;
-        sType   = table_get(r -> pApacheReq->headers_in, "Content-Type") ;
+        const char * sLength = apr_table_get(r -> pApacheReq->headers_in, "Content-Length") ;
+        sType   = apr_table_get(r -> pApacheReq->headers_in, "Content-Type") ;
 	len = sLength?atoi (sLength):0 ;
 	}
     else
@@ -1069,6 +1020,7 @@ static int embperl_SetupFormData (/*i/o*/ register req * r)
             strncpy (r -> errdat1, SvPV (ERRSV, l), sizeof (r -> errdat1) - 1) ;
 	    LogError (r, rcEvalErr) ; 
             sv_setpv(ERRSV,"");
+            POPs ; /* cleanup stack */
             }
 	tainted = 0 ;
         return ok ;
@@ -1150,11 +1102,11 @@ static void embperl_LogStartReq (/*i/o*/ req * r)
     if (r -> pApacheReq && (r -> Config.bDebug & dbgHeadersIn))
         {
         int i;
-        array_header *hdrs_arr;
-        table_entry  *hdrs;
+        const apr_array_header_t *hdrs_arr;
+        apr_table_entry_t  *hdrs;
 
-        hdrs_arr = table_elts (r -> pApacheReq->headers_in);
-        hdrs = (table_entry *)hdrs_arr->elts;
+        hdrs_arr = apr_table_elts (r -> pApacheReq->headers_in);
+        hdrs = (apr_table_entry_t *)hdrs_arr->elts;
 
         lprintf (r -> pApp,   "[%d]HDR:  %d\n", r -> pThread -> nPid, hdrs_arr->nelts) ; 
         for (i = 0; i < hdrs_arr->nelts; ++i)
@@ -1256,7 +1208,7 @@ int    embperl_SetupRequest (/*in*/ pTHX_
     r -> pPerlTHX = aTHX ;
 #endif
 
-#if defined (_DEBUG) && defined (WIN32)
+#if defined (_MDEBUG) && defined (WIN32)
     _CrtMemCheckpoint(&r -> MemCheckpoint);    
 #endif    
 #ifdef DMALLOC
@@ -1301,9 +1253,13 @@ int    embperl_SetupRequest (/*in*/ pTHX_
     tainted = 0 ;
 
 
+    /*if (r -> Config.bDebug)
+	lprintf (r -> pApp,  "[%d]ep_acquire_mutex(RequestCountMutex)\n", r -> pThread -> nPid) ; */
     ep_acquire_mutex(RequestCountMutex) ;
     r -> nRequestCount   = nRequestCount++ ;
     ep_release_mutex(RequestCountMutex) ;
+    /*if (r -> Config.bDebug)
+	lprintf (r -> pApp,  "[%d]ep_release_mutex(RequestCountMutex)\n", r -> pThread -> nPid) ; */
     r -> nRequestTime    = time(NULL) ;
 
     r -> pErrArray  = newAV () ;
@@ -1335,6 +1291,7 @@ int    embperl_SetupRequest (/*in*/ pTHX_
     if (r -> sSessionUserID)
         {
         tainted = 0 ;
+        SPAGAIN;
         PUSHMARK(sp);
 	XPUSHs(pApp -> pUserObj); 
 	XPUSHs(sv_2mortal(newSVpv(r -> sSessionUserID, 0))); 
@@ -1345,6 +1302,7 @@ int    embperl_SetupRequest (/*in*/ pTHX_
     if (r -> sSessionStateID)
         {
         tainted = 0 ;
+        SPAGAIN;
         PUSHMARK(sp);
 	XPUSHs(pApp -> pStateObj); 
 	XPUSHs(sv_2mortal(newSVpv(r -> sSessionStateID, 0))); 
@@ -1361,6 +1319,7 @@ int    embperl_SetupRequest (/*in*/ pTHX_
     if (pApp -> Config.sAppHandlerClass)
         {
         tainted = 0 ;
+        SPAGAIN ;
         PUSHMARK(sp);
 	XPUSHs(pApp -> _perlsv); 
 	PUTBACK;                        
@@ -1370,6 +1329,7 @@ int    embperl_SetupRequest (/*in*/ pTHX_
         if (SvTRUE (ERRSV))
 	    {
             STRLEN l ;
+            POPs ; /* cleanup stack */
             LogErrorParam (pApp, rcEvalErr, SvPV (ERRSV, l), " while calling APP_HANDLER_CLASS -> init") ;
             sv_setpv(ERRSV,"");
             return rcEvalErr ;
@@ -1406,7 +1366,7 @@ int    embperl_CleanupOutput   (/*in*/ tReq *                r,
     epTHX_
     tComponentOutput * pOutput = c -> pOutput ;
 
-    if (c -> pPrev && c -> pPrev -> pOutput == pOutput)
+    if (!pOutput || (c -> pPrev && c -> pPrev -> pOutput == pOutput))
         { /* this component uses the main output object */
         return ok ;
         }
@@ -1584,18 +1544,22 @@ int    embperl_CleanupRequest (/*in*/ tReq *  r)
     
     if (r -> nSessionMgnt)
         {
+        SPAGAIN ;
         PUSHMARK(sp);
         XPUSHs(pApp -> pAppObj); 
         PUTBACK;                        
         perl_call_method ("cleanup", G_DISCARD) ;
+        SPAGAIN ;
         PUSHMARK(sp);
         XPUSHs(pApp -> pUserObj); 
         PUTBACK;                        
         perl_call_method ("cleanup", G_DISCARD) ;
+        SPAGAIN ;
         PUSHMARK(sp);
         XPUSHs(pApp -> pStateObj); 
         PUTBACK;                        
         perl_call_method ("cleanup", G_DISCARD) ;
+        SPAGAIN ;
         }
     
     hv_clear (r -> pThread -> pHeaderHash) ;
@@ -1660,7 +1624,7 @@ int    embperl_CleanupRequest (/*in*/ tReq *  r)
     ep_destroy_pool (r -> pPool) ;
     sv_setpv(ERRSV,"");
 
-#if defined (_DEBUG) && defined (WIN32)
+#if defined (_MDEBUG) && defined (WIN32)
     _CrtMemDumpAllObjectsSince(&r -> MemCheckpoint);    
 #endif    
 #ifdef DMALLOC
@@ -1677,44 +1641,6 @@ int    embperl_CleanupRequest (/*in*/ tReq *  r)
 
 
 
-
-
-
-
-/*---------------------------------------------------------------------------
-* embperl_DefaultComponentConfig
-*/
-/*!
-*
-* \_en									   
-* initialze Config defaults
-* \endif                                                                       
-*
-* \_de									   
-* Initialisiert Config Defaults
-* \endif                                                                       
-*                                                                          
-* ------------------------------------------------------------------------ */
-
-
-void embperl_DefaultComponentConfig (/*in*/ tComponentConfig  *pCfg) 
-
-    {
-    pCfg -> sPackage ;
-    pCfg -> bDebug = dbgStd ;
-    /* pCfg -> bOptions = optRawInput | optAllFormData ; */
-    pCfg -> nEscMode = escStd ;
-    pCfg -> bCacheKeyOptions = ckoptDefault ;
-    pCfg -> sSyntax = "Embperl" ;
-    pCfg -> sInputCharset = "iso-8859-1" ;
-#ifdef LIBXSLT
-    pCfg -> sXsltproc = "libxslt" ;
-#else
-#ifdef XALAN
-    pCfg -> sXsltproc = "xalan" ;
-#endif
-#endif
-    }
 
 
 /*---------------------------------------------------------------------------
@@ -1912,6 +1838,7 @@ int    embperl_SetupComponent  (/*in*/ tReq *                 r,
 	        strncpy (r -> errdat1, c -> sImportPackage, sizeof (r -> errdat1) - 1);
 	        LogError (r, rcImportStashErr) ;
 	        }
+            SvREFCNT_inc(c -> pImportStash) ;
             }
 	}
 
@@ -1933,7 +1860,7 @@ int    embperl_SetupComponent  (/*in*/ tReq *                 r,
         else
             *p = '\0' ;
         }
-    if (!*pParam -> sInputfile || strcmp(pParam -> sInputfile, "*") == 0) 
+    if (!pParam -> sInputfile || !*pParam -> sInputfile || strcmp(pParam -> sInputfile, "*") == 0) 
         pParam -> sInputfile = r -> Param.sFilename ;
     else if (strcmp(pParam -> sInputfile, "../*") == 0) 
         {
@@ -1954,7 +1881,10 @@ int    embperl_SetupComponent  (/*in*/ tReq *                 r,
 
     *ppComponent = c ;
 
-    rc = embperl_SetupOutput (r, c) ;
+    if (!pParam -> sInputfile)
+        rc = rcMissingInput ;
+    else
+        rc = embperl_SetupOutput (r, c) ;
     if (rc != ok)
         LogError (r, rc) ;
     return rc ;

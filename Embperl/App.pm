@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: App.pm,v 1.1.2.2 2002/03/11 08:47:27 richter Exp $
+#   $Id: App.pm,v 1.1.2.5 2002/06/24 19:22:30 richter Exp $
 #
 ###################################################################################
  
@@ -129,7 +129,7 @@ sub send_error_page
          
     my $server = $ENV{SERVER_SOFTWARE} || 'Offline' ;
 
-    $r -> output ("$server Embperl $Embperl::VERSION [$time]<P>\r\n") ;
+    $r -> output ($server . ($server =~ /Embperl/?'':" Embperl $Embperl::VERSION") . " [$time]<P>\r\n") ;
     $r -> output ("</BODY></HTML>\r\n\r\n") ;
     }
 

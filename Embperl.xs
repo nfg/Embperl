@@ -17,6 +17,16 @@
 #include "xs/ep_xs_sv_convert.h"
 
 
+/* for embperl_exit */
+static IV errgv_empty_set(IV ix, SV * sv)
+{ 
+    dTHX ;
+    sv_setsv(sv, &sv_undef);
+    return TRUE;
+}
+
+
+
 
 MODULE = Embperl    PACKAGE = Embperl   PREFIX = embperl_
 
@@ -30,7 +40,7 @@ OUTPUT:
     RETVAL
 
 
-#ifdef APACHE
+#ifdef APACHEXXX
 
 void 
 embperl_ApacheAddModule ()
@@ -49,6 +59,7 @@ PREINIT:
     Embperl__Req ppReq;
 PPCODE:
     RETVAL = embperl_InitRequest(aTHX_ pApacheReqSV, pPerlParam, &ppReq);
+    XSprePUSH ;
     EXTEND(SP, 2) ;
     PUSHs(epxs_IV_2obj(RETVAL)) ;
     PUSHs(epxs_Embperl__Req_2obj(ppReq)) ;
@@ -61,6 +72,7 @@ PREINIT:
     Embperl__Req ppReq;
 PPCODE:
     RETVAL = embperl_InitRequestComponent(aTHX_ pApacheReqSV, pPerlParam, &ppReq);
+    XSprePUSH ;
     EXTEND(SP, 2) ;
     PUSHs(epxs_IV_2obj(RETVAL)) ;
     PUSHs(epxs_Embperl__Req_2obj(ppReq)) ;

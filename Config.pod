@@ -1,0 +1,1977 @@
+
+=pod
+
+=head1 NAME
+
+Configuration and calling
+
+=head1 Operating-Modes
+
+Embperl can operate in one of four modes:
+
+=over
+
+=item mod_perl
+
+The mostly used way is to use Embperl together with mod_perl and Apache.
+This gives the best performance and the most possibilities.
+
+=item CGI/FastCGI
+
+When you want to run Embperl on a machine that doesn't have mod_perl, you
+can run Embperl also as normal CGI script. Due to the overhead of CGI,
+this mode is much slower. To get a better performance you should consider
+using Embperl together with FastCGI. (http://www.fastcgi.com). 
+
+=item Offline
+
+You can use Embperl also on the command line. This is usefull for generating
+static content out of dynamic pages and can sometime helpfull for testing.
+
+=item Call it from other Perl programms
+
+If you have your own application and want to use Embperl's capbilities you can
+do so by calling Embperl::Execute. This allows to build your own application
+logic and useing Embperl possibilites for rendering content.
+
+=back
+
+
+=head2 mod_perl
+
+To use Embperl under mod_perl you must have installed Apache and mod_perl on your system.
+Then you add some directieves to your F<httpd.conf> to load Embperl and add C<Embperl>
+as the C<PerlHandler>. The following directives will cause all file with extetion F<epl>
+to be handled by Embperl:
+
+    PerlModule Embperl
+
+    AddType text/html .epl
+
+    <Files *.epl>
+    SetHandler  perl-script
+    PerlHandler Embperl
+    Options     ExecCGI
+    </files>
+
+
+Another possibility is to have all file under a special location processed by Embperl:
+
+    PerlModule Embperl
+
+    Alias /embperl /path/to/embperl/eg
+
+    <Location /embperl/x>
+    SetHandler  perl-script
+    PerlHandler Embperl
+    Options     ExecCGI
+    </Location>
+
+In this setup you should make sure that non Embperl files like images doesn't served 
+from this directory.
+
+B<See also>: L<"perldoc Embperl::Object"|"EmbperlObject.pod"> to see how to setup I<Embperl> so as to  
+create your site out of small overwriteable objects.
+
+Embperl accepts a lot of configuration directives to customize it's behaviour. See the next
+section for a description.
+
+=head2 CGI/FastCGI
+
+To use this mode you must copy B<embpcgi.pl> to your cgi-bin
+directory.  You can invoke it with the URL
+http://www.domain.xyz/cgi-bin/embpcgi.pl/url/of/your/document.
+
+The /url/of/your/document will be passed to Embperl by the web server.
+Normal processing (aliasing, etc.) takes place before the URI makes it
+to PATH_TRANSLATED.
+
+If you are running the Apache httpd, you can also define
+B<embpcgi.pl> as a handler for a specific file extension or
+directory.
+
+Example of Apache C<httpd.conf>:
+
+    <Directory /path/to/your/html/docs>
+    Action text/html /cgi-bin/embperl/embpcgi.pl
+    </Directory>
+
+
+B<NOTE>: Via CGI Scripts it maybe possible to bypass some of the Apache setup. avoid this
+use L<EMBPERL_ALLOW> to restrict access to the files, which should be processed by Embperl.
+
+You can also run Embperl with B<FastCGI>, in this case use embpfastcgi.pl
+as cgi script. You must have FCGI.pm installed.
+
+
+=head2 Offline
+
+Run Embperl from the comannd line use F<embpexec.pl> on unix and F<embpexec.bat> on windows:
+
+
+    B<embpexec.pl [options] htmlfile [query_string]>
+
+    B<embpexec.bat [options] htmlfile [query_string]>
+
+=over 4
+
+=item B<htmlfile>
+
+The full pathname of the source file which should be processed by
+Embperl.
+
+=item B<query_string>
+
+Optional. Has the same meaning as the environment variable
+QUERY_STRING when invoked as a CGI script.  That is, QUERY_STRING
+contains everything following the first "?" in a URL.  <query_string>
+should be URL-encoded.  The default is no query string.
+
+=back
+
+Options:
+
+=over
+
+=item -o outputfile
+
+Optional. Gives the filename to which the output is written.  The
+default is stdout.
+
+=item -l logfile
+
+Optional. Gives the filename of the logfile.  The default is
+F</tmp/embperl.log> on unix and F<\embperl.log> on windows.
+
+=item -d debugflags
+
+Optional. Specifies the level of debugging (what is written to the
+log file). The default is nothing.  See L<"EMBPERL_DEBUG"> for exact values.
+
+=item -o options
+
+See L<"EMBPERL_OPTIONS"> for option values.
+
+=item -s syntax
+
+Defines the syntax of the source. See See L<"EMBPERL_SYNTAX">
+
+=back
+
+
+=head2 By calling Embperl::Execute (\%param)
+
+
+C<Execute> can be used to call Embperl from your own modules/scripts (for example
+from a Apache::Registry or CGI script) or from within another Embperl page to nest multiple
+Embperl pages (for example to store a common header or
+footer in a different file). 
+
+There are two forms you can use for calling Execute. A short form which only takes a
+filename and optional additional parameters or a long form which
+takes a hash reference as its argument. This gives it the chance to
+vary the parameters according to the job that should be done.
+
+(See B<eg/x/Excute.pl> for more detailed examples)
+
+B<See also>: L<"perldoc Embperl::Object"|"EmbperlObject.pod"> to see how to setup I<Embperl> so as to
+create your site out of small overwriteable objects and L<"perldoc Embperl::Mail"|"Mail.pod"> on how
+to use I<Embperl> to send email.
+
+  Execute($filename, $p1, $p2, $pn) ;
+
+This will cause Embperl to interpret the file with the name $filename and, if specified, pass
+any additional parameters in the array @param (just like @_ in a perl subroutine).
+The above example could also be written in the long form:
+
+  Execute ({inputfile => $filename,
+            param     => [$p1, $p2, $pn]}) ;
+
+The possible items for hash of the long form are are descriped in the 
+configuration section and parameter section.
+
+
+
+=head3 EXAMPLES for Execute:
+
+ # Get source from /path/to/your.html and
+ # write output to /path/to/output'
+
+ Embperl::Execute ({ inputfile  => '/path/to/your.html',
+                     outputfile => '/path/to/output'}) ;
+
+
+ # Get source from scalar and write output to stdout
+ # Don't forget to modify mtime if $src changes
+
+ $src = '<html><head><title>Page [+ $no +]</title></head>' ;
+
+ Embperl::Execute ({ inputfile  => 'some name',
+                     input      => \$src,
+                     mtime      => 1 }) ;
+
+ # Get source from scalar and write output to another scalar
+
+ my $src = '<html><head><title>Page [+ $no +]</title></head>' ;
+ my $out ;
+
+ Embperl::Execute ({ inputfile  => 'another name',
+                     input      => \$src,
+                     mtime      => 1,
+                     output     => \$out }) ;
+
+ print $out ;
+
+
+ # Include a common header in an Embperl page, 
+ # which is stored in /path/to/head.html
+ 
+ [- Execute ('/path/to/head.html') -]
+ 
+
+
+
+
+=head1 Configuration
+
+Configuration can be setup in different ways, depending how you run Embperl.
+When you run under mod_perl, Embperl add a set of new configuration directives
+to the Apache configuration, so you can set them in your F<httpd.conf>.
+When you run Embperl as CGI it takes the configuration from environment variables. 
+For compatibility reason that
+can also be turned on under mod_perl, by adding C<Embperl_UseEnv on> in your 
+F<httpd.conf>. When you call Embperl from another Perl programm, by calling
+the C<Execute> function, you can pass your configuration along with other parameters
+as a hash reference. If you pass C<use_env =&lt; 1> als parameter Embperl will
+also scan the environment for configuration informations. Last but not least
+you can pass configuration informations as options when you run Embperl via
+embpexec.pl from the command line. Some of the configuration options are
+also setable inside the page via the Empberl objects and you can read the 
+current configuration from these objects.
+
+You can not only pass configuration in different ways, there are also three different
+contexts: I<Application>, I<Request> and I<Component>. 
+A application describes a
+set of pages/files that belongs together and form the application. Application level
+configuration are the same for all files that belongs to an application. These
+configuration information need to be known before any request processing takes place,
+so they can't be modified during a request. Every application has it's own name.
+You can refer the configuration of an application, by simply setting the name
+of the application to use.
+
+Request level configuration information applies to one request, some of them must 
+be known before the request starts, some of them can still be modified during the request.
+
+Configuration for components can be setup before the request, but can also be passed
+as argument when you call the component via C<Execute>.
+
+
+=head2 Embperl_Appname
+
+=over
+
+=item Env:
+
+EMBPERL_APPNAME
+
+=item Method:
+
+$application -> config -> app_name I<[read only]>
+
+=item Since:
+
+2.0b6
+
+=back
+
+
+Specifies the name for an application. The name is basicly used to refer to this application
+elsewhere in httpd.conf without the need to setup the parameters for the apllication again.
+
+
+=head2 Embperl_App_Handler_Class
+
+=over
+
+=item Env:
+
+EMBPERL_APP_HANDLER_CLASS
+
+=item Method:
+
+$application -> config -> app_handler_class I<[read only]>
+
+=item Since:
+
+2.0b6
+
+=back
+
+
+Embperl will call the C<init> method of the given class at the start of the request,
+but after all request parameters are setup. This give the class a chance to 
+do any necessary computation and modify the request parameters, before the request 
+is actualy executed. See L<internationalization> for an example.
+
+
+=head2 Embperl_Session_Handler_Class
+
+=over
+
+=item Env:
+
+EMBPERL_SESSION_HANDLER_CLASS
+
+=item Method:
+
+$application -> config -> session_handler_class I<[read only]>
+
+=item Default:
+
+Apache::SessionX
+
+=item Since:
+
+1.3b3
+
+=item See also:
+
+Session Handling
+
+=back
+
+
+Set the class that performs the Embperl session handling. This gives you
+the possibility to implement your own session handling.
+
+NOTE: Default until
+1.3.3 was C<HTML::Embperl::Session>, starting with 1.3.4 it is 
+C<Apache::SessionX>. To get the old session behaviour set it to
+C<HTML::Embperl::Session>. 
+
+=head2 Embperl_Session_Args
+
+=over
+
+=item Env:
+
+EMBPERL_SESSION_ARGS
+
+=item Method:
+
+$application -> config -> session_args I<[read only]>
+
+=item Since:
+
+1.3b3
+
+=item See also:
+
+Session Handling
+
+=back
+
+
+List of arguments for Apache::Session classes
+Arguments that contains spaces can be quoted.
+Example:
+
+  EMBPERL_SESSION_ARGS "DataSource=dbi:mysql:session UserName=www 'Password=secret word'"
+
+
+=head2 Embperl_Session_Classes
+
+=over
+
+=item Env:
+
+EMBPERL_SESSION_CLASSES
+
+=item Method:
+
+$application -> config -> session_classes I<[read only]>
+
+=item Since:
+
+1.3b3
+
+=item See also:
+
+Session Handling
+
+=back
+
+
+Space separated list of object store and lock manager
+(and optionally the serialization and id generating class)
+for Apache::Session (see L<"Session handling">)
+
+
+=head2 Embperl_Session_Config
+
+=over
+
+=item Env:
+
+EMBPERL_SESSION_CONFIG
+
+=item Method:
+
+$application -> config -> session_config I<[read only]>
+
+=item Default:
+
+given when running Makefile.PL of Apache::SessionX
+
+=item Since:
+
+1.3.3
+
+=item See also:
+
+Session Handling
+
+=back
+
+
+Selects a session configuration from the configurations you have defined when running
+I<Apache::SessionX>'s C<Makefile.PL>.
+
+NOTE: Use either C<EMBPERL_SESSION_CONFIG> or C<EMBPERL_SESSION_ARGS> and C<EMBPERL_SESSION_CLASSES> 
+
+
+=head2 Embperl_Cookie_Name
+
+=over
+
+=item Env:
+
+EMBPERL_COOKIE_NAME
+
+=item Method:
+
+$application -> config -> cookie_name I<[read only]>
+
+=item Default:
+
+EMBPERL_UID
+
+=item Since:
+
+1.2b4
+
+=item See also:
+
+Session Handling
+
+=back
+
+
+Set the name that Embperl uses when it sends the cookie with the session id.
+
+
+=head2 Embperl_Cookie_Domain
+
+=over
+
+=item Env:
+
+EMBPERL_COOKIE_DOMAIN
+
+=item Method:
+
+$application -> config -> cookie_domain I<[read only]>
+
+=item Default:
+
+none
+
+=item Since:
+
+1.2b4
+
+=item See also:
+
+Session Handling
+
+=back
+
+
+Set the domain that Embperl uses for the cookie with the session id.
+
+
+=head2 Embperl_Cookie_Path
+
+=over
+
+=item Env:
+
+EMBPERL_COOKIE_PATH
+
+=item Method:
+
+$application -> config -> cookie_path I<[read only]>
+
+=item Default:
+
+none
+
+=item Since:
+
+1.2b4
+
+=item See also:
+
+Session Handling
+
+=back
+
+
+Set the path that Embperl uses for the cookie with the session id.
+
+
+=head2 Embperl_Cookie_Expires
+
+=over
+
+=item Env:
+
+EMBPERL_COOKIE_EXPIRES
+
+=item Method:
+
+$application -> config -> cookie_expires I<[read only]>
+
+=item Default:
+
+at the end of the session
+
+=item Since:
+
+1.3b5
+
+=item See also:
+
+Session Handling
+
+=back
+
+
+Set the expiration date that Embperl uses for the cookie with the session id.
+You can specify the full date or relativ values. Examples: +30s +10m +1h -1d +3M +10y
+
+
+=head2 Embperl_Log
+
+=over
+
+=item Env:
+
+EMBPERL_LOG
+
+=item Method:
+
+$application -> config -> log I<[read only]>
+
+=item Default:
+
+Unix: /tmp/embperl.log  Windows: /embperl.log
+
+=back
+
+
+Gives the location of the log file.  This will contain information
+about what Embperl is doing.  The amount of information depends on the
+debug settings (see L<"EMBPERL_DEBUG"> below).  The log output is intended to show what
+your embedded Perl code is doing and to help debug it. 
+
+
+=head2 Embperl_Debug
+
+=over
+
+=item Env:
+
+EMBPERL_DEBUG
+
+=item Method:
+
+$application -> config -> debug 
+
+=item Default:
+
+1 
+
+=back
+
+
+This is a bitmask which specifies what should be written to the log.
+To specify multiple debugflags, simply add the values together.
+You can give the value a decimal, octal (prefix 0) or hexadecimal (prefix 0x) value.
+You can also use the constants defined in I<Embperl::Constant>.
+The following values are defined:
+
+=over 4
+
+=item dbgStd = 1 (0x1)
+
+Show minimum information.
+
+=item dbgMem = 2 (0x2)
+
+Show memory and scalar value allocation.
+
+=item dbgEval = 4 (0x4)
+
+Show arguments to and results of evals.
+
+=item dbgEnv = 16 (0x10) 
+
+List every request's environment variables.
+
+=item dbgForm = 32 (0x20)
+
+List posted form data.
+
+=item dbgInput = 128 (0x80)
+
+Show processing of HTML input tags.
+
+=item dbgFlushOutput = 256 (0x100)
+
+Flush Embperl's output after every write.  This should only be set to
+help debug Embperl crashes, as it drastically slows down Embperl's
+operation.
+
+=item dbgFlushLog = 512 (0x200)
+
+Flush Embperl's logfile output after every write.  This should only be
+set to help debug Embperl crashes, as it drastically slows down
+Embperl's operation.
+
+
+=item dbgLogLink = 8192 (0x2000)
+
+This feature is not yet implemented in Embperl 2.0!
+
+Inserts a link at the top of each page which can be used to view the
+log for the current HTML file.  See also L<"EMBPERL_VIRTLOG">.
+
+Example:
+
+    EMBPERL_DEBUG 10477
+    EMBPERL_VIRTLOG /embperl/log.htm
+
+    <Location /embperl/log.htm>
+    SetHandler perl-script
+    PerlHandler Embperl
+    Options ExecCGI
+    </Location>
+
+=item dbgDefEval = 16384 (0x4000)
+
+Shows every time new Perl code is compiled.
+
+
+=item dbgHeadersIn = 262144 (0x40000)
+
+Log all HTTP headers which are sent from and to the browser.
+
+=item dbgShowCleanup = 524288 (0x80000)
+
+Show every variable which is undef'd at the end of the request.  For
+scalar variables, the value before undef'ing is logged.
+
+
+=item dbgSession = 2097152 (0x200000) 
+
+Enables logging of session transactions.
+
+=item dbgImport =  4194304 (0x400000) 
+
+Show how subroutines are imported in other namespaces.
+
+=item dbgOutput = 0x08000
+
+Logs the process of converting the internal tree strcuture to plain text for output
+
+=item dbgDOM = 0x10000
+
+Logs things related to processing the internal tree data structure of documents
+
+=item dbgRun = 0x20000
+
+Logs things related to execution of a document
+
+=item dbgBuildToken = 0x800000
+
+Logs things related to creating the token tables for source parsing
+
+=item dbgParse = 0x1000000
+
+Logs the parseing of the source
+
+=item dbgObjectSearch = 0x2000000
+
+Shows how Embperl::Objects seraches sourcefiles
+
+=item dbgCache = 0x4000000
+
+Logs cache related things
+
+=item dbgCompile = 0x8000000
+
+Gives information about compiling the parsed source to Perl code
+
+=item dbgXML = 0x10000000
+
+Logs things related to XML processing
+
+=item dbgXSLT = 0x20000000
+
+Logs things related to XSLT processing
+
+=item dbgCheckpoint = 0x40000000
+
+Logs things related to checkpoints which are internaly used during execution.
+This information is only usefull if you have a deep knowledge of Embperl
+internals.
+
+
+=back
+
+
+=head2 Embperl_Maildebug
+
+=over
+
+=item Env:
+
+EMBPERL_MAILDEBUG
+
+=item Method:
+
+$application -> config -> maildebug 
+
+=item Since:
+
+1.2.1
+
+=back
+
+
+Debug value pass to Net::SMTP.
+
+
+=head2 Embperl_Mailhost
+
+=over
+
+=item Env:
+
+EMBPERL_MAILHOST
+
+=item Method:
+
+$application -> config -> mailhost 
+
+=item Default:
+
+localhost
+
+=back
+
+
+Specifies which host the mail related functions of Embperl uses as SMTP server.
+
+
+=head2 Embperl_Mailhelo
+
+=over
+
+=item Env:
+
+EMBPERL_MAILHELO
+
+=item Method:
+
+$application -> config -> mailhelo 
+
+=item Default:
+
+choosen by Net::SMTP
+
+=item Since:
+
+1.3b4
+
+=back
+
+
+Specifies which host/domain all mailrealted function uses
+in the HELO/EHLO command.
+A reasonable default is normaly choosen by I<Net::SMTP>, but
+depending on your installation it may neccessary to set it
+manualy.
+
+
+=head2 Embperl_Mailfrom
+
+=over
+
+=item Env:
+
+EMBPERL_MAILFROM
+
+=item Method:
+
+$application -> config -> mailfrom 
+
+=item Default:
+
+www-server@<server_name>
+
+=item Since:
+
+1.2.1
+
+=back
+
+
+Specifies the email address that is used as sender all mailrelted function.
+
+
+=head2 Embperl_Mail_Errors_To
+
+=over
+
+=item Env:
+
+EMBPERL_MAIL_ERRORS_TO
+
+=item Method:
+
+$application -> config -> mail_errors_to 
+
+=back
+
+
+If set all errors will be send to the email adress given.
+
+
+=head2 Embperl_Mail_Errors_Limit
+
+=over
+
+=item Env:
+
+EMBPERL_MAIL_ERRORS_LIMIT
+
+=item Method:
+
+$application -> config -> mail_errors_limit I<[read only]>
+
+=item Since:
+
+2.0b6
+
+=back
+
+
+Do not mail more then <num> errors. Set to 0 for no limit.
+
+
+=head2 Embperl_Mail_Errors_Reset_Time
+
+=over
+
+=item Env:
+
+EMBPERL_MAIL_ERRORS_RESET_TIME
+
+=item Method:
+
+$application -> config -> mail_errors_reset_time I<[read only]>
+
+=item Since:
+
+2.0b6
+
+=back
+
+
+Reset error counter if for <sec> seconds no error has occured.
+
+
+=head2 Embperl_Mail_Errors_Resend_Time
+
+=over
+
+=item Env:
+
+EMBPERL_MAIL_ERRORS_RESEND_TIME
+
+=item Method:
+
+$application -> config -> mail_errors_resend_time I<[read only]>
+
+=item Since:
+
+2.0b6
+
+=back
+
+
+Mail errors of <sec> seconds regardless of the error counter.
+
+
+=head2 Embperl_Object_Base
+
+=over
+
+=item Env:
+
+EMBPERL_OBJECT_BASE
+
+=item Method:
+
+$application -> config -> object_base I<[read only]>
+
+=item Default:
+
+_base.epl
+
+=item Since:
+
+1.3b1
+
+=back
+
+
+Name of the base page that Embperl::Objects searches for.
+
+
+=head2 Embperl_Object_App
+
+=over
+
+=item Env:
+
+EMBPERL_OBJECT_APP
+
+=item Method:
+
+$application -> config -> object_app 
+
+=item Since:
+
+2.0b6
+
+=back
+
+
+Filename of the application object that Embperl::Object searches for. 
+The file should contain the Perl code for 
+the application object. The must be no package name given (as the package is set
+by Embperl::Object), but the @ISA should point to Embperl::App.
+If set this file is searched throught the same search path as any content file.
+After a successfull load the init method is called with the Embperl request object
+as parameter. The init method can change the parameters inside the request object
+to influence the current request.
+
+
+=head2 Embperl_Object_Addpath
+
+=over
+
+=item Env:
+
+EMBPERL_OBJECT_ADDPATH
+
+=item Method:
+
+$application -> config -> object_addpath 
+
+=item Since:
+
+1.3b1
+
+=back
+
+
+Additional directories where Embperl::Object searches for pages. Directories are
+separated by C<;> (on Unix C<:> works also). This path is
+B<always> appended to the searchpath.
+
+
+=head2 Embperl_Object_Stopdir
+
+=over
+
+=item Env:
+
+EMBPERL_OBJECT_STOPDIR
+
+=item Method:
+
+$application -> config -> object_stopdir 
+
+=item Since:
+
+1.3b1
+
+=back
+
+
+Directory where Embperl::Object stops searching for the base page.
+
+
+=head2 Embperl_Object_Fallback
+
+=over
+
+=item Env:
+
+EMBPERL_OBJECT_FALLBACK
+
+=item Method:
+
+$application -> config -> object_fallback 
+
+=item Since:
+
+1.3b1
+
+=back
+
+
+If the requested file is not found by Embperl::Object, the file given by C<EMBPERL_OBJECT_FALLBACK>
+is displayed instead. If C<EMBPERL_OBJECT_FALLBACK> isn't set a
+staus 404, NOT_FOUND is returned as usual. If the fileame given in 
+C<EMBPERL_OBJECT_FALLBACK> doesn't contain a path, it is searched thru the same
+directories as C<EMBPERL_OBJECT_BASE>.
+
+
+=head2 Embperl_Object_Handler_Class
+
+=over
+
+=item Env:
+
+EMBPERL_OBJECT_HANDLER_CLASS
+
+=item Method:
+
+$application -> config -> object_handler_class 
+
+=item Since:
+
+1.3b1
+
+=back
+
+
+If you specify this, the template base and the requested page inherit all
+methods from this class. This class must contain C<Embperl::Req> in his
+@ISA array.
+
+
+
+
+
+
+=head2 Embperl_Allow
+
+=over
+
+=item Env:
+
+EMBPERL_ALLOW
+
+=item Method:
+
+$request -> config -> allow I<[read only]>
+
+=item Default:
+
+no restrictions
+
+=item Since:
+
+1.2b10
+
+=back
+
+
+If specified, only files which match the given B<perl regular expression> will be
+processed by Embperl. All other files will return FORBIDDEN.
+This is especially useful in a CGI environment by making the server more secure.
+
+
+=head2 Embperl_Urimatch
+
+=over
+
+=item Env:
+
+EMBPERL_URIMATCH
+
+=item Method:
+
+$request -> config -> urimatch I<[read only]>
+
+=item Default:
+
+process all files
+
+=item Since:
+
+2.0b6
+
+=back
+
+
+If specified, only files which match the given B<perl regular expression> will be
+processed by Embperl, all other files will be handled by the standard Apache
+handler. This can be useful if you have Embperl documents and non Embperl
+documents (e.g. gifs) residing in the same directory. 
+
+ Example: 
+ # Only files which end with .htm will processed by Embperl
+ EMBPERL_URIMATCH \.htm$
+
+
+=head2 Embperl_Multfieldsep
+
+=over
+
+=item Env:
+
+EMBPERL_MULTFIELDSEP
+
+=item Method:
+
+$request -> config -> mult_field_sep I<[read only]>
+
+=item Default:
+
+\t
+
+=item Since:
+
+2.0b6
+
+=back
+
+
+Specifies the charachter that is used to separate multiple form values with the
+same name.
+
+=head2 Embperl_Path
+
+=over
+
+=item Env:
+
+EMBPERL_PATH
+
+=item Method:
+
+$request -> config -> path I<[read only]>
+
+=item Since:
+
+1.3b6
+
+=back
+
+
+Can contain a semicolon (also colon under Unix) separated file search path.
+When a file is processed and the filename isn't an absolute path or
+does not start with ./ (or .\ under windows), I<Embperl> searches all
+the specified directories for that file. Directories must end with a
+slash (C</>), otherwise the entry is treated as a fileprefix. 
+A special handling is done if the filename starts with any number
+of C<../> i.e. refers to an upper directory. Then I<Embperl> strips
+the same number of entries at the start of the searchpath as the filename
+contains C<../>.
+
+=head2 Embperl_Debug
+
+=over
+
+=item Env:
+
+EMBPERL_DEBUG
+
+=item Method:
+
+$request -> config -> debug 
+
+=item Since:
+
+yes
+
+=back
+
+
+See application configuration for an describtion of possible values
+
+=head2 Embperl_Options
+
+=over
+
+=item Env:
+
+EMBPERL_OPTIONS
+
+=item Method:
+
+$request -> config -> options 
+
+=item Since:
+
+yes
+
+=back
+
+
+This bitmask specifies some options for the execution of Embperl.
+To specify multiple options, simply add the values together.
+
+=over 4
+
+=item optDisableVarCleanup = 1
+
+Disables the automatic cleanup of variables at the end of each
+request.
+
+=item optDisableEmbperlErrorPage = 2
+
+Tells Embperl not to send its own errorpage in case of failure,
+but instead show as much of the page as possible. Errors are only logged
+to the log file.
+Without this option, Embperl sends its
+own error page, showing all the errors which have occurred.  If you
+have dbgLogLink enabled, every error will be a link to the
+corresponding location in the log file. This option has no effect if
+optReturnError is set.
+
+=item optReturnError = 262144
+
+With this option set, Embperl sends no output in case of an error.
+It returns the error back to Apache or the calling program. When running
+under mod_perl this gives you the chance to use the Apache I<ErrorDocument>
+directive to show a custom error-document. Inside the ErrorDocument
+you can retrieve the error messages with
+
+  $errors = $req_rec -> prev -> pnotes('EMBPERL_ERRORS') ;
+
+where C<$errors> is a array reference. (1.3b5+)
+
+=item optShowBacktrace = 0x8000000
+
+When set every error message not only show the sourcefiles, but all files
+from which this file was called by Execute.
+
+
+=back
+
+
+=head2 Embperl_Session_Mode
+
+=over
+
+=item Env:
+
+EMBPERL_SESSION_MODE
+
+=item Method:
+
+$request -> config -> session_mode 
+
+=item Default:
+
+smodeUDatCookie = 1
+
+=item Since:
+
+no
+
+=back
+
+
+Specifies how Embperl the id for the session data is passed between requests.
+Possible values are:
+
+=over
+
+=item smodeNone = 0
+
+No session id will be passed
+
+=item smodeUDatCookie = 1
+
+The session id for the user session will be passed via cookie
+
+=item smodeUDatParam = 2
+
+The session id for the user session will append as parameter to any URL
+and inserted as a hidden field in any form.
+
+=item smodeUDatUrl = 4
+
+The session id for the user session will passed as a part of the URL.
+NOT YET IMPLEMENTED!!
+
+=item smodeSDatParam = 0x20
+
+The session id for the state session will append as parameter to any URL
+and inserted as a hidden field in any form.
+
+
+=back
+
+You may add the UDat and SDat values together to get both sorts of sessions,
+for example the value 0x21 will pass the id for the user session inside a
+cookie and the id for the state session as parameters.
+
+
+
+
+=head2 Embperl_Package /package
+
+=over
+
+=item Env:
+
+EMBPERL_PACKAGE /PACKAGE
+
+=item Since:
+
+no 
+
+=back
+
+
+The name of the package where your code will be executed.  By default, 
+Embperl generates a unique package name for every file.  This ensures
+that variables and functions from one file do not conflict with those of  
+another file.  (Any package's variables will still be accessible with
+explicit package names.)
+
+=head2 Embperl_Debug
+
+=over
+
+=item Env:
+
+EMBPERL_DEBUG
+
+=item Method:
+
+$component -> config -> debug 
+
+=back
+
+
+See application configuration for an describtion of possible values
+
+=head2 Embperl_Options
+
+=over
+
+=item Env:
+
+EMBPERL_OPTIONS
+
+=item Method:
+
+$component -> config -> options 
+
+=back
+
+
+This bitmask specifies some options for the execution of Embperl.
+To specify multiple options, simply add the values together.
+
+=over 4
+
+=item optDisableVarCleanup = 1
+
+Disables the automatic cleanup of variables at the end of each
+request.
+
+=item optDisableEmbperlErrorPage = 2
+
+Tells Embperl not to send its own errorpage in case of failure,
+but instead show as much of the page as possible. Errors are only logged
+to the log file.
+Without this option, Embperl sends its
+own error page, showing all the errors which have occurred.  If you
+have dbgLogLink enabled, every error will be a link to the
+corresponding location in the log file. This option has no effect if
+optReturnError is set.
+
+=item optReturnError = 262144
+
+With this option set, Embperl sends no output in case of an error.
+It returns the error back to Apache or the calling program. When running
+under mod_perl this gives you the chance to use the Apache I<ErrorDocument>
+directive to show a custom error-document. Inside the ErrorDocument
+you can retrieve the error messages with
+
+  $errors = $req_rec -> prev -> pnotes('EMBPERL_ERRORS') ;
+
+where C<$errors> is a array reference. (1.3b5+)
+
+=item optShowBacktrace = 0x8000000
+
+When set every error message not only show the sourcefiles, but all files
+from which this file was called by Execute.
+
+
+=item optSafeNamespace = 4
+
+Tells Embperl to execute the embedded code in a safe namespace so the
+code cannot access data or code in any other package.  (See the
+chapter about L<"(Safe-)Namespaces and opcode restrictions"> below for more details.)
+
+=item optOpcodeMask = 8
+
+Tells Embperl to apply an operator mask.  This gives you the chance to
+disallow special (unsafe) opcodes.  (See the Chapter about 
+L<"(Safe-)Namespaces and opcode restrictions">
+below for more details.)
+
+=item optDisableFormData = 256
+
+This option disables the setup of %fdat and @Z<>ffld. Embperl will not do anything
+with the posted form data.
+Set this when using Execute from your perl script and you have already read the Form Data (via eg. CGI.pm).
+
+
+=item optAllFormData = 8192
+
+This option will cause Embperl to insert all formfields in %fdat and @Z<>ffld, even if they
+are empty. Empty formfields will be inserted with an empty string. Without this option,
+empty formfields will be absent from %fdat and @Z<>ffld.
+
+
+=item optRedirectStdout = 16384
+
+Redirects STDOUT to the Embperl output stream before every request and resets it afterwards.
+If set, you can use a normal Perl B<print> inside any Perl block to output data. 
+Without this option you can only use output data by using the [+ ... +] block, or printing
+to the filehandle B<OUT>.
+
+
+=item optNoHiddenEmptyValue = 65536 (only 1.2b2 and above)
+
+Normally, if there is a value defined in %fdat for a specific input field, Embperl
+will output a hidden input element for it when you use B<hidden>. When this option
+is set, Embperl will not output a hidden input element for this field when the
+value is a blank string.
+
+
+=item optKeepSpaces = 1048576 (only 1.2b5 and above) 	       = 0x100000,
+
+Disable the removal of spaces and empty lines from the output. This is useful
+for sources other than HTML.
+
+
+=back
+
+
+
+=head2 Embperl_Escmode
+
+=over
+
+=item Env:
+
+EMBPERL_ESCMODE
+
+=item Method:
+
+$component -> config -> escmode 
+
+=item Default:
+
+7
+
+=back
+
+
+Turn HTML and URL escaping on and off. 
+
+NOTE: If you want to output binary data, you must set the escmode
+to zero.
+
+For convenience you can change the escmode inside a page by setting 
+the variable C<$escmode>.
+
+
+=over 4
+
+=item escXML = 8 (or 15) (2.0b4 and above)
+
+The result of a Perl expression is always XML-escaped (e.g., `>'
+becomes `&gt;' and ' become &apos;).
+
+=item escUrl + escHtml = 3 (or 7)
+
+The result of a Perl expression is HTML-escaped (e.g., `>' becomes
+`&gt;') in normal text and URL-escaped (e.g., `&' becomes `%26')
+within of C<A>, C<EMBED>, C<IMG>, C<IFRAME>, C<FRAME> and C<LAYER> tags.
+
+=item escUrl = 2 (or 6)
+
+The result of a Perl expression is always URL-escaped (e.g., `&'
+becomes `%26').
+
+=item escHtml = 1 (or 5)
+
+The result of a Perl expression is always HTML-escaped (e.g., `>'
+becomes `&gt;').
+
+=item escNode = 0
+
+No escaping takes place.
+
+=item escEscape = 4
+
+If you add this value to the above Embperl will always perform the
+escaping. Without it is possible to disable escaping by preceeding the item that
+normaly is escaped with a backslash. While this is a handy thing, it could
+be very dangerous in situations, where content that is inserted by some
+user is redisplayed, because they can enter arbitary HTML and preceed them
+with a backslash to avoid correct escaping when their input is redisplayed
+again.
+
+=back
+
+NOTE: You can localize $escmode inside a [+ +] block, e.g. to turn escaping
+temporary off and output C<$data> write
+
+    [+ do { local $escmode = 0 ; $data } +]
+
+
+=head2 Embperl_Input_Escmode
+
+=over
+
+=item Env:
+
+EMBPERL_INPUT_ESCMODE
+
+=item Method:
+
+$component -> config -> input_escmode I<[read only]>
+
+=item Default:
+
+0 
+
+=item Since:
+
+2.0b6
+
+=back
+
+
+Tells Embperl how to handle escape sequences that are found in the source.
+
+=over 
+
+=item 0
+
+don't interpret input (default)
+
+
+=item 1   
+
+unescape html escapes to their characters (i.e. &lt; becomes < )
+inside of Perl code
+
+=item 2
+
+unescape url escapes to their characters (i.e. %26; becomes & )
+inside of Perl code
+
+=item 3
+
+unescape html and url escapes, depending on the context
+
+=back
+
+Add 4 to remove html tags inside of Perl code. This is helpfull when
+an html editor insert html tags like <br> inside your Perl code.
+
+Set EMBPERL_INPUT_ESCMODE to 7 to get the old default of Embperl < 2.0b6
+Set EMBPERL_INPUT_ESCMODE to 0 to get the old behaviour when optRawInput was set.
+
+
+=head2 Embperl_Input_Charset
+
+=over
+
+=item Env:
+
+EMBPERL_INPUT_CHARSET
+
+=item Method:
+
+$component -> config -> input_charset 
+
+=back
+
+
+NOT YET IMPLEMENTED!
+
+
+=head2 Embperl_Cacke_Key
+
+=over
+
+=item Env:
+
+EMBPERL_CACKE_KEY
+
+=item Method:
+
+$component -> config -> cache_key I<[read only]>
+
+=item Since:
+
+2.0b1
+
+=back
+
+
+literal string that is appended to the cache key
+
+
+=head2 Embperl_Cache_Key_Options
+
+=over
+
+=item Env:
+
+EMBPERL_CACHE_KEY_OPTIONS
+
+=item Method:
+
+$component -> config -> cache_key_options I<[read only]>
+
+=item Default:
+
+all options set 
+
+=item Since:
+
+2.0b1
+
+=back
+
+
+Tells Embperl how to create a key for caching of the output
+
+=over
+
+=item ckoptPathInfo  = 2
+
+include the PathInfo into CacheKey 
+
+=item ckoptQueryInfo = 4
+
+include the QueryInfo into CacheKey 
+
+=item ckoptDontCachePost = 8
+
+don't cache POST requests  (not yet implemented)
+
+=back
+
+
+=head2 Embperl_Expires_Func
+
+=over
+
+=item Env:
+
+EMBPERL_EXPIRES_FUNC
+
+=item Method:
+
+$component -> config -> expires_func I<[read only]>
+
+=item Since:
+
+2.0b1
+
+=back
+
+
+Function that is called every time before data is taken from the cache.
+If this funtion returns true, the data from the cache isn't used anymore,
+but rebuilt.
+
+Function could be either a coderef (when passed to Execute), a name of a
+subroutine or a string starting with "sub " in which case it is compiled
+as anonymous subroutine.
+
+NOTE: If C<&EXPIRES> is defined inside the page, it get evaluated before 
+the excecution of the page
+
+
+=head2 Embperl_Cache_Key_Func
+
+=over
+
+=item Env:
+
+EMBPERL_CACHE_KEY_FUNC
+
+=item Method:
+
+$component -> config -> cache_key_func 
+
+=item Since:
+
+2.0b1
+
+=back
+
+
+function that should be called when build a cache key. The result is
+appended to the cache key.
+
+
+=head2 Embperl_Expires_In
+
+=over
+
+=item Env:
+
+EMBPERL_EXPIRES_IN
+
+=item Method:
+
+$component -> config -> expires_in I<[read only]>
+
+=item Since:
+
+2.0b1
+
+=back
+
+
+Time in seconds that the output should be cached. (0 = never, -1 = forever)
+
+NOTE: If C<$EXPIRES> is set inside the page, it get evaluated before 
+the excecution of the page
+
+=head2 Embperl_Syntax
+
+=over
+
+=item Env:
+
+EMBPERL_SYNTAX
+
+=item Method:
+
+$component -> config -> syntax 
+
+=item Default:
+
+Embperl
+
+=item Since:
+
+2.0b1
+
+=back
+
+
+Used to tell Embperl which syntax to use inside a page. Embperl comes with
+the following syntaxes: 
+
+
+=over
+
+=item EmbperlHTML
+
+all the HTML tags that Embperl recognizes by default
+
+=item EmbperlBlocks
+
+all the [ ] blocks that Embperl supports
+
+=item Embperl
+
+(default; contains EmbperlHtml and EmbperlBlocks)
+
+=item ASP
+
+<%  %> and <%=  %>, see perldoc Embperl::Syntax::ASP
+
+=item SSI
+
+Server Side Includes, see perldoc Embperl::Syntax::SSI
+
+=item Perl
+
+File contains pure Perl (similar to Apache::Registry), but
+can be used inside EmbperlObject
+
+=item Text
+
+File contains only Text, no actions are taken on the Text
+
+=item Mail
+
+Defines the <mail:send> tag, for sending mail. This is an
+example for a taglib, which could be a base for writing
+your own taglib to extent the number of available tags
+
+=item POD
+
+translates pod files to XML, which can be converted to 
+the desired output format by an XSLT transformation
+
+=item RTF
+
+Can be used to process word processing documents in RTF format
+
+=back
+
+You can get a description for each syntax if you type
+
+    perldoc Embperl::Syntax::xxx
+
+where 'xxx' is the name of the syntax.
+
+You can also specify multiple syntaxes e.g.
+
+    EMBPERL_SYNTAX "Embperl SSI"
+
+    Execute ({inputfile => '*', syntax => 'Embperl ASP'}) ;
+
+The 'syntax' metacommand allows to switch the syntax or to 
+add or subtract syntaxes e.g.
+
+    [$ syntax + Mail $]
+
+will add the Mail taglib so the <mail:send> tag is available after
+this line.
+
+    [$ syntax - Mail $]
+
+now the <mail:send> tag is unknown again
+
+    [$ syntax SSI $]
+
+now you can only use SSI commands inside your page.
+
+
+=head2 Embperl_Recipe
+
+=over
+
+=item Env:
+
+EMBPERL_RECIPE
+
+=item Method:
+
+$component -> config -> recipe I<[read only]>
+
+=item Since:
+
+2.0b4
+
+=back
+
+
+Tells Embperl which recipe to use to process this component
+
+=head2 Embperl_Xsltstylesheet
+
+=over
+
+=item Env:
+
+EMBPERL_XSLTSTYLESHEET
+
+=item Method:
+
+$component -> config -> xsltstylesheet I<[read only]>
+
+=item Since:
+
+2.0b5
+
+=back
+
+
+Tell the xslt processor which stylsheet to use.
+
+=head2 Embperl_Xsltproc
+
+=over
+
+=item Env:
+
+EMBPERL_XSLTPROC
+
+=item Method:
+
+$component -> config -> xsltproc I<[read only]>
+
+=item Since:
+
+2.0b5
+
+=back
+
+
+Tells Embperl which xslt processor to use. Current C<libxslt> and C<xalan>
+are supported by Embperl, but they must be compiled in to be available.
+
+=cut
+
+ head2 *CFG $component /  / cleanup
+
+
+
+ * Request parameter
+
+   filename
+   unparsed_uri
+   uri
+   path_info
+   query_info
+   language
+   cookies
+
+
+ * Component Parameter
+
+   inputfile
+   outputfile
+   input
+   output
+   sub
+   import
+   firstline
+   mtime
+   param
+   fdat
+   ffld
+   object
+   isa
+   errors
+   xsltparam 
+

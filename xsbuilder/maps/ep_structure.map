@@ -37,7 +37,7 @@
    sSessionID | session_id
    sSessionStateID | session_state_id
    sSessionUserID  | session_user_id
-   bExit | exit
+   bExit | had_exit
    nLogFileStartPos | log_file_start_pos
    bError | error
    pErrArray | errors
@@ -124,7 +124,7 @@
    bReqRunning | req_running
    bSubReq | sub_req
    nInsideSub | inside_sub
-   bExit | exit
+   bExit | had_exit
    nPathNdx | path_ndx
    sCWD | cwd
    bEP1Compat | ep1_compat
@@ -198,21 +198,22 @@
 
  <tComponentParam>
 !   _perlsv
-   sInputfile | inputfile
-   sOutputfile | outputfile
-   pInput | input
-   pOutput | output
-   sSub | sub
-   nImport | import
-   nFirstLine | firstline
-   nMtime | mtime
-   pParam | param
-   pFormHash | fdat
-   pFormArray | ffld
-   sObject  | object
-   sISA     | isa
-   pErrArray | errors
-   pXsltParam | xsltparam 
+   sInputfile   | inputfile
+   sOutputfile  | outputfile
+   sSubreq      | subreq
+   pInput       | input
+   pOutput      | output
+   sSub         | sub
+   nImport      | import
+   nFirstLine   | firstline
+   nMtime       | mtime
+   pParam       | param
+   pFormHash    | fdat
+   pFormArray   | ffld
+   sObject      | object
+   sISA         | isa
+   pErrArray    | errors
+   pXsltParam   | xsltparam 
    new
 !   private
  </tComponentParam>

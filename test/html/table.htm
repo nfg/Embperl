@@ -217,7 +217,7 @@ $kats[3]{Id} = '' ;
 					[- print LOG "1row= $row  regs=$regs[0]{Id}\n" ; $cmp = $regs[0]->{Id} ;  print LOG "2row= $row  regs=$regs[0]{Id}\n" ; 1 ; -]
                     [- while (($k, $v) = each (%{$regs[0]})) { print LOG "$v=$k;\n" ; } -]
 					[$if ($cmp || '') ne '' $] 
-                    <a href="inhalt.htm?Region=[+print LOG "row= $row  regs=$regs[0]{Id}\n" ; $regs[$row]{Id}+]">[+$regs[$row]{Id}+]</a></td>
+                    <a href="inhalt.htm?Region=[+ do { print LOG "row= $row  regs=$regs[0]{Id}\n" ; $regs[$row]{Id} } +]">[+$regs[$row]{Id}+]</a></td>
                     [$endif$]
                 </tr>
             </table>

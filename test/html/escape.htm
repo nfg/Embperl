@@ -209,6 +209,77 @@ Escape method:
 6: [+ $r -> Escape($b, 6) +] 
 7: [+ $r -> Escape($b, 7) +] 
 
+print OUT:
+
+[-
+local $escmode = 7;
+print OUT "7: éric\n";
+local $escmode = 0;
+print OUT "0: éric\n";
+-]
+
+[-
+$escmode = 7;
+print OUT "7: éric\n";
+$escmode = 0;
+print OUT "0: éric\n";
+-]
+
+
+[-
+$escmode = 7;
+print OUT "7: éric\n";
+-]
+
+[-
+$escmode = 0;
+print OUT "0: éric\n";
+-]
+
+
+[-
+local $escmode = 7;
+print OUT "7: éric\n";
+-]
+
+
+[-
+local $escmode = 0;
+print OUT "0: éric\n";
+-]
+
+
+
+
+[- 
+$find_if = 
+{ '!Table'     => 'interface,router',
+'$where'     => 'interface.router_id=router.id',
+#'!LongNames' => 1,
+ }; 
+-]
+
+[-
+$escmode = 0;
+-]
+<A HREF="0?[+ $find_if +]">
+
+[-
+$escmode = 7;
+-]
+<A HREF="7?[+ $find_if +]">
+  
+
+[- 
+$fdat{esc} = 'environment of the &lt;font color="red"&gt;Sample Company&lt;/font&gt;' ;
+$fdat{null} = 0 ;
+-]
+[#
+escmode = [+ $escmode = 7 +]
+
+<input name="esc">
+<input name="null">
+#]
 
 <P>Ok.<P>
 

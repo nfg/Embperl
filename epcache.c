@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcache.c,v 1.1.2.24 2002/02/25 11:37:57 richter Exp $
+#   $Id: epcache.c,v 1.1.2.25 2002/05/20 07:04:24 richter Exp $
 #
 ###################################################################################*/
 
@@ -17,6 +17,12 @@
 #include "epmacro.h"
 
 
+/* --- don't use Perl's memory management here --- */
+
+#undef malloc
+#undef realloc
+#undef strdup
+#undef free
 
 
 HV * pProviders ;       /**< global hash that holds all known providers classes */
@@ -85,6 +91,9 @@ int Cache_Init (/*in*/ tApp * a)
     pCacheItems = newHV () ;
 
     ArrayNew (a, &pCachesToRelease, 16, sizeof (tCacheItem *)) ;
+
+    /* lprintf (a, "XXXXX Cache_Init [%d/%d] pProviders=%x pCacheItems=%x pCachesToRelease=%x", _getpid(), GetCurrentThreadId(), pProviders, pCacheItems, pCachesToRelease) ; */
+    
     return ok ;
     }
 
@@ -115,6 +124,8 @@ int Cache_CleanupRequest (req * r)
     {
     int n = ArrayGetSize (r -> pApp, pCachesToRelease) ;
     int i ;
+
+    /* lprintf (r -> pApp, "XXXXX Cache_CleanupRequest [%d/%d] pProviders=%x pCacheItems=%x pCachesToRelease=%x", _getpid(), GetCurrentThreadId(), pProviders, pCacheItems, pCachesToRelease) ; */
 
     for (i = 0; i < n; i++)
         Cache_FreeContent (r, pCachesToRelease[i]) ;
@@ -248,6 +259,8 @@ int Cache_New (/*in*/ req *             r,
     const char * sKey = "" ;
     STRLEN       len ;
 
+    /* lprintf (r -> pApp, "XXXXX Cache_New [%d/%d] pProviders=%x %s  pCacheItems=%x %s  pCachesToRelease=%x %s\n", _getpid(), GetCurrentThreadId(), pProviders, IsBadReadPtr (pProviders,4 )?"bad":"ok", pCacheItems, IsBadReadPtr (pCacheItems, 4)?"bad":"ok", pCachesToRelease, IsBadReadPtr (pCachesToRelease, 4)?"bad":"ok") ; */
+
     if (SvTYPE(pParam) == SVt_RV)
         pParam = SvRV (pParam) ;
 
@@ -266,13 +279,11 @@ int Cache_New (/*in*/ req *             r,
         if (!ppRV || !*ppRV)
             {
 	    strncpy (r -> errdat1, "<provider missing>", sizeof(r -> errdat1) - 1) ;
-
             return rcUnknownProvider ;
             }
         if (!SvROK (*ppRV) || SvTYPE(pProviderParam = (HV *)SvRV (*ppRV)) != SVt_PVHV)
             {
 	    strncpy (r -> errdat1, "<provider missing, element is no hashref>", sizeof(r -> errdat1) - 1) ;
-
             return rcUnknownProvider ;
             }
         }
@@ -283,7 +294,6 @@ int Cache_New (/*in*/ req *             r,
     else
         {
         strncpy (r -> errdat1, "<provider missing, no description found>", sizeof(r -> errdat1) - 1) ;
-
         return rcUnknownProvider ;
         }
 

@@ -10,12 +10,13 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcgiinit.c,v 1.1.2.16 2002/03/05 11:05:02 richter Exp $
+#   $Id: epcgiinit.c,v 1.1.2.17 2002/05/27 17:53:12 richter Exp $
 #
 ###################################################################################*/
 
 
 #include "ep.h"
+#include "epdefault.c"
 
 
 #undef EPCFG

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: embperl.h,v 1.19.4.27 2002/03/21 05:37:50 richter Exp $
+#   $Id: embperl.h,v 1.19.4.30 2002/06/18 06:27:34 richter Exp $
 #
 ###################################################################################*/
 
@@ -90,6 +90,8 @@ enum tRc
     rcCannotCheckUri,
     rcSetupSessionErr,
     rcRefcntNotOne,
+    rcApacheErr,
+    rcTooDeepNested,
     rcForbidden = 403,
     rcNotFound  = 404,
     rcDecline   = -1
@@ -167,7 +169,8 @@ enum opt
     optOpenLogEarly            = 0x200000,
     optNoUncloseWarn	       = 0x400000,
     optDisableSelectScan       = 0x800000,
-    optShowBacktrace           = 0x8000000
+    optShowBacktrace           = 0x8000000,
+    optEnableChdir             = 0x1000000
     } ;
 
 /* --- output escaping --- */

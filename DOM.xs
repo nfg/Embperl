@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: DOM.xs,v 1.1.2.26 2002/03/02 19:55:46 richter Exp $
+#   $Id: DOM.xs,v 1.1.2.27 2002/05/21 12:09:07 richter Exp $
 #
 ###################################################################################
 
@@ -347,7 +347,7 @@ CODE:
     pDomTree = DomTree_self (pAttr -> xDomTree) ;
 
     Attr_selfValue (r -> pApp, pDomTree, Attr_self(pDomTree, pAttr -> xNode), r -> Component.nCurrRepeatLevel, &sAttrText) ;
-    RETVAL = newSVpv (sAttrText, ArrayGetSize (r -> pApp, sAttrText)) ;
+    RETVAL = sAttrText?newSVpv (sAttrText, 0):&sv_undef ;
     StringFree (r -> pApp, &sAttrText) ;
 OUTPUT:
     RETVAL
@@ -368,7 +368,7 @@ CODE:
     
     pAttr = Attr_self(pDomTree, xAttr) ;
     Attr_selfValue (r -> pApp, pDomTree, pAttr , r -> Component.nCurrRepeatLevel, &sAttrText) ;
-    RETVAL = newSVpv (sAttrText, ArrayGetSize (r -> pApp, sAttrText)) ;
+    RETVAL = sAttrText?newSVpv (sAttrText, 0):&sv_undef ;
     StringFree (r -> pApp, &sAttrText) ;
 OUTPUT:
     RETVAL

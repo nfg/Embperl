@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: RTF.pm,v 1.1.2.24 2002/01/27 20:04:36 richter Exp $
+#   $Id: RTF.pm,v 1.1.2.25 2002/04/11 06:44:14 richter Exp $
 #
 ###################################################################################
  
@@ -46,7 +46,7 @@ sub new
     {
     my $self = shift ;
 
-    $self = Embperl::Syntax::EmbperlBlocks::new ($self, 1) ;
+    $self = Embperl::Syntax::EmbperlBlocks::new ($self, { 'unescape' => 17 }) ;
 
     if (!$self -> {-rtfBlocks})
         {
@@ -55,7 +55,8 @@ sub new
         my $v ;
         my $ebesc = $self -> CloneHash ($eb, { 'unescape' => 17 }) ;
 
-        
+        $self -> {-root} = $self -> CloneHash ($self -> {-root}, { 'unescape' => 17 }) ;
+       
         while (($k, $v) = each %$ebesc)
             {
             $Block{$k} = $v ;
@@ -393,7 +394,9 @@ sub Var2Code
 
     {
     my $var = shift ;
+    $var =~ s/(\r|\n)//g ;  # variablename can contain \r and/or \n !!!
     my @parts = split (/\./, $var) ;
+    return '' if (!@parts) ;
     my $code = '$param[$_ep_rtf_ndx]' ;
 
     foreach (@parts)
@@ -412,7 +415,7 @@ sub Var2Code
     '-lsearch' => 1,
     'Varname' => 
         {
-        'contains'   => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789.',
+        'contains'   => "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789.\r\n",
         #'inside'     => \%Varseparator,
         #'inside'     => \%Varinside,
         'cdatatype' => ntypTag,
@@ -428,12 +431,44 @@ sub Var2Code
         {
         text => '\\\\*',
         'cdatatype' => 0,
-        'contains'   => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789.',
+        'contains'   => "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789.\r\n",
         },
     ) ;
 
 
 %Inside = () ;
+
+
+%ParaBlockInside = (
+    '-lsearch' => 1,
+    'RTF block' => {
+	'text' => '{',
+	'end'  => '}',
+        'nodename' => '!:{:::}',
+        'nodetype'  => ntypStartEndTag,
+        'cdatatype' => ntypCDATA,
+        'removespaces' => 0,
+	'inside' => \%ParaBlockInside,
+        'procinfo'   => {
+            'embperl' => {
+                },
+            },
+        },
+    'RTF field' => {
+	'text' => '{\field',
+	'end'  => '}',
+        'nodename' => '!:{:::}',
+        'nodetype'  => ntypStartEndTag,
+	#'cdatatype' => ntypAttrValue,
+	'insidemustexist' => 1,
+	'inside' => \%FieldStart,
+        'procinfo'   => {
+            'embperl' => {
+                },
+            },
+        },
+    ) ;
+
 
 # Start of commands
 
@@ -448,7 +483,7 @@ sub Var2Code
         #'cdatatype' => ntypCDATA,
 	#'cdatatype' => ntypAttrValue,
         'nodename' => '!:',
-	'inside'  => {}, 
+	'inside'  => {%ParaBlockInside,}, 
         'procinfo'   => {
             'embperl' => {
                 compiletimeperlcodeend => q[ $Embperl::req -> component -> code ('') if (!$_ep_rtf_inside || $_ep_rtf_cmd) ; $_ep_rtf_cmd = 0 ;],
@@ -471,6 +506,7 @@ sub Var2Code
                 },
             },
         },
+    
     ) ;
 
 # Field start and end
@@ -505,36 +541,6 @@ sub Var2Code
         },
     ) ;
 
-
-%ParaBlockInside = (
-    '-lsearch' => 1,
-    'RTF block' => {
-	'text' => '{',
-	'end'  => '}',
-        'nodename' => '!:{:::}',
-        'nodetype'  => ntypStartEndTag,
-        'cdatatype' => ntypCDATA,
-        'removespaces' => 0,
-	'inside' => \%ParaBlockInside,
-        'procinfo'   => {
-            'embperl' => {
-                },
-            },
-        },
-    'RTF field' => {
-	'text' => '{\field',
-	'end'  => '}',
-        'nodename' => '!:{:::}',
-        'nodetype'  => ntypStartEndTag,
-	#'cdatatype' => ntypAttrValue,
-	'insidemustexist' => 1,
-	'inside' => \%FieldStart,
-        'procinfo'   => {
-            'embperl' => {
-                },
-            },
-        },
-    ) ;
 
 =pod
     'RTF first paragraph' => {

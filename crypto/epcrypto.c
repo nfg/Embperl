@@ -34,7 +34,7 @@ int do_crypt_file(FILE *    in,
    
 
     EVP_CipherInit(&ctx, EPC_CHIPER, NULL, NULL, do_encrypt);
-    //EVP_CIPHER_CTX_set_key_length(&ctx, EPC_KEYLEN);
+    /* EVP_CIPHER_CTX_set_key_length(&ctx, EPC_KEYLEN); */
     
     EVP_CipherInit(&ctx, NULL, key, iv, do_encrypt);
 
