@@ -1,0 +1,61 @@
+[- 
+$r = shift ;
+
+my $langset = $r -> {language_set} ;
+$$langset -> Reset ;
+while ($rec = $$langset -> Next)
+    {
+    push @rules, 
+        [
+        -key => "category_$rec->{id}",
+        -name => $rec -> {name},
+        'emptyok',
+        length_min => 5
+        ] ;
+    push @keys, "category_$rec->{id}" ;
+    }
+
+
+
+
+use Embperl::Form::Validate ;
+$epf = Embperl::Form::Validate -> new ([
+                                        -key => \@keys,
+                                        -name => { de => 'eine Kategorie', en => 'one category' },
+                                        'required',
+                                        @rules,
+                                        ]) ;
+
+$Embperl::Form::Validate::objects{'addsel'} = $epf ;
+
+-]
+<script>
+[+ do { local $escmode = 0 ; $epf -> get_script_code (undef, $r) } +]
+</script>
+
+[= addsel1 =]
+
+<ul>
+    <li>
+        [- $rec = $r -> {category_set}[$row] -]
+        <a href="add.epl?category_id=[+ $rec -> {category_id} +]">[+ $rec -> {category} +]</a>
+    </li>
+</ul>
+
+
+<form action="[+ $r -> param -> uri +]"  OnSubmit="">
+
+[= addsel2 =]<br> 
+[= addsel3 =]<br><br>
+
+<table>
+    <tr>
+        [- $rec = $r -> {language_set}[$row] -]
+        <td>[+ $rec -> {name} +]:</td><td><input type="text" name="category_[+ $rec -> {id} +]" size=80></td>
+    </tr>
+</table>
+
+<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="-add_category" value="[=addsel4=]">
+
+</form>

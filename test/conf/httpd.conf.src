@@ -1,0 +1,550 @@
+print OFH <<EOD ;
+#
+# Testconfig for Embperl make test
+#
+
+ServerRoot \"$EPPATH/test\"
+ServerName localhost
+DocumentRoot \"$EPPATH/test\"
+Port $EPPORT
+EOD
+
+if ($^O ne 'MSWin32')
+	{
+print OFH <<EOD ;
+
+User $EPUSER
+Group $EPGROUP
+
+MinSpareServers 1
+MaxSpareServers 30
+StartServers 3
+MaxClients 10
+MaxRequestsPerChild 0
+
+
+EOD
+    }
+
+
+
+print OFH <<EOD ;
+
+$EPMODPERL
+
+DirectoryIndex index.htm  
+
+
+$EPSTRONGHOLDKEY
+
+#-Tw
+PerlTaintCheck On
+PerlWarn On
+
+
+PerlSetEnv EMBPERL_SRC \"$EPPATH\"
+SetEnv EMBPERL_SRC \"$EPPATH\"
+PerlSetEnv DMALLOC_OPTIONS \"log=$EPPATH/test/tmp/httpd.dmalloc.log,debug=0x3f03\" 
+SetEnv DMALLOC_OPTIONS \"log=$EPPATH/test/tmp/httpd.dmalloc.log,debug=0x3f03\" 
+
+PerlRequire \"$EPPATH/test/conf/$EPSTARTUP\"
+#PerlModule causes some warning with Perl 5.005_03
+#PerlModule Embperl 
+
+Embperl_UseEnv off
+
+EMBPERL_DEBUG $EPDEBUG
+#EMBPERL_VIRTLOG /embperl/log
+EMBPERL_LOG \"$EPPATH/test/tmp/test.log\"
+EMBPERL_INPUT_ESCMODE 7
+
+ErrorLog tmp/httpd.err.log
+PidFile tmp/httpd.pid
+AccessConfig conf/null
+ResourceConfig conf/null
+TypesConfig conf/null
+LockFile tmp/httpd.lock
+LogFormat \"%h %l %u %t \\"%r\\" %s %b %{connection}o pid=%P %Tsec\" std
+
+
+EOD
+
+
+
+if ($EPSESSIONXVERSION && ($EPSESSIONXVERSION > 1))
+    {
+print OFH <<EOD ;
+
+EMBPERL_SESSION_CLASSES "File Null"
+EMBPERL_SESSION_ARGS "'Directory=$EPPATH/test/tmp'"
+EOD
+    }
+else
+    {
+print OFH <<EOD ;
+
+EMBPERL_SESSION_HANDLER_CLASS no
+EOD
+    }
+
+
+print OFH <<EOD ;
+
+EMBPERL_ALLOW (asc|\\.xml\$|\\.htm\$)
+
+
+<Location /embperl/log>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+</Location>
+
+ 
+AddType text/html .html
+AddType text/html .htm
+AddType text/html .xhtm
+
+Alias /embperl/asclibxslt \"$EPPATH/test/html/pod\"
+Alias /embperl/ascxalan \"$EPPATH/test/html/pod\"
+Alias /embperl/libxslt \"$EPPATH/test/html/xml\"
+Alias /embperl/xalan \"$EPPATH/test/html/xml\"
+Alias /embperl/uidurl/ \"$EPPATH/test/html/sidurl/\"
+Alias /embperl/suidurl/ \"$EPPATH/test/html/sidurl/\"
+Alias /embperl/sub/ \"$EPPATH/test/html/\"
+Alias /embperl/ \"$EPPATH/test/html/\"
+Alias /embperl2/ \"$EPPATH/test/html2/\"
+Alias /embperlmail/ \"$EPPATH/test/html/\"
+Alias /eg/ \"$EPPATH/eg/\"
+
+<Location /embperl>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+</Location>
+
+<Location /embperl/sub>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+</Location>
+
+<Location /embperl2>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+</Location>
+
+<Location /embperl/safe>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+EMBPERL_OPTIONS 4
+</Location>
+
+<Location /embperl/libxslt>
+EMBPERL_RECIPE EmbperlLibXSLT
+EMBPERL_XSLTSTYLESHEET \"$EPPATH/test/html/xml/podold.xsl\"
+</Location>
+
+<Location /embperl/asclibxslt>
+EMBPERL_RECIPE EmbperlLibXSLT
+EMBPERL_XSLTSTYLESHEET \"$EPPATH/test/html/xml/pod.xsl\"
+EMBPERL_SYNTAX POD
+</Location>
+
+<Location /embperl/xalan>
+EMBPERL_RECIPE EmbperlXalanXSLT
+EMBPERL_XSLTSTYLESHEET \"$EPPATH/test/html/xml/podold.xsl\"
+</Location>
+
+<Location /embperl/ascxalan>
+EMBPERL_RECIPE EmbperlXalanXSLT
+EMBPERL_XSLTSTYLESHEET \"$EPPATH/test/html/xml/pod.xsl\"
+EMBPERL_SYNTAX POD
+</Location>
+
+<Location /embperl/opmask>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+EMBPERL_OPTIONS 12
+EMBPERL_COMPARTMENT TEST
+EMBPERL_PACKAGE TEST
+</Location>
+
+<Location /embperl/rawinput>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+EMBPERL_OPTIONS 16
+EMBPERL_INPUT_ESCMODE 0
+</Location>
+
+<Location /cgi-bin/rawinput>
+SetEnv EMBPERL_OPTIONS 16
+SetEnv EMBPERL_INPUT_ESCMODE 0
+</Location>
+
+<Location /embperl/nochdir>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+EMBPERL_OPTIONS 384
+</Location>
+
+<Location /embperl/nph>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+EMBPERL_OPTIONS 64
+</Location>
+
+<Location /embperl/stdout>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+#EMBPERL_OPTIONS 16384
+EMBPERL_OPTIONS 16400
+EMBPERL_ESCMODE 0
+PerlSetupEnv Off
+</Location>
+
+<Location /embperl/allform>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+EMBPERL_OPTIONS 8192
+</Location>
+
+<Location /embperl/noerr>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+EMBPERL_OPTIONS 2
+</Location>
+
+<Location /embperl/errdoc>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+EMBPERL_OPTIONS 262144
+ErrorDocument 500 /html/errmsg.htm
+</Location>
+
+<Location /embperl/errdoc/epl>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+EMBPERL_OPTIONS 262144
+ErrorDocument 500 /embperl/errmsg2.htm
+</Location>
+
+<Location /embperl/match>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+EMBPERL_URIMATCH \\.htm\$
+</Location>
+
+<Location /embperl/registry>
+SetHandler perl-script
+PerlHandler Apache::Registry
+Options ExecCGI
+</Location>
+
+<Location /embperl/EmbperlObject>
+EMBPERL_APPNAME epo1
+EMBPERL_OBJECT_BASE epobase.htm
+EMBPERL_OBJECT_FALLBACK epofallback.htm
+EMBPERL_URIMATCH \"\\.htm.?\$|\\.epl\$\"
+SetHandler perl-script
+PerlHandler Embperl::Object 
+Options ExecCGI
+</Location>
+
+<Location /embperl/EmbperlObject/base3>
+EMBPERL_APPNAME epo3
+EMBPERL_OBJECT_BASE epobase3.htm
+EMBPERL_OBJECT_STOPDIR \"$EPPATH/test/html/EmbperlObject\"
+EMBPERL_OBJECT_ADDPATH \"$EPPATH/test/html/EmbperlObject/lib\"
+EMBPERL_OBJECT_FALLBACK epofallback.htm
+EMBPERL_URIMATCH \"\\.htm.?\$|\\.epl\$\"
+SetHandler perl-script
+PerlHandler Embperl::Object 
+Options ExecCGI
+</Location>
+
+<Location /embperl/EmbperlObject/base2>
+EMBPERL_APPNAME epo2
+EMBPERL_OBJECT_BASE epobase2.htm
+EMBPERL_OBJECT_STOPDIR \"$EPPATH/test/html/EmbperlObject\"
+EMBPERL_OBJECT_ADDPATH \"$EPPATH/test/html/EmbperlObject/lib\"
+EMBPERL_OBJECT_FALLBACK epofallback.htm
+EMBPERL_URIMATCH \"\\.htm.?\$|\\.epl\$\"
+SetHandler perl-script
+PerlHandler Embperl::Object 
+Options ExecCGI
+</Location>
+
+<Location /embperl/SSI/>
+EMBPERL_SYNTAX SSI
+</Location>
+
+<Location /embperl/SSIEP/>
+EMBPERL_SYNTAX "Embperl SSI"
+</Location>
+
+<Location /embperl/pod/>
+EMBPERL_SYNTAX POD
+</Location>
+
+<Location /embperl/app/>
+EMBPERL_APPNAME TestApp
+EMBPERL_APP_HANDLER_CLASS Embperl::TEST::App
+</Location>
+
+<Location /embperl/sidurl>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+EMBPERL_SESSION_MODE 0x20
+</Location>
+
+<Location /embperl/uidurl>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+EMBPERL_SESSION_MODE 0x02
+</Location>
+
+<Location /embperl/suidurl>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+EMBPERL_SESSION_MODE 0x22
+</Location>
+
+<Location /embperlmail>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+EMBPERL_APPNAME MailApp
+EMBPERL_MAILHOST mail.i.ecos.de
+EMBPERL_MAIL_ERRORS_TO richter
+EMBPERL_MAIL_ERRORS_LIMIT 2
+EMBPERL_MAIL_ERRORS_RESET_TIME 20
+EMBPERL_MAIL_ERRORS_RESEND_TIME 60
+</Location>
+
+
+### CGI setup ###
+
+Alias /cgi-bin/uidurl/ \"$EPPATH/test/html/sidurl/\"
+Alias /cgi-bin/suidurl/ \"$EPPATH/test/html/sidurl/\"
+Alias /cgi-bin/ \"$EPPATH/test/html/\"
+Alias /cgi-bin2/ \"$EPPATH/test/html2/\"
+Alias /cgi-bin-32/ \"$EPPATH/test/html/\"
+ScriptAlias /cgi/ \"$EPPATH/\"
+
+<Location /cgi-bin>
+Action text/html /cgi/embpcgi.test.pl
+Options ExecCGI
+EOD
+
+if ($EPSESSIONXVERSION && ($EPSESSIONXVERSION > 1))
+    {
+print OFH <<EOD ;
+
+SetEnv EMBPERL_SESSION_CLASSES "File Null"
+SetEnv EMBPERL_SESSION_ARGS "'Directory=$EPPATH/test/tmp'"
+EOD
+    }
+else
+    {
+print OFH <<EOD ;
+
+SetEnv EMBPERL_SESSION_HANDLER_CLASS no
+EOD
+    }
+
+
+print OFH <<EOD ;
+
+SetEnv EMBPERL_ALLOW (asc|\\.xml\$|\\.htm\$)
+
+</Location>
+
+<Location /cgi-bin2>
+Action text/html /cgi/embpcgi.test.pl
+Options ExecCGI
+EOD
+
+if ($EPSESSIONVERSION && ($EPSESSIONVERSION > 1))
+    {
+print OFH <<EOD ;
+
+SetEnv EMBPERL_SESSION_CLASSES "File Null"
+SetEnv EMBPERL_SESSION_ARGS "'Directory=$EPPATH/test/tmp'"
+EOD
+    }
+else
+    {
+print OFH <<EOD ;
+
+SetEnv EMBPERL_SESSION_HANDLER_CLASS no
+EOD
+    }
+
+
+print OFH <<EOD ;
+
+SetEnv EMBPERL_ALLOW (asc|\\.xml\$|\\.htm\$)
+
+</Location>
+
+
+<Location /cgi-bin/EmbperlObject>
+Action text/html /cgi/epocgi.test.pl
+Options ExecCGI
+SetEnv EMBPERL_OBJECT_BASE epobase.htm
+SetEnv EMBPERL_OBJECT_FALLBACK epofallback.htm
+</Location>
+
+
+<Location /cgi-bin-32>
+Action text/html /cgi/embpcgi.test.bat
+Options ExecCGI
+</Location>
+
+
+<Location /cgi-bin/SSI/>
+SetEnv EMBPERL_SYNTAX SSI
+</Location>
+
+<Location /cgi-bin/SSIEP/>
+SetEnv EMBPERL_SYNTAX "Embperl SSI"
+</Location>
+
+<Location /cgi-bin/pod/>
+SetEnv EMBPERL_SYNTAX POD
+</Location>
+
+
+### Status ###
+
+<Location /perl-status>
+SetHandler perl-script
+PerlHandler Apache::Status
+</Location>
+
+<Location /server-status>
+SetHandler server-status
+</Location>
+
+<Location /server-info>
+SetHandler server-info
+</Location>
+
+
+
+
+
+#
+# Configuration for example access
+#
+
+<Location /eg>
+EMBPERL_XSLTPROC libxslt
+</Location>
+
+<Location /eg/x>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+</Location>
+
+<Location /eg/web>
+EMBPERL_APPNAME EmbperlWeb
+EMBPERL_OPTIONS 16
+EMBPERL_ALLOW .
+EMBPERL_OBJECT_BASE base.epl
+EMBPERL_OBJECT_APP  epwebapp.pl
+EMBPERL_OBJECT_STOPDIR \"$EPPATH/eg/web\"
+EMBPERL_URIMATCH \"\\.htm.?\$|\\.epl\$|\\.xml\$|\\.pod\$\"
+SetHandler perl-script
+PerlHandler Embperl::Object 
+Options ExecCGI
+</Location>
+
+<Location /eg/web/conf>
+EMBPERL_RECIPE EmbperlLibXSLT
+EMBPERL_XSLTSTYLESHEET \"$EPPATH/eg/web/conf/pod.xsl\"
+EMBPERL_SYNTAX POD
+sethandler perl-script
+perlhandler Embperl
+</Location>
+
+<Location /eg/xml>
+SetHandler perl-script
+PerlHandler Embperl
+Options ExecCGI
+EMBPERL_XSLTSTYLESHEET \"$EPPATH/eg/xml/pod.xsl\"
+EMBPERL_XSLTPROC libxslt
+EMBPERL_RECIPE XSLT
+</Location>
+
+<Files NEWS.xml>
+EMBPERL_XSLTSTYLESHEET \"$EPPATH/eg/xml/NEWS.xsl\"
+</Files>
+
+
+<Location /eg/images/aim>
+
+PerlSetVar AIMParameter \"pointsize=14 font=$EPPATH/../fonts/OCRAEXT.ttf\"
+
+#PerlSetVar AIMParameter \"pointsize=14 gravity=left font=$EPPATH/../fonts/OCRAEXT.ttf\"
+PerlSetVar AIMCacheDir  \"$EPPATH/eg/images/aim/cache\"
+PerlSetVar AIMDebug 1
+PerlFixupHandler Apache::ImageMagick
+
+</location>
+
+
+
+CustomLog tmp/httpd.acc.log std
+
+### misc ###
+
+<IfModule apache_ssl.c>
+SSLDisable
+SSLCacheServerPort gcache_port
+SSLCacheServerPath \"$EPAPACHESRC/modules/ssl/gcache\"
+</IfModule>
+
+<IfModule mod_jserv.c>
+ApJServManual on
+ApJServSecretKey DISABLED
+ApJServLogFile /dev/null
+</IfModule>
+
+EOD
+
+if (!$EPSTRONGHOLDKEY && $EPSSLDISABLE)
+    {
+print OFH <<EOD ;
+<IfModule mod_ssl.c>
+SSLDisable
+SSLCacheServerPort $EPPORT2
+SSLCacheServerPath tmp
+</IfModule>
+EOD
+    }
+
+
+
+
+
+
+
+
+

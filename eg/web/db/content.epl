@@ -1,0 +1,7 @@
+<hr>
+[- $r = shift -]
+[$if $r -> param -> uri !~ /html?$|epl$/ $]<pre>[$endif$]
+[- Execute ({inputfile => '*'})  -] 
+[$if $r -> param -> uri !~ /html?$|epl$/ $]</pre>[$endif$]
+
+

@@ -1,0 +1,29 @@
+[-
+$r = shift ;
+$set = $r -> {item_set} ;
+$escmode = 0 ;
+-]
+
+=pod
+
+=head1 NAME
+
+[+ $r -> {category_set}{category} +]
+
+[$ while ($rec = $$set -> Next) $]
+
+=head1 [+ $rec -> {heading} +]
+
+[+ $rec -> {description} +]
+[$endwhile$]
+
+
+
+
+
+ 
+
+
+
+
+

@@ -1,0 +1,38 @@
+[- 
+$r = shift ;
+-]
+
+<table width="100%">
+    <tr bgcolor="#fefcad">
+        <td><font size="4">[= add1 =] [+ $r -> {category_set}{category} +]</font></td>
+    </tr>
+</table>
+
+
+
+
+[= show2 =]<br><br>
+
+<table width="100%">
+    <tr bgcolor="#fefcad">
+        [- $rec = $r -> {item_set}[$row] -]
+        <td>[+ $rec -> {name} +]</td>
+    </tr>
+    <tr>
+        <td>
+            <table>
+                <tr>
+                    <td>[= heading =]:</td><td>[+ $rec -> {heading} +]</td>
+                </tr>
+                <tr>
+                    <td>[= url =]:</td><td>[+ $rec -> {url} +]</td>
+                </tr>
+                <tr>
+                    <td>[= description =]:</td><td>[+ do { $txt = $rec -> {description} ; $txt =~ s/\\n/\\\\<br\\>/g; $txt } +]</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<br><br>

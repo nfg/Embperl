@@ -1,0 +1,27 @@
+<html>
+
+<head>
+<title>Embperl Tests - use Mail taglib</title>
+</head>
+
+<body>
+
+
+  [$ syntax + Mail $]
+
+  <mail:send to="richter@ecos.de" subject="Testmail" mailhost="mail.i.ecos.de">
+    Hi,
+    this is a test for a new mail tag
+    it is send at [+ scalar(localtime) +]
+    from Embperl's Mail taglib.
+  </mail:send>
+
+  [$ if $? $]
+		<h2>Sorry, there was an error, your mail couldn't be send</h2>
+  [$else$]
+		<h2>Your mail was successfully delivered</h2>
+  [$endif$]
+
+</body>
+</html>
+

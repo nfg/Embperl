@@ -1,0 +1,160 @@
+
+###############################################################################
+###############################################################################
+###                                                                         ###
+###   perlwww - Copyright (c) 1999, 2000  ecos                              ###
+###                                                                         ###
+###   Technische Realisierung: G. Richter / ecos GmbH  (http://www.ecos.de) ###
+###                                                                         ###
+###   - Datenbankschema -                                                   ###
+###                                                                         ###
+###   $Id: db.schema,v 1.1.2.2 2002/02/12 16:55:01 richter Exp $                 ###
+###                                                                         ###
+###############################################################################
+###############################################################################
+
+
+
+%DBDefault = 
+
+    (
+    '!Grant' => 
+        [
+        'select', 
+        'insert',
+        'update',
+        'delete',
+        ],
+    )
+     ;
+
+# ----------------------------------------------------------------------
+
+@DBSchema = (
+
+
+
+# ----------------------------------------------------------------------
+
+    {
+    '!Table' => 'item',
+    '!Fields' => 
+        [
+        'id'                            => 'counter',
+        'url'				=> 'tinytext',
+        'category_id'                   => 'integer',
+        'state'		                => 'integer',
+        'creationtime'			=> 'datetime',
+        'modtime'			=> 'datetime',
+        'user_id'		        => 'integer',
+        'checkcount'		        => 'integer',
+	],
+    '!PrimKey' => 'id',
+    },
+
+# ----------------------------------------------------------------------
+
+    {
+    '!Table' => 'itemtext',
+    '!Fields' => 
+        [
+        'id'                            => 'counter',
+        'item_id'                       => 'integer',
+        'language_id'                   => 'char(2)',
+        'heading'			=> 'tinytext',
+        'keywords'			=> 'text',
+        'description'			=> 'text',
+        'url'				=> 'tinytext',
+	],
+    '!PrimKey' => 'id',
+    },
+
+# ----------------------------------------------------------------------
+
+    {
+    '!Table' => 'language',
+    '!Fields' => 
+        [
+        'id'                        => 'char(2) not null',
+        'name'                      => 'tinytext',
+        ],
+    '!PrimKey' => 'id',
+    '!Init' =>
+        [
+            { id => 'de', name => 'Deutsch'} ,
+            { id => 'en', name => 'English'} ,
+        ],
+    },
+
+# ----------------------------------------------------------------------
+
+    {
+    '!Table' => 'category',
+    '!Fields' => 
+        [
+        'id'                        => 'counter',
+        'state'                     => 'integer',
+        ],
+    '!PrimKey' => 'id',
+    '!Init' =>
+        [
+            { id => 1, state => 1 } ,
+            { id => 2, state => 1 } ,
+            { id => 3, state => 1 } ,
+            { id => 4, state => 1 } ,
+            { id => 5, state => 1 } ,
+            { id => 6, state => 1 } ,
+        ],
+    },
+
+# ----------------------------------------------------------------------
+
+    {
+    '!Table' => 'categorytext',
+    '!Fields' => 
+        [
+        'id'                            => 'counter',
+        'category_id'                   => 'integer',
+        'language_id'                   => 'char(2)',
+        'category'			=> 'tinytext',
+	],
+    '!PrimKey' => 'id',
+    '!Init' =>
+        [
+            { id => 1, category_id => 1, language_id => 'de', 'category' => 'Neuigkeiten' } ,
+            { id => 2, category_id => 1, language_id => 'en', 'category' => 'News' } ,
+            { id => 3, category_id => 2, language_id => 'de', 'category' => 'Websites die Embperl nutzen' } ,
+            { id => 4, category_id => 2, language_id => 'en', 'category' => 'Sites using Embperl' } ,
+            { id => 5, category_id => 3, language_id => 'de', 'category' => 'Bücher die Embperl behandeln' } ,
+            { id => 6, category_id => 3, language_id => 'en', 'category' => 'Books that talk about Embperl' } ,
+            { id => 7, category_id => 4, language_id => 'de', 'category' => 'Artikel über Embperl (on- und offline)' } ,
+            { id => 8, category_id => 4, language_id => 'en', 'category' => 'Article about Embperl (on- and offline)' } ,
+            { id => 9, category_id => 5, language_id => 'de', 'category' => 'Syntaxhervorhebungen für Texteditoren' } ,
+            { id => 10, category_id => 5, language_id => 'en', 'category' => 'Syntaxhighlighting for texteditors' } ,
+            { id => 11, category_id => 6, language_id => 'de', 'category' => 'Module und Beispiele für Embperl' } ,
+            { id => 12, category_id => 6, language_id => 'en', 'category' => 'Modules and examples for Embperl' } ,
+        ],
+    },
+
+# ----------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------
+
+    {
+    '!Table' => 'user',
+    '!Fields' => 
+        [
+        'id'                        => 'counter',
+        'name'                      => 'tinytext',
+        'email'                     => 'tinytext',
+        'password'                  => 'tinytext',
+        ],
+    '!PrimKey' => 'id',
+    },
+
+
+) ;
+
+1 ;
+

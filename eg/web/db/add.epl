@@ -1,0 +1,49 @@
+[- $r = shift -]
+
+<table width="100%">
+    <tr bgcolor="#fefcad">
+        <td><font size="4">[= add1 =] [+ $r -> {category_set}{category} +]</font></td>
+    </tr>
+</table>
+
+
+
+<form action="show.epl" method="POST">
+
+[= add2 =]<br><br>
+
+<table>
+    <tr>
+        <td>URL:</td><td><input type="text" name="url" size=80></td>
+    </tr>
+</table>
+
+<table width="100%">
+    <tr bgcolor="#fefcad"><font size="3">
+        [- $rec = $r -> {language_set}[$row] -]
+        <td>[+ $rec -> {name} +]</td>
+    </tr>
+    <tr>
+        <td>
+            <table>
+                <tr>
+                    <td>[= heading =]:</td><td><input type="text" name="heading_[+ $rec -> {id} +]" size=80></td>
+                </tr>
+                <tr>
+                    <td>[= url =]:</td><td><input type="text" name="url_[+ $rec -> {id} +]" size=80></td>
+                </tr>
+                <tr>
+                    <td>[= description =]:</td><td><textarea name="description_[+ $rec -> {id} +]" cols=60 rows=10></textarea></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="-add_item" value="[= add3 =] [+ $r -> {category_set}{category} +]">
+
+<input type="hidden" name="category_id">
+
+</form>
+             
