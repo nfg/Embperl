@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eputil.c,v 1.42 2004/08/16 07:36:18 richter Exp $
+#   $Id: eputil.c,v 1.44 2005/02/22 16:34:29 richter Exp $
 #
 ###################################################################################*/
 
@@ -1788,7 +1788,8 @@ static char * embperl_GetText1 (/*in*/ tReq *       r,
     epTHX_
     IV      len ;
     IV      i ;
-    char *  pMsg ;
+    SV **   ppSV ;
+    STRLEN  l ;
 
     if (!arr || SvTYPE(arr) != SVt_PVAV)
         return NULL ;
@@ -1803,8 +1804,11 @@ static char * embperl_GetText1 (/*in*/ tReq *       r,
             if (SvTYPE (pHV) != SVt_PVHV)
                 continue ;
 
-            if ((pMsg = GetHashValueStr (aTHX_ pHV, sMsgId, NULL)))
-                return pMsg ;
+            ppSV = hv_fetch(pHV, (char *)sMsgId, strlen (sMsgId), 0) ;  
+            if (ppSV != NULL)
+	        {
+                return SvOK(*ppSV)?SvPV (*ppSV, l):NULL ;
+                }
             }
         }
     return NULL ;

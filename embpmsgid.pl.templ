@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: embpmsgid.pl.templ,v 1.3 2004/01/23 06:50:54 richter Exp $
+#   $Id: embpmsgid.pl.templ,v 1.4 2005/01/17 06:24:40 richter Exp $
 #
 ###################################################################################
 
@@ -113,6 +113,7 @@ foreach my $fn (@ARGV)
     }
 
 
+$Data::Dumper::Sortkeys  = \&{ sub {[ sort { $a cmp $b } keys %{$_[0]} ]} } ;
 
 print Data::Dumper -> Dump ([\%Embperl::Syntax::MsgIdExtract::Ids], ['msgids']) ;
 
@@ -134,11 +135,59 @@ if ($opt_datadumper || $opt_dbm)
         rename $opt_datadumper, "$opt_datadumper.bak" ;
         open FH, ">$opt_datadumper" or die "Cannot open $opt_datadumper ($!)" ;
         $Data::Dumper::Indent = 1 ;
-        $Data::Dumper::Useqq  = 1 ;
+        #$Data::Dumper::Useqq  = 1 ;
         print FH Data::Dumper -> Dump  ([$msgids], ['msgids']) ;
         close FH ;
         }
     }
+
+
+__END__
+ 
+=head1 NAME
+ 
+embpmsgid.pl - Extract message ids from Embperl files
+ 
+=head1 SYNOPSIS
+ 
+embpmsgid.pl [I<options>] [I<files>]
+ 
+=head1 DESCRIPTION
+
+Extract message ids (C<[= ... =]> blocks) from Embperl files given on 
+command line.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--datadumper>=I<file>, B<-d>
+
+Use the given file to read and store message ids. Must be valid Perl 
+code which defines $msgids.
+
+=item B<--dbm>=I<file>, B<-b>
+
+Use the given file to read and store message ids. Must be a dbm file.
+
+=item B<--languages>=I<code>, B<-l>
+
+Specify language code to generate. Can be given multiple times.
+
+=back
+
+=head1 SEE ALSO
+
+L<Embperl>
+
+=head1 AUTHOR
+
+G. Richter (richter@dev.ecos.de)
+
+=end
+
+
+
 
 
 

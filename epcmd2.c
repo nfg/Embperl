@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcmd2.c,v 1.17 2004/08/16 07:36:15 richter Exp $
+#   $Id: epcmd2.c,v 1.18 2005/01/15 19:53:58 richter Exp $
 #
 ###################################################################################*/
 
@@ -156,7 +156,7 @@ static void embperlCmd_SetRemove (/*i/o*/ register req * r,
 	else
 	    {
 	    if (r -> Component.Config.bDebug & dbgInput)
-		lprintf (r -> pApp,  "[%d]INPU: No value in %%fdat for Attribut: Name: '%*.*s' Value: '%*.*s' Attribute: '%*.*s' nRepeatLevel=%d\n", r -> pThread -> nPid, nNameLen, nNameLen, pName, nValLen, nValLen, pVal, nAttrLen, nAttrLen, sAttrName, nRepeatLevel ) ; 
+		lprintf (r -> pApp,  "[%d]INPU: No value in %%fdat for Attribut: Name: '%*.*s' Value: '%*.*s' Attribute: '%*.*s' nRepeatLevel=%d\n", r -> pThread -> nPid, nNameLen, nNameLen, pName?pName:"", nValLen, nValLen, pVal?pVal:"", nAttrLen, nAttrLen, sAttrName, nRepeatLevel ) ; 
             }
 
 	}

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epmain.c,v 1.135 2004/11/13 16:47:08 richter Exp $
+#   $Id: epmain.c,v 1.139 2005/02/28 06:31:00 richter Exp $
 #
 ###################################################################################*/
 
@@ -19,9 +19,6 @@
 #include "epmacro.h"
 
 
-/* Version */
-
-static char sVersion [] = VERSION ;
 
 
 /*---------------------------------------------------------------------------
@@ -180,6 +177,7 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
         case rcTooDeepNested:           msg ="[%d]ERR:  %d: %s Source data is too deep nested %s %s" ; break ; 
         case rcUnknownOption:           msg ="[%d]ERR:  %d: %s Unkown option '%s' in configuration directive '%s'" ; break ; 
         case rcTimeFormatErr:           msg ="[%d]ERR:  %d: %s Format error in %s = %s" ; break ;
+        case rcSubCallNotRequest:       msg ="[%d]ERR:  %d: %s A Embperl sub is called and no Embperl request is running  %s %s" ; break ;
 
 	default:                        msg ="[%d]ERR:  %d: %s Error (no description) %s %s" ; break ; 
         }
@@ -276,7 +274,7 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
 
         if (r -> pErrArray)
             {
-            av_push (r -> pErrArray, pSV) ;
+            av_push (r -> pErrArray, r -> pErrSV?SvREFCNT_inc(r -> pErrSV):pSV) ;
             }
         else
 	    SvREFCNT_dec (pSV) ;
@@ -398,6 +396,7 @@ void NewEscMode (/*i/o*/ register req * r,
     }
 
 
+#ifdef UNUSED
 
 
 /* ---------------------------------------------------------------------------- */
@@ -444,6 +443,8 @@ opmask_addlocal(pTHX_
 	    op_mask[myopcode++] |= bits & (1 << j++);
         }
     }
+
+#endif
 
 
 /* ---------------------------------------------------------------------------- */
@@ -545,6 +546,7 @@ static char * CreateSessionCookie (/*i/o*/ register req * r,
     }
     
 
+#ifdef UNUSED
                      
 /* ---------------------------------------------------------------------------- */
 /*                                                                              */
@@ -588,6 +590,8 @@ static void SetupSafeNamespace (/*i/o*/ register req * r)
         GvHV(gv) = (HV*)SvREFCNT_inc(defstash);
         }
     }
+
+#endif
 
 /* ---------------------------------------------------------------------------- */
 /*                                                                              */
@@ -1308,7 +1312,6 @@ int embperl_RunRequest (/*i/o*/ register req * r)
 
     EPENTRY (ExecuteReq) ;
 
-    
     if (!r -> Component.pExportHash)
 	r -> Component.pExportHash = newHV () ;
     
@@ -1385,7 +1388,6 @@ int embperl_RunRequest (/*i/o*/ register req * r)
 #if defined (_MDEBUG) && defined (WIN32)
     _ASSERTE( _CrtCheckMemory( ) );
 #endif
-
 
     if ((c -> Config.bOptions & optReturnError) && r -> bError)
         {        

@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Mail.pm,v 1.36 2004/01/23 06:50:56 richter Exp $
+#   $Id: Mail.pm,v 1.37 2005/02/11 14:52:10 richter Exp $
 #
 ###################################################################################
 
@@ -31,7 +31,7 @@ use vars qw(
 @ISA = qw(Embperl);
 
 
-$VERSION = '2.0b10';
+$VERSION = '2.0';
 
 
 sub _quote_hdr
@@ -271,7 +271,11 @@ this parameter C<Execute> will die when an error occurs.
 
 =head2 Configuration
 
-Some default values could be setup via environement variables
+Some default values could be setup via environement variables.
+
+B<IMPORTANT:> For now Embperl::Mail does B<not> honour the Embperl
+configuration directives in your httpd.conf. Only values set via the
+environment are accepted (e.g. via SetEnv or PerlSetEnv).
 
 
 =head2 EMBPERL_MAILHOST

@@ -18,7 +18,8 @@ print "<HTML><TITLE>Test for Embperl::Req::SetupSession</TITLE><BODY>\n" ;
 
 my $session = Embperl::Req::SetupSession ($r) ;
 
-$off = 0 ; $off-- if ($Embperl::SessionMgnt == 2 && !defined (tied (%$session) -> getid)) ; 
+$off = 0 ; 
+#$off-- if ($Embperl::SessionMgnt == 2 && !defined (tied (%$session) -> getid)) ; 
 @ks = grep (!/^_/, sort (keys %$session)) ; $num = keys (%$session) - $#ks - 1 + $off ; 
 
 foreach (@ks)

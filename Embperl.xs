@@ -70,6 +70,22 @@ CODE:
 
 #endif    
 
+int
+embperl_InitAppForRequest(pApacheReqSV, pPerlParam)
+    SV * pApacheReqSV
+    SV * pPerlParam
+PREINIT:
+    Embperl__App pApp;
+    Embperl__Thread pThread;
+    tApacheDirConfig * pApacheCfg = NULL ;
+PPCODE:
+    RETVAL = embperl_InitAppForRequest(aTHX_ pApacheReqSV, pPerlParam, &pThread, &pApp, &pApacheCfg);
+    XSprePUSH ;
+    EXTEND(SP, 2) ;
+    PUSHs(epxs_IV_2obj(RETVAL)) ;
+    PUSHs(epxs_Embperl__Thread_2obj(pThread)) ;
+    PUSHs(epxs_Embperl__App_2obj(pApp)) ;
+
     
 
 MODULE = Embperl::Req    PACKAGE = Embperl::Req   PREFIX = embperl_

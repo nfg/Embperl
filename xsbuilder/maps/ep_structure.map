@@ -44,6 +44,7 @@
    errdat1[ERRDATLEN] | errdat1
    errdat2[ERRDATLEN] | errdat2
    lastwarn[ERRDATLEN] | lastwarn
+   pErrSV | errobj
 !   pDomTreeAV | dom_tree_av
    pCleanupAV | cleanup_vars
    pCleanupPackagesHV | cleanup_packages

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epeval.c,v 1.36 2004/08/16 07:36:15 richter Exp $
+#   $Id: epeval.c,v 1.37 2005/02/27 22:16:41 richter Exp $
 #
 ###################################################################################*/
 
@@ -80,7 +80,14 @@ int EvalDirect (/*i/o*/ register req *  r,
          
 	/* LogError (r, rcEvalErr) ; */
 
-	sv_setpv(pSVErr,"");
+        if (SvROK (pSVErr))
+            {
+            if (r -> pErrSV)
+                SvREFCNT_dec(r -> pErrSV) ;
+            r -> pErrSV = newRV (SvRV(pSVErr)) ;
+            }
+        
+        sv_setpv(pSVErr,"");
         return rcEvalErr ;
         }
 
@@ -558,6 +565,14 @@ int CallCV  (/*i/o*/ register req * r,
         if (l > 0 && r -> errdat1[l-1] == '\n')
              l-- ;
         r -> errdat1[l] = '\0' ;
+
+        if (SvROK (pSVErr))
+            {
+            if (r -> pErrSV)
+                SvREFCNT_dec(r -> pErrSV) ;
+            r -> pErrSV = newRV (SvRV(pSVErr)) ;
+            }
+        
          
 	LogError (r, rcEvalErr) ;
 
@@ -842,6 +857,14 @@ int CallStoredCV  (/*i/o*/ register req * r,
         if (l > 0 && r -> errdat1[l-1] == '\n')
              l-- ;
         r -> errdat1[l] = '\0' ;
+
+        if (SvROK (pSVErr))
+            {
+            if (r -> pErrSV)
+                SvREFCNT_dec(r -> pErrSV) ;
+            r -> pErrSV = newRV (SvRV(pSVErr)) ;
+            }
+        
          
 	LogError (r, rcEvalErr) ;
 

@@ -1,5 +1,54 @@
 =pod
 
+=head1 2.0rc3 14. March 2005
+
+   - Handle warnings the same way under Embperl and Embperl::Object, so they
+     are in both cases log to embperl.log and the Apache error log and show
+     up on the error page. Reported by Dirk Melchers.
+   - Report line number and file name in unstructures jump error messages.
+     Requested by Michael Smith.
+   - Fixed sigsegv under solaris cause by NULL point in debug output.
+   - Applied patches from Angus Lees to make Embperl compile and test on
+     64Bit machines and avoid some compiler warnings.
+   - Add pod for embpmsgid.pl from Angus Lees.
+   - Fix [= =] with included spaces in embpmsgid.pl. Reported by Robert.
+   - Make undef values for translation hashs treat as the same as
+     non exists. Requested by Robert.
+   - Let embpmsgid.pl parse out language tags of gettext, sort output
+     and don't convert chars > 128 to octal values. Requested by Robert. 
+   - Fixed make test module load problem for mod_perl tests, when
+     mod_perl is staticly linked into Apache
+   - Documentation updates and cleanup 
+   - Output an error message when an Embperl sub is called and no
+     Embperl request is active.
+   - Do not use method call to output in send_error_page to avoid
+     trouble with overloaded output function.
+   - Fixed segfault which occured sometimes randomly after compile 
+     of Embperl page source.
+   - Reimplemented SetupSession, CleanupSession and SetSessionCookie
+     which can be used to access Embperl session data from outside,
+     for example from mod_perl Authentication handler.
+   - Fixed problem with undefined $req_rec when Embperl::Execute
+     is called from a registry script. Reported by Martin Moss.     
+   - If an object is passed to die inside Execute the errors array
+     will receive this object and will not be stringified.
+     Requested by Robert Noris.
+   - $epreq -> errobj holds the last object passed to die during 
+     the request.
+   - Added documentaion of Embperl's error handling and trapping. 
+   - If optReturnError is set in the httpd.conf it is now reseted
+     for all sub components, to make sure all errors are reported
+     back. (It can still be set via the options argument of 
+     Execute).
+   - Using ErrorDocument by setting optReturnError now also works
+     under EmbperlObject. Reported by Robert Noris.
+   - Fixed problem when calling Embperl sub via Execute inside a
+     file that is called via Execute. Reported by Michael Smith.
+   - Fixed segfault when requesting symbol tables informations
+     via Apache::Status, reported by Dan Wilga.
+   - Find apr.h if it is not in same directory as httpd.h in
+     Makefile.PL. (Necessary for RedHat)
+
 =head1 2.0rc2  21. November 2004
 
    - Flush output to client and send final chuck, before cleanup runs.

@@ -1,3 +1,4 @@
+
 /*###################################################################################
 #
 #   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: embperl.h,v 1.34 2004/01/23 06:50:54 richter Exp $
+#   $Id: embperl.h,v 1.35 2005/02/25 08:06:21 richter Exp $
 #
 ###################################################################################*/
 
@@ -94,6 +95,7 @@ enum tRc
     rcTooDeepNested,
     rcUnknownOption,
     rcTimeFormatErr,
+    rcSubCallNotRequest,
     rcForbidden = 403,
     rcNotFound  = 404,
     rcDecline   = -1

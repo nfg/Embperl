@@ -3,7 +3,7 @@
 #
 # (C) 1997-2004 G.Richter (richter@dev.ecos.de) / ECOS
 #
-# $Id: Makefile.PL,v 1.74 2004/11/07 19:36:42 richter Exp $
+# $Id: Makefile.PL,v 1.76 2005/03/14 13:41:45 richter Exp $
 #
 
 
@@ -733,6 +733,12 @@ if ($b && $apache && $apache_src ne '')
         $i = "-I$inc_dir -I$apache_src/regex -I$apache_src/os/unix" ; 
         $o = '' ;
         }
+
+    if ($mp2cfg && !-f "$inc_dir/apr.h")
+	{
+	$i .= " -I$mp2cfg->{apr_includedir}" ;
+	}
+
     $d .= ' -DAPACHE' ;
     $d .= ' -DAPACHE2' if ($mp2cfg) ;
     $EPNOAPACHELIB = 0 ;
@@ -1293,7 +1299,7 @@ WriteMakefile(
     'INC'	   => $i,     			 
     'EXE_FILES'    => [ 'embpexec.pl', 'embpmsgid.pl' ],
     'clean'        => { FILES => 'dirent.h test/conf/httpd.conf test/conf/httpd.stop.conf test/conf/httpd.min.conf test/tmp/* Embperl.c $(OBJECT)' },
-    'realclean'    => { FILES => 'embpmsgid.pl embpexec.pl embpexec.bat embpcgi.pl embpcgi.test.pl embpcgi.bat epocgi.pl epocgi.bat epocgi.test.pl embpfastcgi.pl test/conf/config.pl xs/mmargs.pl' },
+    'realclean'    => { FILES => 'embpmsgid.pl embpexec.pl embpexec.bat embpcgi.pl embpcgi.test.pl embpcgi.bat epocgi.pl epocgi.bat epocgi.test.pl embpfastcgi.pl embpfastcgi.test.pl test/conf/config.pl xs/mmargs.pl' },
     'dist'         => { COMPRESS => 'gzip', SUFFIX => 'gz'},
     'dynamic_lib'  => $dynlib,
     'PREREQ_PM'    => { 'File::Spec' => 0.8 },

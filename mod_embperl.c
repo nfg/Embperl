@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: mod_embperl.c,v 1.27 2004/11/06 13:33:07 richter Exp $
+#   $Id: mod_embperl.c,v 1.29 2005/01/16 13:31:14 richter Exp $
 #
 ###################################################################################*/
 
@@ -576,14 +576,9 @@ static void *embperl_create_dir_config(apr_pool_t * p, char *d)
     embperl_DefaultAppConfig (&cfg -> AppConfig) ;
     embperl_DefaultComponentConfig (&cfg -> ComponentConfig) ;
     cfg -> bUseEnv = -1 ; 
-    /*
-    sprintf(buf, "%x", cfg) ;
-    if (d)
-        cfg -> AppConfig.sAppName = ap_pstrcat (p, d?d:"", ":", buf, NULL) ;
-    */
 
     if (bApDebug)
-        ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: create_dir_config %s (0x%x) [%d/%d]\n", cfg -> AppConfig.sAppName?cfg -> AppConfig.sAppName:"", cfg, getpid(), gettid()) ;
+        ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: create_dir_config %s (0x%p) [%d/%d]\n", cfg -> AppConfig.sAppName?cfg -> AppConfig.sAppName:"", cfg, getpid(), gettid()) ;
 
     return cfg;
     }
@@ -607,7 +602,7 @@ static void *embperl_create_server_config(apr_pool_t * p, server_rec *s)
     cfg -> bUseEnv = -1 ; 
 
     if (bApDebug)
-        ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: create_server_config (0x%x) [%d/%d]\n", cfg, getpid(), gettid()) ;
+        ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: create_server_config (0x%p) [%d/%d]\n", cfg, getpid(), gettid()) ;
 
 
     return cfg;
@@ -726,7 +721,7 @@ static void *embperl_merge_dir_config (apr_pool_t *p, void *basev, void *addv)
         mrg = (tApacheDirConfig *)ap_palloc (subpool, sizeof(tApacheDirConfig));
 
         if (bApDebug)
-            ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: merge_dir/server_config base=0x%x add=0x%x mrg=0x%x\n", basev, addv, mrg) ;
+            ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: merge_dir/server_config base=0x%p add=0x%p mrg=0x%p\n", basev, addv, mrg) ;
 
 #ifdef APACHE2
         apr_pool_cleanup_register(subpool, mrg, embperl_ApacheConfigCleanup, embperl_ApacheConfigCleanup); 

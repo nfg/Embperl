@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: App.pm,v 1.4 2004/08/17 03:53:45 richter Exp $
+#   $Id: App.pm,v 1.5 2005/02/25 08:06:22 richter Exp $
 #
 ###################################################################################
  
@@ -77,7 +77,6 @@ sub send_error_page
     my ($self, $r) = @_ ;
 
     local $SIG{__WARN__} = 'Default' ;
-    
     my $virtlog     = '' ; # $r -> VirtLogURI || '' ;
     my $logfilepos  = $r -> log_file_start_pos ;
     my $url         = '' ; # $Embperl::dbgLogLink?"<A HREF=\"$virtlog\?$logfilepos\&$$\">Logfile</A>":'' ;    
@@ -88,53 +87,52 @@ sub send_error_page
     my $time = localtime ;
     my $mail = $req_rec -> server -> server_admin if (defined ($req_rec)) ;
     $mail ||= '' ;
-
     $req_rec -> content_type('text/html') if (defined ($req_rec)) ;
 
-    $r -> output ("<HTML><HEAD><TITLE>Embperl Error</TITLE></HEAD><BODY bgcolor=\"#FFFFFF\">\r\n$url") ;
-    $r -> output ("<H1>Internal Server Error</H1>\r\n") ;
-    $r -> output ("The server encountered an internal error or misconfiguration and was unable to complete your request.<P>\r\n") ;
-    $r -> output ("Please contact the server administrator, $mail and inform them of the time the error occurred, and anything you might have done that may have caused the error.<P><P>\r\n") ;
+    # don't use method call to avoid trouble with overloading
+    Embperl::Req::output ($r,"<HTML><HEAD><TITLE>Embperl Error</TITLE></HEAD><BODY bgcolor=\"#FFFFFF\">\r\n$url") ;
+    Embperl::Req::output ($r,"<H1>Internal Server Error</H1>\r\n") ;
+    Embperl::Req::output ($r,"The server encountered an internal error or misconfiguration and was unable to complete your request.<P>\r\n") ;
+    Embperl::Req::output ($r,"Please contact the server administrator, $mail and inform them of the time the error occurred, and anything you might have done that may have caused the error.<P><P>\r\n") ;
 
     my $errors = $r -> errors ;
     if ($virtlog ne '' && $Embperl::dbgLogLink)
         {
         foreach $err (@$errors)
             {
-            $r -> output ("<A HREF=\"$virtlog?$logfilepos&$$#E$cnt\">") ; #<tt>") ;
+            Embperl::Req::output ($r,"<A HREF=\"$virtlog?$logfilepos&$$#E$cnt\">") ; #<tt>") ;
             $Embperl::escmode = 3 ;
             $err =~ s|\\|\\\\|g;
             $err =~ s|\n|\n\\<br\\>\\&nbsp;\\&nbsp;\\&nbsp;\\&nbsp;|g;
             $err =~ s|(Line [0-9]*:)|$1\\</a\\>|;
-            $r -> output ($err) ;
+            Embperl::Req::output ($r,$err) ;
             $Embperl::escmode = 0 ;
-            $r -> output ("<p>\r\n") ;
-            #$r -> output ("</tt><p>\r\n") ;
+            Embperl::Req::output ($r,"<p>\r\n") ;
+            #Embperl::Req::output ($r,"</tt><p>\r\n") ;
             $cnt++ ;
             }
         }
     else
         {
         $Embperl::escmode = 3 ;
-        $r -> output ("\\<table cellspacing='2' cellpadding='5'\\>\r\n") ;
+        Embperl::Req::output ($r,"\\<table cellspacing='2' cellpadding='5'\\>\r\n") ;
         foreach $err (@$errors)
             {
             $err =~ s|\\|\\\\|g;
             $err =~ s|\n|\n\\<br\\>\\&nbsp;\\&nbsp;\\&nbsp;\\&nbsp;|g;
-            $r -> output ("\\<tr bgcolor='#eeeeee'\\>\\<td\\>\r\n\\<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - --\\>\r\n") ;
-            $r -> output ("$err\r\n") ;
-            $r -> output ("\\<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - --\\>\r\n\\</td\\>\\</tr\\>\r\n") ;
-            #$r -> output ("\\<tt\\>$err\\</tt\\>\\<p\\>\r\n") ;
+            Embperl::Req::output ($r,"\\<tr bgcolor='#eeeeee'\\>\\<td\\>\r\n\\<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - --\\>\r\n") ;
+            Embperl::Req::output ($r,"$err\r\n") ;
+            Embperl::Req::output ($r,"\\<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - --\\>\r\n\\</td\\>\\</tr\\>\r\n") ;
+            #Embperl::Req::output ($r,"\\<tt\\>$err\\</tt\\>\\<p\\>\r\n") ;
             $cnt++ ;
             }
-        $r -> output ("\\</table\\>\r\n\\<br\\>\n\r") ;
+        Embperl::Req::output ($r,"\\</table\\>\r\n\\<br\\>\n\r") ;
         $Embperl::escmode = 0 ;
         }
-         
     my $server = $ENV{SERVER_SOFTWARE} || 'Offline' ;
 
-    $r -> output ($server . ($server =~ /Embperl/?'':" Embperl $Embperl::VERSION") . " [$time]<P>\r\n") ;
-    $r -> output ("</BODY></HTML>\r\n\r\n") ;
+    Embperl::Req::output ($r,$server . ($server =~ /Embperl/?'':" Embperl $Embperl::VERSION") . " [$time]<P>\r\n") ;
+    Embperl::Req::output ($r,"</BODY></HTML>\r\n\r\n") ;
     }
 
 # ---------------------------------------------------------------------------------

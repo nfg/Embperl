@@ -112,11 +112,6 @@ The Debian packages "libhtml-embperl-perl" and "libembperl-perl" are
 maintained by Angus Lees and are available from the usual Debian
 mirrors.
 
-Note that libembperl-perl (Embperl v2) is currently only available
-from the "unstable" distribution.  There are no pre-built
-apache2/mod_perl2 packages currently available.
-
-
 =head2 UNIX (without Apache Source)
 
 If you have an UNIX with preinstalled Apache and mod_perl (e.g. a Linux 
@@ -364,7 +359,7 @@ L<"IntroEmbperlObject"|"IntroEmbperlObject.pod"> documents.
 To learn how to use and configure Embperl, read the L<"Embperl documentation"|"Embperl.pod">.
 
 
-=head2 Further Documentation (english)
+=head2 Further Documentation
 
 
 See L<"perldoc Features"|"Features.pod"> for list of Embperls features 
@@ -375,29 +370,18 @@ introduction to Embperl.
 See L<"perldoc IntroEmbperlObject"|"IntroEmbperlObject.pod"> for an step by step 
 introduction to the OO features of Embperl.
 
+See L<"perldoc IntroEmbperl2.pod"|"IntroEmbperl2.pod"> for Introduction to Embperl 2 
+advanced features.
+
 See L<"perldoc Config"|"Config.pod"> for configuration and calling Embperl.
 
 See L<"perldoc Embperl"|"Embperl.pod"> for complete documentation.
-
-See the L<"eg/"|"Examples.pod"> directory for examples.
-
-See L<"perldoc Faq"|"Faq.pod"> for Frequently Asked Questions.
 
 See L<"perldoc TipsAndTricks"|"TipsAndTricks.pod"> for Tips and Tricks 
 around Embperl.
 
 or you can view it online on http://perl.apache.org/embperl/
-
-=head2 Further Documentation (german)
-
-See B<perldoc FeaturesD> for list of Embperls features 
-
-See B<perldoc IntroD> for an step by step 
-introduction to Embperl.
-
-See B<perldoc EmbperlD> for complete documentation.
-
-or you can view it online on http://www.ecos.de/embperl/
+and http://www.ecos.de/embperl/
 
 
 =head2 Compiling XALAN

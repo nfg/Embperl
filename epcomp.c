@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcomp.c,v 1.17 2004/08/16 07:36:15 richter Exp $
+#   $Id: epcomp.c,v 1.19 2005/02/25 08:42:00 richter Exp $
 #
 ###################################################################################*/
 
@@ -1664,6 +1664,8 @@ int embperl_Compile                 (/*in*/  tReq *	  r,
 	return rc ;
 	}
 
+    pDomTree = DomTree_self (xDomTree) ; /* addr may have changed */
+
     SvREFCNT_dec (pDomTree -> pSV) ;
     pDomTree -> pSV = NULL ;
 
@@ -1998,6 +2000,12 @@ int embperl_ExecuteSubStart         (/*in*/  tReq *	  r,
     tIndex xOldDomTree  ;
     tDomTree * pDomTree ;
     tDomTree * pCurrDomTree ;
+
+    if (!r || !r -> Component.bReqRunning)
+    	{
+    	LogErrorParam (r -> pApp, rcSubCallNotRequest, "", "") ;
+    	return 0 ;
+    	}
 
  #if 0
     if (SvIOK (pDomTreeSV))

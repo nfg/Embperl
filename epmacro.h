@@ -21,19 +21,28 @@
         rc = AddMagic (pApp, "Embperl::"#name, &EMBPERL2_mvtTab##name) ;
 
 
-#define INTMG(name,var,used,sub) \
+#define INTMG_COMP(name,var,used,sub) \
     \
 int EMBPERL2_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
 \
     { \
     tReq       * r = CurrReq ; \
-    tComponent * c = &r -> Component ; \
-    tApp       * a = r -> pApp ; \
-    sv_setiv (pSV, var) ; \
+    tComponent * c ; \
+    tApp       * a ; \
+    if (!r) \
+        return 0 ; \
+    c = &r -> Component ; \
+    if (!c) \
+        return 0 ; \
+    a = r -> pApp ; \
+    if (!a) \
+        return 0 ; \
+  \
+    sv_setiv (pSV, c -> var) ; \
     if (c -> bReqRunning) \
 	used++ ; \
     if ((c -> Config.bDebug & dbgTab) && c -> bReqRunning) \
-        lprintf (a, "[%d]TAB:  get %s = %d, Used = %d\n", r -> pThread -> nPid, #name, var, used) ; \
+        lprintf (a, "[%d]TAB:  get %s = %d, Used = %d\n", r -> pThread -> nPid, #name, c -> var, used) ; \
     return 0 ; \
     } \
 \
@@ -41,30 +50,55 @@ int EMBPERL2_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
 \
     { \
     tReq       * r = CurrReq ; \
-    tComponent * c = &r -> Component ; \
-    tApp       * a = r -> pApp ; \
-    var = SvIV (pSV) ; \
+    tComponent * c ; \
+    tApp       * a ; \
+    if (!r) \
+        return 0 ; \
+    c = &r -> Component ; \
+    if (!c) \
+        return 0 ; \
+    a = r -> pApp ; \
+    if (!a) \
+        return 0 ; \
+  \
+    c -> var = SvIV (pSV) ; \
     if ((c -> Config.bDebug & dbgTab) && c -> bReqRunning) \
-        lprintf (a, "[%d]TAB:  set %s = %d, Used = %d\n", r -> pThread -> nPid, #name, var, used) ; \
+        lprintf (a, "[%d]TAB:  set %s = %d, Used = %d\n", r -> pThread -> nPid, #name, c -> var, used) ; \
     sub ; \
     return 0 ; \
     } \
     \
     MGVTBL EMBPERL2_mvtTab##name = { EMBPERL2_mgGet##name, EMBPERL2_mgSet##name, NULL, NULL, NULL } ;
 
-#define INTMGshort(name,var) \
+#define INTMGshort_COMP(name,var) \
     \
 int EMBPERL2_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
 \
     { \
-    sv_setiv (pSV, var) ; \
+    tReq       * r = CurrReq ; \
+    tComponent * c ; \
+    if (!r) \
+        return 0 ; \
+    c = &r -> Component ; \
+    if (!c) \
+        return 0 ; \
+   \
+    sv_setiv (pSV, c -> var) ; \
     return 0 ; \
     } \
 \
     int EMBPERL2_mgSet##name (pTHX_ SV * pSV, MAGIC * mg) \
 \
     { \
-    var = SvIV (pSV) ; \
+    tReq       * r = CurrReq ; \
+    tComponent * c ; \
+    if (!r) \
+        return 0 ; \
+    c = &r -> Component ; \
+    if (!c) \
+        return 0 ; \
+   \
+    c -> var = SvIV (pSV) ; \
     return 0 ; \
     } \
     \
@@ -132,6 +166,75 @@ int EMBPERL2_mgSet##name (pTHX_ SV * pSV, MAGIC * mg) \
     } \
     \
     MGVTBL EMBPERL2_mvtTab##name = { EMBPERL2_mgGet##name, EMBPERL2_mgSet##name, NULL, NULL, NULL } ;
+
+
+
+
+#define OPTMGRD_COMP(name,var) \
+    \
+int EMBPERL2_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
+\
+    { \
+    tReq       * r = CurrReq ; \
+    tComponent * c ; \
+    if (!r) \
+        return 0 ; \
+    c = &r -> Component ; \
+    if (!c) \
+        return 0 ; \
+   \
+    sv_setiv (pSV, (c -> var & name)?1:0) ; \
+    return 0 ; \
+    } \
+\
+int EMBPERL2_mgSet##name (pTHX_ SV * pSV, MAGIC * mg) \
+\
+    { \
+    return 0 ; \
+    } \
+    \
+    MGVTBL EMBPERL2_mvtTab##name = { EMBPERL2_mgGet##name, EMBPERL2_mgSet##name, NULL, NULL, NULL } ;
+
+
+#define OPTMG_COMP(name,var) \
+    \
+int EMBPERL2_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
+\
+    { \
+    tReq       * r = CurrReq ; \
+    tComponent * c ; \
+    if (!r) \
+        return 0 ; \
+    c = &r -> Component ; \
+    if (!c) \
+        return 0 ; \
+   \
+\
+    sv_setiv (pSV, (c -> var & name)?1:0) ; \
+    return 0 ; \
+    } \
+\
+int EMBPERL2_mgSet##name (pTHX_ SV * pSV, MAGIC * mg) \
+\
+    { \
+    tReq       * r = CurrReq ; \
+    tComponent * c ; \
+    if (!r) \
+        return 0 ; \
+    c = &r -> Component ; \
+    if (!c) \
+        return 0 ; \
+   \
+\
+    if (SvIV (pSV)) \
+        c -> var |= name ; \
+    else \
+        c -> var &= ~name ; \
+    return 0 ; \
+    } \
+    \
+    MGVTBL EMBPERL2_mvtTab##name = { EMBPERL2_mgGet##name, EMBPERL2_mgSet##name, NULL, NULL, NULL } ;
+
 
 
 

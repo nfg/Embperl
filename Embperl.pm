@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Embperl.pm,v 1.194 2004/10/04 05:31:02 richter Exp $
+#   $Id: Embperl.pm,v 1.198 2005/02/27 20:22:00 richter Exp $
 #
 ###################################################################################
 
@@ -47,7 +47,7 @@ use vars qw(
 
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = '2.0rc2' ;
+$VERSION = '2.0rc3' ;
 
 
 if ($modperl  = $ENV{MOD_PERL})
@@ -107,6 +107,8 @@ sub Execute
     # when called inside a Embperl Request, Execute the component only
     return Embperl::Req::ExecuteComponent ($_ep_param, @_) if ($req) ;
 
+    local $req_rec = Apache -> request if ($Embperl::modperl) ;
+
     my $rc ;
     if (!ref $_ep_param)
         {
@@ -126,11 +128,7 @@ sub handler
     {
     local $SIG{__WARN__} = \&Warn ;
     $req_rec = $_[0] ;
-    #$req_rec -> log_error ("1 rc = ") ;
     my $rc = Embperl::Req::ExecuteRequest ($_[0]) ;
-use Data::Dumper ;
-use Devel::Peek ;
-    #$req_rec -> log_error ( "2 rc = $rc", Dumper ($rc), Dump ($rc)) ;
     return $rc ;
     }
 
@@ -260,8 +258,39 @@ sub get_multipart_formdata
 sub SetupSession
 
     {
-    die "SetupSession Not implemented yet in 2.0" ;
+    my ($req_rec, $uid, $sid, $appparam) = @_ ;
+    
+    my ($rc, $thread, $app) = Embperl::InitAppForRequest ($req_rec, $appparam) ;
+
+    my $cookie_name = $app -> config -> cookie_name ;
+    my $debug = $appparam?$appparam -> {debug} & Embperl::Constant::dbgSession:0 ;
+    if (!$uid)
+        {
+        my $cookie_val  = $ENV{HTTP_COOKIE} || ($req_rec?$req_rec->header_in('Cookie'):undef) ;
+
+	if ((defined ($cookie_val) && ($cookie_val =~ /$cookie_name=(.*?)(\;|\s|$)/)) || ($ENV{QUERY_STRING} =~ /$cookie_name=.*?:(.*?)(\;|\s|&|$)/) || $ENV{EMBPERL_UID} )
+	    {
+	    $uid = $1 ;
+	    print Embperl::LOG "[$$]SES:  Received user session id $1\n" if ($debug) ;
+            }
+
+        }
+    
+    if (!$sid)
+        {
+	if (($ENV{QUERY_STRING} =~ /${cookie_name}=(.*?)(\;|\s|&|:|$)/))
+	    {
+	    $sid = $1 ;
+	    print Embperl::LOG "[$$]SES:  Received state session id $1\n" if ($debug) ;
+            }
+        }
+
+    $app -> user_session -> setid ($uid) if ($uid) ;    
+    $app -> state_session -> setid ($sid) if ($sid) ;    
+
+    return wantarray?($app -> udat, $app -> mdat, $app -> sdat):$app -> udat ;
     }
+
 
 #######################################################################################
 
@@ -317,7 +346,15 @@ sub RefreshSession
 sub CleanupSession
 
     {
-    die "CleanupSession Not implemented yet in 2.0" ;
+    my ($req_rec, $appparam) = @_ ;
+
+    my ($rc, $thread, $app) = Embperl::InitAppForRequest ($req_rec, $appparam) ;
+
+    foreach my $obj ($app -> user_session, $app -> state_session, $app -> app_session)
+        {
+        $obj -> cleanup if ($obj) ;
+        }
+
     }
 
 
@@ -326,7 +363,31 @@ sub CleanupSession
 sub SetSessionCookie
 
     {
-    die "SetSessionCookie Not implemented yet in 2.0" ;
+    my ($req_rec, $appparam) = @_ ;
+
+    my ($rc, $thread, $app) = Embperl::InitAppForRequest ($req_rec, $appparam) ;
+    my $udat    = $app -> user_session ;
+    $req_rec ||= Apache -> request ;
+
+    if ($udat && $req_rec)
+        {
+        my ($initialid, $id, $modified)  = $udat -> getids ;
+        
+        my $name     = $app -> config -> cookie_name ;
+        my $domain   = $app -> config -> cookie_domain ;
+        my $path     = $app -> config -> cookie_path ;
+        my $expires  = $app -> config -> cookie_expires ;
+        my $secure   = $app -> config -> cookie_secure ;
+        my $domainstr  = $domain?"; domain=$domain":'';
+        my $pathstr    = $path  ?"; path=$path":'';
+        my $expiresstr = $expires?"; expires=$expires":'' ;
+        my $securestr  = $secure?"; secure":'' ;
+                        
+        if ($id || $initialid)
+            {    
+            $req_rec -> header_out ("Set-Cookie" => "$name=$id$domainstr$pathstr$expiresstr$securestr") ;
+            }
+        }
     }
 
 

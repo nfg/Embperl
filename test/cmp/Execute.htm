@@ -110,5 +110,28 @@ $e = 2 <BR>
 
 
 </H3>
-<H1> 10.) Done :-)</H1>
+<H1> 10.) Test $req_rec inside Execute</H1>
+
+<html>
+<head>
+<title>Test for $req_rec in Embperl</title>
+</head>
+
+$conf = &lt;undef&gt; <br> 
+^\$_\[0\] = Embperl::Req=HASH\(0x 
+$_[1] = &lt;undef&gt; <br> 
+
+^\$rec_rec  = Apache(::RequestRec)?=SCALAR\(0x
+^\$\$rec_rec = -?\d+<br>
+
+^Apache->request    = Apache(::RequestRec)?=SCALAR\(0x
+^\$\{Apache->request\} = -?\d+<br>
+
+^\${Apache->request} = \$\$req_rec \?  yes  
+
+^test/html/registry/Execute.htm
+</body>
+</html>
+
+<H1> 11.) Done :-)</H1>
 </body></html>

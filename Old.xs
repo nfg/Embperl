@@ -97,7 +97,9 @@ INIT:
     tReq * r = CurrReq ;
 CODE:
 	{
-	tNode xChild ;
+	/*
+        tNode xChild ;
+        */
         char * p = SvPV (sText, l) ;
         /*
 	if (0) //Node_self(DomTree_self (r -> Component.xCurrDomTree), r -> Component.xCurrNode) -> nType == ntypDocumentFraq)

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Object.pm,v 1.12 2004/08/16 07:36:21 richter Exp $
+#   $Id: Object.pm,v 1.14 2005/02/28 06:31:00 richter Exp $
 #
 ###################################################################################
 
@@ -141,6 +141,8 @@ sub Execute
     {
     my $req = shift ;
     
+    local $SIG{__WARN__} = \&Embperl::Warn ;
+
     $Embperl::req_rec = $req -> {req_rec} ;
     my ($rc, $r) = Embperl::Req::InitRequest ($req -> {req_rec}, $req) ;
     my $debug     = $r && ($r -> config -> debug & Embperl::Constant::dbgObjectSearch) ;
@@ -404,7 +406,9 @@ sub Execute
         my $c = $r -> setup_component ($cparam) ;
 
         $rc = run($r) ;
+
         $r -> cleanup ;
+
         return $rc ;
         }
 

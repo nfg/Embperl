@@ -9,10 +9,10 @@ $conf =  <br>
 $_[1] =  <br> 
 
 ^\$rec_rec  = Apache(::RequestRec)?=SCALAR\(0x.*?\)<br>
-^\$\$rec_rec = \d+<br>
+^\$\$rec_rec = -?\d+<br>
 
 ^Apache->request    = Apache(::RequestRec)?=SCALAR\(0x.*?\)<br>
-^\$\{Apache->request\} = \d+<br>
+^\$\{Apache->request\} = -?\d+<br>
 
 ${Apache->request} = $$req_rec ?  yes <br>
 

@@ -17,6 +17,7 @@ package Embperl::TEST::App ;
         'url'     => 'URL',
         'show2'   => 'Folgender Eintrag wurde erfolgreich der Datenbank hinzugefügt',
         'last'    => 'last zwischen [= =]',
+	'test undef' => undef,
         },
     'en' =>
         {
@@ -30,6 +31,7 @@ package Embperl::TEST::App ;
         'url'     => 'URL',
         'show2'   => 'The following entry has been sucessfully added to the database',
         'last'    => 'last inside of [= =]',
+	'test undef' => undef,
         },
     ) ;
 

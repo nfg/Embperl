@@ -9,14 +9,14 @@ TODO
 
 - check memory on recompile of epl files
 
-SOLVED, need more TESTS:
+- make test fedora 1 [13.12.04]
 
-- Perl hash error at end of apache and apachectl restart
+- escape.htm hash order [ abe 7.3.05]
 
-- preload on Apache startup problem [Neil Gunton 25.1.04]
-
-
+- Global $r is not available. [ abe 7.3.05]
 
 TODO for Embperl 2.1 and later
 
 - make Embperl run with threads and threaded Apache 2
+
+- make Embperl::Mail us Embperl configuration

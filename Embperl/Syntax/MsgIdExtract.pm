@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: MsgIdExtract.pm,v 1.3 2004/01/23 06:50:57 richter Exp $
+#   $Id: MsgIdExtract.pm,v 1.5 2005/01/17 06:24:40 richter Exp $
 #
 ###################################################################################
  
@@ -81,15 +81,62 @@ sub new
         'text' => '[=',
         'end'  => '=]',
         'unescape' => 1,
+        removespaces  => 72,
         'procinfo' => {
             embperl => { 
                     perlcode => 
                         [
-                        '$Embperl::Syntax::MsgIdExtract::Ids{scalar(%#0%)} = q{} if (!exists ($Embperl::Syntax::MsgIdExtract::Ids{scalar(%#0%)})) ;', 
+                        '$Embperl::Syntax::MsgIdExtract::Ids{%#\'0%} = q{} if (!exists ($Embperl::Syntax::MsgIdExtract::Ids{%#\'0%})) ;', 
 			],
-                    removenode  => 4,
+                    removenode    => 4,
                     compilechilds => 0,
                     }
+            },
+        },
+     'Embperl output msg id gettext' => {
+        'text' => 'gettext',
+        'end'  => ')',
+        'unescape' => 1,
+        follow  => {
+            'bracktes' =>
+                {
+                'text' => '(',
+                'end'  => ')',
+                follow  => {
+                    'Quote ""' => 
+                        {
+                        'text'   => '"',
+                        'end'    => '"',
+                        removespaces  => 72,
+                        'procinfo' => {
+                            embperl => { 
+                                    perlcode => 
+                                        [
+                                        '$Embperl::Syntax::MsgIdExtract::Ids{%#\'0%} = q{} if (!exists ($Embperl::Syntax::MsgIdExtract::Ids{%#\'0%})) ;', 
+			                ],
+                                    removenode    => 4,
+                                    compilechilds => 0,
+                                    }
+                            },
+                        },
+                    'Quote \'\'' => 
+                        {
+                        'text'   => '\'',
+                        'end'    => '\'',
+                        removespaces  => 72,
+                        'procinfo' => {
+                            embperl => { 
+                                    perlcode => 
+                                        [
+                                        '$Embperl::Syntax::MsgIdExtract::Ids{%#\'0%} = q{} if (!exists ($Embperl::Syntax::MsgIdExtract::Ids{%#\'0%})) ;', 
+			                ],
+                                    removenode    => 4,
+                                    compilechilds => 0,
+                                    }
+                            },
+                        },
+                    },
+                },
             },
         },
       ) ;  

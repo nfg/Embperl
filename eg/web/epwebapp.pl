@@ -151,8 +151,8 @@ sub map_file
         return $path ;
         }
 
-    # nothing found, so return a general error page
-    return "$r->{config}{root}$r->{config}{basepath}notfound.htm" ;
+    # nothing found
+    return ;
     }
 
 
@@ -225,7 +225,26 @@ sub init
    
 
     # map the request uri to the real filename    
-    $pf = map_file ($r, join ('/', @uri)) ;
+    my $uri = join ('/', @uri) ;
+    $pf = map_file ($r, $uri) ;
+    
+    # try different location to statisfy links in pod via xslt 
+    if (!$pf && ($uri =~ s/doc/intro/))
+        {
+        $pf = map_file ($r, $uri) ;
+        if (!$pf && ($uri =~ s/intro/list/))
+            {
+            $pf = map_file ($r, $uri) ;
+            if (!$pf && ($uri =~ s/list\///))
+                {
+                $pf = map_file ($r, $uri) ;
+                }
+            }
+        }                            
+
+    # nothing found, so return a general error page
+    $pf = "$r->{config}{root}$r->{config}{basepath}notfound.htm" if (!$pf) ;
+
     $r -> param -> filename ($pf) ;      # tell Embperl the filename
     $r -> apache_req -> filename ($pf) ; # tell Apache the filename
 
@@ -270,65 +289,67 @@ sub get_recipe
 
    
 
-    if ($src eq 'pl')
+    if ($src)
         {
-        $config -> syntax('Perl') ;
-        return Embperl::Recipe::Embperl -> get_recipe ($r, $recipe) ;
-        }
-
-    if ($src eq 'pod' || $src eq 'pm')
-        {
-        $config -> escmode(0) ;
-        if ($dest eq 'pod')
+        if ($src eq 'pl')
             {
-            $config -> syntax('Text') ;
+            $config -> syntax('Perl') ;
             return Embperl::Recipe::Embperl -> get_recipe ($r, $recipe) ;
             }
 
-        $config -> syntax('POD') ;
-        if ($dest eq 'xml')
+        if ($src eq 'pod' || $src eq 'pm')
             {
+            $config -> escmode(0) ;
+            if ($dest eq 'pod')
+                {
+                $config -> syntax('Text') ;
+                return Embperl::Recipe::Embperl -> get_recipe ($r, $recipe) ;
+                }
+
+            $config -> syntax('POD') ;
+            if ($dest eq 'xml')
+                {
+                return Embperl::Recipe::Embperl -> get_recipe ($r, $recipe) ;
+                }
+
+            $class -> set_xslt_param ($r, $config, $param) ;
+            return Embperl::Recipe::EmbperlXSLT -> get_recipe ($r, $recipe) ;
+            }
+    
+        if ($src eq 'xml')
+            {
+            $class -> set_xslt_param ($r, $config, $param) ;
+            return Embperl::Recipe::EmbperlXSLT -> get_recipe ($r, $recipe) ;
+            }
+    
+        if ($src eq 'epd')
+            {
+            $config -> escmode(0) ;
+            $config -> options($config -> options | &Embperl::Constant::optKeepSpaces) ;
+
+            if ($dest eq 'pod')
+                {
+                $config -> syntax('EmbperlBlocks') ;
+                return Embperl::Recipe::Embperl -> get_recipe ($r, $recipe) ;
+                }
+
+
+            $class -> set_xslt_param ($r, $config, $param) ;
+            return Embperl::Recipe::EmbperlPODXSLT -> get_recipe ($r, $recipe) ;
+            }
+    
+        if ($src eq 'epl' || $src eq 'htm')
+            {
+            $config -> syntax('Embperl') ;
             return Embperl::Recipe::Embperl -> get_recipe ($r, $recipe) ;
             }
 
-        $class -> set_xslt_param ($r, $config, $param) ;
-        return Embperl::Recipe::EmbperlXSLT -> get_recipe ($r, $recipe) ;
-        }
-    
-    if ($src eq 'xml')
-        {
-        $class -> set_xslt_param ($r, $config, $param) ;
-        return Embperl::Recipe::EmbperlXSLT -> get_recipe ($r, $recipe) ;
-        }
-    
-    if ($src eq 'epd')
-        {
-        $config -> escmode(0) ;
-        $config -> options($config -> options | &Embperl::Constant::optKeepSpaces) ;
-
-        if ($dest eq 'pod')
+        if ($src eq 'mail')
             {
             $config -> syntax('EmbperlBlocks') ;
             return Embperl::Recipe::Embperl -> get_recipe ($r, $recipe) ;
             }
-
-
-        $class -> set_xslt_param ($r, $config, $param) ;
-        return Embperl::Recipe::EmbperlPODXSLT -> get_recipe ($r, $recipe) ;
         }
-    
-    if ($src eq 'epl' || $src eq 'htm')
-        {
-        $config -> syntax('Embperl') ;
-        return Embperl::Recipe::Embperl -> get_recipe ($r, $recipe) ;
-        }
-
-    if ($src eq 'mail')
-        {
-        $config -> syntax('EmbperlBlocks') ;
-        return Embperl::Recipe::Embperl -> get_recipe ($r, $recipe) ;
-        }
-
 
     $config -> syntax('Text') ;
     return Embperl::Recipe::Embperl -> get_recipe ($r, $recipe) ;

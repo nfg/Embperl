@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epinit.c,v 1.24 2004/10/31 14:36:15 richter Exp $
+#   $Id: epinit.c,v 1.28 2005/03/12 13:46:07 richter Exp $
 #
 ###################################################################################*/
 
@@ -689,56 +689,56 @@ INTMG (TabMaxRow, pCurrReq -> nTabMaxRow, notused,  ;)
 INTMG (TabMaxCol, pCurrReq -> nTabMaxCol, notused, ;) 
 INTMG (TabMode, pCurrReq -> nTabMode, notused, ;) 
 #endif
-INTMG (EscMode, CurrComponent -> Config.nEscMode, notused, NewEscMode (CurrReq, pSV)) 
+INTMG_COMP (EscMode, Config.nEscMode, notused, NewEscMode (CurrReq, pSV)) 
 #ifdef EP2
-INTMGshort (CurrNode, CurrComponent -> xCurrNode) 
+INTMGshort_COMP (CurrNode, xCurrNode) 
 #endif
 
-OPTMGRD (optDisableVarCleanup      , CurrComponent -> Config.bOptions) 
-OPTMG   (optDisableEmbperlErrorPage, CurrComponent -> Config.bOptions) 
-OPTMG   (optReturnError            , CurrComponent -> Config.bOptions) 
-OPTMGRD (optSafeNamespace          , CurrComponent -> Config.bOptions) 
-OPTMGRD (optOpcodeMask             , CurrComponent -> Config.bOptions) 
-OPTMG   (optRawInput               , CurrComponent -> Config.bOptions) 
-OPTMG   (optSendHttpHeader         , CurrComponent -> Config.bOptions) 
-OPTMGRD (optDisableChdir           , CurrComponent -> Config.bOptions) 
-OPTMG   (optDisableHtmlScan        , CurrComponent -> Config.bOptions) 
-OPTMGRD (optEarlyHttpHeader        , CurrComponent -> Config.bOptions) 
-OPTMGRD (optDisableFormData        , CurrComponent -> Config.bOptions) 
-OPTMG   (optDisableInputScan       , CurrComponent -> Config.bOptions) 
-OPTMG   (optDisableTableScan       , CurrComponent -> Config.bOptions) 
-OPTMG   (optDisableMetaScan        , CurrComponent -> Config.bOptions) 
-OPTMGRD (optAllFormData            , CurrComponent -> Config.bOptions) 
-OPTMGRD (optRedirectStdout         , CurrComponent -> Config.bOptions) 
-OPTMG   (optUndefToEmptyValue      , CurrComponent -> Config.bOptions) 
-OPTMG   (optNoHiddenEmptyValue     , CurrComponent -> Config.bOptions) 
-OPTMGRD (optAllowZeroFilesize      , CurrComponent -> Config.bOptions) 
-OPTMGRD (optKeepSrcInMemory        , CurrComponent -> Config.bOptions) 
-OPTMG   (optKeepSpaces             , CurrComponent -> Config.bOptions) 
-OPTMG   (optOpenLogEarly           , CurrComponent -> Config.bOptions) 
-OPTMG   (optNoUncloseWarn          , CurrComponent -> Config.bOptions) 
+OPTMGRD_COMP (optDisableVarCleanup       , Config.bOptions) 
+OPTMG_COMP    (optDisableEmbperlErrorPage, Config.bOptions) 
+OPTMG_COMP    (optReturnError            , Config.bOptions) 
+OPTMGRD_COMP (optSafeNamespace           , Config.bOptions) 
+OPTMGRD_COMP (optOpcodeMask              , Config.bOptions) 
+OPTMG_COMP    (optRawInput               , Config.bOptions) 
+OPTMG_COMP    (optSendHttpHeader         , Config.bOptions) 
+OPTMGRD_COMP (optDisableChdir            , Config.bOptions) 
+OPTMG_COMP    (optDisableHtmlScan        , Config.bOptions) 
+OPTMGRD_COMP (optEarlyHttpHeader         , Config.bOptions) 
+OPTMGRD_COMP (optDisableFormData         , Config.bOptions) 
+OPTMG_COMP    (optDisableInputScan       , Config.bOptions) 
+OPTMG_COMP    (optDisableTableScan       , Config.bOptions) 
+OPTMG_COMP    (optDisableMetaScan        , Config.bOptions) 
+OPTMGRD_COMP (optAllFormData             , Config.bOptions) 
+OPTMGRD_COMP (optRedirectStdout          , Config.bOptions) 
+OPTMG_COMP    (optUndefToEmptyValue      , Config.bOptions) 
+OPTMG_COMP    (optNoHiddenEmptyValue     , Config.bOptions) 
+OPTMGRD_COMP (optAllowZeroFilesize       , Config.bOptions) 
+OPTMGRD_COMP (optKeepSrcInMemory         , Config.bOptions) 
+OPTMG_COMP    (optKeepSpaces             , Config.bOptions) 
+OPTMG_COMP    (optOpenLogEarly           , Config.bOptions) 
+OPTMG_COMP    (optNoUncloseWarn          , Config.bOptions) 
 
 
-OPTMG   (dbgStd          , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgMem          , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgEval         , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgCmd          , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgEnv          , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgForm         , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgTab          , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgInput        , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgFlushOutput  , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgFlushLog     , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgAllCmds      , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgSource       , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgFunc         , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgLogLink      , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgDefEval      , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgHeadersIn    , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgShowCleanup  , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgProfile      , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgSession      , CurrComponent -> Config.bDebug) 
-OPTMG   (dbgImport       , CurrComponent -> Config.bDebug) 
+OPTMG_COMP    (dbgStd          , Config.bDebug) 
+OPTMG_COMP    (dbgMem          , Config.bDebug) 
+OPTMG_COMP    (dbgEval         , Config.bDebug) 
+OPTMG_COMP    (dbgCmd          , Config.bDebug) 
+OPTMG_COMP    (dbgEnv          , Config.bDebug) 
+OPTMG_COMP    (dbgForm         , Config.bDebug) 
+OPTMG_COMP    (dbgTab          , Config.bDebug) 
+OPTMG_COMP    (dbgInput        , Config.bDebug) 
+OPTMG_COMP    (dbgFlushOutput  , Config.bDebug) 
+OPTMG_COMP    (dbgFlushLog     , Config.bDebug) 
+OPTMG_COMP    (dbgAllCmds      , Config.bDebug) 
+OPTMG_COMP    (dbgSource       , Config.bDebug) 
+OPTMG_COMP    (dbgFunc         , Config.bDebug) 
+OPTMG_COMP    (dbgLogLink      , Config.bDebug) 
+OPTMG_COMP    (dbgDefEval      , Config.bDebug) 
+OPTMG_COMP    (dbgHeadersIn    , Config.bDebug) 
+OPTMG_COMP    (dbgShowCleanup  , Config.bDebug) 
+OPTMG_COMP    (dbgProfile      , Config.bDebug) 
+OPTMG_COMP    (dbgSession      , Config.bDebug) 
+OPTMG_COMP    (dbgImport       , Config.bDebug) 
 
 
     
@@ -1966,6 +1966,9 @@ int    embperl_SetupComponent  (/*in*/ tReq *                 r,
         embperl_GetCGIComponentConfig (r, r -> pPool, &c -> Config, bUseEnv, bUseRedirectEnv, 1) ;
         }
     
+    if (pPrev)
+        c -> Config.bOptions &= ~optReturnError ;
+    
     if (pParamHV)
         {
         Embperl__Component__Config_new_init (aTHX_ &c -> Config, (SV *)pParamHV, 0) ;
@@ -2021,7 +2024,12 @@ int    embperl_SetupComponent  (/*in*/ tReq *                 r,
         else if (pParam -> sObject)
             pParam -> sInputfile = pParam -> sObject ;
         else
-            pParam -> sInputfile = r -> Param.sFilename ;
+            {
+            if (pPrev)
+                pParam -> sInputfile = pPrev -> sSourcefile ;
+            if (!pParam -> sInputfile)
+                pParam -> sInputfile = r -> Param.sFilename ;
+            }
         }
     else if ((p = strchr(pParam -> sInputfile, '#')))
         {
@@ -2063,6 +2071,77 @@ int    embperl_SetupComponent  (/*in*/ tReq *                 r,
 
 
 
+
+
+
+/*---------------------------------------------------------------------------
+* embperl_InitRequest
+*/
+/*!
+*
+* \_en									   
+* Initialize the Thread and Application object and if available return the
+* Apache configuration data
+* \endif                                                                       
+*
+* \_de									   
+* Initialisiert das Thread und Application Objekt und leifert, soweit vorhanden,
+* die Apache Konfiguration
+* \endif                                                                       
+*                                                                          
+* ------------------------------------------------------------------------ */
+
+
+
+
+int     embperl_InitAppForRequest (/*in*/ pTHX_
+                             /*in*/ SV *             pApacheReqSV,
+                             /*in*/ SV *             pPerlParam,
+                             /*out*/tThreadData * *  ppThread,
+                             /*out*/tApp * *         ppApp,
+                             /*out*/tApacheDirConfig * * ppApacheCfg)
+
+
+    {
+    int              rc ;
+    tThreadData *    pThread ;
+    tApp  *          pApp ;
+    tApacheDirConfig * pApacheCfg = NULL ;
+
+    
+    /* get our thread object */
+    if ((rc = embperl_SetupThread (aTHX_ &pThread)) != ok)
+        {
+        LogError (NULL, rc) ;
+        return rc ;
+        }
+
+#ifdef APACHE
+    if (pApacheReqSV && SvROK (pApacheReqSV))
+        {
+        request_rec * ap_r = (request_rec *)SvIV((SV*)SvRV(pApacheReqSV));
+        
+        embperl_GetApacheConfig (pThread, ap_r, ap_r -> server, &pApacheCfg) ;
+        
+        }
+#endif
+
+    /* get the application object */
+    if ((rc = embperl_SetupApp (aTHX_ pThread, pApacheCfg, pPerlParam, &pApp)) != ok)
+        {
+        LogError (NULL, rc) ;
+        return rc ;
+        }
+
+
+    *ppThread    = pThread ;
+    *ppApp       = pApp ;
+    *ppApacheCfg = pApacheCfg ;
+
+    return ok ;
+    }
+
+
 /*---------------------------------------------------------------------------
 * embperl_InitRequest
 */
@@ -2097,29 +2176,21 @@ int     embperl_InitRequest (/*in*/ pTHX_
     tApacheDirConfig * pApacheCfg = NULL ;
 
     
-    /* get our thread object */
-    if ((rc = embperl_SetupThread (aTHX_ &pThread)) != ok)
+
+    
+    /* get our thread & Application object */
+
+    if ((rc = embperl_InitAppForRequest (aTHX_
+                                         pApacheReqSV,
+                                         pPerlParam,
+                                         &pThread,
+                                         &pApp,
+                                         &pApacheCfg)) != ok)
         {
         LogError (NULL, rc) ;
         return rc ;
         }
 
-#ifdef APACHE
-    if (pApacheReqSV && SvROK (pApacheReqSV))
-        {
-        request_rec * ap_r = (request_rec *)SvIV((SV*)SvRV(pApacheReqSV));
-        
-        embperl_GetApacheConfig (pThread, ap_r, ap_r -> server, &pApacheCfg) ;
-        
-        }
-#endif
-
-    /* get the application object */
-    if ((rc = embperl_SetupApp (aTHX_ pThread, pApacheCfg, pPerlParam, &pApp)) != ok)
-        {
-        LogError (NULL, rc) ;
-        return rc ;
-        }
 
     /* and setup the request object */
     if ((rc = embperl_SetupRequest (aTHX_ pApacheReqSV, pApp, pApacheCfg, pPerlParam, &r)) != ok)

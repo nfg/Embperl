@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: test.pl,v 1.148 2004/11/13 16:47:08 richter Exp $
+#   $Id: test.pl,v 1.156 2005/03/14 13:41:45 richter Exp $
 #
 ###################################################################################
 
@@ -20,6 +20,7 @@
 
 # version =>
 # errors  =>
+# noerrtest => 
 # sleep4err =>
 # query_string =>
 # repeat =>
@@ -363,6 +364,9 @@
         'repeat'     => 2,
         'condition'  => '$] >= 5.006001', 
         },
+    'includeerr3.htm' => { 
+        'errors'     => 2,
+        },
     'includeerrbt.htm' => { 
         'errors'     => 3,
         'version'    => 2,
@@ -442,8 +446,11 @@
         'repeat'     => 2,
         'query_info' => 'summary=a1&title=b2&pubdate=c3&content=d4&more=e5',
         },
-    'recursexec.htm' => { 
-        'version'    => 1,
+    'subtextarea.htm' => { 
+        'repeat'     => 2,
+        'query_info' => 'summary=a1&title=b2&pubdate=c3&content=d4&more=e5',
+        },
+    'execwithsub.htm' => { 
         },
     'nph/div.htm' => { 
         'option'     => '64',
@@ -606,7 +613,6 @@
         'modperl'    => 1,
         'cgi'        => 0,
         'cookie'     => 'expectno',
-        'version'    => 1,
         },
     'getsess.htm' => {
         'offline'    => 0,
@@ -776,6 +782,18 @@
     'EmbperlObject/base3/epobaselib.htm' => { 
         'offline'    => 0,
         'cgi'        => 0,
+        },
+    'EmbperlObject/errdoc/epoerrdoc.htm' => {
+        'offline'    => 0,
+        'cgi'        => 0,
+        'errors'     => 1,
+        },
+
+    'EmbperlObject/errdoc/epoerrdoc2.htm' => {
+        'offline'    => 0,
+        'cgi'        => 0,
+        'errors'     => 4, # 4-8
+        'noerrtest'  => 1,
         },
     'EmbperlObject/epobase.htm' => {
         'offline'    => 0,
@@ -1650,7 +1668,7 @@ sub GetMem
 sub CheckError
 
     {
-    my ($cnt) = @_ ;
+    my ($cnt, $noerrtest) = @_ ;
     my $err = 0 ;
     my $ic ;
 
@@ -1673,7 +1691,7 @@ sub CheckError
 		# because RedHat excapes newlines in error log
 	    my @cnt = split /(?:\\n(?!ot))+/ ;	
 	    $cnt -= @cnt ; 
-	    if ($cnt < 0)
+	    if ($cnt < 0 && !$noerrtest)
 		{ 
 		print "\n\n" if ($cnt == -1) ;
 		print "[$cnt]$_\n" if (!defined ($opt_ab) || !(/Warn/));
@@ -1997,7 +2015,7 @@ do
 		    }
 		    
 	        $errin = $err ;
-                $err = CheckError ($errcnt) if ($err == 0 || ($errcnt > 0 && $err == 500) || $file eq 'notfound.htm'  || $file eq 'notallow.xhtm') ;
+                $err = CheckError ($errcnt, $test -> {noerrtest}) if ($err == 0 || ($errcnt > 0 && $err == 500) || $file eq 'notfound.htm'  || $file eq 'notallow.xhtm') ;
     
 	        
 	        if ($err == 0 && $errin != 500 && $file ne 'notfound.htm' && $file ne 'notallow.xhtm')
@@ -2830,7 +2848,7 @@ do
 	    #$errcnt++ if (($loc eq $cgiloc || $loc eq $fastcgiloc) && $file eq 'notallow.xhtm') ;   
 	    sleep ($test->{sleep4err}) if ($test->{sleep4err}) ;
             sleep (1) if (($loc eq $cgiloc || $loc eq $fastcgiloc) && $errcnt) ;
-            $err = CheckError ($errcnt) if (($err == 0 || $file eq 'notfound.htm' || $file eq 'notallow.xhtm')) ;
+            $err = CheckError ($errcnt, $test -> {noerrtest}) if (($err == 0 || $file eq 'notfound.htm' || $file eq 'notallow.xhtm')) ;
 	    if ($err == 0 && $file ne 'notfound.htm' && $file ne 'notallow.xhtm' && !defined ($opt_ab))
 		{
 		$page =~ /.*\/(.*)$/ ;

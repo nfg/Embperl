@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdat2.h,v 1.8 2004/04/02 05:10:41 richter Exp $
+#   $Id: epdat2.h,v 1.9 2005/02/27 22:16:41 richter Exp $
 #
 ###################################################################################*/
 
@@ -399,6 +399,7 @@ struct tReq
     char    errdat1 [ERRDATLEN] ; /* Additional error information */
     char    errdat2 [ERRDATLEN] ;
     char    lastwarn [ERRDATLEN] ; /* last warning */
+    SV *    pErrSV ;               /* in case error is an object it is copied to here */
 
     AV *    pDomTreeAV ; /* holds all DomTrees alocated during the request */
     AV *    pCleanupAV ; /* set all sv's that are conatined in that array to undef after the whole request */

@@ -49,7 +49,7 @@ Hash in  H <a href="http://localhost/tests?A=1&amp;B=2">
 
 
 ^<a href=\"tst.html\?(par1=1|par2=2)&amp;(par1=1|par2=2)\">1<\/a>
-<a href="tst.html?par1=1&amp;par2=2&amp;par3=3">2</a>
+^<a href=\"tst.html\?(par1=1&amp;par2=2|par2=2&amp;par1=1)&amp;par3=3\">2<\/a>
 <a href="tst.html?par1=1&amp;par2=2">3</a>
 <a href="tst.html?par1=1&amp;par2=2&amp;par3=3">4</a>
 
@@ -191,6 +191,11 @@ print OUT:
 ^<a href=\"0\?(\!Table=interface\,router|\$where=interface\.router_id=router\.id)\&amp;(\!Table=interface\,router|\$where=interface\.router_id=router\.id)\">
 
 ^<a href=\"7\?(\!Table=interface%2Crouter|%24where=interface\.router_id%3Drouter\.id)\&amp;(\!Table=interface%2Crouter|%24where=interface\.router_id%3Drouter\.id)\">
+
+escmode = 7
+<input name="esc" value="environment of the &lt;font color=&quot;red&quot;&gt;Sample Company&lt;/font&gt;&lt;&gt;&amp;">
+<input name="null" value="0">
+
   
 
 --> my

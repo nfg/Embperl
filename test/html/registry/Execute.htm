@@ -128,7 +128,12 @@ Embperl::Execute ({inputfile	=> '../inc.htm', input_escmode => 7,
 
 print "\n<H3>$out</H3>\n" ;
 
-print "\n<H1> 10.) Done :-)</H1>\n" ;
+print "\n<H1> 10.) Test \$req_rec inside Execute</H1>\n" ;
+
+Embperl::Execute ('../reqrec.htm') ;
+
+
+print "\n<H1> 11.) Done :-)</H1>\n" ;
 
 
 print "</body></html>\n";

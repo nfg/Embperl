@@ -53,7 +53,9 @@ to be handled by Embperl:
     Options     ExecCGI
     </files>
 
+
 Another possibility is to have all files under a special location processed by Embperl:
+
 
     PerlModule Embperl
 
@@ -65,6 +67,7 @@ Another possibility is to have all files under a special location processed by E
     Options     ExecCGI
     </Location>
 
+
 In this setup you should make sure that non Embperl files like images doesn't served 
 from this directory.
 
@@ -75,9 +78,13 @@ library. On Unix it is mostly called F<Embperl.so> on Windows it is called C<Emb
 Now add the following line to your httpd.conf B<before> any of the Embperl configuration
 directives, but B<after> F<mod_perl.so> is loaded:
 
+
     LoadModule  embperl_module  /path/to/perl/site/lib/Embperl/Embperl.so
 
+
+
 To use I<Embperl::Object> you use the C<Embperl::Object> as C<PerlHandler>:
+
 
     <Location /foo>
         Embperl_AppName     unique-name
@@ -87,6 +94,7 @@ To use I<Embperl::Object> you use the C<Embperl::Object> as C<PerlHandler>:
         PerlHandler         Embperl::Object 
         Options             ExecCGI
     </Location>
+
 
 Addtionaly you can setup other parameters for I<Embperl::Object>. If you do so
 inside a container (like C<<Location>, <Directory>, <Files>>) you need to
@@ -115,9 +123,11 @@ directory.
 
 Example of Apache C<httpd.conf>:
 
+
     <Directory /path/to/your/html/docs>
     Action text/html /cgi-bin/embperl/embpcgi.pl
     </Directory>
+
 
 
 B<NOTE>: Via CGI Scripts it maybe possible to bypass some of the Apache setup. To avoid this
@@ -134,9 +144,11 @@ as cgi script. You must have FCGI.pm installed.
 Run Embperl from the comannd line use F<embpexec.pl> on unix and F<embpexec.bat> on windows:
 
 
-    B<embpexec.pl [options] htmlfile [query_string]>
+B<embpexec.pl [options] htmlfile [query_string]>
 
-    B<embpexec.bat [options] htmlfile [query_string]>
+
+B<embpexec.bat [options] htmlfile [query_string]>
+
 
 =over 4
 
@@ -252,6 +264,27 @@ configuration section and parameter section.
  [- Execute ('/path/to/head.html') -]
  
 
+=head2 Debugging
+
+Starting with 2.0b2 Embperl files can debugged via the interactive debugger.
+The debugger shows the Embperl page source along with the correct linenumbers. 
+You can do anything you can do inside a normal Perl programm via the debugger,
+e.g. show variables, modify variables, single step, set breakpoints etc.
+
+You can use the Perl interacive command line debugger via
+
+    perl -d embpexec.pl file.epl  
+
+or if you prefer a graphical debugger, try ddd (http://www.gnu.org/software/ddd/)
+it's a great tool, also for debugging any other perl script:
+
+    ddd --debugger 'perl -d embpexec.pl file.epl'
+
+
+NOTE: embpexec.pl could be found in the Embperl source directory
+
+If you want to debug your pages, while running under mod_perl, Apache::DB is the
+right thing. Apache::DB is available from CPAN.
 
 
 
@@ -1107,8 +1140,10 @@ $application -> config -> object_addpath
 
 
 Additional directories where Embperl::Object searches for pages.
-This search through the searchpath is always performed if in a call to Execute no path for the
-file is given.
+
+This search through the searchpath is always performed if in a call to 
+Execute no path for the file is given.
+
  
 In F<httpd.conf> or as evironment variable directories are
 separated by C<;> (on Unix C<:> works also). The parameter for C<Execute> and
@@ -1135,16 +1170,37 @@ $application -> config -> object_reqpath
 =back
 
 
+
+
 Additional directories where Embperl::Object searches for files for the inital request.
+
 If a file is requested, but cannot be found at the given location, the directories
-given in the this path are additionaly search for the file. This applies only to
+given in the this path are additionaly searched for the file. This applies only to
 the initial filename given to Embperl::Object and B<not> to files called via
 Execute.  
- 
+
 In F<httpd.conf> or as evironment variable directories are
 separated by C<;> (on Unix C<:> works also). The parameter for C<Execute> and
 the application object method expects/returns an array reference.
 
+Example:
+
+if you say
+
+    Embperl_Object_Reqpath  /a:/b:/c
+
+and you request 
+
+    /x/index.epl
+
+it will try
+
+    /x/index.epl
+    /a/index.epl
+    /b/index.epl
+    /c/index.epl
+
+and take the first one that is found.
 
 
 =head2 Embperl_Object_Stopdir
@@ -1896,6 +1952,8 @@ NOT YET IMPLEMENTED!
 
 
 
+
+
 =head2 Embperl_Top_Include
 
 =over
@@ -1923,7 +1981,8 @@ Example:
 
 This will cause MY::Module to be used in every page. Note that 
 Embperl_Top_Include must contain valid Perl code and must be
-ended with a semikolon.
+ended with a semicolon.
+
 
 B<NOTE:> If you pass top_include as parameter to Execute it is
 only used in case the code is compiled (or recompiled) and not cached.
@@ -2428,7 +2487,7 @@ A hashref that contains all cookies send by the browser to the server.
 
 =item Method:
 
-$request -> param -> cgi 
+$request -> param -> cgi I<[read only]>
 
 =item Since:
 
@@ -2438,7 +2497,8 @@ $request -> param -> cgi
 
 
 Holds the CGI.pm object, which is used for file upload. If no file uploaded data
-is send tho the request, this member is undefined.
+is send to the request, this member is undefined.
+
 
 =head2 inputfile
 
@@ -3386,6 +3446,26 @@ $request -> lastwarn
 
 
 Last warning message.
+
+=head2 errobj
+
+=over
+
+=item Method:
+
+$request -> errobj 
+
+=item Since:
+
+2.0rc3
+
+=back
+
+
+The object passed to the last die, if any. 
+This is usefully when you pass an object to die inside an Execute. After the Execute you
+can check $epreq -> errobj, to get the object. The object is also push to the array
+passed to the L<errors> parameter of Execute.
 
 =head2 cleanup_vars
 

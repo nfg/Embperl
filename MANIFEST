@@ -53,7 +53,6 @@ Embperl/Syntax/Test.pm
 Embperl/Syntax/Test2.pm
 Embperl/Syntax/Text.pm
 Embperl/Util.pm
-EmbperlD.pod
 EmbperlLogo.gif
 Embperl_BS
 Faq.pod
@@ -61,7 +60,6 @@ Features.pod
 FeaturesD.pod
 INSTALL.pod
 Intro.pod
-IntroD.pod
 IntroEmbperlObject.pod
 MANIFEST
 Makefile.PL
@@ -226,6 +224,8 @@ test/cmp/epobless.htm
 test/cmp/epobless2.htm
 test/cmp/epobless3.htm
 test/cmp/epodiv.htm
+test/cmp/epoerrdoc.htm
+test/cmp/epoerrdoc2.htm
 test/cmp/epofdat.htm
 test/cmp/epoincdiv.htm
 test/cmp/eponotfound.htm
@@ -254,6 +254,7 @@ test/cmp/execprint.htm
 test/cmp/execsecond.htm
 test/cmp/executesub.htm
 test/cmp/execviamod.htm
+test/cmp/execwithsub.htm
 test/cmp/exit.htm
 test/cmp/exit2.htm
 test/cmp/exit3.htm
@@ -283,6 +284,7 @@ test/cmp/incif.htm
 test/cmp/include.htm
 test/cmp/includeerr1.htm
 test/cmp/includeerr2.htm
+test/cmp/includeerr3.htm
 test/cmp/includeerrbt.htm
 test/cmp/incperl.htm
 test/cmp/inctext.htm
@@ -380,6 +382,8 @@ test/html/EmbperlObject/base2/epostopdir.htm
 test/html/EmbperlObject/base3/epobaselib.htm
 test/html/EmbperlObject/epobase.htm
 test/html/EmbperlObject/epodiv.htm
+test/html/EmbperlObject/errdoc/epoerrdoc.htm
+test/html/EmbperlObject/errdoc/epoerrdoc2.htm
 test/html/EmbperlObject/epofdat.htm
 test/html/EmbperlObject/epofallback.htm
 test/html/EmbperlObject/epofoot.htm
@@ -446,6 +450,8 @@ test/html/execsecond.htm
 test/html/executesub.htm
 test/html/execviamod.htm
 test/html/execviamod.pm
+test/html/execwithsub.htm
+test/html/execwithsub2.htm
 test/html/exit.htm
 test/html/exit2.htm
 test/html/exit3.htm
@@ -468,10 +474,12 @@ test/html/importsub.htm
 test/html/importsub2.htm
 test/html/inc.htm
 test/html/incerr.htm
+test/html/incerrobj.htm
 test/html/incif.htm
 test/html/include.htm
 test/html/includeerr1.htm
 test/html/includeerr2.htm
+test/html/includeerr3.htm
 test/html/includeerrbt.htm
 test/html/incparam.htm
 test/html/incperl.htm

@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdom.c,v 1.24 2004/08/17 06:17:58 richter Exp $
+#   $Id: epdom.c,v 1.26 2005/01/15 20:17:26 richter Exp $
 #
 ###################################################################################*/
 
@@ -1805,6 +1805,8 @@ void DomTree_checkpoint (tReq * r, tIndex nRunCheckpoint)
                     }
                 else
                     {
+                    char buf[512] ;
+
                     if ((a -> pCurrReq?a -> pCurrReq -> Component.Config.bDebug:a -> Config.bDebug) & dbgCheckpoint)
                         lprintf (a, "[%d]Checkpoint: jump forward2 DomTree=%d Index=%d Node=%d(%d),%d,%d Line=%d -> Index=%d Node=%d(%d),%d,%d Line=%d SVs=%d\n", 
 		                       a -> pThread -> nPid, r -> Component.xCurrDomTree, nCompileCheckpoint, 
@@ -1815,15 +1817,19 @@ void DomTree_checkpoint (tReq * r, tIndex nRunCheckpoint)
 				       pRunParent -> xNdx, pRunParent2?pRunParent2 -> xNdx:-1, 
 				       pRunNode -> nLinenumber, sv_count) ; 
     
-                    mydie (a, "Unstrutured forward jump") ;
+                    sprintf(buf, "Unstructured forward jump, %200.200s Line %d -> Line %d", DomTree_filename(r -> Component.xCurrDomTree), pPrevNode -> nLinenumber, pRunNode -> nLinenumber) ;
+                    mydie (a, buf) ;
                     }
                 }
             else
                 {
+                char buf[512] ;
+
                 if ((a -> pCurrReq?a -> pCurrReq -> Component.Config.bDebug:a -> Config.bDebug) & dbgCheckpoint)
 	                lprintf (a, "[%d]Checkpoint: jump forward DomTree=%d Index=%d Node=%d Line=%d -> Index=%d Node=%d Line=%d SVs=%d\n", a -> pThread -> nPid, r -> Component.xCurrDomTree, nCompileCheckpoint, pPrevNode -> xNdx, pPrevNode -> nLinenumber, nRunCheckpoint, pRunNode -> xNdx, pRunNode -> nLinenumber, sv_count) ; 
     
-                mydie (a, "Unstrutured forward jump (no parents)") ;
+                sprintf(buf, "Unstructured forward jump (no parents), %200.200s Line %d -> Line %d", DomTree_filename(r -> Component.xCurrDomTree), pPrevNode -> nLinenumber, pRunNode -> nLinenumber) ;
+                mydie (a, buf) ;
                 }
             r -> Component.nCurrCheckpoint = nRunCheckpoint + 1 ;
             return ;
@@ -1954,6 +1960,8 @@ void DomTree_checkpoint (tReq * r, tIndex nRunCheckpoint)
             }
         else
             {
+            char buf[512] ;
+            
             if ((a -> pCurrReq?a -> pCurrReq -> Component.Config.bDebug:a -> Config.bDebug) & dbgCheckpoint)
 	        lprintf (a, "[%d]Checkpoint: jump backward2 DomTree=%d Index=%d Node=%d(%d),%d(%d) Line=%d -> Index=%d Node=%d(%d),%d(%d) Line=%d SVs=%d\n", 
 			    a -> pThread -> nPid, r -> Component.xCurrDomTree, 
@@ -1964,7 +1972,8 @@ void DomTree_checkpoint (tReq * r, tIndex nRunCheckpoint)
 						pRunParent -> xNdx,	xNode_selfLevelNull(pDomTree,pRunParent),
 						pRunNode -> nLinenumber, sv_count) ; 
 
-            mydie (a, "Unstrutured backward jump") ;
+            sprintf(buf, "Unstructured backward jump, %200.200s Line %d -> Line %d", DomTree_filename(r -> Component.xCurrDomTree), pPrevNode -> nLinenumber, pRunNode -> nLinenumber) ;
+            mydie (a, buf) ;
             }
         }
     r -> Component.nCurrCheckpoint = nRunCheckpoint + 1 ;
