@@ -196,6 +196,12 @@ $kats[2]{Id} = 'Veranstaltungen' ;
 		<option value="Wert8">Wert8</option>
 	</select>
 
+    [- @ksall = qw{Wert1 Wert2 Wert3 Wert4 Wert5 Wert6 Wert7 Wert8} ; -]
+	<select name="[- $eld = 'eld' -]f[+ $eld +][+ 5 +]">
+		<option value="[+ $ksall[$row] +]">[+ $ksall[$row] +]</option>
+	</select>
+
+
 	<input type="checkbox" value="Wert1" name="mult" checked>
 	<input type="checkbox" value="Wert1" name="mult">
 	<input type="checkbox" value="Wert2" name="mult" checked>

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epmain.c,v 1.75.4.112 2002/03/12 08:58:44 richter Exp $
+#   $Id: epmain.c,v 1.75.4.113 2002/03/20 08:22:37 richter Exp $
 #
 ###################################################################################*/
 
@@ -173,7 +173,7 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
         case rcForbidden:		msg ="[%d]ERR:  %d: %s Access Forbidden for '%s'" ; break ; 
         case rcDecline:		        msg ="[%d]ERR:  %d: %s Decline for '%s'" ; break ; 
         case rcCannotCheckUri:          msg ="[%d]ERR:  %d: %s Cannot check URI against ALLOW and/or URIMATCH because URI is unknown" ; break ; 
-        case rcSetupSessionErr:         msg ="[%d]ERR:  %d: %s Embperl Session handling DISABLED because of the following error: %s\nSet EMBPERL_SESSION_HANDLER_CASSS to 'no' to avoid this message. %s" ; break ; 
+        case rcSetupSessionErr:         msg ="[%d]ERR:  %d: %s Embperl Session handling DISABLED because of the following error: %s\nSet EMBPERL_SESSION_HANDLER_CLASS to 'no' to avoid this message. %s" ; break ; 
         case rcRefcntNotOne:            msg ="[%d]ERR:  %d: %s There is still %s reference(s) to the %s object, while there shouldn't be any." ; break ; 
 
 	default:                        msg ="[%d]ERR:  %d: %s Error (no description) %s %s" ; break ; 

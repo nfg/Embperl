@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Mail.pm,v 1.29.4.4 2002/01/22 09:29:55 richter Exp $
+#   $Id: Mail.pm,v 1.29.4.6 2002/03/19 04:41:23 richter Exp $
 #
 ###################################################################################
 
@@ -18,6 +18,7 @@ package Embperl::Mail ;
 
 
 require Embperl ;
+require Embperl::Constant ;
 
 use Apache::Constants qw(&OPT_EXECCGI &DECLINED &OK &FORBIDDEN &NOT_FOUND) ;
 
@@ -32,7 +33,7 @@ use vars qw(
 @ISA = qw(Embperl);
 
 
-$VERSION = '1.3.4';
+$VERSION = '2.0b7';
 
 
 
@@ -44,14 +45,21 @@ sub Execute
     my $data ;
     my @errors ;
 
-    $req -> {options} ||= &Embperl::optDisableHtmlScan | &Embperl::optRawInput | 
-                          &Embperl::optKeepSpaces      | &Embperl::optReturnError;
+    $req -> {options} ||= &Embperl::Constant::optKeepSpaces      | &Embperl::Constant::optReturnError;
     
+    $req -> {syntax}  ||= 'EmbperlBlocks' ; 
     $req -> {escmode} ||= 0 ;
     $req -> {output}   = \$data ;
     $req -> {errors} ||= \@errors ;
 
-    Embperl::Execute ($req) ;
+    if ($Embperl::req)
+        {
+        $Embperl::req -> execute_component ($req) ;
+        }
+    else
+        {
+        Embperl::Execute ($req) ;
+        }
 
     die "@errors" if (@errors) ;
 
@@ -68,8 +76,8 @@ sub Execute
                                   ($helo?(Hello => $helo):()) 
                                   ) or die "Cannot connect to mailhost $req->{mailhost}" ;
 
-        my $from =  $req -> {from} || $ENV{'EMBPERL_MAILFROM'} ;
-        $smtp->mail($from || "WWW-Server\@$ENV{SERVER_NAME}");
+        my $from =  $req -> {from} || $ENV{'EMBPERL_MAILFROM'} || 'WWW-Server\@' . ($ENV{SERVER_NAME}" || 'localhost') ;
+        $smtp->mail($from);
 
         my $to ;
         if (ref ($req -> {'to'}))
@@ -90,7 +98,7 @@ sub Execute
         else
             {
             $cc = [] ;
-            @$cc = split (/\s*;\s*/, $req -> {'cc'}) ;
+            @$cc = split (/\s*;\s*/, $req -> {'cc'}) if ($req -> {'cc'}) ;
             }
 
         my $bcc ;
@@ -101,7 +109,7 @@ sub Execute
         else
             {
             $bcc = [] ;
-            @$bcc = split (/\s*;\s*/, $req -> {'bcc'}) ;
+            @$bcc = split (/\s*;\s*/, $req -> {'bcc'}) if ($req -> {'bcc'}) ;
             }
 
         my $headers = $req->{mailheaders} ;        

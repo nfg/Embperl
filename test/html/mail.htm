@@ -16,6 +16,10 @@
     from Embperl's Mail taglib.
   </mail:send>
 
+  [+ "tagend" +]<br>
+
+  $? = [+ $? +]<br>
+
   [$ if $? $]
 		<h2>Sorry, there was an error, your mail couldn't be send</h2>
   [$else$]

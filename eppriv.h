@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eppriv.h,v 1.1.2.15 2002/03/04 11:44:49 richter Exp $
+#   $Id: eppriv.h,v 1.1.2.16 2002/03/20 08:12:53 richter Exp $
 #
 ###################################################################################*/
 
@@ -45,6 +45,7 @@ void boot_Embperl__Req__Param (pTHX_ CV * cv) ;
 void boot_Embperl__Component (pTHX_ CV * cv) ;
 void boot_Embperl__Component__Config (pTHX_ CV * cv) ;
 void boot_Embperl__Component__Param (pTHX_ CV * cv) ;
+void boot_Embperl__Component__Output (pTHX_ CV * cv) ;
 void boot_Embperl__Syntax (pTHX_ CV * cv) ;
 
 
@@ -222,4 +223,9 @@ void Embperl__Component_new_init (pTHX_ tComponent * c, SV * pPerlParam, int ove
 void Embperl__Component__Config_new_init (pTHX_ tComponentConfig * c, SV * pPerlParam, int overwrite) ;
 void Embperl__Component__Param_new_init (pTHX_ tComponentParam * c, SV * pPerlParam, int overwrite) ;
 
-
+void Embperl__Req__Config_destroy(pTHX_ tReqConfig * p) ;
+void Embperl__Req__Param_destroy(pTHX_ tReqParam * p) ;
+void Embperl__Req_destroy(pTHX_ tReq * p) ;
+void Embperl__Component__Config_destroy(pTHX_ tComponentConfig * p) ;
+void Embperl__Component__Param_destroy(pTHX_ tComponentParam * p) ;
+void Embperl__Component_destroy(pTHX_ tComponent *p) ;

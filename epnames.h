@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epnames.h,v 1.19.4.18 2002/03/12 09:33:10 richter Exp $
+#   $Id: epnames.h,v 1.19.4.19 2002/03/20 06:28:22 richter Exp $
 #
 ###################################################################################*/
 
@@ -209,7 +209,19 @@
 #define xNoName			    EMBPERL2_xNoName			   
 #define xOrderIndexAttr		    EMBPERL2_xOrderIndexAttr		   
 #define Escape		            EMBPERL2_Escape		   
- 
+#define embperl_ApacheAddModule     EMBPERL2_ApacheAddModule 
+#define EvalRegEx                   EMBPERL2_EvalRegEx          
+#define GetHashValueStrDupA	    EMBPERL2_GetHashValueStrDupA
+#define GetSessionID	            EMBPERL2_GetSessionID	   
+#define LogErrorParam	            EMBPERL2_LogErrorParam	   
+#define Node_selfForceLevel	    EMBPERL2_Node_selfForceLevel
+#define Node_selfLevelItem	    EMBPERL2_Node_selfLevelItem
+#define dom_free_size	            EMBPERL2_dom_free_size	   
+#define SetHashValueInt	            EMBPERL2_SetHashValueInt	   
+#define pCacheItems	            EMBPERL2_pCacheItems	   
+#define pCachesToRelease            EMBPERL2_pCachesToRelease   
+#define pProviders                  EMBPERL2_pProviders         
+
  
 #ifndef PERL_VERSION
 #include <patchlevel.h>

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eputil.c,v 1.15.4.50 2002/03/13 06:29:36 richter Exp $
+#   $Id: eputil.c,v 1.15.4.51 2002/03/14 15:29:07 richter Exp $
 #
 ###################################################################################*/
 
@@ -1551,6 +1551,7 @@ char * embperl_PathSearch    (/*i/o*/ register req * r,
     int skip = 0 ; 
     int i ;
     struct stat st ;
+    char * absfn = NULL ;
     char * fn ;
     STRLEN l ;
 
@@ -1564,6 +1565,17 @@ char * embperl_PathSearch    (/*i/o*/ register req * r,
         }
     if (skip)
         skip += r -> Component.pPrev?r -> Component.pPrev -> nPathNdx:0 ;
+
+    if (skip == 0 && sFilename[0] == '.' && (sFilename[1] == '/' || sFilename[1] == '\\'))
+        {
+        absfn = embperl_File2Abs (r, pPool, sFilename) ;
+        if (stat (absfn, &st) == 0)
+            {
+            return absfn ;
+            }
+        return NULL ;
+        }        
+
 
     for (i = skip ; i <= AvFILL (pPathAV); i++)
 	{

@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcmd2.c,v 1.4.2.18 2002/01/19 14:13:41 richter Exp $
+#   $Id: epcmd2.c,v 1.4.2.19 2002/03/20 15:31:00 richter Exp $
 #
 ###################################################################################*/
 
@@ -129,13 +129,13 @@ static embperlCmd_SetRemove (/*i/o*/ register req * r,
 	    {
 	    Element_selfSetAttribut (r -> pApp, pDomTree, pNode, nRepeatLevel, sAttrName, nAttrLen, NULL, 0) ;
 	    if (r -> Component.Config.bDebug & dbgInput)
-		lprintf (r -> pApp,  "[%d]INPU: Set Attribut: Name: '%*.*s' Value: '%*.*s' Attribute: '%*.*s'\n", r -> pThread -> nPid, nNameLen, nNameLen, pName, nValLen, nValLen, pVal, nAttrLen, nAttrLen, sAttrName) ; 
+		lprintf (r -> pApp,  "[%d]INPU: Set Attribut: Name: '%*.*s' Value: '%*.*s' Attribute: '%*.*s' nRepeatLevel=%d\n", r -> pThread -> nPid, nNameLen, nNameLen, pName, nValLen, nValLen, pVal, nAttrLen, nAttrLen, sAttrName, nRepeatLevel) ; 
             }
 	else
 	    {
 	    Element_selfRemoveAttribut (r -> pApp, pDomTree, pNode, nRepeatLevel, sAttrName, nAttrLen) ;
 	    if (r -> Component.Config.bDebug & dbgInput)
-		lprintf (r -> pApp,  "[%d]INPU: Remove Attribut: Name: '%*.*s' Value: '%*.*s' Attribute: '%*.*s'\n", r -> pThread -> nPid, nNameLen, nNameLen, pName, nValLen, nValLen, pVal, nAttrLen, nAttrLen, sAttrName ) ; 
+		lprintf (r -> pApp,  "[%d]INPU: Remove Attribut: Name: '%*.*s' Value: '%*.*s' Attribute: '%*.*s' nRepeatLevel=%d\n", r -> pThread -> nPid, nNameLen, nNameLen, pName, nValLen, nValLen, pVal, nAttrLen, nAttrLen, sAttrName, nRepeatLevel ) ; 
 	    }
 	}
     else
@@ -144,12 +144,12 @@ static embperlCmd_SetRemove (/*i/o*/ register req * r,
 	    {
 	    hv_store (r -> pThread -> pInputHash, (char *)pName, nNameLen, newSVpv ((nValLen?((char *)pVal):""), nValLen), 0) ;
 	    if (r -> Component.Config.bDebug & dbgInput)
-		lprintf (r -> pApp,  "[%d]INPU: Has already Attribut: Name: '%*.*s' Value: '%*.*s' Attribute: '%*.*s'\n", r -> pThread -> nPid, nNameLen, nNameLen, pName, nValLen, nValLen, pVal, nAttrLen, nAttrLen, sAttrName ) ; 
+		lprintf (r -> pApp,  "[%d]INPU: Has already Attribut: Name: '%*.*s' Value: '%*.*s' Attribute: '%*.*s' nRepeatLevel=%d\n", r -> pThread -> nPid, nNameLen, nNameLen, pName, nValLen, nValLen, pVal, nAttrLen, nAttrLen, sAttrName, nRepeatLevel ) ; 
 	    }
 	else
 	    {
 	    if (r -> Component.Config.bDebug & dbgInput)
-		lprintf (r -> pApp,  "[%d]INPU: No value in %%fdat for Attribut: Name: '%*.*s' Value: '%*.*s' Attribute: '%*.*s'\n", r -> pThread -> nPid, nNameLen, nNameLen, pName, nValLen, nValLen, pVal, nAttrLen, nAttrLen, sAttrName ) ; 
+		lprintf (r -> pApp,  "[%d]INPU: No value in %%fdat for Attribut: Name: '%*.*s' Value: '%*.*s' Attribute: '%*.*s' nRepeatLevel=%d\n", r -> pThread -> nPid, nNameLen, nNameLen, pName, nValLen, nValLen, pVal, nAttrLen, nAttrLen, sAttrName, nRepeatLevel ) ; 
             }
 
 	}

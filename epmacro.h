@@ -14,16 +14,16 @@
 
 #define ADDINTMG(name)    \
     if (rc == 0)    \
-        rc = AddMagic (pApp, EMBPERL_##name##_NAME, &EMBPERL_mvtTab##name) ;
+        rc = AddMagic (pApp, EMBPERL_##name##_NAME, &EMBPERL2_mvtTab##name) ;
 
 #define ADDOPTMG(name)    \
     if (rc == 0)    \
-        rc = AddMagic (pApp, "Embperl::"#name, &EMBPERL_mvtTab##name) ;
+        rc = AddMagic (pApp, "Embperl::"#name, &EMBPERL2_mvtTab##name) ;
 
 
 #define INTMG(name,var,used,sub) \
     \
-int EMBPERL_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
+int EMBPERL2_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
 \
     { \
     tReq       * r = CurrReq ; \
@@ -37,7 +37,7 @@ int EMBPERL_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
     return 0 ; \
     } \
 \
-    int EMBPERL_mgSet##name (pTHX_ SV * pSV, MAGIC * mg) \
+    int EMBPERL2_mgSet##name (pTHX_ SV * pSV, MAGIC * mg) \
 \
     { \
     tReq       * r = CurrReq ; \
@@ -50,50 +50,50 @@ int EMBPERL_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
     return 0 ; \
     } \
     \
-    MGVTBL EMBPERL_mvtTab##name = { EMBPERL_mgGet##name, EMBPERL_mgSet##name, NULL, NULL, NULL } ;
+    MGVTBL EMBPERL2_mvtTab##name = { EMBPERL2_mgGet##name, EMBPERL2_mgSet##name, NULL, NULL, NULL } ;
 
 #define INTMGshort(name,var) \
     \
-int EMBPERL_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
+int EMBPERL2_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
 \
     { \
     sv_setiv (pSV, var) ; \
     return 0 ; \
     } \
 \
-    int EMBPERL_mgSet##name (pTHX_ SV * pSV, MAGIC * mg) \
+    int EMBPERL2_mgSet##name (pTHX_ SV * pSV, MAGIC * mg) \
 \
     { \
     var = SvIV (pSV) ; \
     return 0 ; \
     } \
     \
-    MGVTBL EMBPERL_mvtTab##name = { EMBPERL_mgGet##name, EMBPERL_mgSet##name, NULL, NULL, NULL } ;
+    MGVTBL EMBPERL2_mvtTab##name = { EMBPERL2_mgGet##name, EMBPERL2_mgSet##name, NULL, NULL, NULL } ;
 
 
 
 #define INTMGcall(name,var,sub) \
     \
-void EMBPERL_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
+void EMBPERL2_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
 \
     { \
     sv_setiv (pSV, var) ; \
     sub ; \
     } \
 \
-    void EMBPERL_mgSet##name (pTHX_ SV * pSV, MAGIC * mg) \
+    void EMBPERL2_mgSet##name (pTHX_ SV * pSV, MAGIC * mg) \
 \
     { \
     var = SvIV (pSV) ; \
     sub ; \
     } \
     \
-    MGVTBL EMBPERL_mvtTab##name = { EMBPERL_mgGet##name, EMBPERL_mgSet##name, NULL, NULL, NULL } ;
+    MGVTBL EMBPERL2_mvtTab##name = { EMBPERL2_mgGet##name, EMBPERL2_mgSet##name, NULL, NULL, NULL } ;
 
 
 #define OPTMGRD(name,var) \
     \
-int EMBPERL_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
+int EMBPERL2_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
 \
     { \
 \
@@ -101,18 +101,18 @@ int EMBPERL_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
     return 0 ; \
     } \
 \
-int EMBPERL_mgSet##name (pTHX_ SV * pSV, MAGIC * mg) \
+int EMBPERL2_mgSet##name (pTHX_ SV * pSV, MAGIC * mg) \
 \
     { \
     return 0 ; \
     } \
     \
-    MGVTBL EMBPERL_mvtTab##name = { EMBPERL_mgGet##name, EMBPERL_mgSet##name, NULL, NULL, NULL } ;
+    MGVTBL EMBPERL2_mvtTab##name = { EMBPERL2_mgGet##name, EMBPERL2_mgSet##name, NULL, NULL, NULL } ;
 
 
 #define OPTMG(name,var) \
     \
-int EMBPERL_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
+int EMBPERL2_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
 \
     { \
 \
@@ -120,7 +120,7 @@ int EMBPERL_mgGet##name (pTHX_ SV * pSV, MAGIC * mg) \
     return 0 ; \
     } \
 \
-int EMBPERL_mgSet##name (pTHX_ SV * pSV, MAGIC * mg) \
+int EMBPERL2_mgSet##name (pTHX_ SV * pSV, MAGIC * mg) \
 \
     { \
 \
@@ -131,7 +131,7 @@ int EMBPERL_mgSet##name (pTHX_ SV * pSV, MAGIC * mg) \
     return 0 ; \
     } \
     \
-    MGVTBL EMBPERL_mvtTab##name = { EMBPERL_mgGet##name, EMBPERL_mgSet##name, NULL, NULL, NULL } ;
+    MGVTBL EMBPERL2_mvtTab##name = { EMBPERL2_mgGet##name, EMBPERL2_mgSet##name, NULL, NULL, NULL } ;
 
 
 

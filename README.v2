@@ -9,7 +9,7 @@ THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF 
 MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-$Id: README.v2,v 1.1.4.28 2002/03/12 08:58:44 richter Exp $
+$Id: README.v2,v 1.1.4.29 2002/03/21 06:04:05 richter Exp $
 
 
 ### !! IMPORTANT !! IMPORTANT !! IMPORTANT !! IMPORTANT !! IMPORTANT !! 
@@ -150,6 +150,17 @@ The following differences to Embperl 1.x apply:
 
   Embperl_UseEnv on
 
+- For every container in your httpd.conf (e.g. VirtualHost,Directory,Location)
+  where you want to define any application level configuration directives
+  (see below under tAppConfig for a list), you need to set a unique
+  value for EMBPERL_APPNAME. This is for example necessay for all
+  Embperl::Object parameters. Example:
+
+  <Location /eo>
+  EMBPERL_APPNAME my_embperl_app
+  EMBPERL_OBJECT_BASE base.epl
+  </Location>
+    
 - The following options can currently only be set from httpd.conf:
      optKeepSpaces
 

@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcomp.c,v 1.4.2.95 2002/03/12 08:58:44 richter Exp $
+#   $Id: epcomp.c,v 1.4.2.96 2002/03/20 20:38:58 richter Exp $
 #
 ###################################################################################*/
 
@@ -1358,6 +1358,9 @@ int embperl_CompileNode (/*in*/  tReq *         r,
     tStringIndex    nNdx  ;
     tEmbperlCmd *   pCmd  ;
     tEmbperlCmd *   pCmdHead  ;
+    tEmbperlCmd *   pCmdLast  ;
+    tEmbperlCmd *   pCmdNext  ;
+    tEmbperlCmd *   pCmdIter  ;
     tNodeData *     pNode = Node_self (pDomTree, xNode) ;
     tAttrData *     pAttr ;
     int             nAttr = 0 ;
@@ -1378,7 +1381,7 @@ int embperl_CompileNode (/*in*/  tReq *         r,
 	/*	 pCmd = NULL ; */
 	}
     else
-	pCmd = pCmdHead = NULL ;
+	pCmd = pCmdHead = pCmdLast = NULL ;
     
 
     if (r -> Component.Config.bDebug & dbgCompile)
@@ -1448,10 +1451,11 @@ int embperl_CompileNode (/*in*/  tReq *         r,
 	if ((rc = embperl_CompileCmd (r, pDomTree, pNode, pCmd, &nStartCodeOffset)) != ok)
 	    return rc ;
 	pDomTree = DomTree_self (xDomTree) ; /* addr may have changed */
+        pCmdLast = pCmd ;
         pCmd = pCmd -> pNext ;
 	}
 
-    pCmd = pCmdHead ;
+    pCmd = pCmdLast ;
     if (pCmd)
         if ((rc = embperl_CompilePostProcess (r, pDomTree, pNode, pCmd, nCheckpointCodeOffset, nCheckpointArrayOffset, bCheckpointPending)) != ok)
 	    return rc ;
@@ -1481,8 +1485,15 @@ int embperl_CompileNode (/*in*/  tReq *         r,
 	{
 	if ((rc = embperl_CompileCmdEnd (r, pDomTree, pNode, pCmd, nStartCodeOffset, bCheckpointPending)) != ok)
 	    return rc ;
-	pCmd = pCmd -> pNext ;
-	}
+        pCmdIter = pCmdHead ;
+        pCmdNext = NULL ;
+        while (pCmdIter && pCmdIter != pCmd)
+            {
+            pCmdNext = pCmdIter ;
+            pCmdIter = pCmdIter -> pNext ;
+            }
+	pCmd = pCmdNext ;
+        }
 
     if (pCmdHead && pCmdHead -> nSwitchCodeType == 2)
         {

@@ -17,7 +17,9 @@ Now we have some 'Umlaute':
 Now lets look what we are getting from this:<BR>
 (this is the value in $a) (this is the value in $a) &auml;&ouml;&uuml;&auml;&ouml;&uuml;???&lt;&amp;+  <BR>
 
-What is the EscMode? 3
+What is the EscMode? 7
+Let's set the EscMode to 3
+What is the EscMode now? 3
 Now a Url: <A HREF="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521">Here it goes</A>
 A Tag 2:   <A HREF="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521" TARGET="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? &amp; + - %21">a2</A>
 A Tag 3:   <A  TARGET="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? &amp; + - %21" HREF="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521" TARGET="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This is a text ? &amp; + - %21">a3</A>

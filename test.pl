@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: test.pl,v 1.70.4.129 2002/03/12 09:33:10 richter Exp $
+#   $Id: test.pl,v 1.70.4.132 2002/03/21 05:37:50 richter Exp $
 #
 ###################################################################################
 
@@ -41,6 +41,7 @@
 # msg =>
 # app_handler_class =>
 # input_escmode =>
+# portadd =>
 
 @testdata = (
     'ascii' => { },
@@ -254,6 +255,33 @@
         'offline'    => 0,
         'cgi'        => 0,
         'repeat'     => 2,
+        },
+    'keepreq.htm' => {
+        'cgi'        => 0,
+        'errors'     => 1,
+        },
+    'keepreq.htm' => {
+        'cgi'        => 0,
+        'errors'     => 1,
+        'cmpext'     => '.2',
+        },
+    'hostconfig.htm' => {
+        'modperl'    => 1,
+        },
+    'hostconfig.htm' => {
+        'modperl'    => 1,
+        'cmpext'     => '.3',
+        'portadd'    => 3,
+        },
+    'hostconfig.htm' => {
+        'modperl'    => 1,
+        'cmpext'     => '.4',
+        'portadd'    => 4,
+        },
+    'hostconfig.htm' => {
+        'modperl'    => 1,
+        'cmpext'     => '.5',
+        'portadd'    => 5,
         },
     'include.htm' => { 
         'version'    => 1,
@@ -2435,7 +2463,7 @@ do
 		}
 	    }
 
-        my $tries = ($opt_gdb || $opt_ddd)?30:10 ;
+        my $tries = ($opt_gdb || $opt_ddd)?30:15 ;
         $httpdpid = 0 ;
         my $herr = 0 ;
 
@@ -2601,6 +2629,9 @@ do
 	    $n_req++ ;
 	    $t1 = 0 ; # Embperl::Clock () ;
             $file .= '-1' if ($opt_ep1 && -e "$page-1") ;
+            
+            $port = $EPPORT + ($test -> {portadd} || 0) ;
+
             if (defined ($opt_ab))
 		{
 	        $m = REQ ("$loc$locver", $file, $test -> {query_info}, $outfile, $content, $upload, $test -> {cookie}, $test -> {respheader}) if ($opt_abpre) ;

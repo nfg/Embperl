@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: embperl.h,v 1.19.4.26 2002/03/11 08:47:25 richter Exp $
+#   $Id: embperl.h,v 1.19.4.27 2002/03/21 05:37:50 richter Exp $
 #
 ###################################################################################*/
 
@@ -177,9 +177,10 @@ enum tEscMode
     escNone     = 0,
     escHtml     = 1,
     escUrl      = 2,
-    escStd      = 3,
     escEscape   = 4,
-    escXML      = 8
+    escXML      = 8,
+
+    escStd      = 7
     } ;
 
 /* --- input escaping --- */

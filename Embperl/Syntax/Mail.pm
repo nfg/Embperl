@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Mail.pm,v 1.1.2.5 2002/01/22 09:29:56 richter Exp $
+#   $Id: Mail.pm,v 1.1.2.6 2002/03/15 19:53:56 richter Exp $
 #
 ###################################################################################
  
@@ -71,7 +71,6 @@ sub Init
                                         'mailhost', 'mailhelo', 'maildebug'], undef, undef, 
                 { 
                 removenode  =>  42,
-                perlcode =>  {},
                 perlcodeend =>  q{
                     {
                     use Embperl::Mail ;
@@ -96,7 +95,8 @@ sub Init
                   },
                 stackname   => 'mail_send',
                 'push'        => '%$x%',
-                }) ;
+                },
+                ) ;
 
     }
 

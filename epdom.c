@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdom.c,v 1.4.2.83 2002/03/05 08:07:20 richter Exp $
+#   $Id: epdom.c,v 1.4.2.84 2002/03/20 15:31:00 richter Exp $
 #
 ###################################################################################*/
 
@@ -1257,7 +1257,7 @@ int DomTree_clone (/*in*/ tApp * a,
 	{
 	tAttrData * pAttr; 
 	pDocument = Node_selfCloneNode (a, pDomTree, pDocument, 0, 1) ;
-	pAttr = Element_selfSetAttribut (a, pDomTree, pDocument, 0, NULL, xDomTreeAttr, NULL, pDomTree -> xNdx) ;
+	pAttr = Element_selfSetAttribut (a, pDomTree, pDocument, 0, NULL, xDomTreeAttr, (char *)&pDomTree -> xNdx, sizeof (pDomTree -> xNdx)) ;
 	pAttr -> bFlags = aflgOK ; /* reset string value flag */
 	pDomTree -> xDocument = pDocument -> xNdx ;
 	pDocument -> nType = ntypDocumentFraq ;
@@ -1324,7 +1324,7 @@ void DomTree_checkpoint (tReq * r, tIndex nRunCheckpoint)
         pDomTree -> xDocument = pCheckpoints[nRunCheckpoint].xNode ;
         
         pDocument = Node_self (pDomTree, pDomTree -> xDocument) ;
-	pAttr = Element_selfSetAttribut (a, pDomTree, pDocument, 0, NULL, xDomTreeAttr, NULL, pDomTree -> xNdx) ;
+	pAttr = Element_selfSetAttribut (a, pDomTree, pDocument, 0, NULL, xDomTreeAttr, (char *)&pDomTree -> xNdx, sizeof (pDomTree -> xNdx)) ;
 	pAttr -> bFlags = aflgOK ; /* reset string value flag */
         pDocument = Node_self (pDomTree, pDomTree -> xDocument) ;
 	pDocument -> nType = ntypDocumentFraq ;
@@ -2707,7 +2707,7 @@ tNode Node_replaceChildWithNode (/*in*/ tApp * a,
 
     if (pOldChild -> nType == ntypDocumentFraq)
 	{
-	tAttrData * pAttr = Element_selfSetAttribut (a, pOldChildDomTree, pOldChild, nOldRepeatLevel, NULL, xDomTreeAttr, NULL, pDomTree -> xNdx) ;
+	tAttrData * pAttr = Element_selfSetAttribut (a, pOldChildDomTree, pOldChild, nOldRepeatLevel, NULL, xDomTreeAttr, (char *)&pDomTree -> xNdx, sizeof (pDomTree -> xNdx)) ;
 	pAttr -> bFlags = aflgOK ; /* reset string value flag */
 	}
 
@@ -2792,7 +2792,7 @@ tNode Node_insertAfter          (/*in*/ tApp * a,
 
     if (pNewNode -> nType == ntypDocumentFraq)
 	{
-	tAttrData * pAttr = Element_selfSetAttribut (a, pRefNodeDomTree, pNewNode, nRefRepeatLevel, NULL, xDomTreeAttr, NULL, pNewNodeDomTree -> xNdx) ;
+	tAttrData * pAttr = Element_selfSetAttribut (a, pRefNodeDomTree, pNewNode, nRefRepeatLevel, NULL, xDomTreeAttr, (char *)&pNewNodeDomTree -> xNdx, sizeof (pNewNodeDomTree -> xNdx)) ;
 	pAttr -> bFlags = aflgOK ; /* reset string value flag */
 	}
 
@@ -3192,7 +3192,16 @@ static tNodeData * Node_toString2 (/*i/o*/ register req *   r,
     if (pNode -> nType == ntypDocumentFraq)
 	{
 	int o        = pDomTree -> xNdx ;
-	pDomTree = DomTree_self (Element_selfGetAttribut (a, pDomTree, pNode, NULL, xDomTreeAttr) -> xValue) ;
+        tAttrData *  pAttr = Element_selfGetAttribut (a, pDomTree, pNode, NULL, xDomTreeAttr) ;
+        if (pAttr)
+            {
+            char * p ;
+            char * pNdx ;
+
+            pNdx = Attr_selfValue(a, pDomTree, pAttr, nRepeatLevel, &p) ;
+            pDomTree = DomTree_self (*(tIndexShort *)pNdx) ;
+            }
+
         if (r -> Component.Config.bDebug & dbgOutput)
 	    lprintf (a,  "[%d]toString: ** Switch from DomTree=%d to new DomTree=%d\n", r -> pThread -> nPid, o, pDomTree -> xNdx) ; 
 		

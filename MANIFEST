@@ -44,7 +44,6 @@ Embperl/Syntax/Text.pm
 Embperl/Util.pm
 EmbperlD.pod
 EmbperlLogo.gif
-EmbperlObject.pm
 Embperl_BS
 Faq.pod
 Features.pod
@@ -231,6 +230,10 @@ test/cmp/getsess.htm
 test/cmp/geturlsess.htm
 test/cmp/heredoc.htm
 test/cmp/hidden.htm
+test/cmp/hostconfig.htm
+test/cmp/hostconfig.htm.3
+test/cmp/hostconfig.htm.4
+test/cmp/hostconfig.htm.5
 test/cmp/http.htm
 test/cmp/i18n.htm
 test/cmp/if.htm
@@ -251,6 +254,8 @@ test/cmp/input.htm
 test/cmp/inputjava.htm
 test/cmp/inputjs2.htm
 test/cmp/java.htm
+test/cmp/keepreq.htm
+test/cmp/keepreq.htm.2
 test/cmp/lists.htm
 test/cmp/loop.htm
 test/cmp/loopperl.htm
@@ -414,6 +419,7 @@ test/html/getnosess.htm
 test/html/getsess.htm
 test/html/heredoc.htm
 test/html/hidden.htm
+test/html/hostconfig.htm
 test/html/http.htm
 test/html/if.htm
 test/html/ifperl.htm
@@ -439,6 +445,7 @@ test/html/inputdisable.htm
 test/html/inputjava.htm
 test/html/inputjs2.htm
 test/html/java.htm
+test/html/keepreq.htm
 test/html/lists.htm
 test/html/loop.htm
 test/html/loopperl.htm

@@ -26,6 +26,10 @@ MaxRequestsPerChild 0
 EOD
     }
 
+print OFH "Listen ", $EPPORT , "\n" ;
+print OFH "Listen ", $EPPORT + 3, "\n" ;
+print OFH "Listen ", $EPPORT + 4, "\n" ;
+print OFH "Listen ", $EPPORT + 5, "\n" ;
 
 
 print OFH <<EOD ;
@@ -64,14 +68,20 @@ AccessConfig conf/null
 ResourceConfig conf/null
 TypesConfig conf/null
 LockFile tmp/httpd.lock
-LogFormat \"%h %l %u %t \\"%r\\" %s %b %{connection}o pid=%P %Tsec\" std
+
+
+# needs mod_log_config
+
+#CustomLog tmp/httpd.acc.log std
+
+#LogFormat \"%h %l %u %t \\"%r\\" %s %b %{connection}o pid=%P %Tsec\" std
 
 
 EOD
 
 
 
-if ($EPSESSIONXVERSION && ($EPSESSIONXVERSION > 1))
+if ($EPSESSIONXVERSION)
     {
 print OFH <<EOD ;
 
@@ -336,7 +346,35 @@ EMBPERL_MAIL_ERRORS_RESET_TIME 20
 EMBPERL_MAIL_ERRORS_RESEND_TIME 60
 </Location>
 
+EOD
 
+print OFH "<VirtualHost _default_:", $EPPORT + 3, ">\n" ;
+print OFH <<EOD ;
+EMBPERL_APPNAME VirtHost1
+EMBPERL_INPUT_ESCMODE 15
+</VirtualHost>
+
+EOD
+
+print OFH "<VirtualHost _default_:", $EPPORT + 4, ">\n" ;
+print OFH <<EOD ;
+EMBPERL_APPNAME VirtHost2
+EMBPERL_INPUT_ESCMODE 31
+EMBPERL_OBJECT_BASE p4
+</VirtualHost>
+
+EOD
+
+print OFH "<VirtualHost _default_:", $EPPORT + 5, ">\n" ;
+print OFH <<EOD ;
+EMBPERL_INPUT_ESCMODE 63
+EMBPERL_OBJECT_BASE p5
+</VirtualHost>
+
+EOD
+
+
+print OFH <<EOD ;
 ### CGI setup ###
 
 Alias /cgi-bin/uidurl/ \"$EPPATH/test/html/sidurl/\"
@@ -351,7 +389,7 @@ Action text/html /cgi/embpcgi.test.pl
 Options ExecCGI
 EOD
 
-if ($EPSESSIONXVERSION && ($EPSESSIONXVERSION > 1))
+if ($EPSESSIONXVERSION)
     {
 print OFH <<EOD ;
 
@@ -511,7 +549,6 @@ PerlFixupHandler Apache::ImageMagick
 
 
 
-CustomLog tmp/httpd.acc.log std
 
 ### misc ###
 

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: EmbperlHTML.pm,v 1.1.2.10 2002/01/22 09:29:56 richter Exp $
+#   $Id: EmbperlHTML.pm,v 1.1.2.12 2002/03/20 20:38:59 richter Exp $
 #
 ###################################################################################
  
@@ -120,15 +120,30 @@ sub Init
                 stackname   => 'htmltable',
                 'push'        => '%$p%',
                 mayjump     => 1,
-                }) ;
+                },
+                {
+                procinfo =>
+                    {
+                    'embperl#2' =>
+                        {
+                        perlcode => '{  my $_ep_selectname=%&*\'name%;',
+                        perlcodeend => '} %&*-name%', 
+                        stackname   => 'htmltable',
+                        'push'        => '%$p%',
+                        }
+                    }
+                }
+            ) ;
     # option tag are _not_ added as block, to allow <option> without </option>
     # which are interpreted correct by most browsers
     $self -> AddTag ('option', ['value'], undef, ['selected'],
                 { 
                 perlcode =>
                     [ 
-                    '_ep_opt (%$n%, %^*htmlselect%, %&*\'value%, %&\'selected%);',
-                    '_ep_opt (%$n%, %^*htmlselect%, %>*\'1%, %&\'selected%);',
+                    '_ep_opt (%$n%, $_ep_selectname, %&*\'value%, %&\'selected%);',
+                    '_ep_opt (%$n%, $_ep_selectname, %>*\'1%, %&\'selected%);',
+                    #'_ep_opt (%$n%, %^*htmlselect%, %&*\'value%, %&\'selected%);',
+                    #'_ep_opt (%$n%, %^*htmlselect%, %>*\'1%, %&\'selected%);',
                     ]
                 }) ;
     $self -> AddTagWithStart ('/option', 'option') ;

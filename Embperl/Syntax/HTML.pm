@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: HTML.pm,v 1.1.2.16 2002/01/22 09:29:56 richter Exp $
+#   $Id: HTML.pm,v 1.1.2.18 2002/03/20 20:38:59 richter Exp $
 #
 ###################################################################################
  
@@ -81,7 +81,7 @@ sub AddElement
                                 'unescape'  => 1,
                                 (ref($taginfo) eq 'HASH'?%$taginfo:()),
                               } ;
-    $tag -> {'procinfo'} = { $self -> {-procinfotype} => $procinfo } if ($procinfo) ;
+    $tag -> {'procinfo'} = { $self -> {-procinfotype} => $procinfo, (ref($taginfo) eq 'HASH'?%{$taginfo->{procinfo}}:()) } if ($procinfo) ;
 
     my %inside = %{$self -> {-htmlQuotes}} ;
     my $addinside = 0 ;
@@ -275,10 +275,10 @@ sub AddComment
 sub AddTagBlock 
 
     {
-    my ($self, $tagname, $attrs, $attrsurl, $attrsnoval, $procinfo) = @_ ;
+    my ($self, $tagname, $attrs, $attrsurl, $attrsnoval, $procinfo, $taginfo) = @_ ;
 
 
-    my $tag = $self -> AddTag ($tagname, $attrs, $attrsurl, $attrsnoval, $procinfo) ;
+    my $tag = $self -> AddTag ($tagname, $attrs, $attrsurl, $attrsnoval, $procinfo, $taginfo) ;
 
     $tag -> {'nodetype'} = &ntypStartTag ;
 

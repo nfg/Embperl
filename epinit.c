@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epinit.c,v 1.1.2.43 2002/03/12 09:33:10 richter Exp $
+#   $Id: epinit.c,v 1.1.2.45 2002/03/20 08:12:53 richter Exp $
 #
 ###################################################################################*/
 
@@ -64,6 +64,8 @@ static int  nRequestCount = 1 ;
 static perl_mutex RequestCountMutex ;
 
 static tMemPool * pMainPool ;
+
+static tReq NullRequest ; /* a request object with all zero, to point for deleted objects */
 
 
 /*---------------------------------------------------------------------------
@@ -1417,6 +1419,7 @@ int    embperl_CleanupOutput   (/*in*/ tReq *                r,
         sprintf (buf, "%d", SvREFCNT(SvRV(pOutput -> _perlsv)) - 1) ;
         LogErrorParam (r -> pApp, rcRefcntNotOne, buf, "request.component.output") ;
         }            
+    sv_unmagic(SvRV(pOutput -> _perlsv), '~') ;
     SvREFCNT_dec (pOutput -> _perlsv) ;
     ep_destroy_pool (pOutput -> pPool) ;
 
@@ -1447,6 +1450,8 @@ int    embperl_CleanupComponent  (/*in*/ tComponent *          c)
     {
     tReq *  r = c -> pReq ;
     epTHX_
+    SV * pHV ;
+    MAGIC * mg;
 
     if (c -> Param.sISA)
         {
@@ -1490,15 +1495,30 @@ int    embperl_CleanupComponent  (/*in*/ tComponent *          c)
         sprintf (buf, "%d", SvREFCNT(SvRV(c -> _perlsv)) - 1) ;
         LogErrorParam (r -> pApp, rcRefcntNotOne, buf, "request.component") ;
         }            
+
+
+    Embperl__Component__Config_destroy(aTHX_ &c -> Config) ;
+    Embperl__Component__Param_destroy(aTHX_ &c -> Param) ;
+    Embperl__Component_destroy(aTHX_ c) ;
+
+    pHV = SvRV (c -> _perlsv) ;
+    if (mg = mg_find (pHV, '~'))
+        *((tComponent **)(mg -> mg_ptr)) = &NullRequest.Component ;
+    pHV = SvRV (c -> Config._perlsv) ;
+    if (mg = mg_find (pHV, '~'))
+        *((tComponentConfig **)(mg -> mg_ptr)) = &NullRequest.Component.Config ;
+    pHV = SvRV (c -> Param._perlsv) ;
+    if (mg = mg_find (pHV, '~'))
+        *((tComponentParam **)(mg -> mg_ptr)) = &NullRequest.Component.Param ;
+
     SvREFCNT_dec (c -> Config._perlsv) ;
     SvREFCNT_dec (c -> Param._perlsv) ;
     SvREFCNT_dec (c -> _perlsv) ;
 
+
     if (c == &r -> Component && c -> pPrev)
         { /* we have a previous component, so let restore it */
         tComponent * pPrev = c -> pPrev;
-        SV * pHV ;
-        MAGIC * mg;
 
         memcpy (c, pPrev, sizeof (*c)) ;
         
@@ -1541,10 +1561,12 @@ int    embperl_CleanupRequest (/*in*/ tReq *  r)
 
     {
     epTHX_
-    int i ;
-    HE *   pEntry ;
-    I32    l ;
-    tApp * pApp = r -> pApp ;
+    int     i ;
+    HE *    pEntry ;
+    I32     l ;
+    tApp *  pApp = r -> pApp ;
+    SV *    pHV ;
+    MAGIC * mg;
     dSP ;
 
     
@@ -1610,15 +1632,33 @@ int    embperl_CleanupRequest (/*in*/ tReq *  r)
         LogErrorParam (r -> pApp, rcRefcntNotOne, buf, "request") ;
         }            
         */
-    SvREFCNT_dec (r -> Config._perlsv) ;
-    SvREFCNT_dec (r -> Param._perlsv) ;
 
     /* cleanup errarray manualy, to avoid segv incase error in destroy */
     SvREFCNT_dec (r -> pErrArray) ;
     r -> pErrArray = NULL ;
 
+    
+    Embperl__Req__Config_destroy(aTHX_ &r -> Config) ;
+    Embperl__Req__Param_destroy(aTHX_ &r -> Param) ;
+    Embperl__Req_destroy(aTHX_ r) ;
+
+    pHV = SvRV (r -> _perlsv) ;
+    if (mg = mg_find (pHV, '~'))
+        *((tReq **)(mg -> mg_ptr)) = &NullRequest ;
+    pHV = SvRV (r -> Config._perlsv) ;
+    if (mg = mg_find (pHV, '~'))
+        *((tReqConfig **)(mg -> mg_ptr)) = &NullRequest.Config ;
+    pHV = SvRV (r -> Param._perlsv) ;
+    if (mg = mg_find (pHV, '~'))
+        *((tReqParam **)(mg -> mg_ptr)) = &NullRequest.Param ;
+    
+   
+    SvREFCNT_dec (r -> Config._perlsv) ;
+    SvREFCNT_dec (r -> Param._perlsv) ;
     SvREFCNT_dec (r -> _perlsv) ;
+    
     ep_destroy_pool (r -> pPool) ;
+    sv_setpv(ERRSV,"");
 
 #if defined (_DEBUG) && defined (WIN32)
     _CrtMemDumpAllObjectsSince(&r -> MemCheckpoint);    

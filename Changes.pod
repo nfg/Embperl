@@ -1,5 +1,30 @@
 =pod
 
+=head1 2.0b7 (BETA) 21. Mar. 2002
+
+   - Changed default for EMBPERL_ESCMODE from 3 to 7. This disables
+     by default the possibilty use the backslash to not escape a piece
+     of output. This increases the security, because it by default
+     avoids the interpretation of the backslash in any user input that
+     is redisplayed. 
+   - Fixed bug in mail syntax and Embperl::Mail reported by Jan Kyncl.
+   - Removed LogFormat and CustsomLog from test config, so mod_log_config
+     is not required for make test. Reported by Jochen Topf.
+   - Removed EmbperlObject.pm from MANIFEST, since it was replaced by
+     Embperl/Object.pm.
+   - Make symbolsnames unique so they don't clash with 1.3.4. Reported
+     by Kee Hinckley.
+   - Fixed a problem that ocurred when a reference to some of the Embperl
+     objects was kept after the end of it's lifetime, which caused a
+     segfault.
+   - Don't do a path search when the filename starts with './'.
+   - Fixed a segfault that occured when many nested sub's are used,
+     but only a low number of strings.
+   - Fixed a problem that <option> tags are not correctly selected, when
+     the <option> tag was inside a loop and the name of the <select>
+     tag was dynamicly generated.
+   - Added test for config directives inside of VirtualHost 
+
 =head1 2.0b6 (BETA) 13. Mar. 2002
 
    - Embperl have move from the namespace HTML::Embperl to Embperl.
