@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epnames.h,v 1.19.4.24 2002/05/24 07:25:35 richter Exp $
+#   $Id: epnames.h,v 1.31 2002/10/22 05:29:06 richter Exp $
 #
 ###################################################################################*/
 
@@ -222,6 +222,12 @@
 #define pCachesToRelease            EMBPERL2_pCachesToRelease   
 #define pProviders                  EMBPERL2_pProviders         
 
+
+#ifdef sv_undef
+#undef sv_undef 
+#endif
+#define sv_undef ep_sv_undef
+
  
 #ifndef PERL_VERSION
 #include <patchlevel.h>
@@ -330,9 +336,6 @@
 
 #ifndef na
 #define na PL_na
-#endif
-#ifndef sv_undef
-#define sv_undef PL_sv_undef
 #endif
 #ifndef tainted
 #define tainted PL_tainted

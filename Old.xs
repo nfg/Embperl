@@ -43,8 +43,8 @@ PREINIT:
     tReq * r = CurrReq ;
     int  bRestore = 0 ;
 #ifdef APACHE
-    SV * pSaveApacheReqSV ;
-    request_rec * pSaveApacheReq ;
+    SV * pSaveApacheReqSV = NULL ;
+    request_rec * pSaveApacheReq = NULL ;
 #endif
 CODE:
 #ifdef APACHE
@@ -78,7 +78,10 @@ embperl_log(sText)
 INIT:
     tReq * r = CurrReq ;
 CODE:
-    lwrite (r->pApp,sText, strlen (sText)) ;
+    if (r)
+        lwrite (r->pApp,sText, strlen (sText)) ;
+    else
+        PerlIO_puts(PerlIO_stderr(), sText) ;
 
 
 void
@@ -94,7 +97,7 @@ CODE:
             Node_appendChild (DomTree_self (r -> Component.xCurrDomTree), r -> Component.xCurrNode, r -> Component.nCurrRepeatLevel, ntypCDATA, 0, p, l, 0, 0, NULL) ; 
                 else*/
         r -> Component.xCurrNode = Node_insertAfter_CDATA (r->pApp, p, l, (r -> Component.nCurrEscMode & 3)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode, DomTree_self (r -> Component.xCurrDomTree), r -> Component.xCurrNode, r -> Component.nCurrRepeatLevel) ; 
-        r -> Component.bEscModeSet = -1 ;
+        r -> Component.bEscModeSet = 0 ;
         
         }
 
@@ -174,8 +177,8 @@ embperl_logerror(r,code, sText,pApacheReqSV=NULL)
 PREINIT:
     int  bRestore = 0 ;
 #ifdef APACHE
-    SV * pSaveApacheReqSV ;
-    request_rec * pSaveApacheReq ;
+    SV * pSaveApacheReqSV = NULL ;
+    request_rec * pSaveApacheReq = NULL ;
 #endif
 CODE:
 #ifdef APACHE

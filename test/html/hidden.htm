@@ -7,7 +7,7 @@
 
 [-
 $regs{feld1} = 'Pfalz' ;
-$regs{feld2} = 'Rheinhessen' ;
+$regs{feld2} = 'Rhein"hessen"&Pfalz' ;
 
 $kats{feld1} = 'Kultur' ;
 
@@ -40,7 +40,11 @@ $sort[3] = 'feld1' ;
 	b6[$hidden %regs, %kats $]
 	
 
-    <input type="text" name="feld2">
+    <select name="feld2"><option value="Wert1">rlp</option></select>
+
+	s1[$hidden$]
+
+    <select name="feld2"><option value="Wert1"><option value="Wert2">rlp</option></select>
     
 	c1[$hidden$]
 	c2[$hidden regs $]

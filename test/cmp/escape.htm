@@ -65,7 +65,7 @@ Now a Url: <A HREF="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=Th
 
 2
 Now lets look what we are getting from this:<BR>
-(this%20is%20the%20value%20in%20$a) (this%20is%20the%20value%20in%20$a)%20הצüהצü%3F%3F%3F%3C%26%2B%20%20<BR>
+(this%20is%20the%20value%20in%20%24a) (this%20is%20the%20value%20in%20%24a)%20%E4%F6%FC%E4%F6%FC%3F%3F%3F%3C%26%2B%20%20<BR>
 
 What is the EscMode? 2
 Now a Url: <A HREF="http://localhost/tests?id=abcdefghijklmnopqrstuvwxyz&text=This%20is%20a%20text%20%3F%20%26%20%2B%20-%20%2521">Here it goes</A>
@@ -97,21 +97,21 @@ file.html?name=abcd&amp;data=xyz
 Now we localy set $escmode:<BR>
 (this is the value in $a) הצüהצü???<&+    \<a><BR>
 (this is the value in $a) &auml;&ouml;&uuml;&auml;&ouml;&uuml;???&lt;&amp;+    <a&gt;<BR>
-(this%20is%20the%20value%20in%20$a)%20הצüהצü%3F%3F%3F%3C%26%2B%20%20%20%20<a%3E<BR>
+(this%20is%20the%20value%20in%20%24a)%20%E4%F6%FC%E4%F6%FC%3F%3F%3F%3C%26%2B%20%20%20%20<a%3E<BR>
 (this is the value in $a) &auml;&ouml;&uuml;&auml;&ouml;&uuml;???&lt;&amp;+    <a&gt;<BR>
 (this is the value in $a) הצüהצü???<&+    \<a><BR>
 (this is the value in $a) &auml;&ouml;&uuml;&auml;&ouml;&uuml;???&lt;&amp;+    \&lt;a&gt;<BR>
-(this%20is%20the%20value%20in%20$a)%20הצüהצü%3F%3F%3F%3C%26%2B%20%20%20%20\%3Ca%3E<BR>
+(this%20is%20the%20value%20in%20%24a)%20%E4%F6%FC%E4%F6%FC%3F%3F%3F%3C%26%2B%20%20%20%20%5C%3Ca%3E<BR>
 (this is the value in $a) &auml;&ouml;&uuml;&auml;&ouml;&uuml;???&lt;&amp;+    \&lt;a&gt;<BR>
 
 Same without local:
 (this is the value in $a) הצüהצü???<&+    \<a><BR>
 (this is the value in $a) &auml;&ouml;&uuml;&auml;&ouml;&uuml;???&lt;&amp;+    <a&gt;<BR>
-(this%20is%20the%20value%20in%20$a)%20הצüהצü%3F%3F%3F%3C%26%2B%20%20%20%20<a%3E<BR>
+(this%20is%20the%20value%20in%20%24a)%20%E4%F6%FC%E4%F6%FC%3F%3F%3F%3C%26%2B%20%20%20%20<a%3E<BR>
 (this is the value in $a) &auml;&ouml;&uuml;&auml;&ouml;&uuml;???&lt;&amp;+    <a&gt;<BR>
 (this is the value in $a) הצüהצü???<&+    \<a><BR>
 (this is the value in $a) &auml;&ouml;&uuml;&auml;&ouml;&uuml;???&lt;&amp;+    \&lt;a&gt;<BR>
-(this%20is%20the%20value%20in%20$a)%20הצüהצü%3F%3F%3F%3C%26%2B%20%20%20%20\%3Ca%3E<BR>
+(this%20is%20the%20value%20in%20%24a)%20%E4%F6%FC%E4%F6%FC%3F%3F%3F%3C%26%2B%20%20%20%20%5C%3Ca%3E<BR>
 (this is the value in $a) &auml;&ouml;&uuml;&auml;&ouml;&uuml;???&lt;&amp;+    \&lt;a&gt;<BR>
 
 
@@ -122,12 +122,12 @@ Control Chars 129 & 130:
 &amp;#129;&amp;#130;<BR>
 
 0
-^<A HREF=('http://host/script\?name=My%20Name%20צהü'|"http://host/script\?name=My%20Name%20צהü")>
+^<A HREF=('http://host/script\?name=My%20Name%20%F6%E4%FC'|"http://host/script\?name=My%20Name%20%F6%E4%FC")>
 
-^<A HREF=('http://host/script\?name=My%20Name%20צהü'|"http://host/script\?name=My%20Name%20צהü")>
+^<A HREF=('http://host/script\?name=My%20Name%20%F6%E4%FC'|"http://host/script\?name=My%20Name%20%F6%E4%FC")>
 
 0
-^<A HREF=('http://host/script\?name=My%20Name%20צהü'|"http://host/script\?name=My%20Name%20צהü")>
+^<A HREF=('http://host/script\?name=My%20Name%20%F6%E4%FC'|"http://host/script\?name=My%20Name%20%F6%E4%FC")>
 
 ^<A HREF=('http://host/script\?name=My Name צהü'|"http://host/script\?name=My Name צהü")>
 
@@ -173,11 +173,11 @@ Escape method:
 
 0: (this is the value in $a) הצüהצü???<&+  
 1: (this is the value in $a) &auml;&ouml;&uuml;&auml;&ouml;&uuml;???&lt;&amp;+  
-2: (this%20is%20the%20value%20in%20$a)%20הצüהצü%3F%3F%3F%3C%26%2B%20%20
+2: (this%20is%20the%20value%20in%20%24a)%20%E4%F6%FC%E4%F6%FC%3F%3F%3F%3C%26%2B%20%20
 3: (this is the value in $a) &auml;&ouml;&uuml;&auml;&ouml;&uuml;???&lt;&amp;+  
 4: (this is the value in $a) הצüהצü???<&+  
 5: (this is the value in $a) &auml;&ouml;&uuml;&auml;&ouml;&uuml;???&lt;&amp;+  
-6: (this%20is%20the%20value%20in%20$a)%20הצüהצü%3F%3F%3F%3C%26%2B%20%20
+6: (this%20is%20the%20value%20in%20%24a)%20%E4%F6%FC%E4%F6%FC%3F%3F%3F%3C%26%2B%20%20
 7: (this is the value in $a) &auml;&ouml;&uuml;&auml;&ouml;&uuml;???&lt;&amp;+  
 print OUT:
 
@@ -189,11 +189,33 @@ print OUT:
 0: יric
 7: &eacute;ric
 0: יric
-<a href="0?!Table=interface,router&amp;$where=interface.router_id=router.id">
+^<a href="0\?(!Table=interface,router&amp;\$where=interface.router_id=router.id|\$where=interface.router_id=router.id&amp;!Table=interface,router)">
 
-<a href="7?!Table=interface,router&amp;$where=interface.router_id%3Drouter.id">
+^<a href="7\?(!Table=interface%2Crouter&amp;%24where=interface.router_id%3Drouter.id|%24where=interface.router_id%3Drouter.id&amp;!Table=interface%2Crouter)">
   
 
+--> my
+
+ &lt;b&gt;hello
+&lt;b&gt;hello
+<br><br>reset<br>
+    &lt;b&gt;helloin++
+ &lt;b&gt;hello
+&lt;b&gt;hello
+<br><br>reset<br>
+    &lt;b&gt;hello
+&lt;b&gt;hello
+--> local
+
+ <b>hello
+<b>hello
+<br><br>reset<br>
+    &lt;b&gt;helloin++
+ <b>hello
+<b>hello
+<br><br>reset<br>
+    <b>hello
+<b>hello
 <P>Ok.<P>
 
 

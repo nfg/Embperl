@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epprovider.c,v 1.1.2.36 2002/06/01 23:44:25 richter Exp $
+#   $Id: epprovider.c,v 1.3 2003/03/30 18:57:02 richter Exp $
 #
 ###################################################################################*/
 
@@ -323,7 +323,7 @@ static int ProviderFile_New (/*in*/ req *              r,
     pNew = (tProviderFile *)pItem -> pProvider ;
 
     sFilename = GetHashValueStr (aTHX_ pProviderParam, "filename",  r -> Component.Param.sInputfile) ;
-    pNew -> sFilename = embperl_PathSearch(r, NULL, sFilename) ;
+    pNew -> sFilename = embperl_PathSearch(r, NULL, sFilename, -1) ;
     if (!pNew -> sFilename)
         {
         strncpy (r -> errdat1, sFilename, sizeof (r -> errdat1) - 1) ;
@@ -388,7 +388,7 @@ static int ProviderFile_AppendKey (/*in*/ req *              r,
     const char * sAbsFilename  ;
 
     sFilename = GetHashValueStr (aTHX_ pProviderParam, "filename",  r -> Component.Param.sInputfile) ;
-    sAbsFilename = embperl_PathSearch(r, NULL, (char *)sFilename) ;
+    sAbsFilename = embperl_PathSearch(r, r -> pPool, (char *)sFilename, -1) ;
     if (!sAbsFilename)
         {
         strncpy (r -> errdat1, sFilename, sizeof (r -> errdat1) - 1) ;
@@ -878,7 +878,7 @@ static int ProviderEpParse_New (/*in*/ req *              r,
     int          rc ;
     int          num ;
     SV * pSyntaxSV ;
-    SV * pSyntaxRV ;
+    SV * pSyntaxRV = NULL ;
     SV * pSyntaxPV ;
     tTokenTable * pSyntax ;
     const char * sSyntax = GetHashValueStr (aTHX_ pProviderParam, "syntax", r -> Component.Config.sSyntax) ;
@@ -1154,7 +1154,7 @@ static int ProviderEpCompile_New (/*in*/ req *              r,
 
     /*if (r -> Config.bDebug)
 	lprintf (r -> pApp,  "[%d]ep_acquire_mutex(PackageCountMutex)\n", r -> pThread -> nPid) ; */
-    if (sPackage = GetHashValueStrDupA (aTHX_ pProviderParam, "package", r -> Component.Config.sPackage)) 
+    if ((sPackage = GetHashValueStrDupA (aTHX_ pProviderParam, "package", r -> Component.Config.sPackage))) 
         {
         int n ;
         ep_acquire_mutex(PackageCountMutex) ;

@@ -94,8 +94,10 @@ if (!$win32)
 
 
 
-    my ($l1, $l2) = "$xalanlib $xerceslib" =~ /^lib(.*?)\.so lib(.*?)\.so$/ ;
+    my ($l1, $l2) = "$xalanlib $xerceslib" =~ /^lib(.*?)\.so(?:\.\d+)? lib(.*?)\.so(?:\.\d+)?$/ ;
     ($l1, $l2) = "$xalanlib $xerceslib" =~ /^(xalan.*?\.lib) (xerces.*?\.lib)$/i if ($win32) ;
+
+    print "Somethings is wrong with library names ($l1, $l2)\n" if (!$l1 || !$l2) ;
 
     return { cflags => "-I\"$pathsrc\" -I\"$xercesinc\" -D_REENTRANT "  , 
              cpp    => $cpp,

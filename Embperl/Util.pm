@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Util.pm,v 1.1.2.8 2002/05/27 17:53:13 richter Exp $
+#   $Id: Util.pm,v 1.2 2002/10/22 05:39:48 richter Exp $
 #
 ###################################################################################
 
@@ -39,6 +39,14 @@ sub AddCompartment ($)
     $NameSpace{$sName} = $cp ;
 
     return $cp ;
+    }
+
+#######################################################################################
+
+sub MailFormTo
+
+    {
+    $Embperl::req -> app -> mail_form_to (@_) ;
     }
 
 #######################################################################################
@@ -102,7 +110,7 @@ sub CreateAliases
         *{"$package\:\:sdat"} = $sess if ($sess) ;
 
         *{"$package\:\:exit"}       = \&Embperl::exit ;
-        *{"$package\:\:MailFormTo"} = \&Embperl::MailFormTo ;
+        *{"$package\:\:MailFormTo"} = \&Embperl::Util::MailFormTo ;
         *{"$package\:\:Execute"}    = \&Embperl::Req::ExecuteComponent ;
 
         tie *{"$package\:\:LOG"}, 'Embperl::Log' ;

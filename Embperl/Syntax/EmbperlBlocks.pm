@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: EmbperlBlocks.pm,v 1.1.2.25 2002/05/28 18:58:01 richter Exp $
+#   $Id: EmbperlBlocks.pm,v 1.3 2002/11/26 10:03:44 richter Exp $
 #
 ###################################################################################
  
@@ -117,9 +117,7 @@ sub AddMetaCmdWithEnd
     {
     my ($self, $cmdname, $endname, $procinfo) = @_ ;
 
-    my $tag = $self -> AddMetaCmd ($cmdname, $procinfo) ;
-
-    $tag -> {'endtag'} = $endname ;
+    my $tag = $self -> AddMetaCmd ($cmdname, $procinfo, {'endtag' => $endname} ) ;
 
     return $tag ;
     }
@@ -137,19 +135,11 @@ sub AddMetaCmdBlock
     my ($self, $cmdname, $endname, $procinfostart, $procinfoend) = @_ ;
 
     my $tag ;
-    my $pinfo ;
+    my $pinfo = { %$procinfostart, 'stackname' => 'metacmd', 'push' => $cmdname };
+    $tag = $self -> AddMetaCmd ($cmdname, $pinfo, {'endtag' => $endname} ) ;
 
-    $tag = $self -> AddMetaCmd ($cmdname, $procinfostart) ;
-    $tag -> {'endtag'} = $endname ;
-    $pinfo = $tag -> {'procinfo'} -> {$self -> {-procinfotype}} ;
-    $pinfo -> {'stackname'} = 'metacmd' ;
-    $pinfo -> {'push'} = $cmdname ;
-
-    $tag = $self -> AddMetaCmd ($endname, $procinfoend) ;
-    $pinfo = $tag -> {'procinfo'} -> {$self -> {-procinfotype}} ;
-    $pinfo -> {'stackname'} = 'metacmd' ;
-    $pinfo -> {'stackmatch'} = $cmdname ;
-    
+    $pinfo = { %$procinfoend, 'stackname' => 'metacmd', 'stackmatch' => $cmdname };
+    $tag = $self -> AddMetaCmd ($endname, $pinfo) ;
 
     return $tag ;
     }
@@ -169,14 +159,9 @@ sub AddMetaStartEnd
     my $tag ;
     my $pinfo ;
 
-    $tag = $self -> AddMetaCmd ($cmdname, $procinfostart) ;
-    $tag -> {'nodetype'} = &ntypStartTag ;
+    $tag = $self -> AddMetaCmd ($cmdname, $procinfostart, {'nodetype' => &ntypStartTag}) ;
 
-
-    $tag = $self -> AddMetaCmd ($endname) ;
-    $tag -> {'nodetype'} = &ntypEndTag ;
-    $tag -> {'starttag'} = $cmdname ;
-    
+    $tag = $self -> AddMetaCmd ($endname, undef, {'nodetype' => &ntypEndTag, 'starttag' => $cmdname}) ;
 
     return $tag ;
     }
@@ -350,6 +335,26 @@ sub Init
                 perlcode => 'use strict ;', 
                 removenode => 3,
                 }) ;
+    $self -> AddMetaCmd ('next',
+                { 
+                perlcode => 'next;', 
+                removenode => 3,
+                }) ;
+    $self -> AddMetaCmd ('last',
+                { 
+                perlcode => 'last;', 
+                removenode => 3,
+                }) ;
+    $self -> AddMetaCmd ('redo',
+                { 
+                perlcode => 'redo;', 
+                removenode => 3,
+                }) ;
+    $self -> AddMetaCmd ('next',
+                { 
+                perlcode => 'next;', 
+                removenode => 3,
+                }) ;
     $self -> AddMetaCmd ('hidden',
                 { 
                 perlcode => '_ep_hid(%$n%,%&\'<noname>%);', 
@@ -477,11 +482,13 @@ sub Init
         'text' => '[=',
         'end'  => '=]',
         'unescape' => 1,
+         removespaces  => 72,
+        'cdatatype' => ntypAttrValue,
         'procinfo' => {
             embperl => { 
                     perlcode => 
                         [
-                        '_ep_rpid(%$x%,scalar(%#0%));', 
+                        '_ep_rpid(%$x%,scalar(%&\'<noname>%));', 
 			],
                     removenode  => 4,
                     compilechilds => 0,

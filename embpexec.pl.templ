@@ -11,13 +11,14 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: embpexec.pl.templ,v 1.1.4.5 2002/03/05 08:07:20 richter Exp $
+#   $Id: embpexec.pl.templ,v 1.5 2003/02/15 20:46:31 richter Exp $
 #
 ###################################################################################
 
 BEGIN
     {
     DB::parse_options("NonStop=1") if (defined (&DB::parse_options)) ;
+    %Embperl::initparam = (use_env => 1) ;
     }
 
 use Embperl;

@@ -1,0 +1,66 @@
+<html>
+<head>
+<title>Embperl Tests - Embperl::Form::Validate</title>
+</head>
+
+<body>
+
+Fehler:
+Stundenzahl nicht numerisch
+Bitte (sinnvollen) Kommentar eingeben
+<script>
+    
+
+function epform_validate_foo()
+    {
+    var msgs = new Array ;
+    var fail = 0 ;
+    var i = 0 ;
+    var obj ;
+
+    do {
+    
+do {
+
+do {
+obj = document.foo['datum'] ; if (!(obj.value)) { msgs[i++]='Bitte Datum eintragen'; break;}
+obj = document.foo['datum'] ; if (!(obj.value.search(/\d+\.\d+\.\d+/) >= 0)) { msgs[i++]='Datum überprüfen'; break;}
+ 
+} while (0) ; if (fail) break ;
+
+do {
+obj = document.foo['stunden'] ; if (!(obj.value)) { msgs[i++]='Bitte Stunden eintragen'; break;}
+obj = document.foo['stunden'] ; if (!(obj.value.search(/^\s*[0-9+-.][0-9.eE]*\s*$/) >= 0)) { msgs[i++]='Stundenzahl nicht numerisch'; break;}
+obj = document.foo['stunden'] ; if (!(obj.value > 0)) { msgs[i++]='Stundenzahl muß >0 sein'; break;}
+ 
+} while (0) ; if (fail) break ;
+
+do {
+obj = document.foo['kommentar'] ; if (!(obj.value)) { msgs[i++]='Bitte (sinnvollen) Kommentar eingeben'; break;}
+ 
+} while (0) ; if (fail) break ;
+ 
+} while (0) ; if (fail) break ;
+ ;
+    }
+    while (0) ;
+    if (i)
+        alert (msgs.join('\n')) ;
+
+    return !i ;
+    }
+ </script>
+   
+  
+
+    <form name="foo" action="POST"  onSubmit="return epform_validate_foo()">
+        stunden <input type="text" name="stunden" value="x"><br>
+        datum <input type="text" name="datum" value="23.12.2002"><br>
+        kommentar <input type="text" name="kommentar" value=""><br>
+         <input type="submit"><br>
+    </form>
+ 
+
+
+</body>
+</html>

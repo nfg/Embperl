@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eputil.c,v 1.15.4.53 2002/05/20 07:04:25 richter Exp $
+#   $Id: eputil.c,v 1.35 2003/03/30 18:57:03 richter Exp $
 #
 ###################################################################################*/
 
@@ -159,9 +159,9 @@ SV * Escape	  (/*i/o*/ register req * r,
 
     if (nEscMode >= 0)
 	{	    
-	if (nEscMode & escXML && !r -> Component.bEscInUrl)
+	if ((nEscMode & escXML) && !r -> Component.bEscInUrl)
 	    pEscTab = Char2XML ;
-	if (nEscMode & escHtml && !r -> Component.bEscInUrl)
+	else if ((nEscMode & escHtml) && !r -> Component.bEscInUrl)
 	    pEscTab = Char2Html ;
 	else if (nEscMode & escUrl)
 	    pEscTab = Char2Url ;
@@ -387,12 +387,14 @@ int   TransHtml (/*i/o*/ register req * r,
 	
     if (bInUrl == 16)
 	{ 
-	/* Just remove \ for rtf */
+	/* Just remove \ and }{ for rtf */
 	if (nLen == 0)
 	    nLen = strlen (sData) ;
 	e = sData + nLen ;
 	while (p < e)
 	    {
+	    if (*p == '}' && p[1] == '{')
+	    	*p++ = ' ', *p++ = ' ' ;
 	    if (*p == '\\' && p[1] != '\0')
 	    	*p++ = ' ' ;
 	    p++ ;
@@ -775,7 +777,7 @@ char * GetHashValueStrDup (/*in*/  pTHX_
     ppSV = hv_fetch(pHash, (char *)sKey, strlen (sKey), 0) ;  
     if (ppSV != NULL)
         {
-	if (s = SvPV (*ppSV, l))
+	if ((s = SvPV (*ppSV, l)))
 	    return ep_pstrdup (pPool, s);
 	else
 	    return NULL ;
@@ -799,7 +801,7 @@ char * GetHashValueStrDupA (/*in*/  pTHX_
     ppSV = hv_fetch(pHash, (char *)sKey, strlen (sKey), 0) ;  
     if (ppSV != NULL)
         {
-	if (s = SvPV (*ppSV, l))
+	if ((s = SvPV (*ppSV, l)))
 	    return strdup (s);
 	else
 	    return NULL ;
@@ -1149,8 +1151,10 @@ void ClearSymtab (/*i/o*/ register req * r,
     pCV = perl_get_cv (s, 0) ;
     if (pCV)
 	{
+	dSP ;
 	if (bDebug)
 	    lprintf (r -> pApp,  "[%d]CUP: Call &%s::CLEANUP\n", r -> pThread -> nPid, sPackage) ;
+	PUSHMARK(sp) ;
 	perl_call_sv ((SV *)pCV, G_EVAL | G_NOARGS | G_DISCARD) ;
 	pSVErr = ERRSV ;
 	if (SvTRUE (pSVErr))
@@ -1543,9 +1547,10 @@ void embperl_SetCWDToFile  (/*i/o*/ register req * r,
 /*                                                                              */
 /* ---------------------------------------------------------------------------- */
 
-char * embperl_PathSearch    (/*i/o*/ register req * r,
+char * embperl_PathSearch  (/*i/o*/ register req * r,
                             /*in*/  tMemPool *     pPool,
-                            /*in*/  const char *         sFilename)
+                            /*in*/  const char *   sFilename,
+                            /*in*/  int            nPathNdx)
 
     {
     epTHX_
@@ -1557,8 +1562,16 @@ char * embperl_PathSearch    (/*i/o*/ register req * r,
     char * fn ;
     STRLEN l ;
 
+    if (r -> Config.bDebug & dbgObjectSearch)
+        lprintf (r -> pApp,  "[%d]Search for %s\n", r -> pThread -> nPid, sFilename) ; 
+
     if (isAbsPath(sFilename) || !pPathAV || AvFILL (pPathAV) < r -> Component.nPathNdx)
-        return embperl_File2Abs (r, pPool, sFilename) ;
+        {
+        absfn = embperl_File2Abs (r, pPool, sFilename) ;
+        if (r -> Config.bDebug & dbgObjectSearch)
+            lprintf (r -> pApp,  "[%d]Search: nothing to search return %s\n", r -> pThread -> nPid, absfn) ; 
+        return absfn ;
+        }
 
     while (sFilename[0] == '.' && sFilename[1] == '.' &&  (sFilename[2] == '/' || sFilename[2] == '\\'))
         {
@@ -1566,15 +1579,19 @@ char * embperl_PathSearch    (/*i/o*/ register req * r,
         sFilename += 3 ;
         }
     if (skip)
-        skip += r -> Component.pPrev?r -> Component.pPrev -> nPathNdx:0 ;
+        skip += nPathNdx >= 0?nPathNdx:r -> Component.pPrev?r -> Component.pPrev -> nPathNdx:0 ;
 
     if (skip == 0 && sFilename[0] == '.' && (sFilename[1] == '/' || sFilename[1] == '\\'))
         {
         absfn = embperl_File2Abs (r, pPool, sFilename) ;
         if (stat (absfn, &st) == 0)
             {
+            if (r -> Config.bDebug & dbgObjectSearch)
+                lprintf (r -> pApp,  "[%d]Search: starts with ./ return %s\n", r -> pThread -> nPid, absfn) ; 
             return absfn ;
             }
+        if (r -> Config.bDebug & dbgObjectSearch)
+            lprintf (r -> pApp,  "[%d]Search: starts with ./, but not found\n", r -> pThread -> nPid) ; 
         return NULL ;
         }        
 
@@ -1582,13 +1599,21 @@ char * embperl_PathSearch    (/*i/o*/ register req * r,
     for (i = skip ; i <= AvFILL (pPathAV); i++)
 	{
         fn = ep_pstrcat(r -> pPool, SvPV(*av_fetch (pPathAV, i, 0), l), PATH_SEPARATOR_STR, sFilename, NULL) ;
-        /* lprintf (r -> pApp, "i=%d skip=%d, dir=%s, fn=%s\n", i, skip, SvPV(*av_fetch (pPathAV, i, 0), l), fn) ; */
+        if (r -> Config.bDebug & dbgObjectSearch)
+            lprintf (r -> pApp,  "[%d]Search: #%d test dir=%s, fn=%s (skip=%d)\n", r -> pThread -> nPid,  
+                                        i,  SvPV(*av_fetch (pPathAV, i, 0), l), fn, skip) ; 
         if (stat (fn, &st) == 0)
             {
             r -> Component.nPathNdx = i ;        
-            return embperl_File2Abs (r, pPool, fn) ;
+            absfn = embperl_File2Abs (r, pPool, fn) ;
+            if (r -> Config.bDebug & dbgObjectSearch)
+                lprintf (r -> pApp,  "[%d]Search: found %s\n", r -> pThread -> nPid, absfn) ; 
+            return absfn ;
             }
         }
+
+    if (r -> Config.bDebug & dbgObjectSearch)
+        lprintf (r -> pApp,  "[%d]Search: not found %s\n", r -> pThread -> nPid) ; 
 
     return NULL ;
     }
@@ -1792,6 +1817,213 @@ const char * embperl_GetText (/*in*/ tReq *       r,
 
     return sMsgId ;
     }
+
+
+/* ------------------------------------------------------------------------ */
+/*                                                                          */
+/* embperl_OptionListSearch				                    */
+/*                                                                          */
+/*! 
+*   \_en
+*   Lookup a number of options from a list and return numeric equivalent
+*   @param  pList           Option/Valus pairs
+*   @param  bMult           Allow multiple options
+*   @param  sCmd            Configurationdirective (for errormessage)
+*   @param  sOptions        Option string
+*   @param  pnValue         Returns option value
+*   @return                 error code
+*   
+*   \endif                                                                       
+*
+*   \_de									   
+*   Ermittelt aus einer Liste von Optionen das numerische Equivalent
+*   @param  pList           Option/Wertepaare
+*   @param  bMult           Mehrfachoptionen erlaubt
+*   @param  sCmd            Konfigurationsdirektive (für Fehlermeldung)
+*   @param  sOptions        Optionszeichenkette
+*   @param  pnValue         Liefert den Optionswert zurück
+*   @return                 Fehlercode
+*   
+*   \endif                                                                       
+*                                                                          
+* ------------------------------------------------------------------------ */
+
+
+int embperl_OptionListSearch (/*in*/ tOptionEntry * pList,
+                              /*in*/ bool          bMult,
+                              /*in*/ const char *  sCmd,
+                              /*in*/ const char *  sOptions,
+                              /*in*/ int *         pnValue)
+    {
+    char * sKeyword ;
+    char * sOpts = strdup (sOptions) ;
+    dTHX ;
+
+    *pnValue = 0 ;
+    
+    sKeyword = strtok (sOpts, ", \t\n") ;
+    while (sKeyword)
+        {
+        tOptionEntry * pEntry = pList ;
+        bool found = 0 ;
+
+        while (pEntry -> sOption)
+            {
+            if (stricmp (sKeyword, pEntry -> sOption) == 0)
+                {
+                *pnValue |= pEntry -> nValue ;
+                if (!bMult)
+                    {
+                    if (sOpts)
+                        free (sOpts) ;
+
+                    return ok ;
+                    }
+                found = 1 ;
+                }
+            }
+        if (!found)
+            {
+            LogErrorParam (NULL, rcUnknownOption, sKeyword, sCmd) ;
+            if (sOpts)
+                free (sOpts) ;
+
+            return rcUnknownOption ;
+            }
+
+        
+        }
+
+    
+    if (sOpts)
+        free (sOpts) ;
+
+    return ok ;
+    }
+
+/* ------------------------------------------------------------------------ */
+/*                                                                          */
+/* embperl_CalcExpires 				                            */
+/*                                                                          */
+/*! 
+*   \_en
+*   Convert Expires time to HTTP format
+*   @param  sTime           Time to convert
+*   @param  sResult	    Buffer for result
+*   @param  bHTTP           http format
+*   @return                 error code
+*   
+*   \endif                                                                       
+*
+*   \_de									   
+*   Kovertiert Zeitangabe in HTTP Format
+*   @param  sTime           Zeit die konvertioert werden soll
+*   @param  sResult	    Buffer für resultat
+*   @param  bHTTP           http format
+*   @return                 Fehlercode
+*   
+*   \endif                                                                       
+*                                                                          
+* ------------------------------------------------------------------------ */
+
+/* parts from libareq */
+
+#define Mult_s 1
+#define Mult_m 60
+#define Mult_h (60*60)
+#define Mult_d (60*60*24)
+#define Mult_M (60*60*24*30)
+#define Mult_y (60*60*24*365)
+
+static int expire_mult(char s)
+{
+    switch (s) {
+    case 's':
+	return Mult_s;
+    case 'm':
+	return Mult_m;
+    case 'h':
+	return Mult_h;
+    case 'd':
+	return Mult_d;
+    case 'M':
+	return Mult_M;
+    case 'y':
+	return Mult_y;
+    default:
+	return 1;
+    };
+}
+
+static time_t expire_calc(const char *time_str)
+{
+    int is_neg = 0, offset = 0;
+    char buf[256];
+    int ix = 0;
+
+    if (*time_str == '-') {
+	is_neg = 1;
+	++time_str;
+    }
+    else if (*time_str == '+') {
+	++time_str;
+    }
+    else if (stricmp(time_str, "now")) {
+	/*ok*/
+    }
+    else {
+	return 0;
+    }
+
+    while (*time_str && isdigit(*time_str)) {
+	buf[ix++] = *time_str++;
+    }
+    buf[ix] = '\0';
+    offset = atoi(buf);
+
+    return time(NULL) +
+	(expire_mult(*time_str) * (is_neg ? (0 - offset) : offset));
+}
+
+static const char ep_month_snames[12][4] =
+    {
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    };
+static const char ep_day_snames[7][4] =
+    {
+    "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+    };
+        
+
+const char * embperl_CalcExpires(const char *sTime, char * sResult, int bHTTP)
+{
+    time_t when;
+    struct tm *tms;
+    int sep = bHTTP ? ' ' : '-';
+    dTHX ;
+
+    if (!sTime) {
+	return NULL;
+    }
+
+    when = expire_calc(sTime);
+
+    if (!when) {
+	return sTime ;
+    }
+
+    tms = gmtime(&when);
+    sprintf(sResult,
+		       "%s, %.2d%c%s%c%.2d %.2d:%.2d:%.2d GMT",
+		       ep_day_snames[tms->tm_wday],
+		       tms->tm_mday, sep, ep_month_snames[tms->tm_mon], sep,
+		       tms->tm_year + 1900,
+		       tms->tm_hour, tms->tm_min, tms->tm_sec);
+    return sResult ;
+}
+
+
+
 
 
 

@@ -25,7 +25,7 @@ T_PTROBJ_CONF
 T_PTROBJ_REQ
     {
     MAGIC * mg ;
-    if (mg = mg_find (SvRV($arg), '~'))
+    if ((mg = mg_find (SvRV($arg), '~')))
         $var = *((tReq **)(mg -> mg_ptr)) ;
     else
         croak (\"$var is not of type Embperl::Req\") ;
@@ -41,7 +41,7 @@ T_PTROBJ_FILE
 T_PTROBJ_DOMNODE
     {
     MAGIC * mg ;
-    if (mg = mg_find (SvRV($arg), '~'))
+    if ((mg = mg_find (SvRV($arg), '~')))
         $var = *((tDomNode **)(mg -> mg_ptr)) ;
     else
         croak (\"$var is not of type XML::Embperl::DOM::Node\") ;

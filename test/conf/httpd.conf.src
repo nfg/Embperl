@@ -1,5 +1,5 @@
 
-# $Id: httpd.conf.src,v 1.24.4.69 2002/06/25 06:22:18 richter Exp $
+# $Id: httpd.conf.src,v 1.52 2003/02/27 07:05:33 richter Exp $
 
 print OFH <<EOD ;
 #
@@ -38,11 +38,11 @@ print OFH "Listen ", $EPPORT + 5, "\n" ;
 
 print OFH "$EPMODPERL\n" ;
 
+##print OFH "PerlModule Apache2\n" ;
+
 print OFH "LoadModule embperl_module \"$EPPATH/blib/arch/auto/Embperl/Embperl.so\"\n" if ($MP2) ;
 
-##print OFH "LoadModule info_module \"/usr/src/packages/apache_1.3.24_mp561_so/src/modules/standard/mod_info.so\"\n"  ;
-
-print OFH "PassEnv ACTION_PREFIX\n" ;
+##print OFH "PassEnv ACTION_PREFIX\n" ;
 
 print OFH <<EOD ;
 
@@ -129,6 +129,7 @@ EOD
 
 print OFH <<EOD ;
 
+Embperl_Cookie_Path /
 EMBPERL_ALLOW (asc|\\.xml\$|\\.htm\$)
 
 
@@ -546,14 +547,9 @@ SetHandler perl-script
 PerlHandler Embperl
 Options ExecCGI FollowSymLinks
 EMBPERL_INPUT_ESCMODE 7
-
-EMBPERL_SYNTAX "Embperl III::RandomTag"
-
 EMBPERL_OPTIONS 262288
-
-
-
 </Location>
+
 
 <Location /eg/web>
 EMBPERL_APPNAME EmbperlWeb
@@ -571,9 +567,12 @@ Options ExecCGI
 </Location>
 
 <Location /eg/web/conf>
+EMBPERL_APPNAME EmbperlConf
 EMBPERL_RECIPE EmbperlLibXSLT
 EMBPERL_XSLTSTYLESHEET \"$EPPATH/eg/web/conf/pod.xsl\"
 EMBPERL_SYNTAX POD
+EMBPERL_URIMATCH \"\\.htm.?\$|\\.epl\$|\\.xml\$|\\.pod\$|/$\"
+EMBPERL_PATH \"$EPPATH/eg/web/conf;$EPPATH/eg/web\"
 sethandler perl-script
 perlhandler Embperl
 </Location>
@@ -587,21 +586,17 @@ EMBPERL_XSLTPROC libxslt
 EMBPERL_RECIPE XSLT
 </Location>
 
-<Files NEWS.xml>
-EMBPERL_XSLTSTYLESHEET \"$EPPATH/eg/xml/NEWS.xsl\"
-</Files>
 
-
-<Location /eg/images/aim>
-
-PerlSetVar AIMParameter \"pointsize=14 font=$EPPATH/../fonts/OCRAEXT.ttf\"
-
-#PerlSetVar AIMParameter \"pointsize=14 gravity=left font=$EPPATH/../fonts/OCRAEXT.ttf\"
-PerlSetVar AIMCacheDir  \"$EPPATH/eg/images/aim/cache\"
-PerlSetVar AIMDebug 1
-PerlFixupHandler Apache::ImageMagick
-
-</location>
+#<Location /eg/images/aim>
+#
+#PerlSetVar AIMParameter \"pointsize=14 font=$EPPATH/../fonts/OCRAEXT.ttf\"
+#
+##PerlSetVar AIMParameter \"pointsize=14 gravity=left font=$EPPATH/../fonts/OCRAEXT.ttf\"
+#PerlSetVar AIMCacheDir  \"$EPPATH/eg/images/aim/cache\"
+#PerlSetVar AIMDebug 1
+#PerlFixupHandler Apache::ImageMagick
+#
+#</location>
 
 
 
@@ -619,6 +614,15 @@ ApJServManual on
 ApJServSecretKey DISABLED
 ApJServLogFile /dev/null
 </IfModule>
+
+<IfModule mod_dav.c>
+DavLockDB tmp/DAVLockDB
+<Location /dav>
+DAV on
+</Location>
+
+</IfModule>
+
 
 EOD
 

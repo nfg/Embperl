@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eplibxslt.c,v 1.1.2.21 2002/06/24 09:22:47 richter Exp $
+#   $Id: eplibxslt.c,v 1.3 2003/04/11 05:41:18 richter Exp $
 #
 ###################################################################################*/
 
@@ -86,7 +86,7 @@ int embperl_LibXSLT_Text2Text   (/*in*/  tReq *	  r,
     char *	    pKey ;
     SV *            pValue ;
     STRLEN          len ;
-    IV              l ;
+    I32             l ;
     int		    n ;
     const char * *  pParamArray ;
     const char *    sStylesheet ;
@@ -139,7 +139,7 @@ int embperl_LibXSLT_Text2Text   (/*in*/  tReq *	  r,
 
     xmlSubstituteEntitiesDefault(1);
     xmlLoadExtDtdDefaultValue = 1;
-    xmlSetGenericErrorFunc (stderr, NULL) ;
+    /* xmlSetGenericErrorFunc (stderr, NULL) ; */
     
     cur = xsltParseStylesheetFile((const xmlChar *)sStylesheet);
     p   = SvPV (pSource, len) ;
@@ -241,7 +241,7 @@ static int ProviderLibXSLTXSL_New (/*in*/ req *              r,
 *   \endif                                                                       
 */
 
-void ProviderLibXSLT_ErrorFunc      (void *ctx, const char *msg, ...)
+static void ProviderLibXSLT_ErrorFunc      (void *ctx, const char *msg, ...)
 
     {
     tReq * r ;
@@ -259,7 +259,7 @@ void ProviderLibXSLT_ErrorFunc      (void *ctx, const char *msg, ...)
     va_end(args) ;
     
     if (!r)
-        fputs (SvPV(pSV, l), stderr) ;
+        PerlIO_puts (PerlIO_stderr(), SvPV(pSV, l)) ;
     else
         {
         char * p = SvPV(pSV, l) ;
@@ -273,6 +273,47 @@ void ProviderLibXSLT_ErrorFunc      (void *ctx, const char *msg, ...)
     SvREFCNT_dec(pSV) ;
     }
 
+
+/* ------------------------------------------------------------------------ */
+/*                                                                          */
+/* ProviderLibXSLT_ExternalEnityLoader          		            */
+/*                                                                          */
+/*! 
+*   \_en
+*   Callback which is called when to load an external entity. It does
+*   an EMbperl path search before calling libxmls function to do the work.
+*   \endif                                                                       
+*
+*   \_de									   
+*   Callback das aufgerufen wird um externe Entities zu laden. Es wird eine
+*   Suche im Embperl Pfad ausgeführt um danach libxml das eigentliche 
+*   Laden zu überlassen.
+*   \endif                                                                       
+*/
+
+
+static xmlExternalEntityLoader pCurrentExternalEntityLoader ;
+
+static
+xmlParserInputPtr
+ProviderLibXSLT_ExternalEnityLoader(const char *URL, const char *ID,
+                               xmlParserCtxtPtr ctxt) 
+    {
+    tReq * r ;
+    char * sFile ;
+    dTHX ;
+
+    r = CurrReq ;
+    sFile = embperl_PathSearch (r, r -> pPool, URL, r -> Component.nPathNdx) ;
+    if (sFile && pCurrentExternalEntityLoader)
+        return (*pCurrentExternalEntityLoader)(sFile, ID, ctxt) ;
+    else
+        {
+        strncpy (r -> errdat1, URL, sizeof(r -> errdat1) - 1) ;
+        LogError (r, rcNotFound) ;
+        return NULL ;
+        }
+    }
 
 
 /* ------------------------------------------------------------------------ */
@@ -376,6 +417,8 @@ static int ProviderLibXSLTXSL_GetContentPtr     (/*in*/ req *            r,
     SV *   pSource ;
     xsltStylesheetPtr cur ;
     xmlDocPtr	    doc ;
+    xmlExternalEntityLoader pLoader ;
+
 
     tCacheItem * pFileCache = Cache_GetDependency(r, pProvider -> pCache, 0) ;
     if ((rc = Cache_GetContentSV (r, pFileCache, &pSource, bUseCache)) != ok)
@@ -399,6 +442,10 @@ static int ProviderLibXSLTXSL_GetContentPtr     (/*in*/ req *            r,
         xmlSubstituteEntitiesDefault(1);
         xmlLoadExtDtdDefaultValue = 1;
         xmlSetGenericErrorFunc (NULL, &ProviderLibXSLT_ErrorFunc) ;
+        pLoader = xmlGetExternalEntityLoader () ;
+        if (pLoader != &ProviderLibXSLT_ExternalEnityLoader)
+            pCurrentExternalEntityLoader = pLoader ;
+        xmlSetExternalEntityLoader (&ProviderLibXSLT_ExternalEnityLoader) ;
         
         if ((doc = xmlParseMemory(p, len)) == NULL)
       	    {
@@ -632,6 +679,7 @@ static int ProviderLibXSLTXML_GetContentPtr     (/*in*/ req *            r,
     STRLEN len ;
     SV *   pSource ;
     xmlDocPtr	    doc ;
+    xmlExternalEntityLoader pLoader ;
 
     tCacheItem * pFileCache = Cache_GetDependency(r, pProvider -> pCache, 0) ;
     if ((rc = Cache_GetContentSV (r, pFileCache, &pSource, bUseCache)) != ok)
@@ -655,6 +703,10 @@ static int ProviderLibXSLTXML_GetContentPtr     (/*in*/ req *            r,
         xmlSubstituteEntitiesDefault(1);
         xmlLoadExtDtdDefaultValue = 1;
         xmlSetGenericErrorFunc (NULL, &ProviderLibXSLT_ErrorFunc) ;
+        pLoader = xmlGetExternalEntityLoader () ;
+        if (pLoader != &ProviderLibXSLT_ExternalEnityLoader)
+            pCurrentExternalEntityLoader = pLoader ;
+        xmlSetExternalEntityLoader (&ProviderLibXSLT_ExternalEnityLoader) ;
 
         if ((doc = xmlParseMemory(p, len)) == NULL)
       	    {
@@ -916,7 +968,7 @@ static int ProviderLibXSLT_UpdateParam(/*in*/ req *              r,
     char *	    pKey ;
     SV *            pValue ;
     STRLEN          len ;
-    IV		    l ;
+    I32		    l ;
     int		    n ;
     const char * *  pParamArray ;
     

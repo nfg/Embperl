@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: App.pm,v 1.1.2.5 2002/06/24 19:22:30 richter Exp $
+#   $Id: App.pm,v 1.2 2002/10/22 05:39:48 richter Exp $
 #
 ###################################################################################
  
@@ -116,14 +116,18 @@ sub send_error_page
     else
         {
         $Embperl::escmode = 3 ;
+        $r -> output ("\\<table cellspacing='2' cellpadding='5'\\>\r\n") ;
         foreach $err (@$errors)
             {
             $err =~ s|\\|\\\\|g;
             $err =~ s|\n|\n\\<br\\>\\&nbsp;\\&nbsp;\\&nbsp;\\&nbsp;|g;
-            $r -> output ("$err\\<p\\>\r\n") ;
+            $r -> output ("\\<tr bgcolor='#eeeeee'\\>\\<td\\>\r\n\\<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - --\\>\r\n") ;
+            $r -> output ("$err\r\n") ;
+            $r -> output ("\\<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - --\\>\r\n\\</td\\>\\</tr\\>\r\n") ;
             #$r -> output ("\\<tt\\>$err\\</tt\\>\\<p\\>\r\n") ;
             $cnt++ ;
             }
+        $r -> output ("\\</table\\>\r\n\\<br\\>\n\r") ;
         $Embperl::escmode = 0 ;
         }
          
@@ -216,6 +220,59 @@ sub mail_errors
     return $ok ;
     }    
 
+# ---------------------------------------------------------------------------------
+#
+#   MailFormTo
+#
+# ---------------------------------------------------------------------------------
+
+
+sub mail_form_to
+
+    {
+    my ($self, $to, $subject, $returnfield) = @_ ;
+    my $v ;
+    my $k ;
+    my $ok ;
+    my $smtp ;
+    my $ret ;
+    my $r = $self -> curr_req ;
+    my $fdat = $r -> thread -> form_hash ;
+
+    $ret = $fdat -> {$returnfield} ;
+
+    require Net::SMTP ;
+
+    $smtp = Net::SMTP->new($self -> config -> mailhost || 'localhost', 
+                           Debug => $self -> config -> maildebug || 0,
+                           $self -> config -> mailhelo?(Hello => $self -> config -> mailhelo):()) 
+             or die "Cannot connect to mailhost" ;
+    
+    $smtp->mail($self -> config -> mailfrom || "WWW-Server\@$ENV{SERVER_NAME}");
+    $smtp->to($to);
+    $ok = $smtp->data();
+    $ok = $smtp->datasend("Reply-To: $ret\n") if ($ok && $ret) ;
+    $ok and $ok = $smtp->datasend("To: $to\n");
+    $ok and $ok = $smtp->datasend("Subject: $subject\n");
+    $ok and $ok = $smtp->datasend("\n");
+    foreach $k (@{$r -> thread -> form_array})
+        { 
+        $v = $fdat->{$k} ;
+        if (defined ($v) && $v ne '')
+            {
+            $ok and $ok = $smtp->datasend("$k\t= $v \n" );
+            }
+        }
+    $ok and $ok = $smtp->datasend("\nClient\t= $ENV{REMOTE_HOST} ($ENV{REMOTE_ADDR})\n\n" );
+    $ok and $ok = $smtp->dataend() ;
+    $smtp->quit; 
+
+    $? = $ok?0:1 ;
+
+    return $ok ;
+    }    
+
+
 
 
 1;
@@ -234,4 +291,19 @@ Embperl base class for application objects
 
 
 =head1 DESCRIPTION
+
+You may override the following methods in your application object
+
+=over
+
+=item $app -> get_recipe ($r, $name)
+
+=item $app -> send_error_page ($r) 
+
+=item $app -> mail_errors ($r) 
+
+=item $app -> mail_form_to ($to, $subject, $returnfield)
+
+=back
+
 

@@ -2,7 +2,6 @@ package Embperl::Syntax::Test2;
 
 use Embperl::Syntax qw{:types} ;
 use Embperl::Syntax::HTML ;
-use URI;
 use File::Spec::Unix;
 
 # We inherit the generic HTML support from Embperl::Syntax::HTML
@@ -53,3 +52,5 @@ sub rewrite_url
     warn "rewrite_url got $_[0]\n" ;
     return "**$_[0]**12**"; 
     }
+
+1 ;

@@ -1,0 +1,43 @@
+[- 
+$r = shift ; 
+$r -> config -> output_mode (1) ;
+$escmode = 12 ;
+-]
+
+<html>
+<head>
+<title>Embperl Tests - XHTML output</title>
+</head>
+
+<body>
+
+[- $a = 1 -]
+
+[$if $a$]
+    a <br>
+[$ endif$]
+
+[-
+
+@c = ([1,"'2'"],['"3"',4]) ;
+-]
+
+
+<table>
+    <tr>
+        <td>[+ $c[$row][$col] +] </td>
+    </tr> 
+</table>
+
+[-
+%fdat = ( a => 1, b => "'2'", c => '"3"') ;
+@ffld = keys %fdat ;
+-]
+
+[$hidden$]
+
+<input type="text" name="b">
+<input type="text" name="c">
+
+</body>
+</html>

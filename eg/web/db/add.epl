@@ -1,53 +1,156 @@
 [- 
 use File::Basename ;
+use Data::Dumper ;
 
-$r = shift 
+
+$DBIx::Recordset::Debug = 3;
+$maxrow = 3;
+
+$r = shift ;
+-]
+<table width="100%">
+    <tr bgcolor="#fefcad">
+        <td><font size="4">[$ if $r -> {edit} $][= edit1 =] [$ else $][= add1 =] [$ endif $] [+ $r -> {category_set}{category} +]</font></td>
+    </tr>
+</table>
+
+
+[$ if !$r->{error} $]
+
+<form action="[+ $r -> app -> posturl('show.epl') +]" method="POST">
+
+[= add2a =]<br>
+[= add2b =]<br><br>
+[$ if $r -> {category_set}{add_info}$]
+<B>[+ $r -> {category_set}{add_info} +]</b><br><br>
+[$ endif $]
+
+
+[$if $r -> {user_admin} $]
+<table>
+    <tr>
+        <td class="cText" rowspan="2" valign="top">[= state =]:&nbsp;</td><td class="cInput"><input type="radio" name="state" value="1"[$ if ($r->{item_set}{state}) $] CHECKED[$ endif $]>[= display =]</td>
+    </tr>
+    <tr>
+        <td class="cInput"><input type="radio" name="state" value="0"[$ if !$r->{item_set}{state} $] CHECKED[$ endif $]>[= hide =]</td>
+    </tr>
+</table>
+[$endif$]
+
+[-
+ $ct = $r->{category_texts}; 
+ $cy = $r->{category_types}; 
+ $cf = $r->{category_fields};
+
+ 
 -]
 
 <table width="100%">
-    <tr bgcolor="#fefcad">
-        <td><font size="4">[= add1 =] [+ $r -> {category_set}{category} +]</font></td>
-    </tr>
-</table>
-
-
-
-<form action="[+ $r -> {action_prefix}?($r->{action_prefix} . dirname($r-> param -> uri) .'/'):'' +]show.epl" method="POST">
-
-[= add2 =]<br><br>
-
-<table>
-    <tr>
-        <td>URL:</td><td><input type="text" name="url" size=80></td>
-    </tr>
-</table>
-
-<table width="100%">
+    [$while $rec = ${$r -> {language_set}} -> Next $] 
     <tr bgcolor="#fefcad"><font size="3">
-        [- $rec = $r -> {language_set}[$row] -]
-        <td>[+ $rec -> {name} +]</td>
+        <td><font size=3><b>[+ $rec -> {name} +]</b></font></td>
     </tr>
     <tr>
         <td>
+	    [$ syntax EmbperlBlocks $]
             <table>
-                <tr>
-                    <td>[= heading =]:</td><td><input type="text" name="heading_[+ $rec -> {id} +]" size=80></td>
-                </tr>
-                <tr>
-                    <td>[= url =]:</td><td><input type="text" name="url_[+ $rec -> {id} +]" size=80></td>
-                </tr>
-                <tr>
-                    <td>[= description =]:</td><td><textarea name="description_[+ $rec -> {id} +]" cols=60 rows=10></textarea></td>
-                </tr>
+                [$ foreach $type (@$cf) $]
+                    [$ if $txt = $ct->{$type . '_text'} $]
+                        <tr>
+			    [$ syntax Embperl $]
+   			    [# <td class="cText" valign="top" colspan="2">[+ $txt +] / [+ $type +] / [+ $i++ +]</td> #]
+                            [$ if $cy->{$type} =~ /textarea/ $]
+                                <td class="cText" valign="top">[+ $txt +]:&nbsp;</td>
+				<td class="cInput">
+                                    <textarea name="[+ $type +]_[+ $rec -> {id} +]" cols="60" rows="10">[+ $fdat{"${type}_$rec->{id}"} +]</textarea> 
+                                </td>
+                            [$ elsif $cy->{$type} =~ /pulldown/ $]
+                                <td class="cText" valign="top">[+ $txt +]:&nbsp;</td>
+				<td class="cInput">
+				  [-
+				   ($table = $type) =~ s/_id$//;
+				   $poss = $r->app->get_titles($r,$table);
+				  -]
+			          
+				  [# [+ $type +] / [+ $table +] / [+ $r->{category_title_type} +]<PRE>[+ Dumper $poss +]</PRE> #]
+
+				  <select name="[+ $type +]_[+ $rec -> {id} +]">
+				    [- $item = $poss->[$row] -]
+				    <option value="[+ $item->{id} +]">[+ $item->{title} +]</option>
+				  </select>
+				</td>
+                            [$ else $]
+                                <td class="cText" valign="top">[+ $txt +]:&nbsp;</td>
+				<td class="cInput"><input type="text" name="[+ $type +]_[+ $rec -> {id} +]" size="80"> </td>
+                            [$ endif $]
+			    [$ syntax EmbperlBlocks $]
+                        </tr>
+                    [$ endif $]
+                [$ endforeach $]
             </table>
+	    [$ syntax Embperl $]
+            <input type="hidden" name="id_[+ $rec -> {id} +]">
         </td>
     </tr>
+    [$endwhile$]
 </table>
 
+<br>Owner: [+ $r->{item_set}{email} +]
+
 <br><br>
+[$ if $r -> {edit} $]
+&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="-update_item" value="[= update3 =]">
+&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="-delete_item" value="[= delete3 =]">
+[$ else $]
 &nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="-add_item" value="[= add3 =] [+ $r -> {category_set}{category} +]">
+[$endif$]
+
 
 <input type="hidden" name="category_id">
+<input type="hidden" name="[+ $r -> {category_set}{table_type} +]_id">
 
 </form>
-             
+[$ endif $]
+
+[#
+<PRE>
+[+
+ Data::Dumper->Dump(
+		    [
+		     {%fdat},
+		     $r->{edit},
+		     $r->{category_set}{add_info},
+		     $r->{action_prefix},
+		     $r->{category_set}{category},
+		     $r->{user_admin},
+		     [keys %$r],
+		     $r->{category_fields},
+		     $r->{category_texts},
+$state,
+$item_set,
+#		     ${$r->{category_set}},
+#		     ${$r->{language_set}},
+#		     $r->{item_set},
+		     ],[qw[
+			   fdat
+			   edit
+			   add_info
+			   action_prefix
+			   category
+			   user_admin
+			   r_keys
+			   category_fields
+			   category_texts
+		            state
+                	   category_set
+			   language_set
+			   item_set
+			   ]
+			]
+		    )
++]
+</PRE>
+#]
+
+
+

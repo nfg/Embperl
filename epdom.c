@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdom.c,v 1.4.2.95 2002/06/19 04:22:43 richter Exp $
+#   $Id: epdom.c,v 1.11 2003/04/11 05:41:17 richter Exp $
 #
 ###################################################################################*/
 
@@ -96,7 +96,7 @@ tNodeData * dom_malloc (/*in*/ tApp * a,
     if (nFree > sizeof (MemFree) / sizeof (void *))
 	mydie (a, "Node to huge for dom_malloc") ;
 
-    if (pNew = MemFree[nFree])
+    if ((pNew = MemFree[nFree]))
 	{ /* --- take one entry off the free list --- */
 	MemFree[nFree] = *((tUInt8 * *)pNew) ;
 	(*pCounter)++ ;
@@ -211,7 +211,7 @@ void * str_malloc (/*in*/ tApp * a,
     else
         {
         char buf[256] ;
-        sprintf (buf, "%d bytes", n) ;
+        sprintf (buf, "%zu bytes", n) ;
         LogErrorParam (a, rcOutOfMemory, "str_malloc failed", buf) ;
         }
 
@@ -238,7 +238,7 @@ void * str_malloc_dbg (/*in*/ tApp * a,
     else
         {
         char buf[256] ;
-        sprintf (buf, "%d bytes", n) ;
+        sprintf (buf, "%zu bytes", n) ;
         LogErrorParam (a, rcOutOfMemory, "str_malloc_dbg failed", buf) ;
         }
 
@@ -254,7 +254,7 @@ void * str_realloc (/*in*/ tApp * a,
     void * m = ((size_t *)s) - 1 ;
     size_t * m_size;
     nMemUsage -= *((size_t *)m) ;
-    if (m = realloc (m, n + sizeof (size_t)))
+    if ((m = realloc (m, n + sizeof (size_t))))
 	{
 	nMemUsage += n ;
 	/* make the following in multiple step, so sun-cc is happy... */
@@ -266,7 +266,7 @@ void * str_realloc (/*in*/ tApp * a,
     else
         {
         char buf[256] ;
-        sprintf (buf, "%d bytes", n) ;
+        sprintf (buf, "%zu bytes", n) ;
         LogErrorParam (a, rcOutOfMemory, "str_realloc failed", buf) ;
         }
     
@@ -295,7 +295,7 @@ void * str_realloc_dbg (/*in*/ tApp * a,
     else
         {
         char buf[256] ;
-        sprintf (buf, "%d bytes", n) ;
+        sprintf (buf, "%zu bytes", n) ;
         LogErrorParam (a, rcOutOfMemory, "str_realloc failed", buf) ;
         }
 
@@ -1166,7 +1166,10 @@ static int DomTree_dodelete (/*in*/ tApp * a, tDomTree * pDomTree)
 	    dom_free (a, pNode, &numNodes) ;
 	    }
 	else
-	    pNode = NULL ;
+            {
+            xNode = -1 ;
+            pNode = NULL ;
+            }
 
 	if ((pLookupLevelNode = pLookup ->  pLookupLevel) && (pLookupLevelNode -> xNullNode == xNode || pNode == NULL))
 	    {
@@ -1561,6 +1564,7 @@ void DomTree_checkpoint (tReq * r, tIndex nRunCheckpoint)
         tNodeData * pPrevNode    = Node_selfPreviousSibling (a, pDomTree, pCompileNode, r -> Component.nCurrRepeatLevel) ;
         
         tNodeData * pCompileParent = NodeAttr_selfParentNode (pDomTree, pCompileNode, r -> Component.nCurrRepeatLevel) ;
+        tNodeData * pCompileParent2= NodeAttr_selfParentNode (pDomTree, pCompileParent, r -> Component.nCurrRepeatLevel) ;
         tNodeData * pRunParent     = NodeAttr_selfParentNode (pDomTree, pRunNode, r -> Component.nCurrRepeatLevel) ;
         tNodeData * pRunParent2    = NodeAttr_selfParentNode (pDomTree, pRunParent, r -> Component.nCurrRepeatLevel) ;
 
@@ -1584,6 +1588,29 @@ void DomTree_checkpoint (tReq * r, tIndex nRunCheckpoint)
 
             if ((a -> pCurrReq?a -> pCurrReq -> Component.Config.bDebug:a -> Config.bDebug) & dbgCheckpoint)
 	        lprintf (a, "[%d]Checkpoint: jump backward DomTree=%d Index=%d Node=%d RepeatLevel=%d Line=%d -> Index=%d Node=%d Line=%d SVs=%d\n", a -> pThread -> nPid, r -> Component.xCurrDomTree, nCompileCheckpoint, pPrevNode -> xNdx, r -> Component.nCurrRepeatLevel, pPrevNode -> nLinenumber, nRunCheckpoint, pRunNode -> xNdx, pRunNode -> nLinenumber, sv_count) ; 
+
+            }
+        else if (pRunParent2 && pCompileParent2 && pCompileParent2 -> xNdx  == pRunParent2 -> xNdx)
+            {
+            pPrevNode = Node_selfPreviousSibling (a, pDomTree, pCompileParent, r -> Component.nCurrRepeatLevel) ;
+            if (pPrevNode)
+                pPrevNode = Node_selfCondCloneNode (a, pDomTree, pPrevNode, r -> Component.nCurrRepeatLevel) ;
+            else
+                {
+                pPrevNode = Node_selfCondCloneNode (a, pDomTree, pCompileParent, r -> Component.nCurrRepeatLevel) ;
+                pPrevNode -> bFlags |= nflgIgnore ;
+                }
+
+            r -> Component.nCurrRepeatLevel++ ;            
+            pRunNode  = Node_selfCondCloneNode   (a, pDomTree, pRunParent, r -> Component.nCurrRepeatLevel) ;
+        
+            pRunNode -> xPrev = pPrevNode -> xNdx ;
+            pPrevNode -> xNext = pRunNode -> xNdx ;
+	    pRunNode -> bFlags  |= nflgNewLevelPrev ;
+	    pPrevNode -> bFlags |= nflgNewLevelNext ;
+
+            if ((a -> pCurrReq?a -> pCurrReq -> Component.Config.bDebug:a -> Config.bDebug) & dbgCheckpoint)
+	        lprintf (a, "[%d]Checkpoint: jump backward parent DomTree=%d Index=%d Node=%d RepeatLevel=%d Line=%d -> Index=%d Node=%d Line=%d SVs=%d\n", a -> pThread -> nPid, r -> Component.xCurrDomTree, nCompileCheckpoint, pPrevNode -> xNdx, r -> Component.nCurrRepeatLevel, pPrevNode -> nLinenumber, nRunCheckpoint, pRunNode -> xNdx, pRunNode -> nLinenumber, sv_count) ; 
 
             }
         else if (xNode_selfLevelNull(pDomTree,pPrevNode) == xNode_selfLevelNull(pDomTree,pRunParent))
@@ -1872,7 +1899,7 @@ tNodeData * Node_selfLevelItem (/*in*/ tApp * a,
 	    }
 	if (pLnNode -> nRepeatLevel == nLevel)
 	    return pLnNode ;
-	while (pLookupLevelNodeLevel = pLookupLevelNodeLevel -> pNext)
+	while ((pLookupLevelNodeLevel = pLookupLevelNodeLevel -> pNext))
 	    {
 	    pLnNode = pLookupLevelNodeLevel -> pNode ;
 	    if (pLnNode -> nRepeatLevel == nLevel)
@@ -2328,7 +2355,7 @@ tNodeData * Node_selfExpand   (/*in*/ tApp * a,
 		pLookupLevelNodeLevel -> pNode = pNewChild ;
 	    else
 		{
-		while (pLookupLevelNodeLevel = pLookupLevelNodeLevel -> pNext)
+		while ((pLookupLevelNodeLevel = pLookupLevelNodeLevel -> pNext))
 		    {
 		    pLnNode = pLookupLevelNodeLevel -> pNode ;
 		    if (pLnNode -> nRepeatLevel == nLevel)
@@ -3311,6 +3338,8 @@ static tNodeData * Node_toString2 (/*i/o*/ register req *   r,
 			        pNodeName++ ;
 			        }
 			    }
+                        else
+                            pNodeEnd = "" ;
 		        if (*pNodeName == ':')
 			    pNodeName++ ;
 		        
@@ -3332,11 +3361,11 @@ static tNodeData * Node_toString2 (/*i/o*/ register req *   r,
                         }
                     else
 		        {
-		        pNodeStart = "<" ;
-		        pNodeEnd = ">" ;
 		        nNodeStartLen = 1 ;
-		        nNodeEndLen = 1 ;
+                        nNodeEndLen = r -> Config.nOutputMode == omodeXml && pNode -> nType == ntypTag?3:1 ;
 		        nNodeNameLen = strlen (pNodeName) ;
+                        pNodeStart = "<" ;
+                        pNodeEnd = nNodeEndLen == 3?" />":">" ;
 		        }
 
 		    owrite (r, pNodeStart, nNodeStartLen) ;
@@ -3367,11 +3396,12 @@ static tNodeData * Node_toString2 (/*i/o*/ register req *   r,
 			    if (pAttr -> xValue)
 			        {
 			        if (pAttr -> xName != xNoName)
-				    if (pAttr -> bFlags & aflgSingleQuote)
+                                    {
+                                    if (pAttr -> bFlags & aflgSingleQuote)
 				        oputs (r, "='") ;
 				    else
 				        oputs (r, "=\"") ;
-
+                                    }
 			        if (pAttr -> bFlags & aflgAttrChilds)
 				    {
 				    tAttrData * pAttrNode = (tAttrData * )Node_toString2 (r, pDomTree, pAttr -> xNdx, &nRepeatLevel) ;
@@ -3390,14 +3420,17 @@ static tNodeData * Node_toString2 (/*i/o*/ register req *   r,
 				    Ndx2StringLen (pAttr -> xValue, s, l) ;
 				    while (isspace (*s) && l > 0)
 				        s++, l-- ;
-				    owrite (r, s, l) ;
+                                    /*OutputEscape (r, s, l, (pAttr -> bFlags & aflgEscXML)?Char2XML:(pAttr -> bFlags & aflgEscUrl)?Char2Url:Char2Html, (char)((pAttr -> bFlags & aflgEscChar)?'\\':0)) ;*/
+                                    owrite (r, s, l) ;
 				    nLastLen += l ;
 				    }
 			        if (pAttr -> xName != xNoName)
-				    if (pAttr -> bFlags & aflgSingleQuote)
+                                    {
+                                    if (pAttr -> bFlags & aflgSingleQuote)
 				        oputc (r, '\'') ;
 				    else
 				        oputc (r, '"') ;
+                                    }
 			        }
 			    }
 		        pAttr++ ;
@@ -3446,7 +3479,7 @@ static tNodeData * Node_toString2 (/*i/o*/ register req *   r,
 		    {
 		    oputs (r, "</") ;
 		    oputs (r, Node_selfNodeName (pNode)) ;
-		    oputc (r, '>') ;
+                    oputc (r, '>') ;
 		    }
 	        }
             }

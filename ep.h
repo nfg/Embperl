@@ -21,7 +21,16 @@
 #include <ctype.h>
 #include <time.h>
 
-#if !defined(PERLIO_IS_STDIO)
+#ifndef PERL_VERSION
+#include <patchlevel.h>
+#ifndef PERL_VERSION
+#define PERL_VERSION PATCHLEVEL
+#define PERL_SUBVERSION SUBVERSION
+#endif
+#endif
+
+
+#if !defined(PERLIO_IS_STDIO) && PERL_VERSION < 8
 #define PERLIO_IS_STDIO
 #endif
 
@@ -101,11 +110,6 @@ extern "C" {
 #undef sleep
 #endif
 
-#ifndef PERL_VERSION
-#include <patchlevel.h>
-#define PERL_VERSION PATCHLEVEL
-#define PERL_SUBVERSION SUBVERSION
-#endif
 
 #if PERL_VERSION >= 6
 
@@ -589,7 +593,8 @@ char * embperl_File2Abs  (/*i/o*/ register req * r,
                         /*in*/  const char *         sFilename) ;
 char * embperl_PathSearch    (/*i/o*/ register req * r,
                             /*in*/  tMemPool *     pPool,
-                            /*in*/  const char *         sFilename) ;
+                            /*in*/  const char *         sFilename,
+                            /*in*/  int            nPathNdx) ;
 char * embperl_PathStr      (/*i/o*/ register req * r,
                             /*in*/  const char *         sFilename) ;
 AV * embperl_String2AV (/*in*/ tApp * pApp, 

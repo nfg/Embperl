@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epinit.c,v 1.1.2.57 2002/06/19 04:22:43 richter Exp $
+#   $Id: epinit.c,v 1.10 2003/06/09 18:03:21 richter Exp $
 #
 ###################################################################################*/
 
@@ -22,6 +22,9 @@
 
 #include "epdefault.c"
 
+SV   ep_sv_undef ; /* we need our own undef value, because when 
+                      storing a PL_sv_undef with Perl 5.8.0 in a hash
+                      Perl takes it as a placeholder and pretents it isn't there :-( */
 
 
 #ifndef PERL_IMPLICIT_CONTEXT
@@ -64,6 +67,125 @@ static tMemPool * pMainPool ;
 
 static tReq NullRequest ; /* a request object with all zero, to point for deleted objects */
 
+/* -------------------------------------------------------------------------
+*
+* Options lists for configuration 
+*
+*/
+
+#define OPTION(a,b) { #a, a}, { #b, a},
+
+tOptionEntry OptionsDEBUG[] =
+    {
+    OPTION(dbgStd, std)
+    OPTION(dbgMem,Mem)
+    OPTION(dbgEval,Eval)
+    OPTION(dbgCmd,Cmd)
+    OPTION(dbgEnv,Env)
+    OPTION(dbgForm,Form)
+    OPTION(dbgTab,Tab)
+    OPTION(dbgInput,Input)
+    OPTION(dbgFlushOutput,FlushOutput)
+    OPTION(dbgFlushLog,FlushLog)
+    OPTION(dbgAllCmds,AllCmds)
+    OPTION(dbgSource,Source)
+    OPTION(dbgFunc,Func)
+    OPTION(dbgLogLink,LogLink)
+    OPTION(dbgDefEval,DefEval)
+    OPTION(dbgOutput,Output)
+    OPTION(dbgDOM,DOM)
+    OPTION(dbgRun,Run)
+    OPTION(dbgHeadersIn,HeadersIn)
+    OPTION(dbgShowCleanup,ShowCleanup)
+    OPTION(dbgProfile,Profile)
+    OPTION(dbgSession,Session)
+    OPTION(dbgImport,Import)
+    OPTION(dbgBuildToken,BuildToken)
+    OPTION(dbgParse,Parse)
+    OPTION(dbgObjectSearch,ObjectSearch)
+    OPTION(dbgCache,Cache)
+    OPTION(dbgCompile,Compile)
+    OPTION(dbgXML,XML)
+    OPTION(dbgXSLT,XSLT)
+    OPTION(dbgCheckpoint,Checkpoint)
+    OPTION(dbgAll,All)
+    } ;
+
+#define OPTION_OPT(a) OPTION(opt##a, a) 
+
+tOptionEntry OptionsOPTIONS[] =
+    {
+    OPTION_OPT(DisableVarCleanup)
+    OPTION_OPT(DisableEmbperlErrorPage)
+    OPTION_OPT(SafeNamespace)
+    OPTION_OPT(OpcodeMask)
+    OPTION_OPT(RawInput)
+    OPTION_OPT(SendHttpHeader)
+    OPTION_OPT(EarlyHttpHeader)
+    OPTION_OPT(DisableChdir)
+    OPTION_OPT(DisableFormData)
+    OPTION_OPT(DisableHtmlScan)
+    OPTION_OPT(DisableInputScan)
+    OPTION_OPT(DisableTableScan)
+    OPTION_OPT(DisableMetaScan)
+    OPTION_OPT(AllFormData)
+    OPTION_OPT(RedirectStdout)
+    OPTION_OPT(UndefToEmptyValue)
+    OPTION_OPT(NoHiddenEmptyValue)
+    OPTION_OPT(AllowZeroFilesize)
+    OPTION_OPT(ReturnError)
+    OPTION_OPT(KeepSrcInMemory)
+    OPTION_OPT(KeepSpaces)
+    OPTION_OPT(OpenLogEarly)
+    OPTION_OPT(NoUncloseWarn)
+    OPTION_OPT(DisableSelectScan)
+    OPTION_OPT(ShowBacktrace)
+    OPTION_OPT(EnableChdir)
+    } ;
+
+
+#define OPTION_ESC(a) OPTION(esc##a, a) 
+
+tOptionEntry OptionsESCMODE[] =
+    {
+    OPTION_ESC(None)
+    OPTION_ESC(Html)
+    OPTION_ESC(Url)
+    OPTION_ESC(Escape)
+    OPTION_ESC(XML)
+    OPTION_ESC(Std)
+    } ;
+
+
+#define OPTION_IESC(a) OPTION(iesc##a, a) 
+
+tOptionEntry OptionsINPUT_ESCMODE[] =
+    {
+    OPTION_IESC(None)
+    OPTION_IESC(Html)
+    OPTION_IESC(Url)
+    OPTION_IESC(RemoveTags)
+    } ;
+
+#define OPTION_OMODE(a) OPTION(omode##a, a) 
+
+tOptionEntry OptionsOUTPUT_MODE[] =
+    {
+    OPTION_OMODE(Html)
+    OPTION_OMODE(Xml)
+    } ;
+
+#define OPTION_SMODE(a) OPTION(smode##a, a) 
+
+tOptionEntry OptionsSESSION_MODE[] =
+    {
+    OPTION_SMODE(None)
+    OPTION_SMODE(UDatCookie)
+    OPTION_SMODE(UDatParam)
+    OPTION_SMODE(UDatUrl)
+    OPTION_SMODE(SDatParam)
+    } ;
+
 
 /*---------------------------------------------------------------------------
 * embperl_SetupThread
@@ -99,8 +221,11 @@ int    embperl_SetupThread  (/*in*/ pTHX_
     ppSV = hv_fetch (PL_modglobal, "Embperl::Thread", 15, 1) ;
 #endif
     if (!ppSV)
+	{
+	//strcpy (errdat1, "PL_modglobal (key=Embperl::Thread)") ;
         return rcHashError ;
-
+	}
+	
     if (!*ppSV || !SvOK(*ppSV))
         {
         SV * pThreadRV ;
@@ -147,6 +272,7 @@ int    embperl_SetupThread  (/*in*/ pTHX_
     }
 
 
+
 /*---------------------------------------------------------------------------
 * embperl_GetThread
 */
@@ -182,6 +308,36 @@ tThreadData * embperl_GetThread  (/*in*/ pTHX)
     }
 
 /*---------------------------------------------------------------------------
+* embperl_EndPass1
+*/
+/*!
+*
+* \_en									   
+* Call when configuration pass 1 of apache is done.
+* \endif                                                                       
+*
+* \_de									   
+* Wird aufgerufen wenn Pass 1 des Einlesens der Konfiguration beendet ist.
+* \endif                                                                       
+*                                                                          
+* ------------------------------------------------------------------------ */
+
+
+
+int    embperl_EndPass1  (void)
+
+
+    {
+    dTHX ;
+    tThreadData * pThread = embperl_GetThread  (aTHX) ;
+
+    hv_clear (pThread -> pApplications) ;
+
+    return ok ;
+    }
+
+
+/*---------------------------------------------------------------------------
 * embperl_CreateSessionObject
 */
 /*!
@@ -212,7 +368,7 @@ static int embperl_CreateSessionObject(/*in*/ tApp *       a,
     tAppConfig * pCfg = &a -> Config ;
     char *       sPackage = pCfg -> sSessionHandlerClass ;
     HV * pHash = newHV () ;
-    SV * pTie  ;
+    SV * pTie = NULL  ;
     int n ;
     SV * pSVCode ;
 
@@ -428,7 +584,6 @@ int    embperl_SetupApp     (/*in*/ pTHX_
         sAppName        = GetHashValueStr (aTHX_ pParam, "appname", NULL) ;
         }
 
-
     if (!sAppName)
         {
 #ifdef APACHE
@@ -442,6 +597,7 @@ int    embperl_SetupApp     (/*in*/ pTHX_
     if (sAppName)
         pApp = (tApp * )GetHashValuePtr (NULL, pThread -> pApplications, sAppName, NULL) ;
 
+  
     if (!pApp)
         {
         int  rc ;
@@ -475,12 +631,12 @@ int    embperl_SetupApp     (/*in*/ pTHX_
                 bUseEnv         = (bool)GetHashValueInt (aTHX_ pParam, "use_env", 0) ;
                 bUseRedirectEnv = (bool)GetHashValueInt (aTHX_ pParam, "use_redirect_env", 0) ;
                 }
+
             embperl_GetCGIAppConfig (pThread, pPool, &pApp -> Config, bUseEnv, bUseRedirectEnv, 1) ;
             }
 
         SetHashValueInt (NULL, pThread -> pApplications, sAppName, (IV)pApp) ;
         
-
         pApp -> pThread = pThread ;
 
         if (pParam)
@@ -488,7 +644,6 @@ int    embperl_SetupApp     (/*in*/ pTHX_
 
         tainted = 0 ;
 
-        
         if (pApp -> Config.sLog && pApp -> Config.sLog[0])
             {
             if ((rc = OpenLog (pApp)) != ok)
@@ -672,6 +827,9 @@ int embperl_Init        (/*in*/ pTHX_
     tThreadData * pThread ;
     tApp        * pApp ;
     tApacheDirConfig * pApacheCfg = NULL ;
+
+
+    memcpy (&ep_sv_undef, &PL_sv_undef, sizeof (PL_sv_undef)) ;
 
 #ifdef APACHE
     if (pApacheSrvSV && SvROK (pApacheSrvSV))
@@ -893,6 +1051,9 @@ static int embperl_GetFormData (/*i/o*/ register req * r,
                             char * p = strchr(pVal, ':') ;
                             if (p && *p)
                                 {
+                                char * p2 = strchr(p+1, ':') ;
+                                if (p2)
+                                    *p2 = '\0' ;
                                 r -> sSessionUserID = ep_pstrdup (r -> pPool, p + 1) ;
                                 *p = '\0' ;
                                 }
@@ -917,6 +1078,7 @@ static int embperl_GetFormData (/*i/o*/ register req * r,
 			    if (hv_store (pFormHash, pKey, nKey, pSVV, 0) == NULL)
 				{
 				_free (r, pMem) ;
+				strcpy (r -> errdat1, "fdat") ;
 				return rcHashError ;
 				}
 
@@ -1288,7 +1450,7 @@ int    embperl_SetupRequest (/*in*/ pTHX_
 
     embperl_SetupFormData (r) ;
 
-    if (r -> sSessionUserID)
+    if (r -> sSessionUserID && pApp -> pUserObj)
         {
         tainted = 0 ;
         SPAGAIN;
@@ -1299,7 +1461,7 @@ int    embperl_SetupRequest (/*in*/ pTHX_
 	perl_call_method ("setid", 0) ;
         }
 
-    if (r -> sSessionStateID)
+    if (r -> sSessionStateID && pApp -> pStateObj)
         {
         tainted = 0 ;
         SPAGAIN;
@@ -1376,7 +1538,7 @@ int    embperl_CleanupOutput   (/*in*/ tReq *                r,
     if (SvREFCNT(SvRV(pOutput -> _perlsv)) != 1)
         {
         char buf[20] ;
-        sprintf (buf, "%d", SvREFCNT(SvRV(pOutput -> _perlsv)) - 1) ;
+        sprintf (buf, "%d", (int)SvREFCNT(SvRV(pOutput -> _perlsv)) - 1) ;
         LogErrorParam (r -> pApp, rcRefcntNotOne, buf, "request.component.output") ;
         }            
     sv_unmagic(SvRV(pOutput -> _perlsv), '~') ;
@@ -1413,7 +1575,7 @@ int    embperl_CleanupComponent  (/*in*/ tComponent *          c)
     SV * pHV ;
     MAGIC * mg;
 
-    if (c -> Param.sISA)
+    if (c -> Param.sISA && c -> sCurrPackage)
         {
         STRLEN  l ;
         SV * pName = newSVpvf ("%s::ISA", c -> sImportPackage) ;
@@ -1440,19 +1602,19 @@ int    embperl_CleanupComponent  (/*in*/ tComponent *          c)
     if (SvREFCNT(SvRV(c -> Config._perlsv)) != 1)
         {
         char buf[20] ;
-        sprintf (buf, "%d", SvREFCNT(SvRV(c -> Config._perlsv)) - 1) ;
+        sprintf (buf, "%d", (int)SvREFCNT(SvRV(c -> Config._perlsv)) - 1) ;
         LogErrorParam (r -> pApp, rcRefcntNotOne, buf, "request.component.config") ;
         }            
     if (SvREFCNT(SvRV(c -> Param._perlsv)) != 1)
         {
         char buf[20] ;
-        sprintf (buf, "%d", SvREFCNT(SvRV(c -> Param._perlsv)) - 1) ;
+        sprintf (buf, "%d", (int)SvREFCNT(SvRV(c -> Param._perlsv)) - 1) ;
         LogErrorParam (r -> pApp, rcRefcntNotOne, buf, "request.component.param") ;
         }            
     if (SvREFCNT(c -> _perlsv) != 1)
         {
         char buf[20] ;
-        sprintf (buf, "%d", SvREFCNT(SvRV(c -> _perlsv)) - 1) ;
+        sprintf (buf, "%d", (int)SvREFCNT(SvRV(c -> _perlsv)) - 1) ;
         LogErrorParam (r -> pApp, rcRefcntNotOne, buf, "request.component") ;
         }            
 
@@ -1462,13 +1624,13 @@ int    embperl_CleanupComponent  (/*in*/ tComponent *          c)
     Embperl__Component_destroy(aTHX_ c) ;
 
     pHV = SvRV (c -> _perlsv) ;
-    if (mg = mg_find (pHV, '~'))
+    if ((mg = mg_find (pHV, '~')))
         *((tComponent **)(mg -> mg_ptr)) = &NullRequest.Component ;
     pHV = SvRV (c -> Config._perlsv) ;
-    if (mg = mg_find (pHV, '~'))
+    if ((mg = mg_find (pHV, '~')))
         *((tComponentConfig **)(mg -> mg_ptr)) = &NullRequest.Component.Config ;
     pHV = SvRV (c -> Param._perlsv) ;
-    if (mg = mg_find (pHV, '~'))
+    if ((mg = mg_find (pHV, '~')))
         *((tComponentParam **)(mg -> mg_ptr)) = &NullRequest.Component.Param ;
 
     SvREFCNT_dec (c -> Config._perlsv) ;
@@ -1484,13 +1646,13 @@ int    embperl_CleanupComponent  (/*in*/ tComponent *          c)
         
 	/* adjust pointer in perl magic */
         pHV = SvRV (c -> _perlsv) ;
-        if (mg = mg_find (pHV, '~'))
+        if ((mg = mg_find (pHV, '~')))
             *((tComponent **)(mg -> mg_ptr)) = c ;
         pHV = SvRV (c -> Config._perlsv) ;
-        if (mg = mg_find (pHV, '~'))
+        if ((mg = mg_find (pHV, '~')))
             *((tComponentConfig **)(mg -> mg_ptr)) = &c -> Config ;
         pHV = SvRV (c -> Param._perlsv) ;
-        if (mg = mg_find (pHV, '~'))
+        if ((mg = mg_find (pHV, '~')))
             *((tComponentParam **)(mg -> mg_ptr)) = &c -> Param ;
         }
     else
@@ -1579,13 +1741,13 @@ int    embperl_CleanupRequest (/*in*/ tReq *  r)
     if (SvREFCNT(SvRV(r -> Config._perlsv)) != 1)
         {
         char buf[20] ;
-        sprintf (buf, "%d", SvREFCNT(SvRV(r -> Config._perlsv)) - 1) ;
+        sprintf (buf, "%d", (int)SvREFCNT(SvRV(r -> Config._perlsv)) - 1) ;
         LogErrorParam (r -> pApp, rcRefcntNotOne, buf, "request.config") ;
         }            
     if (SvREFCNT(SvRV(r -> Param._perlsv)) != 1)
         {
         char buf[20] ;
-        sprintf (buf, "%d", SvREFCNT(SvRV(r -> Param._perlsv)) - 1) ;
+        sprintf (buf, "%d", (int)SvREFCNT(SvRV(r -> Param._perlsv)) - 1) ;
         LogErrorParam (r -> pApp, rcRefcntNotOne, buf, "request.param") ;
         }            
     /*
@@ -1607,13 +1769,13 @@ int    embperl_CleanupRequest (/*in*/ tReq *  r)
     Embperl__Req_destroy(aTHX_ r) ;
 
     pHV = SvRV (r -> _perlsv) ;
-    if (mg = mg_find (pHV, '~'))
+    if ((mg = mg_find (pHV, '~')))
         *((tReq **)(mg -> mg_ptr)) = &NullRequest ;
     pHV = SvRV (r -> Config._perlsv) ;
-    if (mg = mg_find (pHV, '~'))
+    if ((mg = mg_find (pHV, '~')))
         *((tReqConfig **)(mg -> mg_ptr)) = &NullRequest.Config ;
     pHV = SvRV (r -> Param._perlsv) ;
-    if (mg = mg_find (pHV, '~'))
+    if ((mg = mg_find (pHV, '~')))
         *((tReqParam **)(mg -> mg_ptr)) = &NullRequest.Param ;
     
    
@@ -1750,13 +1912,13 @@ int    embperl_SetupComponent  (/*in*/ tReq *                 r,
         
 	/* adjust pointer in perl magic */
         pHV = SvRV (pPrev -> _perlsv) ;
-        if (mg = mg_find (pHV, '~'))
+        if ((mg = mg_find (pHV, '~')))
             *((tComponent **)(mg -> mg_ptr)) = pPrev ;
         pHV = SvRV (pPrev -> Config._perlsv) ;
-        if (mg = mg_find (pHV, '~'))
+        if ((mg = mg_find (pHV, '~')))
             *((tComponentConfig **)(mg -> mg_ptr)) = &pPrev -> Config ;
         pHV = SvRV (pPrev -> Param._perlsv) ;
-        if (mg = mg_find (pHV, '~'))
+        if ((mg = mg_find (pHV, '~')))
             *((tComponentParam **)(mg -> mg_ptr)) = &pPrev -> Param ;
         }
 
@@ -1852,7 +2014,7 @@ int    embperl_SetupComponent  (/*in*/ tReq *                 r,
         else
             pParam -> sInputfile = r -> Param.sFilename ;
         }
-    else if (p = strchr(pParam -> sInputfile, '#'))
+    else if ((p = strchr(pParam -> sInputfile, '#')))
         {
         pParam -> sSub = p + 1 ;
         if (p == pParam -> sInputfile && c -> pPrev)

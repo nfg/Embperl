@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcgiinit.c,v 1.1.2.17 2002/05/27 17:53:12 richter Exp $
+#   $Id: epcgiinit.c,v 1.7 2003/03/30 18:57:01 richter Exp $
 #
 ###################################################################################*/
 
@@ -30,6 +30,27 @@
     tainted = 0 ; \
     }
 
+#define EPCFG_INTOPT(STRUCT,TYPE,NAME,CFGNAME) \
+    { \
+    char * p ; \
+    tainted = 0 ; \
+    p = GetHashValueStr (aTHX_  pThread -> pEnvHash, REDIR"EMBPERL_"#CFGNAME, NULL) ; \
+    if (p) \
+        { \
+        if (isdigit(*p))    \
+            pConfig -> NAME   = (TYPE)strtol (p, NULL, 0) ; \
+        else \
+            { \
+            int val ; \
+            int rc ; \
+              if ((rc = embperl_OptionListSearch(Options##CFGNAME,1,#CFGNAME,p,&val))) \
+                return rc ; \
+            pConfig -> NAME = (TYPE)val ; \
+            } \
+        } \
+    tainted = 0 ; \
+    }
+
 #undef EPCFG_BOOL
 #define EPCFG_BOOL(STRUCT,TYPE,NAME,CFGNAME) \
     tainted = 0 ; \
@@ -40,6 +61,22 @@
 #define EPCFG_STR(STRUCT,TYPE,NAME,CFGNAME) \
     tainted = 0 ; \
     pConfig -> NAME   = GetHashValueStrDup (aTHX_ pPool, pThread -> pEnvHash, REDIR"EMBPERL_"#CFGNAME, pConfig -> NAME) ; \
+    tainted = 0 ; 
+
+#undef EPCFG_EXPIRES
+#define EPCFG_EXPIRES(STRUCT,TYPE,NAME,CFGNAME) \
+    tainted = 0 ; \
+    { \
+    char buf [256] = "" ; \
+    char * s       = GetHashValueStr (aTHX_ pThread -> pEnvHash, REDIR"EMBPERL_"#CFGNAME, NULL) ; \
+    if (s) \
+        {  \
+        if (!embperl_CalcExpires (s, buf, 0)) \
+            LogErrorParam (NULL, rcTimeFormatErr, "EMBPERL_"#CFGNAME, s) ; \
+        else \
+            pConfig -> NAME   = ep_pstrdup (pPool, buf) ; \
+        } \
+    } \
     tainted = 0 ; 
 
 #undef EPCFG_CHAR
@@ -249,13 +286,17 @@ int embperl_GetCGIReqParam     (/*in*/ tApp        * pApp,
     tThreadData * pThread = pApp -> pThread ;
     eptTHX_
     char * p ;
+    char buf[20] ;
+    char * sHost ;
+    int    nPort ;
+    char * scheme ;
 
     pParam -> sFilename    = GetHashValueStrDup  (aTHX_ pPool, pThread -> pEnvHash, "PATH_TRANSLATED", "") ;
     pParam -> sUnparsedUri = GetHashValueStrDup  (aTHX_ pPool, pThread -> pEnvHash, "REQUEST_URI", "") ;
     pParam -> sUri         = GetHashValueStrDup  (aTHX_ pPool, pThread -> pEnvHash, "PATH_INFO", "") ;
     pParam -> sPathInfo    = GetHashValueStrDup  (aTHX_ pPool, pThread -> pEnvHash, "PATH_INFO", "") ;
     pParam -> sQueryInfo   = GetHashValueStrDup  (aTHX_ pPool, pThread -> pEnvHash, "QUERY_STRING", "") ;
-    if (p = GetHashValueStrDup  (aTHX_ pPool, pThread -> pEnvHash, "HTTP_ACCEPT_LANGUAGE", NULL))
+    if ((p = GetHashValueStrDup  (aTHX_ pPool, pThread -> pEnvHash, "HTTP_ACCEPT_LANGUAGE", NULL)))
         {
         while (isspace(*p))
             p++ ;
@@ -274,6 +315,36 @@ int embperl_GetCGIReqParam     (/*in*/ tApp        * pApp,
 
         embperl_String2HV(pApp, p, ';', pHV) ;
         }
+
+
+    buf[0] = '\0' ;
+    nPort = GetHashValueInt (aTHX_ pThread -> pEnvHash, "SERVER_PORT", 80) ;
+    if (GetHashValueStr (aTHX_ pThread -> pEnvHash, "HTTPS", NULL))
+        {
+	scheme = "https" ;
+	if (nPort != 443)
+	    sprintf (buf, ":%d", nPort) ;
+	}
+    else
+        {
+	scheme = "http" ;
+	if (nPort != 80)
+	    sprintf (buf, ":%d", nPort) ;
+	}
+
+    if (!(sHost = GetHashValueStr (aTHX_ pThread -> pEnvHash, "HTTP_HOST", NULL)))
+    	{
+        sHost = GetHashValueStr (aTHX_ pThread -> pEnvHash, "SERVER_NAME", "") ;
+
+        pParam -> sServerAddr = ep_pstrcat (pPool, scheme, "://", 
+		    sHost, buf,  "//", NULL) ;
+	}
+    else
+    	{
+        pParam -> sServerAddr = ep_pstrcat (pPool, scheme, "://", 
+		    sHost,  "//", NULL) ;
+	}
+    	
 
     return ok ;
     }

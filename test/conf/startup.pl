@@ -31,6 +31,7 @@ BEGIN {
         }
     else
         {
+	eval 'use Apache2' ;
         require ModPerl::Registry ;
         }
     } ;

@@ -19,6 +19,7 @@ if (!$dberr)
                                        '!Order'         => 'creationtime desc',
                                        'language_id'    => $r -> param -> language,
                                        'category_id'    => 1,
+				       'state'          => 1,
                                        '$max'           => 8}) ;
     } ;
     $dberr = "Error accessing $config->{dbdsn}: " . DBIx::Recordset -> LastError . $@ if (DBIx::Recordset -> LastError || $@) ;
@@ -44,7 +45,12 @@ if (!$dberr)
                         <tr> 
                           <td bgcolor="#327EA7"><font size="1" face="Verdana, Arial, Helvetica, sans-serif"><b>
                             <font color="#FFFFFF">&nbsp;
-                                [+ $rec -> {heading} +]
+                                [- 
+                                $date = $rec -> {modtime} ; 
+                                $date =~ /^(\d+)-(\d+)-(\d+)/ ;
+                                $date = $r -> param -> language eq 'de'?"$3.$2.$1":"$2/$3/$1" ;
+                                -]
+                                [+ $date +]
                             </font></b></font></td>
                         </tr>
                         <tr> 
@@ -60,7 +66,7 @@ if (!$dberr)
                                     $txt =~ s#<#&lt;#g ;
                                     $txt =~ s#>#&gt;#g ;
                                     $txt =~ s#B&lt;(.*?)&gt;#<B>$1</B>#g ;
-                                    $txt =~ s#(http://[-a-zA-Z.]+)#<A HREF="$1">$1</A>#g if (!($txt =~ s#L&lt;\"(.*?)\"\|(.*?)&gt;#<A HREF="$2">$1</A>#g)) ;
+                                    $txt =~ s#(http://[-a-zA-Z./0-9]+)#<A HREF="$1">$1</A>#g if (!($txt =~ s#L&lt;\"(.*?)\"\|(.*?)&gt;#<A HREF="$2">$1</A>#g)) ;
                                     -]
                                     [+ do { local $escmode = 0 ; $txt } +]
                                 </font></td>
@@ -73,7 +79,16 @@ if (!$dberr)
                     <table width="100%" border="0" cellspacing="0" cellpadding="0">
                         <tr> 
                           <td bgcolor="#327EA7"><font size="1" face="Verdana, Arial, Helvetica, sans-serif">
-                            <a href="db/news/news.htm"><b><font color="#FFFFFF">&nbsp;[= more_news =]</font></b></a></font></td>
+                            <a href="db/news/news.htm"><b><font color="#FFFFFF">&nbsp;[= more_news =]</font></b></a></font>
+                            </td>
+                        </tr>
+                        <tr> 
+                          <td bgcolor="#C2D9E5"><img src="[+ $r -> {imageuri} +]linie-news.gif" width="152" height="4"/></td>
+                        </tr>
+                        <tr> 
+                          <td bgcolor="#327EA7"><font size="1" face="Verdana, Arial, Helvetica, sans-serif">
+                            <a href="db/add.-category_id-1-.epl"><b><font color="#FFFFFF">&nbsp;[= add_news =]</font></b></a></font>
+                            </td>
                         </tr>
                         <tr> 
                           <td bgcolor="#C2D9E5"><img src="[+ $r -> {imageuri} +]linie-news.gif" width="152" height="4"/></td>

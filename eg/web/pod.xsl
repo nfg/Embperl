@@ -14,17 +14,9 @@
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns="http://www.w3.org/TR/xhtml1/strict">
 
-
-
     <xsl:output method="html" indent="yes" encoding="ISO-8859-1"/>
 
-    <xsl:variable name="imageuri">/eg/images</xsl:variable>
-    <xsl:variable name="newswidth">152</xsl:variable>
-
-    <xsl:param name="page" select="0"/>
-    <xsl:param name="basename">default</xsl:param>
-    <xsl:param name="extension">html???</xsl:param> <!-- select="'htm'"/> -->
-    <xsl:param name="pageinname">0</xsl:param>
+    <xsl:include href="podbase.xsl"/> 
 
 
     <!-- - - - - Header 1 - - - - -->
@@ -65,20 +57,20 @@
             
                     <table width="100%">
                       <tr>
-                        <td align="left" valign="top" width="35%">
+                        <td align="left" valign="top" width="45%">
                           <xsl:if test="$prevpage &gt; 0">
                             <a href="{$basename}.-page-{$prevpage}-.{$extension}" class="cPodHeaderNavLink">
-                                [&lt;&lt; Prev: <xsl:value-of select="preceding-sibling::sect1[para|verbatim|sect2][position()=1]/title"/>]
+                                [ &lt;&lt; Prev: <xsl:value-of select="preceding-sibling::sect1[para|verbatim|sect2][position()=1]/title"/> ]
                             </a>
                           </xsl:if>
                         </td>
-                        <td align="center"  valign="top" width="30%">
-                        <a href="{$basename}.{$extension}" class="cPodHeaderNavLink">[Content]</a>
+                        <td align="center"  valign="top" width="10%">
+                        <a href="{$basename}.{$extension}" class="cPodHeaderNavLink">[ Content ]</a>
                         </td>
-                        <td align="right" valign="top" width="35%">
+                        <td align="right" valign="top" width="45%">
                         <xsl:if test="following-sibling::sect1">
                             <a href="{$basename}.-page-{$nextpage}-.{$extension}" class="cPodHeaderNavLink">
-                                [Next: <xsl:value-of select="following-sibling::sect1[para|verbatim|sect2]/title"/> &gt;&gt;]
+                                [ Next: <xsl:value-of select="following-sibling::sect1[para|verbatim|sect2]/title"/> &gt;&gt; ]
                             </a>
 
                         </xsl:if>
@@ -97,7 +89,7 @@
                       <tr>
                         <td align="right">
                           <a href="{$basename}.-page-{$nextpage}-.{$extension}" class="cPodHeaderNavLink">
-                            [Next: <xsl:value-of select="/pod/sect1[para|verbatim|sect2]/title"/> &gt;&gt;]
+                            [ Next: <xsl:value-of select="/pod/sect1[para|verbatim|sect2]/title"/> &gt;&gt; ]
                           </a>
                         </td>
                     </tr>
@@ -110,13 +102,6 @@
     <!-- - - - - Root - - - - -->
 
     <xsl:template match="/">                         
-        <!--
-        <html>
-            <head>
-                <title><xsl:value-of select="pod/head/title"/></title>
-            </head>
-            <body>
-        -->
                 <xsl:choose>
                     <xsl:when test="count(/pod/sect1) = 1">
                         <xsl:apply-templates select="/pod/sect1"> 
@@ -143,23 +128,19 @@
                         <xsl:apply-templates select="/pod/sect1[position()=$page]"/> 
                     </xsl:otherwise>
                 </xsl:choose>
-        <!--
-            </body>
-        </html>
-        -->
     </xsl:template>
 
     <!-- - - - - table of content - short - - - - -->
 
     <xsl:template match="sect1" mode="toc_short">                         
         <xsl:if test="para|verbatim|sect2|list">
-              <li><b>
+              <li>
                 <xsl:element name="a">
                   <xsl:attribute name="href"><xsl:value-of select="$basename"/>.-page-<xsl:number/>-.<xsl:value-of select="$extension"/></xsl:attribute>
                   <xsl:attribute name="class">cPodH1ContentLink</xsl:attribute>
                 <xsl:value-of select="title"/>
               </xsl:element>
-              </b></li>
+              </li>
         </xsl:if>
     </xsl:template>
 
@@ -193,7 +174,6 @@
           </li>
     </xsl:template>
 
-
     <!-- ********** content - sect1 ********** -->
 
     <xsl:template match="sect1">                         
@@ -216,8 +196,8 @@
             <xsl:apply-templates select="*[name()!='title']"/> 
         </xsl:if>
 
-        <hr/>
         <xsl:if test="$shownav = 1">
+            <hr/>
             <xsl:call-template name="headernav"/>
         </xsl:if>
 
@@ -241,196 +221,5 @@
     </xsl:template>
 
 
-    <!-- - - - - list - - - - -->
-
-    <xsl:template match="list">                         
-        <table border="0" cellspacing="3" cellpadding="0">
-               <xsl:apply-templates mode="item"/> 
-        </table>
-    </xsl:template>
-
-
-
-    <xsl:template match="item" mode="item">                         
-        <tr class="cItemText">
-            <td valign="top">
-                    <img src="{$imageuri}but.gif"/><xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
-            </td>
-            <td>
-                    <xsl:apply-templates select="itemtext"/>
-            </td>
-        </tr>
-        <xsl:if test="*[name()!='itemtext']">
-        <tr>
-            <td>
-                    <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>     
-            </td>
-            <td>
-                    <xsl:apply-templates select="*[name()!='itemtext']"/>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                    <img src="{$imageuri}transp.gif" height="4"/>
-            </td>
-        </tr>
-        </xsl:if>
-    </xsl:template>
-
-
-    <xsl:template match="list" mode="item">                         
-        <tr>
-            <td>
-                    <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>     
-            </td>
-            <td>
-                <table border="0" cellspacing="3" cellpadding="0">
-                       <xsl:apply-templates mode="item"/> 
-                </table>
-            </td>
-        </tr>
-    </xsl:template>
-
-    <xsl:template match="itemtext">                         
-            <p><xsl:apply-templates/></p>
-    </xsl:template>
-
-
-    <!-- - - - - code - - - - -->
-
-    <!--
-    <xsl:template match="verbatim">                         
-        <xsl:if test="not(preceding-sibling::node()[position() = 2][name()='verbatim'])">       
-            <table width="100%" cellpadding="10">
-            <tr>
-            <td width="5%"><xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text></td>
-            <td  class="cPodVerbatim" width="90%">
-            <pre  class="cPodVerbatim"><xsl:value-of select="."/>
-            
-            <xsl:apply-templates select="following-sibling::node()[position() &lt; 3][name()='verbatim']" mode="verbatim"/>
-            </pre>
-            </td>
-            <td width="5%"><xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text></td>
-            </tr>
-            </table>
-        </xsl:if>
-    </xsl:template>
-
-    <xsl:template  match="verbatim" mode="verbatim">                         
-            <xsl:value-of select="."/>
-            <xsl:apply-templates select="following-sibling::node()[position() &lt; 3][name()='verbatim']" mode="verbatim"/>
-    </xsl:template>
-    -->
-
-    <xsl:template match="verbatim">                         
-            <table width="100%" cellspacing="0"><tr>
-            <td width="5%"><xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text></td>
-            <td  class="cPodVerbatim"  width="90%">
-            <br/><pre>
-            <xsl:apply-templates/>
-            </pre>
-            </td>
-            <td width="5%"><xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text></td>
-            </tr></table>
-    </xsl:template>
-
-    <xsl:template  match="verbatim" mode="verbatim">                         
-            <xsl:value-of select="."/>
-            <xsl:apply-templates select="following-sibling::node()[position() &lt; 3][name()='verbatim']" mode="verbatim"/>
-    </xsl:template>
-
-    <!-- - - - - link - - - - -->
-
-    <xsl:template name="link">
-        <xsl:param name="txt"/>
-        <xsl:param name="uri"/>
-        <xsl:choose>
-            <xsl:when test="contains($uri, '::')">
-                <xsl:element name="a">
-                    <xsl:attribute name="href">
-                        <xsl:value-of select="translate($uri, ':', '/')"/>
-                    </xsl:attribute>
-                    <xsl:value-of select="$txt"/>
-                </xsl:element>
-            </xsl:when>
-            <xsl:when test="starts-with($uri, 'http:')">
-                <a href="{$uri}"><xsl:value-of select="$txt"/></a>
-            </xsl:when>
-            <xsl:when test="starts-with($uri, 'ftp:')">
-                <a href="{$uri}"><xsl:value-of select="$txt"/></a>
-            </xsl:when>
-            <xsl:otherwise>
-                
-                <xsl:variable name="page">
-                    <xsl:apply-templates select="//sect1[title=$uri]" mode="number"/>     
-                </xsl:variable>
-
-                <xsl:choose>
-                    <xsl:when test="$page!=''">
-                        <a href="{$basename}.-page-{$page}-.{$extension}"><xsl:value-of select="$txt"/></a>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:variable name="page">
-                            <xsl:apply-templates select="//sect1[sect2/title=$uri]" mode="number"/>     
-                        </xsl:variable>
-                        <xsl:variable name="sect">
-                            <xsl:apply-templates select="//sect2[title=$uri]" mode="number"/>     
-                        </xsl:variable>
-
-                        <xsl:choose>
-                            <xsl:when test="$page!=''">
-                                <a href="{$basename}.-page-{$page}-.{$extension}#sect_{$sect}"><xsl:value-of select="$txt"/></a>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <xsl:value-of select="$txt"/>
-                            </xsl:otherwise>
-                        </xsl:choose>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:template>
-
-
-
-    <xsl:template match="xlink">                         
-            <xsl:choose>
-                <xsl:when test="@uri">
-                    <xsl:call-template name="link">
-                        <xsl:with-param name="uri" select="@uri"/>
-                        <xsl:with-param name="txt" select="."/>
-                    </xsl:call-template>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:call-template name="link">
-                        <xsl:with-param name="uri" select="."/>
-                        <xsl:with-param name="txt" select="."/>
-                    </xsl:call-template>
-                </xsl:otherwise>
-            </xsl:choose>
-                 
-    </xsl:template>
-
-    <xsl:template match="para">                         
-            <p class="body"><xsl:apply-templates/></p>
-    </xsl:template>
-
-    <!-- - - - - text - - - - -->
-
-    <xsl:template match="emphasis">                         
-        <i><xsl:value-of select="."/></i>
-    </xsl:template>
-
-    <xsl:template match="strong">                         
-        <b><xsl:value-of select="."/></b>
-    </xsl:template>
-
-    <xsl:template match="code">                         
-        <code><xsl:value-of select="."/></code>
-    </xsl:template>
-
-    <xsl:template match="underline">                         
-        <u><xsl:value-of select="."/></u>
-    </xsl:template>
 
 </xsl:stylesheet> 

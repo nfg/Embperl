@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epio.c,v 1.16.4.15 2002/05/23 22:24:45 richter Exp $
+#   $Id: epio.c,v 1.24 2002/10/22 05:29:05 richter Exp $
 #
 ###################################################################################*/
 
@@ -53,6 +53,21 @@
 
 
 #endif
+
+
+/* Some helper macros for tied handles, taken from mod_perl 2.0 :-) */
+/*
+ * bleedperl change #11639 switch tied handle magic
+ * from living in the gv to the GvIOp(gv), so we have to deal
+ * with both to support 5.6.x
+ */
+#if ((PERL_REVISION == 5) && (PERL_VERSION >= 7))
+#   define TIEHANDLE_SV(handle) (SV*)GvIOp((SV*)handle)
+#else
+#   define TIEHANDLE_SV(handle) (SV*)handle
+#endif
+
+#define HANDLE_GV(name) gv_fetchpv(name, TRUE, SVt_PVIO)
 
 
 
@@ -346,17 +361,22 @@ int OpenInput (/*i/o*/ register req * r,
         return ok ;
 #endif
     
-    handle = gv_fetchpv("STDIN", TRUE, SVt_PVIO) ;
-    if (handle && SvMAGICAL(handle) && (mg = mg_find((SV*)handle, 'q')) && mg->mg_obj) 
-	{
-	r -> Component.ifdobj = mg->mg_obj ;
-	if (r -> Component.Config.bDebug)
+    handle = HANDLE_GV("STDIN") ;
+    if (handle)
+        {
+        SV *iohandle = TIEHANDLE_SV(handle) ;
+
+        if (iohandle && SvMAGICAL(iohandle) && (mg = mg_find((SV*)iohandle, 'q')) && mg->mg_obj) 
 	    {
-	    char *package = HvNAME(SvSTASH((SV*)SvRV(mg->mg_obj)));
-	    lprintf (r -> pApp,  "[%d]Open TIED STDIN %s...\n", r -> pThread -> nPid, package) ;
+	    r -> Component.ifdobj = mg->mg_obj ;
+	    if (r -> Component.Config.bDebug)
+	        {
+	        char *package = HvNAME(SvSTASH((SV*)SvRV(mg->mg_obj)));
+	        lprintf (r -> pApp,  "[%d]Open TIED STDIN %s...\n", r -> pThread -> nPid, package) ;
+	        }
+	    return ok ;
 	    }
-	return ok ;
-	}
+        }
 
     if (r -> Component.ifd && r -> Component.ifd != PerlIO_stdinF)
         PerlIO_close (r -> Component.ifd) ;
@@ -678,18 +698,23 @@ int OpenOutput (/*i/o*/ register req * r,
 	    }
 #endif
 
-	handle = gv_fetchpv("STDOUT", TRUE, SVt_PVIO) ;
-	if (handle && SvMAGICAL(handle) && (mg = mg_find((SV*)handle, 'q')) && mg->mg_obj) 
-	    {
-	    r -> Component.pOutput -> ofdobj = mg->mg_obj ;
-	    if (r -> Component.Config.bDebug)
-		{
-		char *package = HvNAME(SvSTASH((SV*)SvRV(mg->mg_obj)));
-		lprintf (r -> pApp,  "[%d]Open TIED STDOUT %s for output...\n", r -> pThread -> nPid, package) ;
-		}
-	    return ok ;
-	    }
-	
+        handle = HANDLE_GV("STDOUT") ;
+        if (handle)
+            {
+            SV *iohandle = TIEHANDLE_SV(handle) ;
+
+	    if (iohandle && SvMAGICAL(iohandle) && (mg = mg_find((SV*)iohandle, 'q')) && mg->mg_obj) 
+	        {
+	        r -> Component.pOutput -> ofdobj = mg->mg_obj ;
+	        if (r -> Component.Config.bDebug)
+		    {
+		    char *package = HvNAME(SvSTASH((SV*)SvRV(mg->mg_obj)));
+		    lprintf (r -> pApp,  "[%d]Open TIED STDOUT %s for output...\n", r -> pThread -> nPid, package) ;
+		    }
+	        return ok ;
+	        }
+            }
+        
 	r -> Component.pOutput -> ofd = PerlIO_stdoutF ;
         
         if (r -> Component.Config.bDebug)

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: EmbperlHTML.pm,v 1.1.2.12 2002/03/20 20:38:59 richter Exp $
+#   $Id: EmbperlHTML.pm,v 1.3 2003/02/27 07:05:33 richter Exp $
 #
 ###################################################################################
  
@@ -63,6 +63,8 @@ sub Init
 
     {
     my ($self) = @_ ;
+
+    $self -> AddInitCode ('use vars qw{$_ep_selectname};') ;
 
     $self -> AddTag ('input', ['type', 'name', 'value'], ['src'], ['checked'], 
                 { 

@@ -5,20 +5,23 @@
 #define SEPARATOR ":;"
 #endif
 
+
+
 #ifdef EPCFG_COMPONENT
 /* tComponentConfig */
 
 EPCFG_STR (ComponentConfig,     char *,      sPackage,      PACKAGE) 
-EPCFG_INT (ComponentConfig,     unsigned,    bDebug,        DEBUG) 
-EPCFG_INT (ComponentConfig,     unsigned,    bOptions,      OPTIONS) 
-EPCFG_INT (ComponentConfig,     int   ,      nEscMode,      ESCMODE) 
-EPCFG_INT (ComponentConfig,     int   ,      nInputEscMode, INPUT_ESCMODE) 
+EPCFG_INTOPT (ComponentConfig,     unsigned,    bDebug,        DEBUG) 
+EPCFG_INTOPT (ComponentConfig,     unsigned,    bOptions,      OPTIONS) 
+EPCFG_INTOPT (ComponentConfig,     int   ,      nEscMode,      ESCMODE) 
+EPCFG_INTOPT (ComponentConfig,     int   ,      nInputEscMode, INPUT_ESCMODE) 
 EPCFG_STR (ComponentConfig,     char *,      sInputCharset, INPUT_CHARSET) 
-EPCFG_STR (ComponentConfig,     char *,      sCacheKey,     CACKE_KEY) 
+EPCFG_STR (ComponentConfig,     char *,      sCacheKey,     CACHE_KEY) 
 EPCFG_INT (ComponentConfig,     unsigned,    bCacheKeyOptions, CACHE_KEY_OPTIONS)
 EPCFG_CV  (ComponentConfig,     CV *  ,      pExpiredFunc,  EXPIRES_FUNC) 
 EPCFG_CV  (ComponentConfig,     CV *  ,      pCacheKeyFunc, CACHE_KEY_FUNC)
 EPCFG_INT (ComponentConfig,     int   ,      nExpiresIn,    EXPIRES_IN) 
+EPCFG_STR (ComponentConfig,     char *,      sExpiresFilename, EXPIRES_FILENAME) 
 EPCFG_STR (ComponentConfig,     char *,      sSyntax,       SYNTAX) 
 EPCFG_SV  (ComponentConfig,     SV *,        pRecipe,       RECIPE) 
 EPCFG_STR (ComponentConfig,     char *,      sXsltstylesheet, XSLTSTYLESHEET) 
@@ -33,9 +36,10 @@ EPCFG_REGEX(ReqConfig,     CV *,      pAllow,         ALLOW)
 EPCFG_REGEX(ReqConfig,     CV *,      pUriMatch,      URIMATCH) 
 EPCFG_CHAR(ReqConfig,     char  ,     cMultFieldSep, MULTFIELDSEP ) 
 EPCFG_AV  (ReqConfig,     AV *,       pPathAV,         PATH, SEPARATOR) 
-EPCFG_INT (ReqConfig,     unsigned,    bDebug,        DEBUG) 
-EPCFG_INT (ReqConfig,     unsigned,    bOptions,      OPTIONS) 
-EPCFG_INT (ReqConfig,     int   ,  nSessionMode,     SESSION_MODE) 
+EPCFG_INTOPT (ReqConfig,     unsigned,    bDebug,        DEBUG) 
+EPCFG_INTOPT (ReqConfig,     unsigned,    bOptions,      OPTIONS) 
+EPCFG_INTOPT (ReqConfig,     int   ,  nSessionMode,     SESSION_MODE) 
+EPCFG_INTOPT (ReqConfig,     int   ,      nOutputMode,   OUTPUT_MODE) 
 #endif
 
 
@@ -51,10 +55,11 @@ EPCFG_STR(AppConfig,     char *,  sSessionConfig,   SESSION_CONFIG)
 EPCFG_STR(AppConfig,     char *,  sCookieName,      COOKIE_NAME) 
 EPCFG_STR(AppConfig,     char *,  sCookieDomain,    COOKIE_DOMAIN)
 EPCFG_STR(AppConfig,     char *,  sCookiePath,      COOKIE_PATH) 
-EPCFG_STR(AppConfig,     char *,  sCookieExpires,   COOKIE_EXPIRES) 
+EPCFG_EXPIRES(AppConfig,     char *,  sCookieExpires,   COOKIE_EXPIRES) 
+EPCFG_BOOL(AppConfig,     bool,    bCookieSecure,    COOKIE_SECURE) 
 EPCFG_STR(AppConfig,     char *,  sLog,             LOG) 
-EPCFG_INT(AppConfig,     unsigned,bDebug,           DEBUG) 
-EPCFG_INT(AppConfig,     bool,    bMaildebug,       MAILDEBUG) 
+EPCFG_INTOPT(AppConfig,     unsigned,bDebug,           DEBUG) 
+EPCFG_BOOL(AppConfig,     bool,    bMaildebug,       MAILDEBUG) 
 EPCFG_STR(AppConfig,     char *,  sMailhost,        MAILHOST) 
 EPCFG_STR(AppConfig,     char *,  sMailhelo,        MAILHELO) 
 EPCFG_STR(AppConfig,     char *,  sMailfrom,        MAILFROM) 

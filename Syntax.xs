@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Syntax.xs,v 1.1.2.8 2002/01/24 08:37:05 richter Exp $
+#   $Id: Syntax.xs,v 1.3 2002/10/22 05:29:04 richter Exp $
 #
 ###################################################################################
 

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: db.schema,v 1.1.2.6 2002/06/25 06:22:18 richter Exp $
+#   $Id: db.schema,v 1.3 2002/11/20 06:56:28 richter Exp $
 #
 ##############################################################################
 
@@ -49,15 +49,15 @@
     '!PrimKey' => 'id',
     '!Init' =>
         [
-        { id => 1, category_id => 1, state => 1, creationtime => '2001-07-28' },
-        { id => 2, category_id => 1, state => 1, creationtime => '2001-11-20' },
-        { id => 3, category_id => 1, state => 1, creationtime => '2001-11-27' },
-        { id => 4, category_id => 1, state => 1, creationtime => '2001-12-05' },
-        { id => 5, category_id => 1, state => 1, creationtime => '2002-03-13' },
-        { id => 6, category_id => 1, state => 1, creationtime => '2002-03-21' },
-        { id => 7, category_id => 1, state => 1, creationtime => '2002-05-28' },
-        { id => 8, category_id => 1, state => 1, creationtime => '2002-06-25' },
-        { id => 9, category_id => 2, state => 1, creationtime => '2002-06-25' },
+        { id => 1, category_id => 1, state => 1, creationtime => '2001-07-28', modtime => '2001-07-28' },
+        { id => 2, category_id => 1, state => 1, creationtime => '2001-11-20', modtime => '2001-11-20' },
+        { id => 3, category_id => 1, state => 1, creationtime => '2001-11-27', modtime => '2001-11-27' },
+        { id => 4, category_id => 1, state => 1, creationtime => '2001-12-05', modtime => '2001-12-05' },
+        { id => 5, category_id => 1, state => 1, creationtime => '2002-03-13', modtime => '2002-03-13' },
+        { id => 6, category_id => 1, state => 1, creationtime => '2002-03-21', modtime => '2002-03-21' },
+        { id => 7, category_id => 1, state => 1, creationtime => '2002-05-28', modtime => '2002-05-28' },
+        { id => 8, category_id => 1, state => 1, creationtime => '2002-06-25', modtime => '2002-06-25' },
+        { id => 9, category_id => 2, state => 1, creationtime => '2002-06-25', modtime => '2002-06-25' },
         ]
     },
 
@@ -69,7 +69,7 @@
         [
         'id'                            => 'counter',
         'item_id'                       => 'integer',
-        'language_id'                   => 'char(2)',
+        'language_id'                   => 'varchar(2)',
         'heading'			=> 'tinytext',
         'keywords'			=> 'text',
         'description'			=> 'text',
@@ -113,7 +113,7 @@
     '!Table' => 'language',
     '!Fields' => 
         [
-        'id'                        => 'char(2) not null',
+        'id'                        => 'varchar(2) not null',
         'name'                      => 'tinytext',
         ],
     '!PrimKey' => 'id',
@@ -132,16 +132,102 @@
         [
         'id'                        => 'counter',
         'state'                     => 'integer',
+	'table_type'		    => 'tinytext',
+	'viev_level'		    => 'integer',
+	'edit_level'		    => 'integer',
         ],
     '!PrimKey' => 'id',
     '!Init' =>
         [
-            { id => 1, state => 1 } ,
-            { id => 2, state => 1 } ,
-            { id => 3, state => 1 } ,
-            { id => 4, state => 1 } ,
-            { id => 5, state => 1 } ,
-            { id => 6, state => 1 } ,
+            { id => 1, state => 1, 'table_type' => 'item' } ,
+            { id => 2, state => 1, 'table_type' => 'item' } ,
+            { id => 3, state => 1, 'table_type' => 'item' } ,
+            { id => 4, state => 1, 'table_type' => 'item' } ,
+            { id => 5, state => 1, 'table_type' => 'item' } ,
+            { id => 6, state => 1, 'table_type' => 'item' } ,
+            { id => 7, state => 1, 'table_type' => 'foo' } ,
+        ],
+    },
+
+# ----------------------------------------------------------------------
+
+    {
+    '!Table' => 'categoryfields',
+    '!Fields' => 
+        [
+        'category_id'	=> 'integer not null',
+        'language_id'	=> 'varchar(3) not null',
+	'fieldname'	=> 'varchar(32) not null',
+	'txt'		=> 'text',
+	'typeinfo'      => 'tinytext',
+	'position'      => 'integer',
+        ],
+    '!PrimKey' => 'category_id,language_id,fieldname',
+    #'!PrimKey' => 'category_id',
+    '!Init' =>
+        [
+	    # News
+            { category_id => 1, language_id => 'de', fieldname => 'description', typeinfo => 'textarea', txt => 'Neuigkeit', position => 1 } ,
+            { category_id => 1, language_id => 'en', fieldname => 'description', typeinfo => 'textarea', txt => 'News', position => 1 } ,
+
+	    # Emperl Websites
+            { category_id => 2, language_id => 'de', fieldname => 'heading',     txt => 'Überschrift', position => 1 } ,
+            { category_id => 2, language_id => 'de', fieldname => 'description', typeinfo => 'textarea', txt => 'Beschreibung', typeinfo => 'textarea', position => 3 } ,
+            { category_id => 2, language_id => 'de', fieldname => 'url',         txt => 'URL', typeinfo => 'url', position => 2 } ,
+
+            { category_id => 2, language_id => 'en', fieldname => 'heading',     txt => 'Heading', position => 1 } ,
+            { category_id => 2, language_id => 'en', fieldname => 'description', typeinfo => 'textarea', txt => 'Description', typeinfo => 'textarea', position => 3 } ,
+            { category_id => 2, language_id => 'en', fieldname => 'url',         txt => 'URL', typeinfo => 'url', position => 2 } ,
+
+	    # Books about Embperl
+            { category_id => 3, language_id => 'de', fieldname => 'heading',     txt => 'Titel', position => 1 } ,
+            { category_id => 3, language_id => 'de', fieldname => 'description', typeinfo => 'textarea', txt => 'Beschreibung', typeinfo => 'textarea', position => 3 } ,
+            { category_id => 3, language_id => 'de', fieldname => 'url',         txt => 'URL', typeinfo => 'url', position => 2 } ,
+
+            { category_id => 3, language_id => 'en', fieldname => 'heading',     txt => 'Title', position => 1 } ,
+            { category_id => 3, language_id => 'en', fieldname => 'description', typeinfo => 'textarea', txt => 'Description', typeinfo => 'textarea', position => 3 } ,
+            { category_id => 3, language_id => 'en', fieldname => 'url',         txt => 'URL', typeinfo => 'url', position => 2 } ,
+
+	    # Embperl articles
+            { category_id => 4, language_id => 'de', fieldname => 'heading',     txt => 'Titel', position => 1 } ,
+            { category_id => 4, language_id => 'de', fieldname => 'description', typeinfo => 'textarea', txt => 'Beschreibung', typeinfo => 'textarea', position => 3 } ,
+            { category_id => 4, language_id => 'de', fieldname => 'url',         txt => 'URL', typeinfo => 'url', position => 2 } ,
+
+            { category_id => 4, language_id => 'en', fieldname => 'heading',     txt => 'Title', position => 1 } ,
+            { category_id => 4, language_id => 'en', fieldname => 'description', typeinfo => 'textarea', txt => 'Description', typeinfo => 'textarea', position => 3 } ,
+            { category_id => 4, language_id => 'en', fieldname => 'url',         txt => 'URL', typeinfo => 'url', position => 2 } ,
+
+	    # Syntax highlighting
+            { category_id => 5, language_id => 'de', fieldname => 'heading',     txt => 'Editor', position => 1 } ,
+            { category_id => 5, language_id => 'de', fieldname => 'description', typeinfo => 'textarea', txt => 'Beschreibung', typeinfo => 'textarea', position => 3 } ,
+            { category_id => 5, language_id => 'de', fieldname => 'url',         txt => 'URL', typeinfo => 'url', position => 2 } ,
+
+            { category_id => 5, language_id => 'en', fieldname => 'heading',     txt => 'Editor', position => 1 } ,
+            { category_id => 5, language_id => 'en', fieldname => 'description', typeinfo => 'textarea', txt => 'Description', typeinfo => 'textarea', position => 3 } ,
+            { category_id => 5, language_id => 'en', fieldname => 'url',         txt => 'URL', typeinfo => 'url', position => 2 } ,
+
+	    # Modules and examples
+            { category_id => 6, language_id => 'de', fieldname => 'heading',     txt => 'Name', position => 1 } ,
+            { category_id => 6, language_id => 'de', fieldname => 'description', typeinfo => 'textarea', txt => 'Beschreibung', typeinfo => 'textarea', position => 3 } ,
+            { category_id => 6, language_id => 'de', fieldname => 'url',         txt => 'URL', typeinfo => 'url', position => 2 } ,
+
+            { category_id => 6, language_id => 'en', fieldname => 'heading',     txt => 'Name', position => 1 } ,
+            { category_id => 6, language_id => 'en', fieldname => 'description', typeinfo => 'textarea', txt => 'Description', typeinfo => 'textarea', position => 3 } ,
+            { category_id => 6, language_id => 'en', fieldname => 'url',         txt => 'URL', typeinfo => 'url', position => 2 } ,
+
+	    # Test
+            { category_id => 7, language_id => 'de', fieldname => 'foo',     txt => 'Foo!', typeinfo => 'title', position => 1 } ,
+            { category_id => 7, language_id => 'de', fieldname => 'bar', txt => 'Bar!', position => 2 } ,
+            { category_id => 7, language_id => 'de', fieldname => 'fnord',         txt => 'Fnord!', position => 3 } ,
+            { category_id => 7, language_id => 'de', fieldname => 'fubar', txt => 'Fubar!', position => 4 } ,
+            { category_id => 7, language_id => 'de', fieldname => 'Baz',         txt => 'Bazzz!', typeinfo => 'url', position => 5 } ,
+
+            { category_id => 7, language_id => 'en', fieldname => 'foo',     txt => 'foo!', typeinfo => 'title', position => 1 } ,
+            { category_id => 7, language_id => 'en', fieldname => 'bar', txt => 'bar!', position => 2 } ,
+            { category_id => 7, language_id => 'en', fieldname => 'fnord',         txt => 'fnord!', position => 3 } ,
+            { category_id => 7, language_id => 'en', fieldname => 'fubar', txt => 'fubar!', position => 4 } ,
+            { category_id => 7, language_id => 'en', fieldname => 'Baz',         txt => 'bazzz!', typeinfo => 'url', position => 5 } ,
+
         ],
     },
 
@@ -153,24 +239,40 @@
         [
         'id'                            => 'counter',
         'category_id'                   => 'integer',
-        'language_id'                   => 'char(2)',
+        'language_id'                   => 'varchar(2)',
         'category'			=> 'tinytext',
+        'add_info'                      => 'text',
+	# Deprecated:
+        'heading_text'			=> 'tinytext',
+        'keywords_text'			=> 'tinytext',
+        'description_text'		=> 'tinytext',
+        'url_text'			=> 'tinytext',
 	],
     '!PrimKey' => 'id',
     '!Init' =>
         [
             { id =>  1, category_id => 1, language_id => 'de', 'category' => 'Neuigkeiten' } ,
             { id =>  2, category_id => 1, language_id => 'en', 'category' => 'News' } ,
-            { id =>  3, category_id => 2, language_id => 'de', 'category' => 'Websites die Embperl nutzen' } ,
-            { id =>  4, category_id => 2, language_id => 'en', 'category' => 'Sites using Embperl' } ,
+
+            { id =>  3, category_id => 2, language_id => 'de', 'category' => 'Websites die Embperl nutzen',
+                        add_info    => 'Bitte geben Sie eine Kurzbeschreibung der Site, sowie Informationen zu deren Realisierung ein.' } ,
+            { id =>  4, category_id => 2, language_id => 'en', 'category' => 'Sites using Embperl',
+                        add_info    => 'Please enter a short description of the Site and some informations how it has been setup.' } ,
+
             { id =>  5, category_id => 3, language_id => 'de', 'category' => 'Bücher die Embperl behandeln' } ,
             { id =>  6, category_id => 3, language_id => 'en', 'category' => 'Books that talk about Embperl' } ,
+
             { id =>  7, category_id => 4, language_id => 'de', 'category' => 'Artikel über Embperl (on- und offline)' } ,
             { id =>  8, category_id => 4, language_id => 'en', 'category' => 'Article about Embperl (on- and offline)' } ,
+
             { id =>  9, category_id => 5, language_id => 'de', 'category' => 'Syntaxhervorhebungen für Texteditoren' } ,
             { id => 10, category_id => 5, language_id => 'en', 'category' => 'Syntaxhighlighting for texteditors' } ,
+
             { id => 11, category_id => 6, language_id => 'de', 'category' => 'Module und Beispiele für Embperl' } ,
             { id => 12, category_id => 6, language_id => 'en', 'category' => 'Modules and examples for Embperl' } ,
+
+            { id => 13, category_id => 7, language_id => 'de', 'category' => 'Was ist Foobar?!?' } ,
+            { id => 14, category_id => 7, language_id => 'en', 'category' => 'What is foobar?!?' } ,
         ],
     },
 
@@ -187,12 +289,70 @@
         'name'                      => 'tinytext',
         'email'                     => 'tinytext',
         'password'                  => 'tinytext',
+        'admin'                     => 'bit',
         ],
     '!PrimKey' => 'id',
     },
 
-
 ) ;
+
+
+=pod
+
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# TEST
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+
+    {
+    '!Table' => 'foo',
+    '!Fields' => 
+        [
+        'id'                            => 'counter',
+        'url'				=> 'tinytext',
+        'category_id'                   => 'integer',
+        'state'		                => 'integer',
+        'creationtime'			=> 'datetime',
+        'modtime'			=> 'datetime',
+        'user_id'		        => 'integer',
+        'checkcount'		        => 'integer',
+	],
+    '!PrimKey' => 'id',
+    '!Init' =>
+        [
+        ]
+    },
+
+# ----------------------------------------------------------------------
+
+    {
+   '!Table' => 'footext',
+    '!Fields' => 
+        [
+        'id'                            => 'counter',
+        'foo_id'                       	=> 'integer',
+        'language_id'                   => 'varchar(2)',
+        'foo'				=> 'tinytext',
+        'bar'				=> 'tinytext',
+        'fnord'				=> 'tinytext',
+        'fubar'				=> 'tinytext',
+        'baz'				=> 'tinytext',
+	],
+    '!PrimKey' => 'id',
+    '!Init' =>
+        [
+        ]
+    },
+
+=cut
+
 
 1 ;
 

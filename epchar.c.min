@@ -330,8 +330,8 @@ struct tCharTrans Char2Url [] =
         { ' ' ,   "%20"           },    /* 	&#32;		Space  */
         { '!' ,   ""         },    /* 	&#33;		Exclamation mark  */
         { '"' ,   "%22"   },    /* 	Quotation mark  */
-        { '#' ,   "%23"        },    /* 	&#35;		Number sign  */
-        { '$' ,   ""         },    /* 	&#36;		Dollar sign  */
+        { '#' ,   "%23"      },    /* 	&#35;		Number sign  */
+        { '$' ,   "%24"         },    /* 	&#36;		Dollar sign  */
         { '%' ,   "%25"      },    /* 	&#37;		Percent sign  */
         { '&' ,   "%26"    },    /* 	Ampersand  */
         { '\'' ,  "%27"       },    /* 	&#39;		Apostrophe  */
@@ -339,7 +339,7 @@ struct tCharTrans Char2Url [] =
         { ')' ,   ""         },    /* 	&#41;		Right parenthesis  */
         { '*' ,   ""         },    /* 	&#42;		Asterisk  */
         { '+' ,   "%2B"         },    /* 	&#43;		Plus sign  */
-        { ',' ,   ""         },    /* 	&#44;		Comma  */
+        { ',' ,   "%2C"         },    /* 	&#44;		Comma  */
         { '-' ,   ""         },    /* 	&#45;		Hyphen  */
         { '.' ,   ""         },    /* 	&#46;		Period (fullstop)  */
         { '/' ,   ""         },    /* 	&#47;		Solidus (slash)  */
@@ -353,7 +353,10 @@ struct tCharTrans Char2Url [] =
         { '7' ,   ""         },    /* 	&#55;		Digit 7  */
         { '8' ,   ""         },    /* 	&#56;		Digit 8  */
         { '9' ,   ""         },    /* 	&#57;		Digit 9  */
-        { ':' ,   ""         },    /* 	&#58;		Colon  */
+/* We should escape this according to the rfc, but this would make troubles inside
+   of urls, so will don' escape it   
+        { ':' ,   "%3A"      },   */ /* 	&#58;		Colon  */
+        { ':' ,   ""      },    /* 	&#58;		Colon  */
         { ';' ,   "%3B"      },    /* 	&#59;		Semicolon  */
         { '<' ,   "%3C"      },    /* 	Less than  */
         { '=' ,   "%3D"      },    /* 	&#61;		Equals sign  */
@@ -386,12 +389,12 @@ struct tCharTrans Char2Url [] =
         { 'X' ,   ""         },    /* 	&#88;		Capital X  */
         { 'Y' ,   ""         },    /* 	&#89;		Capital Y  */
         { 'Z' ,   ""         },    /* 	&#90;		Capital Z  */
-        { '[' ,   ""         },    /* 	&#91;		Left square bracket  */
-        { '\\' ,  ""         },    /* 	&#92;		Reverse solidus (backslash)  */
-        { ']' ,   ""         },    /* 	&#93;		Right square bracket  */
-        { '^' ,   ""         },    /* 	&#94;		Caret  */
+        { '[' ,   "%5B"         },    /* 	&#91;		Left square bracket  */
+        { '\\' ,  "%5C"         },    /* 	&#92;		Reverse solidus (backslash)  */
+        { ']' ,   "%5D"         },    /* 	&#93;		Right square bracket  */
+        { '^' ,   "%5E"         },    /* 	&#94;		Caret  */
         { '_' ,   ""         },    /* 	&#95;		Horizontal bar (underscore)  */
-        { '`' ,   ""         },    /* 	&#96;		Acute accent  */
+        { '`' ,   "%60"         },    /* 	&#96;		Acute accent  */
         { 'a' ,   ""         },    /* 	&#97;		Small a  */
         { 'b' ,   ""         },    /* 	&#98;		Small b  */
         { 'c' ,   ""         },    /* 	&#99;		Small c  */
@@ -418,140 +421,139 @@ struct tCharTrans Char2Url [] =
         { 'x' ,   ""         },    /* 	&#120;		Small x  */
         { 'y' ,   ""         },    /* 	&#121;		Small y  */
         { 'z' ,   ""         },    /* 	&#122;		Small z  */
-        { '{' ,   ""         },    /* 	&#123;		Left curly brace  */
-        { '|' ,   ""         },    /* 	&#124;		Vertical bar  */
-        { '}' ,   ""         },    /* 	&#125;		Right curly brace  */
+        { '{' ,   "%7B"         },    /* 	&#123;		Left curly brace  */
+        { '|' ,   "%7C"         },    /* 	&#124;		Vertical bar  */
+        { '}' ,   "%7D"         },    /* 	&#125;		Right curly brace  */
         { '~' ,   ""         },    /* 	&#126;		Tilde  */
-        { '' ,   ""         },    /* 	&#127;		Unused  */
-        { '€' ,   ""         },    /* 	&#128;		Unused */
-         
-        { ' ' ,   ""         },    /* &#129;		Unused  */
-        { ' ' ,   ""         },    /* &#130;		Unused  */
-        { ' ' ,   ""         },    /* &#131;		Unused  */
-        { ' ' ,   ""         },    /* &#132;		Unused  */
-        { ' ' ,   ""         },    /* &#133;		Unused  */
-        { ' ' ,   ""         },    /* &#134;		Unused  */
-        { ' ' ,   ""         },    /* &#135;		Unused  */
-        { ' ' ,   ""         },    /* &#136;		Unused  */
-        { ' ' ,   ""         },    /* &#137;		Unused  */
-        { ' ' ,   ""         },    /* &#138;		Horizontal tab  */
-        { ' ' ,   ""         },    /* &#139;		Line feed  */
-        { ' ' ,   ""         },    /* &#140;		Unused  */
-        { ' ' ,   ""         },    /* &#141;		Unused  */
-        { ' ' ,   ""         },    /* &#142;		Carriage Return  */
-        { ' ' ,   ""         },    /* &#143;		Unused  */
-        { ' ' ,   ""         },    /* &#144;		Unused  */
-        { ' ' ,   ""         },    /* &#145;		Unused  */
-        { ' ' ,   ""         },    /* &#146;		Unused  */
-        { ' ' ,   ""         },    /* &#147;		Unused  */
-        { ' ' ,   ""         },    /* &#148;		Unused  */
-        { ' ' ,   ""         },    /* &#149;		Unused  */
-        { ' ' ,   ""         },    /* &#150;		Unused  */
-        { ' ' ,   ""         },    /* &#151;		Unused  */
-        { ' ' ,   ""         },    /* &#152;		Unused  */
-        { ' ' ,   ""         },    /* &#153;		Unused  */
-        { ' ' ,   ""         },    /* &#154;		Unused  */
-        { ' ' ,   ""         },    /* &#155;		Unused  */
-        { ' ' ,   ""         },    /* &#156;		Unused  */
-        { ' ' ,   ""         },    /* &#157;		Unused  */
-        { ' ' ,   ""         },    /* &#158;		Unused  */
-        { ' ' ,   ""         },    /* &#159;		Unused  */
-        { ' ' ,   ""   },    /* 	Non-breaking Space  */
-        { '¡' ,   ""  },    /* 	Inverted exclamation    */
-        { '¢' ,   ""   },    /* 	Cent sign               */
-        { '£' ,   ""  },    /* 	Pound sterling  */
-        { '¤' ,   "" },    /* 	General currency sign  */
-        { '¥' ,   ""    },    /* 	Yen sign  */
-        { '¦' ,   "" },    /* 	Broken vertical bar  */
-        { '§' ,   ""  },    /* 	Section sign  */
-        { '¨' ,   ""   },    /* 	Diæresis / Umlaut  */
-        { '©' ,   ""  },    /* 	Copyright               */
-        { 'ª' ,   ""  },    /* 	Feminine ordinal  */
-        { '«' ,   "" },    /* 	Left angle quote, guillemot left  */
-        { '¬' ,   ""   },    /*	Not sign  */
-        { '­' ,   ""    },    /* 	Soft hyphen  */
-        { '®' ,   ""    },    /* 	Registered trademark  */
-        { '¯' ,   ""  },    /* 	Macron accent  */
-        { '°' ,   ""    },    /* 	Degree sign  */
-        { '±' ,   "" },    /* 	Plus or minus  */
-        { '²' ,   ""   },    /* 	Superscript two  */
-        { '³' ,   ""   },    /* 	Superscript three  */
-        { '´' ,   ""  },    /* 	Acute accent  */
-        { 'µ' ,   ""  },    /* 	Micro sign  */
-        { '¶' ,   ""   },    /* 	Paragraph sign  */
-        { '·' ,   "" },    /* 	Middle dot  */
-        { '¸' ,   ""  },    /* 	Cedilla  */
-        { '¹' ,   ""   },    /* 	Superscript one  */
-        { 'º' ,   ""   },    /* 	Masculine ordinal  */
-        { '»' ,   ""  },    /* 	Right angle quote, guillemot right  */
-        { '¼' ,   "" },    /* 	Fraction one-fourth  */
-        { '½' ,   "" },    /* 	Fraction one-half  */
-        { '¾' ,   "" },    /* 	Fraction three-fourths  */
-        { '¿' ,   "" },    /* 	Inverted question mark  */
-        { 'À' ,   "" },    /* 	Capital A, grave accent  */
-        { 'Á' ,   "" },    /* 	Capital A, acute accent  */
-        { 'Â' ,   ""  },    /* 	Capital A, circumflex  */
-        { 'Ã' ,   "" },    /* 	Capital A, tilde  */
-        { 'Ä' ,   ""   },    /* 	Capital A, diæresis / umlaut  */
-        { 'Å' ,   ""  },    /* 	Capital A, ring  */
-        { 'Æ' ,   ""  },    /* 	Capital AE ligature  */
-        { 'Ç' ,   "" },    /* 	Capital C, cedilla  */
-        { 'È' ,   "" },    /* 	Capital E, grave accent  */
-        { 'É' ,   "" },    /* 	Capital E, acute accent  */
-        { 'Ê' ,   ""  },    /* 	Capital E, circumflex  */
-        { 'Ë' ,   ""   },    /* 	Capital E, diæresis / umlaut  */
-        { 'Ì' ,   "" },    /* 	Capital I, grave accent  */
-        { 'Í' ,   "" },    /* 	Capital I, acute accent  */
-        { 'Î' ,   ""  },    /* 	Capital I, circumflex  */
-        { 'Ï' ,   ""   },    /* 	Capital I, diæresis / umlaut  */
-        { 'Ð' ,   ""    },    /* 	Capital Eth, Icelandic  */
-        { 'Ñ' ,   "" },    /* 	Capital N, tilde  */
-        { 'Ò' ,   "" },    /* 	Capital O, grave accent  */
-        { 'Ó' ,   "" },    /* 	Capital O, acute accent  */
-        { 'Ô' ,   ""  },    /* 	Capital O, circumflex  */
-        { 'Õ' ,   "" },    /* 	Capital O, tilde  */
-        { 'Ö' ,   ""   },    /* 	Capital O, diæresis / umlaut  */
-        { '×' ,   ""  },    /* 	Multiply sign  */
-        { 'Ø' ,   "" },    /* 	Capital O, slash  */
-        { 'Ù' ,   "" },    /* 	Capital U, grave accent  */
-        { 'Ú' ,   "" },    /* 	Capital U, acute accent  */
-        { 'Û' ,   ""  },    /* 	Capital U, circumflex  */
-        { 'Ü' ,   ""   },    /* 	Capital U, diæresis / umlaut  */
-        { 'Ý' ,   "" },    /* 	Capital Y, acute accent  */
-        { 'Þ' ,   ""  },    /* 	Capital Thorn, Icelandic  */
-        { 'ß' ,   ""  },    /* 	Small sharp s, German sz  */
-        { 'à' ,   "" },    /* 	Small a, grave accent  */
-        { 'ß' ,   "" },    /* 	Small a, acute accent  */
-        { 'â' ,   ""  },    /* 	Small a, circumflex  */
-        { 'ã' ,   "" },    /* 	Small a, tilde  */
-        { 'ä' ,   ""   },    /* 	Small a, diæresis / umlaut  */
-        { 'å' ,   ""  },    /* 	Small a, ring  */
-        { 'æ' ,   ""  },    /* 	Small ae ligature  */
-        { 'ç' ,   "" },    /* 	Small c, cedilla  */
-        { 'è' ,   "" },    /* 	Small e, grave accent  */
-        { 'é' ,   "" },    /* 	Small e, acute accent  */
-        { 'ê' ,   ""  },    /* 	Small e, circumflex  */
-        { 'ë' ,   ""   },    /* 	Small e, diæresis / umlaut  */
-        { 'ì' ,   "" },    /* 	Small i, grave accent  */
-        { 'í' ,   "" },    /* 	Small i, acute accent  */
-        { 'î' ,   ""  },    /* 	Small i, circumflex  */
-        { 'ï' ,   ""   },    /* 	Small i, diæresis / umlaut  */
-        { 'ð' ,   ""    },    /* 	Small eth, Icelandic  */
-        { 'ñ' ,   "" },    /* 	Small n, tilde  */
-        { 'ò' ,   "" },    /* 	Small o, grave accent  */
-        { 'ó' ,   "" },    /* 	Small o, acute accent  */
-        { 'ô' ,   ""  },    /* 	Small o, circumflex  */
-        { 'õ' ,   "" },    /* 	Small o, tilde  */
-        { 'ö' ,   ""   },    /* 	Small o, diæresis / umlaut  */
-        { '÷' ,   "" },    /* 	Division sign  */
-        { 'ø' ,   "" },    /* 	Small o, slash  */
-        { 'ù' ,   "" },    /* 	Small u, grave accent  */
-        { 'ú' ,   "" },    /* 	Small u, acute accent  */
-        { 'û' ,   ""  },    /* 	Small u, circumflex  */
-        { 'ü' ,   ""   },    /* 	Small u, diæresis / umlaut  */
-        { 'ý' ,   "" },    /* 	Small y, acute accent  */
-        { 'þ' ,   ""  },    /* 	Small thorn, Icelandic  */
-        { '\255', ""   },    /* 	Small y, diæresis / umlaut  */
+        { '' ,   "%7F"         },    /* 	&#127;		Unused  */
+        { '€' ,   "%80"         },    /* 	&#128;		Unused */
+        { ' ' ,   "%81"         },    /* &#129;		Unused  */
+        { ' ' ,   "%82"         },    /* &#130;		Unused  */
+        { ' ' ,   "%83"         },    /* &#131;		Unused  */
+        { ' ' ,   "%84"         },    /* &#132;		Unused  */
+        { ' ' ,   "%85"         },    /* &#133;		Unused  */
+        { ' ' ,   "%86"         },    /* &#134;		Unused  */
+        { ' ' ,   "%87"         },    /* &#135;		Unused  */
+        { ' ' ,   "%88"         },    /* &#136;		Unused  */
+        { ' ' ,   "%89"         },    /* &#137;		Unused  */
+        { ' ' ,   "%8A"         },    /* &#138;		Horizontal tab  */
+        { ' ' ,   "%8B"         },    /* &#139;		Line feed  */
+        { ' ' ,   "%8C"         },    /* &#140;		Unused  */
+        { ' ' ,   "%8D"         },    /* &#141;		Unused  */
+        { ' ' ,   "%8E"         },    /* &#142;		Carriage Return  */
+        { ' ' ,   "%8F"         },    /* &#143;		Unused  */
+        { ' ' ,   "%90"         },    /* &#144;		Unused  */
+        { ' ' ,   "%91"         },    /* &#145;		Unused  */
+        { ' ' ,   "%92"         },    /* &#146;		Unused  */
+        { ' ' ,   "%93"         },    /* &#147;		Unused  */
+        { ' ' ,   "%94"         },    /* &#148;		Unused  */
+        { ' ' ,   "%95"         },    /* &#149;		Unused  */
+        { ' ' ,   "%96"         },    /* &#150;		Unused  */
+        { ' ' ,   "%97"         },    /* &#151;		Unused  */
+        { ' ' ,   "%98"         },    /* &#152;		Unused  */
+        { ' ' ,   "%99"         },    /* &#153;		Unused  */
+        { ' ' ,   "%9A"         },    /* &#154;		Unused  */
+        { ' ' ,   "%9B"         },    /* &#155;		Unused  */
+        { ' ' ,   "%9C"         },    /* &#156;		Unused  */
+        { ' ' ,   "%9D"         },    /* &#157;		Unused  */
+        { ' ' ,   "%9E"         },    /* &#158;		Unused  */
+        { ' ' ,   "%9F"         },    /* &#159;		Unused  */
+        { ' ' ,   "%A0"   },    /* 	Non-breaking Space  */
+        { '¡' ,   "%A1"  },    /* 	Inverted exclamation    */
+        { '¢' ,   "%A2"   },    /* 	Cent sign               */
+        { '£' ,   "%A3"  },    /* 	Pound sterling  */
+        { '¤' ,   "%A4" },    /* 	General currency sign  */
+        { '¥' ,   "%A5"    },    /* 	Yen sign  */
+        { '¦' ,   "%A6" },    /* 	Broken vertical bar  */
+        { '§' ,   "%A7"  },    /* 	Section sign  */
+        { '¨' ,   "%A8"   },    /* 	Diæresis / Umlaut  */
+        { '©' ,   "%A9"  },    /* 	Copyright               */
+        { 'ª' ,   "%AA"  },    /* 	Feminine ordinal  */
+        { '«' ,   "%AB" },    /* 	Left angle quote, guillemot left  */
+        { '¬' ,   "%AC"   },    /*	Not sign  */
+        { '­' ,   "%AD"    },    /* 	Soft hyphen  */
+        { '®' ,   "%AE"    },    /* 	Registered trademark  */
+        { '¯' ,   "%AF"  },    /* 	Macron accent  */
+        { '°' ,   "%B0"    },    /* 	Degree sign  */
+        { '±' ,   "%B1" },    /* 	Plus or minus  */
+        { '²' ,   "%B2"   },    /* 	Superscript two  */
+        { '³' ,   "%B3"   },    /* 	Superscript three  */
+        { '´' ,   "%B4"  },    /* 	Acute accent  */
+        { 'µ' ,   "%B5"  },    /* 	Micro sign  */
+        { '¶' ,   "%B6"   },    /* 	Paragraph sign  */
+        { '·' ,   "%B7" },    /* 	Middle dot  */
+        { '¸' ,   "%B8"  },    /* 	Cedilla  */
+        { '¹' ,   "%B9"   },    /* 	Superscript one  */
+        { 'º' ,   "%BA"   },    /* 	Masculine ordinal  */
+        { '»' ,   "%BB"  },    /* 	Right angle quote, guillemot right  */
+        { '¼' ,   "%BC" },    /* 	Fraction one-fourth  */
+        { '½' ,   "%BD" },    /* 	Fraction one-half  */
+        { '¾' ,   "%BE" },    /* 	Fraction three-fourths  */
+        { '¿' ,   "%BF" },    /* 	Inverted question mark  */
+        { 'À' ,   "%C0" },    /* 	Capital A, grave accent  */
+        { 'Á' ,   "%C1" },    /* 	Capital A, acute accent  */
+        { 'Â' ,   "%C2"  },    /* 	Capital A, circumflex  */
+        { 'Ã' ,   "%C3" },    /* 	Capital A, tilde  */
+        { 'Ä' ,   "%C4"   },    /* 	Capital A, diæresis / umlaut  */
+        { 'Å' ,   "%C5"  },    /* 	Capital A, ring  */
+        { 'Æ' ,   "%C6"  },    /* 	Capital AE ligature  */
+        { 'Ç' ,   "%C7" },    /* 	Capital C, cedilla  */
+        { 'È' ,   "%C8" },    /* 	Capital E, grave accent  */
+        { 'É' ,   "%C9" },    /* 	Capital E, acute accent  */
+        { 'Ê' ,   "%CA"  },    /* 	Capital E, circumflex  */
+        { 'Ë' ,   "%CB"   },    /* 	Capital E, diæresis / umlaut  */
+        { 'Ì' ,   "%CC" },    /* 	Capital I, grave accent  */
+        { 'Í' ,   "%CD" },    /* 	Capital I, acute accent  */
+        { 'Î' ,   "%CE"  },    /* 	Capital I, circumflex  */
+        { 'Ï' ,   "%CF"   },    /* 	Capital I, diæresis / umlaut  */
+        { 'Ð' ,   "%D0"    },    /* 	Capital Eth, Icelandic  */
+        { 'Ñ' ,   "%D1" },    /* 	Capital N, tilde  */
+        { 'Ò' ,   "%D2" },    /* 	Capital O, grave accent  */
+        { 'Ó' ,   "%D3" },    /* 	Capital O, acute accent  */
+        { 'Ô' ,   "%D4"  },    /* 	Capital O, circumflex  */
+        { 'Õ' ,   "%D5" },    /* 	Capital O, tilde  */
+        { 'Ö' ,   "%D6"   },    /* 	Capital O, diæresis / umlaut  */
+        { '×' ,   "%D7"  },    /* 	Multiply sign  */
+        { 'Ø' ,   "%D8" },    /* 	Capital O, slash  */
+        { 'Ù' ,   "%D9" },    /* 	Capital U, grave accent  */
+        { 'Ú' ,   "%DA" },    /* 	Capital U, acute accent  */
+        { 'Û' ,   "%DB"  },    /* 	Capital U, circumflex  */
+        { 'Ü' ,   "%DC"   },    /* 	Capital U, diæresis / umlaut  */
+        { 'Ý' ,   "%DD" },    /* 	Capital Y, acute accent  */
+        { 'Þ' ,   "%DE"  },    /* 	Capital Thorn, Icelandic  */
+        { 'ß' ,   "%DF"  },    /* 	Small sharp s, German sz  */
+        { 'à' ,   "%E0" },    /* 	Small a, grave accent  */
+        { 'ß' ,   "%E1" },    /* 	Small a, acute accent  */
+        { 'â' ,   "%E2"  },    /* 	Small a, circumflex  */
+        { 'ã' ,   "%E3" },    /* 	Small a, tilde  */
+        { 'ä' ,   "%E4"   },    /* 	Small a, diæresis / umlaut  */
+        { 'å' ,   "%E5"  },    /* 	Small a, ring  */
+        { 'æ' ,   "%E6"  },    /* 	Small ae ligature  */
+        { 'ç' ,   "%E7" },    /* 	Small c, cedilla  */
+        { 'è' ,   "%E8" },    /* 	Small e, grave accent  */
+        { 'é' ,   "%E9" },    /* 	Small e, acute accent  */
+        { 'ê' ,   "%EA"  },    /* 	Small e, circumflex  */
+        { 'ë' ,   "%EB"   },    /* 	Small e, diæresis / umlaut  */
+        { 'ì' ,   "%EC" },    /* 	Small i, grave accent  */
+        { 'í' ,   "%ED" },    /* 	Small i, acute accent  */
+        { 'î' ,   "%EE"  },    /* 	Small i, circumflex  */
+        { 'ï' ,   "%EF"   },    /* 	Small i, diæresis / umlaut  */
+        { 'ð' ,   "%F0"    },    /* 	Small eth, Icelandic  */
+        { 'ñ' ,   "%F1" },    /* 	Small n, tilde  */
+        { 'ò' ,   "%F2" },    /* 	Small o, grave accent  */
+        { 'ó' ,   "%F3" },    /* 	Small o, acute accent  */
+        { 'ô' ,   "%F4"  },    /* 	Small o, circumflex  */
+        { 'õ' ,   "%F5" },    /* 	Small o, tilde  */
+        { 'ö' ,   "%F6"   },    /* 	Small o, diæresis / umlaut  */
+        { '÷' ,   "%F7" },    /* 	Division sign  */
+        { 'ø' ,   "%F8" },    /* 	Small o, slash  */
+        { 'ù' ,   "%F9" },    /* 	Small u, grave accent  */
+        { 'ú' ,   "%FA" },    /* 	Small u, acute accent  */
+        { 'û' ,   "%FB"  },    /* 	Small u, circumflex  */
+        { 'ü' ,   "%FC"   },    /* 	Small u, diæresis / umlaut  */
+        { 'ý' ,   "%FD" },    /* 	Small y, acute accent  */
+        { 'þ' ,   "%FE"  },    /* 	Small thorn, Icelandic  */
+        { '\255', "%FF"   },    /* 	Small y, diæresis / umlaut  */
     } ; 
     
     

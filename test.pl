@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: test.pl,v 1.70.4.141 2002/06/25 06:09:59 richter Exp $
+#   $Id: test.pl,v 1.129 2003/06/09 18:03:22 richter Exp $
 #
 ###################################################################################
 
@@ -230,7 +230,7 @@
         'version'    => 1,
         },
     'input.htm' => { 
-        'query_info' => 'feld5=Wert5&feld6=Wert6&feld7=Wert7&feld8=Wert8&cb5=cbv5&cb6=cbv6&cb7=cbv7&cb8=cbv8&cb9=ncbv9&cb10=ncbv10&cb11=ncbv11&mult=Wert3&mult=Wert6&esc=a<b&escmult=a>b&escmult=Wert3',
+        'query_info' => 'feld5=Wert5&feld5a=Wert4\'y\'r&feld5b="Wert5"&feld6=Wert6&feld7=Wert7&feld8=Wert8&cb5=cbv5&cb6=cbv6&cb7=cbv7&cb8=cbv8&cb9=ncbv9&cb10=ncbv10&cb11=ncbv11&mult=Wert3&mult=Wert6&esc=a<b&escmult=a>b&escmult=Wert3',
         },
     'hidden.htm' => { 
         'query_info' => 'feld1=Wert1&feld2=Wert2&feld3=Wert3&feld4=Wert4',
@@ -484,6 +484,9 @@
         'cgi'        => 0,
         'condition'  => '$] >= 5.006001', 
         'cmpext'     => '.561',
+        },
+    'cookieexpire.htm' => { 
+        'offline'    => 1,
         },
     'mdatsess.htm' => { 
         'offline'    => 0,
@@ -972,6 +975,18 @@
         'version'    => 2,
         'app_handler_class' => 'Embperl::TEST::App',
         },
+    'xhtml.htm' => { 
+        'version'    => 2,
+        },
+    'epform.htm' => { 
+        'version'    => 2,
+        'query_info' => 'datum=23.12.2002&stunden=x',
+        },
+    'subreq.htm' => { 
+        'version'    => 2,
+        'modperl'    => 1,
+        'condition'  => '$MP2',
+        },
 ) ;
 
 for ($i = 0 ; $i < @testdata; $i += 2)
@@ -990,7 +1005,8 @@ use vars qw ($httpconfsrc $httpconf $EPPORT $EPPORT2 *SAVEERR *ERR $EPHTTPDDLL $
             $opt_offline $opt_ep1 $opt_cgi $opt_modperl $opt_execute $opt_nokill $opt_loop
             $opt_multchild $opt_memcheck $opt_exitonmem $opt_exitonsv $opt_config $opt_nostart $opt_uniquefn
             $opt_quite $opt_qq $opt_ignoreerror $opt_tests $opt_blib $opt_help $opt_dbgbreak $opt_finderr
-            $opt_ddd $opt_gdb $opt_ab $opt_abpre $opt_abverbose $opt_start $opt_startinter $opt_kill $opt_showcookie $opt_cache) ;
+            $opt_ddd $opt_gdb $opt_ab $opt_abpre $opt_abverbose $opt_start $opt_startinter $opt_kill $opt_showcookie $opt_cache
+            $opt_cfgdebug) ;
 
     {
     local $^W = 0 ;
@@ -1008,6 +1024,8 @@ BEGIN
     $^W     = 1 ;
     $|      = 1;
     
+    $ENV{EMBPERL_COOKIE_EXPIRES} = '+120s' ;
+
     if (($ARGV[0] || '') eq '--testlib') 
         {
         eval 'use ExtUtils::testlib' ;
@@ -1084,7 +1102,8 @@ $@ = "" ;
 $ret = GetOptions ("offline|o", "ep1|1", "cgi|c", "cache|a", "modperl|httpd|h", "execute|e", "nokill|r", "loop|l:i",
             "multchild|m", "memcheck|v", "exitonmem|g", "exitonsv", "config|f=s", "nostart|x", "uniquefn|u",
             "quite|q",  "qq", "ignoreerror|i", "tests|t", "blib|b", "help", "dbgbreak", "finderr",
-	    "ddd", "gdb", "ab:s", "abverbose", "abpre", "start", "startinter", "kill", "showcookie") ;
+	    "ddd", "gdb", "ab:s", "abverbose", "abpre", "start", "startinter", "kill", "showcookie",
+            "cfgdebug") ;
 
 $opt_help = 1 if ($ret == 0) ;
 
@@ -1157,6 +1176,7 @@ if ($opt_help)
     print "--startinter  start apache only for interactive session\n" ;
     print "--kill   kill apache only\n" ;
     print "--showcookie  shows sent and received cookies\n" ;
+    print "--cfgdebug    shows processing of configuration directives\n" ;
     print "\n\n" ;
     print "path\t$EPPATH\n" ;
     print "httpd\t" . ($EPHTTPD || '') . "\n" ;
@@ -1277,11 +1297,14 @@ sub CmpFiles
     my ($f1, $f2, $errin) = @_ ;
     my $line = 0 ;
     my $err  = 0 ;
+    local $^W = 0 ;
 
     open F1, $f1 || die "***Cannot open $f1" ; 
+    binmode (F1, ":encoding(iso-8859-1)") if ($] >= 5.008000) ;
     if (!$errin)
 	{
 	open F2, $f2 || die "***Cannot open $f2" ; 
+        binmode (F2, ":encoding(iso-8859-1)") if ($] >= 5.008000) ;
 	}
 
     while (defined ($l1 = <F1>))
@@ -1336,6 +1359,8 @@ sub CmpFiles
 		}
 	    else
 		{
+		$l1 =~ s/\s//g ;
+		$l2 =~ s/\s//g ;
 		$eq = lc ($l1) eq lc ($l2) ;
 		}
 	    }
@@ -1442,6 +1467,7 @@ sub REQ
     $response = $ua->request($request, undef, undef);
 
     open FH, ">$ofile" ;
+    { local $^W = 0 ; binmode (FH, ":encoding(iso-8859-1)") if ($] >= 5.008000) ; }
     print FH $response -> content ;
     close FH ;
 
@@ -1457,6 +1483,7 @@ sub REQ
         }
     $cookie = $c if (($c =~ /EMBPERL_UID/) && !($cookieaction =~ /nosave/)) ;  
     $cookie = undef if (($c =~ /EMBPERL_UID=;/) && !($cookieaction =~ /nosave/)) ;  
+    $cookie =~ s/;.*$// if ($cookie) ;
 
     $sendcookie ||= '' ;
     print "\nSent: $sendcookie, Got: " , ($c||''), "\n" if ($opt_showcookie) ;
@@ -1554,6 +1581,7 @@ sub CheckError
 	    !($_ =~ /mod_ssl\:/) &&
 	    !($_ =~ /SES\:/) &&
 	    !($_ =~ /gcache started/) &&
+            !($_ =~ /EmbperlDebug: /) &&
             $_ ne 'Use of uninitialized value.')
 	    {
 	    $cnt-- ;
@@ -1897,6 +1925,7 @@ do
 
         $ENV{EMBPERL_EP1COMPAT} = 0 ;
         delete $ENV{EMBPERL_ALLOW} ;
+	delete $ENV{QUERY_STRING} ;
 
 	if ($err == 0)
 	    {
@@ -2000,7 +2029,7 @@ do
 		$Embperl::Test::STDOUT::output = '' ;
                 tie *STDOUT, 'Embperl::Test::STDOUT' ;
                 $t1 = 0 ; # Embperl::Clock () ;
-		$err = Embperl::Execute ({'inputfile'  => $src,
+                $err = Embperl::Execute ({'inputfile'  => $src,
 						'mtime'      => 1,
 						'debug'      => $defaultdebug,
                                                 input_escmode => 7, 
@@ -2476,7 +2505,7 @@ do
 		}			
 	    else
 	        {
-		system ("$EPHTTPD $XX -f $EPPATH/$httpdconf " . ($opt_startinter?'':'&')) and die "***Cannot start $EPHTTPD" ;
+		system ("$EPHTTPD " . ($opt_cfgdebug?"-D EMBPERL_APDEBUG ":'') . " $XX -f $EPPATH/$httpdconf " . ($opt_startinter?'':'&')) and die "***Cannot start $EPHTTPD" ;
 		}
 	    }
 

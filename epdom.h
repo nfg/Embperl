@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdom.h,v 1.4.2.50 2002/05/21 12:09:08 richter Exp $
+#   $Id: epdom.h,v 1.7 2003/04/11 05:41:17 richter Exp $
 #
 ###################################################################################*/
 
@@ -260,6 +260,10 @@ tStringIndex String2UniqueNdx (/*in*/ struct tApp * a,
                                /*in*/ const char *	    sText,
   			       /*in*/ int		    nLen) ;
 
+void NdxStringFree (/*in*/ struct tApp * a,
+                    /*in*/ tStringIndex             nNdx) ;
+
+
 
 #define SV2String(pSV,l)  (SvOK (pSV)?SvPV (pSV, l):(l=0,((char *)NULL)))
 
@@ -270,7 +274,6 @@ tStringIndex String2UniqueNdx (/*in*/ struct tApp * a,
 #define Ndx2StringLen(nNdx,sVal,nLen) { HE * pHE = pStringTableArray[nNdx] ; nLen=HeKLEN(pHE) ; sVal = HeKEY (pHE) ; }
 
 #define NdxStringRefcntInc(a,nNdx) (SvREFCNT_inc (HeVAL (pStringTableArray[nNdx])))
-
 
 #ifdef DMALLOC
 int ArrayNew_dbg (/*in*/ struct tApp * a, 

@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Mail.pm,v 1.29.4.6 2002/03/19 04:41:23 richter Exp $
+#   $Id: Mail.pm,v 1.35 2003/01/07 20:43:00 richter Exp $
 #
 ###################################################################################
 
@@ -33,7 +33,25 @@ use vars qw(
 @ISA = qw(Embperl);
 
 
-$VERSION = '2.0b7';
+$VERSION = '2.0b9';
+
+
+sub _quote_hdr
+    {
+    my $chunk    = shift;
+    my $encoding = shift ;
+
+    return $chunk unless ($encoding && ($chunk =~ /[\x80-\xff]/)) ;
+
+    $chunk =~ s{
+		([^0-9A-Za-z])
+	       }{
+		   join("" => map {sprintf "=%02X", $_} unpack("C*", $1))
+	       }egox;
+    return "=?$encoding?Q?$chunk?=";
+    }
+
+
 
 
 
@@ -76,7 +94,7 @@ sub Execute
                                   ($helo?(Hello => $helo):()) 
                                   ) or die "Cannot connect to mailhost $req->{mailhost}" ;
 
-        my $from =  $req -> {from} || $ENV{'EMBPERL_MAILFROM'} || 'WWW-Server\@' . ($ENV{SERVER_NAME}" || 'localhost') ;
+        my $from =  $req -> {from} || $ENV{'EMBPERL_MAILFROM'} || 'WWW-Server\@' . ($ENV{SERVER_NAME} || 'localhost') ;
         $smtp->mail($from);
 
         my $to ;
@@ -112,20 +130,22 @@ sub Execute
             @$bcc = split (/\s*;\s*/, $req -> {'bcc'}) if ($req -> {'bcc'}) ;
             }
 
+        my $enc     = $req->{headerencoding} || 'iso-8859-1';
         my $headers = $req->{mailheaders} ;        
         $smtp -> to (@$to, @$cc, @$bcc) ;
 
         $smtp->data() or die "smtp data failed" ;
-        $smtp->datasend("Reply-To: $req->{'reply-to'}\n") or die "smtp data failed"  if ($req->{'reply-to'}) ;
-        $smtp->datasend("From: $from\n") if ($from) ;
-        $smtp->datasend("To: " . join (', ', @$to) . "\n")  or die "smtp datasend failed" ;
-        $smtp->datasend("Cc: " . join (', ', @$cc) . "\n")  or die "smtp datasend failed" if ($req -> {'cc'}) ;
-        $smtp->datasend("Subject: $req->{subject}\n") or die "smtp datasend failed" ;
+        $smtp->datasend("Reply-To: " . _quote_hdr($req->{'reply-to'}, $enc) . "\n") or die "smtp data failed"  if ($req->{'reply-to'}) ;
+        $smtp->datasend("From: " . _quote_hdr($from, $enc) . "\n") if ($from) ;
+        $smtp->datasend("To: " . _quote_hdr(join (', ', @$to), $enc) . "\n")  or die "smtp datasend failed" ;
+        $smtp->datasend("Cc: " . _quote_hdr(join (', ', @$cc), $enc) . "\n")  or die "smtp datasend failed" if ($req -> {'cc'}) ;
+        $smtp->datasend("Subject: " . _quote_hdr($req->{subject}, $enc) . "\n") or die "smtp datasend failed" ;
         if (ref ($headers) eq 'ARRAY')
             {
             foreach (@$headers)
                 {
-                $smtp->datasend("$_\n") or die "smtp datasend failed" ;
+                next unless (/^(.*?):\s*(.*?)$/) ;
+                $smtp->datasend("$1: " . _quote_hdr($2, $enc) . "\n") or die "smtp datasend failed" ;
                 }
             }
         $smtp->datasend("\n")  or die "smtp datasend failed" ;
@@ -209,6 +229,14 @@ the given address is insert as reply address
 =item mailheaders
 
 Array ref of additional mail headers
+
+
+=item headerencoding (2.0b9+)
+
+Tells Embperl::Mail which charset definition to include in any header
+that contains character code 128-255 and therfore needs encoding. 
+Defaults to iso-8859-1. Pass
+empty string to turn encoding of header fields of.
 
 =item mailhost
 

@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epparse.c,v 1.4.2.56 2002/06/18 06:27:34 richter Exp $
+#   $Id: epparse.c,v 1.9 2003/04/11 05:41:17 richter Exp $
 #
 ###################################################################################*/
 
@@ -77,7 +77,7 @@ static int CheckProcInfo      (/*i/o*/ register req * r,
     char *	    pKey ;
     SV * *	    ppSV ;
     SV * 	    pSVValue ;
-    IV		    l	 ;
+    I32		    l	 ;
     HV *            pHVProcInfo ;
     int             n ;
     epTHX ;
@@ -95,7 +95,7 @@ static int CheckProcInfo      (/*i/o*/ register req * r,
 	pHVProcInfo = (HV *)SvRV (*ppSV) ;
 
 	hv_iterinit (pHVProcInfo ) ;
-	while (pEntry = hv_iternext (pHVProcInfo))
+	while ((pEntry = hv_iternext (pHVProcInfo)))
 	    {
 	    pKey     = hv_iterkey (pEntry, &l) ;
 	    pSVValue = hv_iterval (pHVProcInfo , pEntry) ;
@@ -223,7 +223,7 @@ int BuildTokenTable (/*i/o*/ register req *	  r,
     int		    numTokens ;
     struct tToken * pTable ;
     struct tToken * p ;
-    IV		    l	 ;
+    I32		    l	 ;
     STRLEN	    len	 ;
     int		    n ;
     int		    i ;
@@ -336,7 +336,7 @@ int BuildTokenTable (/*i/o*/ register req *	  r,
 	    p -> pStartTag  = (struct tToken *)GetHashValueStrDup (aTHX_ r -> pThread -> pMainPool, pHash, "starttag", NULL) ;
 	    p -> pEndTag    = (struct tToken *)GetHashValueStrDup (aTHX_ r -> pThread -> pMainPool, pHash, "endtag", NULL) ;
 	    p -> sParseTimePerlCode =  GetHashValueStrDup (aTHX_ r -> pThread -> pMainPool, pHash, "parsetimeperlcode", NULL) ;
-	    if (sC = sContains  = GetHashValueStrDup (aTHX_ r -> pThread -> pMainPool, pHash, "contains", NULL))
+	    if ((sC = sContains  = GetHashValueStrDup (aTHX_ r -> pThread -> pMainPool, pHash, "contains", NULL)))
 		{
 		unsigned char * pC ;
 		if ((p -> pContains = parse_malloc (r, sizeof (tCharMap))) == NULL)
@@ -489,7 +489,7 @@ static int ExecParseTimeCode (/*i/o*/	register req *	    r,
     SV *        args[2] ;
     epTHX ;
 
-    if (p = strnstr (sPCode, "%%", nLen))
+    if ((p = strnstr (sPCode, "%%", nLen)))
 	{
 	sCode = parse_malloc (r, nLen + plen + 1) ;
 	n = p - sPCode ;
@@ -582,7 +582,7 @@ static int ParseTokens (/*i/o*/ register req *		r,
     char * pCurr = *ppCurr  ;
     char * pCurrStart = pCDATAStart?pCDATAStart:pCurr ;
     tNode xNewNode ;
-    int	    rc ;
+    int	    rc = 0 ;
     tDomTree * pDomTree = DomTree_self (r -> Component.xCurrDomTree) ;
     int  numInside      = 0 ;
     
@@ -695,7 +695,7 @@ static int ParseTokens (/*i/o*/ register req *		r,
 
 	
 		}
-            while (pNextTokenTab = pToken -> pFollowedBy) ;
+            while ((pNextTokenTab = pToken -> pFollowedBy)) ;
             
             if (pToken)
                 { /* matching token found */       
@@ -722,8 +722,10 @@ static int ParseTokens (/*i/o*/ register req *		r,
 
 			if (bUnescape)
                             {
+                            int newlen ;
                             r -> Component.bEscInUrl = bUnescape - 1 ;
-                            TransHtml (r, pCurrStart, pEnd - pCurrStart + 1) ;
+                            newlen = TransHtml (r, pCurrStart, pEnd - pCurrStart + 1) ;
+                            pEnd = pCurrStart + newlen - 1 ;
                             r -> Component.bEscInUrl = 0 ;
                             }
 
@@ -754,18 +756,21 @@ static int ParseTokens (/*i/o*/ register req *		r,
                         if (pEndCurr - pCurr && pToken -> nCDataType && pToken -> nCDataType != ntypCDATA)
 			    { /* add text before end of token as node */
                             char * pEnd = pEndCurr ;
+                            char c;
 
                             if (pToken -> bRemoveSpaces & 32)
-			        while (pEnd >= pCurrStart && isspace (*pEnd))
+			        while (pEnd > pCurrStart && isspace (*(pEnd-1)))
 				    pEnd-- ;
 			    else if (pToken -> bRemoveSpaces & 64)
-			        while (pEnd >= pCurrStart && (*pEnd == ' ' || *pEnd == '\t'  || *pEnd == '\r'))
+			        while (pEnd > pCurrStart && ((c = *(pEnd-1)) == ' ' || c == '\t'  || c == '\r'))
 				    pEnd-- ;
-				
+
 			    if (pToken -> bUnescape)
                                 {
+                                int newlen ;
                                 r -> Component.bEscInUrl = pToken -> bUnescape - 1 ;
-				TransHtml (r, pCurr, pEnd - pCurr) ;
+				newlen = TransHtml (r, pCurr, pEnd - pCurr) ;
+                                pEnd = pCurr + newlen ;
                                 r -> Component.bEscInUrl = 0 ;
                                 }
 
@@ -797,7 +802,7 @@ static int ParseTokens (/*i/o*/ register req *		r,
 			xParentNode = Node_parentNode  (r -> pApp, pDomTree, xParentNode, 0) ;
 			level-- ;
 			}
-		    if (pToken -> nNodeType && pToken -> nNodeType != ntypCDATA || pToken -> sNodeName)
+		    if ((pToken -> nNodeType && pToken -> nNodeType != ntypCDATA) || pToken -> sNodeName)
 			{
 			/* add token as node if not cdata*/
 			tNodeType nType = pToken -> nNodeType ;
@@ -820,7 +825,7 @@ static int ParseTokens (/*i/o*/ register req *		r,
 			xNewNode = xParentNode ;
 			}
 
-		    if (pInside = pToken -> pInside)
+		    if ((pInside = pToken -> pInside))
 			{ /* parse for further tokens inside of this token */
                         rc = ParseTokens (r, &pCurr, pEnd, pInside, 
 					    pToken -> sEndText,
@@ -875,7 +880,7 @@ static int ParseTokens (/*i/o*/ register req *		r,
 			{ /* nothing more inside of this token allowed, so search for the end of the token */
 			char * pEndCurr ;
 			unsigned char * pContains ;
-			int nSkip ;
+			int nSkip = 0 ;
 			if ((pContains = pToken -> pContains))
 			    {
 			    pEndCurr = pCurr ;
@@ -927,18 +932,21 @@ static int ParseTokens (/*i/o*/ register req *		r,
 				{
 				int nLine ;
                                 char * pEnd = pEndCurr ;
+                                char c;
 
                                 if (pToken -> bRemoveSpaces & 32)
-			            while (pEnd >= pCurrStart && isspace (*pEnd))
+			            while (pEnd > pCurrStart && isspace (*(pEnd-1)))
 				        pEnd-- ;
 			        else if (pToken -> bRemoveSpaces & 64)
-			            while (pEnd >= pCurrStart && (*pEnd == ' ' || *pEnd == '\t'  || *pEnd == '\r'))
+			            while (pEnd > pCurrStart && ((c = *(pEnd-1)) == ' ' || c == '\t'  || c == '\r'))
 				        pEnd-- ;
 				
                                 if (pToken -> bUnescape)
                                     {
+                                    int newlen ;
                                     r -> Component.bEscInUrl = pToken -> bUnescape - 1 ;
-				    TransHtml (r, pCurr, pEnd - pCurr) ;
+				    newlen = TransHtml (r, pCurr, pEnd - pCurr) ;
+                                    pEnd = pCurr + newlen ;
                                     r -> Component.bEscInUrl = 0 ;
                                     }
 
@@ -997,7 +1005,7 @@ static int ParseTokens (/*i/o*/ register req *		r,
             return bInsideMustExist?rcNotFound:ok ;
             }
         else if (sEndText == NULL ||
-	    (*pCurr == *sEndText && (strncmp (pCurr, sEndText, nEndText) == 0) || 
+	    ((*pCurr == *sEndText && (strncmp (pCurr, sEndText, nEndText) == 0)) || 
                 (pCurr[0] == '\n' && pCurr[1] == '\r' && pCurr[2] == '\n' && sEndText[1] == '\n' && sEndText[2] == '\0')) ||
              (pCurr[0] == '\r' && pCurr[1] == '\n' && pCurr[2] == '\r' && pCurr[3] == '\n' && sEndText[0] == '\n'  && sEndText[1] == '\n' && sEndText[2] == '\0')
                 )

@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcomp.c,v 1.4.2.97 2002/05/28 06:56:03 richter Exp $
+#   $Id: epcomp.c,v 1.9 2003/04/11 05:41:16 richter Exp $
 #
 ###################################################################################*/
 
@@ -75,7 +75,7 @@ static int embperl_CompileInit (/*in*/ tApp * a,
 
 
 
-    ArrayNew (a, &pInfo -> pEmbperlCmds, 256, sizeof (struct tEmbperlCmd)) ;
+    ArrayNewZero (a, &pInfo -> pEmbperlCmds, 256, sizeof (struct tEmbperlCmd)) ;
     ArraySet (a, &pInfo -> pEmbperlCmds, 0) ;
     pInfo -> nMaxEmbperlCmd = 1 ;
     *ppInfo = pInfo ;
@@ -137,6 +137,7 @@ int embperl_CompileInitItem      (/*i/o*/ register req * r,
         pNewCmd = malloc (sizeof (*pNewCmd)) ;
         pCmd -> pNext = pNewCmd ;
         pCmd = pNewCmd ;
+        memset (pCmd, 0, sizeof(*pCmd)) ;
         }
     pCmd -> bValid = nTagSet ;
 
@@ -234,13 +235,14 @@ int embperl_CompileInitItem      (/*i/o*/ register req * r,
 	pInfo -> pEmbperlCmds[nNodeName].sMayJump = pCmd -> sMayJump ;
 
     if (r -> Component.Config.bDebug & dbgBuildToken) 
-        lprintf (r -> pApp,  "[%d]EPCOMP: InitItem %s (#%d) perlcode=%s (num=%d) perlcodeend=%s compilechilds=%d removenode=%d\n", 
+        lprintf (r -> pApp,  "[%d]EPCOMP: InitItem %s (#%d) perlcode=%s (num=%d) perlcodeend=%s compilechilds=%d removenode=%d nodetype=%d\n", 
 	                  r -> pThread -> nPid, Ndx2String(nNodeName), nNodeName, 
 			  pCmd -> sPerlCode?pCmd -> sPerlCode[0]:"", 
 			  pCmd -> numPerlCode, 
 			  pCmd -> sPerlCodeEnd?pCmd -> sPerlCodeEnd:"<undef>",
 			  pCmd -> bCompileChilds, 
-			  pCmd -> bRemoveNode) ; 
+			  pCmd -> bRemoveNode, 
+			  pCmd -> nNodeType) ; 
 
     return ok ;
     }
@@ -331,7 +333,7 @@ static int embperl_CompileAddValue    (/*in*/  tReq * r,
 		
 		or = strchr (eq + 1, '|') ;
 		e = or?or:q ;
-		if (f = (char *)strstrn (sText, eq, e - eq))
+		if ((f = (char *)strstrn (sText, eq, e - eq)))
 		    if (!isalnum (f[e - eq]) && f[e - eq] != '_')
 			break ;
 		if (or == NULL)
@@ -349,8 +351,29 @@ static int embperl_CompileAddValue    (/*in*/  tReq * r,
 	    {
 	    if (out == 2)
 		{
-		StringAdd (r -> pApp, ppCode, "'", 1) ;
-		StringAdd (r -> pApp, ppCode, sText, l) ;
+		const char * s = sText ;
+
+                StringAdd (r -> pApp, ppCode, "'", 1) ;
+		while (*s && l--)
+                    {
+                    if (*s == '\'')
+                        {
+                        if (sText < s)
+                            StringAdd (r -> pApp, ppCode, sText, s - sText) ;
+                        StringAdd (r -> pApp, ppCode, "\\'", 2) ;
+                        sText = s + 1 ;
+                        }
+                    else if (*s == '\\')
+                        {
+                        if (sText < s)
+                            StringAdd (r -> pApp, ppCode, sText, s - sText) ;
+                        StringAdd (r -> pApp, ppCode, "\\\\", 2) ;
+                        sText = s + 1 ;
+                        }
+                    s++ ;
+                    }
+                if (sText < s)
+                    StringAdd (r -> pApp, ppCode, sText, s - sText) ;
 		StringAdd (r -> pApp, ppCode, "'", 1) ;
 		}
 	    else if (out)            
@@ -653,7 +676,7 @@ static int embperl_CompileAddAttribut (/*in*/  tReq * r,
 	{
 	if (pChildNode -> bFlags & aflgAttrChilds)
 	    {
-	    int l = sprintf (buf, "XML::Embperl::DOM::Attr::iValue ($_ep_DomTree,%d)", pChildNode -> xNdx) ;
+	    int l = sprintf (buf, "XML::Embperl::DOM::Attr::iValue ($_ep_DomTree,%ld)", pChildNode -> xNdx) ;
 	    sText = buf ;
 	    if (out == 2)
 		out = 1 ;
@@ -772,7 +795,7 @@ static int embperl_CompileToPerlCode  (/*in*/ tReq * r,
 		    if (*p == 'n')
 			{
 			char s [20] ;
-			int  l = sprintf (s, "$_ep_DomTree,%u", pNode -> xNdx) ;
+			int  l = sprintf (s, "$_ep_DomTree,%ld", pNode -> xNdx) ;
 			StringAdd (r -> pApp, ppCode, s, l) ; 
 			}
 		    else if (*p == 't')
@@ -782,13 +805,13 @@ static int embperl_CompileToPerlCode  (/*in*/ tReq * r,
 		    else if (*p == 'x')
 			{
 			char s [20] ;
-			int  l = sprintf (s, "%u", pNode -> xNdx) ;
+			int  l = sprintf (s, "%ld", pNode -> xNdx) ;
 			StringAdd (r -> pApp, ppCode, s, l) ; 
 			}
 		    else if (*p == 'l')
 			{
 			char s [20] ;
-			int  l = sprintf (s, "%u", pDomTree -> xLastNode) ;
+			int  l = sprintf (s, "%ld", pDomTree -> xLastNode) ;
 			StringAdd (r -> pApp, ppCode, s, l) ; 
 			}
 		    else if (*p == 'c')
@@ -796,7 +819,7 @@ static int embperl_CompileToPerlCode  (/*in*/ tReq * r,
 			char s [20] ;
 			if (pDomTree -> xLastNode != pDomTree -> xCurrNode)
 			    {
-			    int  l = sprintf (s, "$_ep_node=%u;", pDomTree -> xLastNode) ;
+			    int  l = sprintf (s, "$_ep_node=%ld;", pDomTree -> xLastNode) ;
 			    StringAdd (r -> pApp, ppCode, s, l) ; 
 			    xCurrNode = pDomTree -> xLastNode ;
 			    }
@@ -804,7 +827,7 @@ static int embperl_CompileToPerlCode  (/*in*/ tReq * r,
 		    else if (*p == 'q')
 			{
 			char s [20] ;
-			int  l = sprintf (s, "%u", pDomTree -> xNdx) ;
+			int  l = sprintf (s, "%hd", pDomTree -> xNdx) ;
 			StringAdd (r -> pApp, ppCode, s, l) ; 
 			}
 		    else if (*p == 'p')
@@ -819,7 +842,7 @@ static int embperl_CompileToPerlCode  (/*in*/ tReq * r,
                         int  l ;
 	                tIndex nCheckpointArrayOffset = ArrayAdd (r -> pApp, &pDomTree -> pCheckpoints, 1) ;
 	                pDomTree -> pCheckpoints[nCheckpointArrayOffset].xNode = pNode -> xNdx ;
-	                l = sprintf (s, " _ep_cp(%d) ;\n", nCheckpointArrayOffset) ;
+	                l = sprintf (s, " _ep_cp(%ld) ;\n", nCheckpointArrayOffset) ;
 			StringAdd (r -> pApp, ppCode, s, l) ; 
 
 	                if (r -> Component.Config.bDebug & dbgCompile)
@@ -1087,7 +1110,7 @@ static int embperl_CompilePostProcess  (/*in*/	tReq *	       r,
     if (pCmd -> bRemoveNode & 16)
 	{
 	tNodeData * pChild ;
-	while (pChild = Node_selfFirstChild (r -> pApp, pDomTree, pNode, 0))
+	while ((pChild = Node_selfFirstChild (r -> pApp, pDomTree, pNode, 0)))
 	    {
 	    Node_selfRemoveChild (r -> pApp, pDomTree, pNode -> xNdx, pChild) ;
 	    }
@@ -1377,7 +1400,8 @@ int embperl_CompileNode (/*in*/  tReq *         r,
     if (nNdx <= pInfo -> nMaxEmbperlCmd)
 	{
 	pCmd = pCmdHead = &(pInfo -> pEmbperlCmds[nNdx]) ;
-	/* ??if (pCmd -> nNodeType != pNode -> nType) */
+        pCmdLast = NULL ;
+        /* ??if (pCmd -> nNodeType != pNode -> nType) */
 	/*	 pCmd = NULL ; */
 	}
     else
@@ -1424,7 +1448,7 @@ int embperl_CompileNode (/*in*/  tReq *         r,
 	
     if (pCmd == NULL || (pCmd -> bRemoveNode & 8) == 0)
         { /* calculate attributes before tag, but not when tag should be ignored in output stream */
-        while (pAttr = Element_selfGetNthAttribut (r -> pApp, pDomTree, pNode, nAttr++))
+        while ((pAttr = Element_selfGetNthAttribut (r -> pApp, pDomTree, pNode, nAttr++)))
 	    {
             if (pAttr -> bFlags & aflgAttrChilds)
                 {

@@ -27,6 +27,10 @@ $kats[2]{Id} = 'Veranstaltungen' ;
     <input name="feld5">
     <input name="feld1" value="Wert1">
     <input name="feld5" value="Wert15">
+    <input name="feld5a" value="a&quot;b">
+    <input name="feld5b" value="a'b&amp;c">
+    <input name="feld5a">
+    <input name="feld5b">
     <input name="feld1" value="">
     <input name="feld5" value="">
     <input type="text">
@@ -141,6 +145,42 @@ $kats[2]{Id} = 'Veranstaltungen' ;
 		<option>Wert5
 	</select>
 
+	<select name="feld5a">
+		<option>Wert3'x</option>
+		<option>Wert4'y'r</option>
+		<option>Wert5\#\\'#''</option>
+	</select>
+
+	<select name="feld5a">
+		<option>Wert3'x
+		<option>Wert4'y'r
+		<option>Wert5\#\\'#''
+	</select>
+
+	<select name="feld5b">
+		<option value="1">1</option>
+		<option value="2">2</option>
+		<option value="&quot;Wert5&quot;">3</option>
+	</select>
+
+	<select name="feld5b">
+		<option>Wert3'x</option>
+		<option>Wert4'y'r</option>
+		<option>&quot;Wert5&quot;</option>
+		<option>Wert3'x</option>
+		<option>"Wert5"</option>
+		<option>Wert3'x</option>
+	</select>
+
+	<select name="feld5b">
+		<option>Wert3'x
+		<option>Wert4'y'r
+		<option>&quot;Wert5&quot;
+		<option>Wert3'x
+		<option>"Wert5"
+		<option>Wert3'x
+	</select>
+
 	<select name="mult" multiple>
 		<option value="Wert1">Wert1</option>
 		<option value="Wert2">Wert2</option>
@@ -163,6 +203,31 @@ $kats[2]{Id} = 'Veranstaltungen' ;
 		<option value="Wert8" selected>Wert8</option>
 	</select>
 
+	<select name="escmult" multiple>
+		<option value="Wert1">Wert1</option>
+		<option value="Wert2">Wert2</option>
+		<option value="Wert3">Wert3</option>
+		<option value="Wert4">Wert4</option>
+		<option value="Wert5">Wert5</option>
+		<option value="Wert6">Wert6</option>
+		<option value="Wert7">Wert7</option>
+		<option value="Wert8">Wert8</option>
+		<option value="a&gt;b">a>b</option>
+	</select>
+
+	<select name="escmult" multiple>
+		<option value="Wert1" selected>Wert1</option>
+		<option value="Wert2" selected>Wert2</option>
+		<option value="Wert3" selected>Wert3</option>
+		<option value="Wert4" selected>Wert4</option>
+		<option value="Wert5" selected>Wert5</option>
+		<option value="Wert6" selected>Wert6</option>
+		<option value="Wert7" selected>Wert7</option>
+		<option value="Wert8" selected>Wert8</option>
+		<option value="a&gt;b" selected>a>b</option>
+	</select>
+
+	
 	
 	ks = [+ do { @ks = sort keys %idat ; "@ks" } +]<p>
 

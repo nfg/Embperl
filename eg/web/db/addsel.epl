@@ -37,17 +37,44 @@ $Embperl::Form::Validate::objects{'addsel'} = $epf ;
 [+ do { local $escmode = 0 ; $epf -> get_script_code (undef, $r) } +]
 </script>
 
-[= addsel1 =]
+<p class="cHeadline">[= addsel1 =]</p>
 
 <ul>
     <li>
         [- $rec = $r -> {category_set}[$row] -]
-        <a href="add.epl?category_id=[+ $rec -> {category_id} +]">[+ $rec -> {category} +]</a>
+        <a href="add.-category_id-[+ $rec -> {category_id} +]-.epl">[+ $rec -> {category} +]</a>
     </li>
 </ul>
 
 
-<form action="[+ $r -> {action_prefix}?($r->{action_prefix} . dirname($r-> param -> uri) .'/'):''+]addsel.epl"  OnSubmit="">
+[$ if $r -> {user_id} $]
+
+<p class="cHeadline">[= addsel_upd =]</p>
+
+<ul>
+    <li>
+        [- $rec = $r -> {category_set}[$row] -]
+        <a href="list.-category_id-[+ $rec -> {category_id} +]-.epl">[+ $rec -> {category} +]</a>
+    </li>
+</ul>
+
+[$else$]
+
+<p class="cHeadline">[= addsel_login1 =] <a href="login.epl">[= addsel_login2 =]</a> [= addsel_login3 =]</p>
+
+[$endif$]
+
+[#
+DEBUGGING:
+
+[! use Data::Dumper; !]
+<PRE>
+[+ Dumper $ENV{SERVER_NAME}, $ENV{SERVER_PORT}, [keys %$r] +]
+</PRE>
+#]
+
+[#
+<form action="[+ $r -> app -> posturl('addsel.epl') +]"  OnSubmit="">
 
 [= addsel2 =]<br> 
 [= addsel3 =]<br><br>
@@ -63,3 +90,4 @@ $Embperl::Form::Validate::objects{'addsel'} = $epf ;
 &nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="-add_category" value="[=addsel4=]">
 
 </form>
+#]

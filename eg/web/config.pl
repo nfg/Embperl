@@ -11,6 +11,8 @@ sub new
     $self -> {dbdsn}      = $^O eq 'MSWin32'?'dbi:ODBC:embperl':'dbi:mysql:embperl' ;
     $self -> {dbuser}     = 'www' ;
     $self -> {dbpassword} = undef ;
+    $self -> {adminemail} = 'richter@ecos.de';
+    $self -> {emailfrom}   = 'embperl@ecos.de';
 
     # There is normaly no need to change anything below this line
 
@@ -61,20 +63,33 @@ BEGIN
     %messages = (
         'de' =>
             {
-            'Introduction'  => 'Einführung',
-            'Documentation' => 'Dokumentation',
-            'Examples'      => 'Beispiele',
-            'Changes'       => 'Änderungen',
-            'Sites using Embperl' => 'Sites mit Embperl',
-            'Add info about Embperl' => 'Hinzufügen Infos',
-            '1.3.4 documentation' => '1.3.4 Dokumentation',
-            'Configuration'  => 'Konfiguration',
+            'Introduction'                    => 'Einführung',
+            'Documentation'                   => 'Dokumentation',
+            'Examples'                        => 'Beispiele',
+            'Changes'                         => 'Änderungen',
+            'Sites using Embperl'             => 'Sites mit Embperl',
+            'Add info about Embperl'          => 'Hinzufügen Infos',
+            'More infos'                      => 'Weitere Infos',
+            'Enter info to add about Embperl' => 'Eingabe von Informationen zu Embperl',
+            'Show info added about Embperl'   => 'Anzeige der gespeicherten Informationen zu Embperl',
+            'Infos about Embperl'             => 'Informationen über Embperl',  
+            '1.3.4 documentation'             => '1.3.4 Dokumentation',
+            'Configuration'                   => 'Konfiguration',
+            'Conferences'                     => 'Konferenzen',
+            'Books'                           => 'Bücher',
+            'Articles'                        => 'Artikel',
+            'Modules & Examples'              => 'Module & Beispiele',
             }
         ) ;
 
     @menu = (
         { menu => 'Home',                   uri => '',                          file => { en => 'eg/web/index.htm', de => 'eg/web/indexD.htm'} },
-        { menu => 'Features',               uri => 'pod/Features.htm',          file => { en => 'Features.pod',     de => 'FeaturesD.pod' } },
+        { menu => 'Features',               uri => 'pod/list/Features.htm',          file => { en => 'Features.pod',     de => 'FeaturesD.pod' }, sub =>
+            [
+            { menu => 'Features 1.3',               uri => 'Features13.htm',          path => { en => '%lib_1_3%/HTML/Features.pod',     de => '%lib_1_3%/HTML/FeaturesD.pod' } }
+            ]
+        
+         },
         { menu => 'Introduction',           uri => 'pod/intro/', sub =>
             [
             { menu => 'Embperl',            uri => 'Intro.htm',                 file => { en => 'Intro.pod', 'de' => 'IntroD.pod'},
@@ -83,6 +98,9 @@ BEGIN
             { menu => 'Embperl::Object',    uri => 'IntroEmbperlObject.htm',    file => 'IntroEmbperlObject.pod',
                   desc => { en => 'Introduction to object-oriented website creation with Embperl', 
                             de => 'Einführung in das objekt-orientierte Erstellen von Websites mit Embperl' }},
+            { menu => 'Embperl 2 Advanced',    uri => 'IntroEmbperl2.htm',    file => 'IntroEmbperl2.pod',
+                  desc => { en => 'Introduction to advanced features of Embperl 2', 
+                            de => 'Einführung in erweiterte Möglichkeiten von Embperl 2' }},
             { menu => 'DBIx::Recordset',   uri => 'IntroRecordset.htm',    path => '%lib_dbix%/DBIx/Intrors.pod',
                   desc => { en => 'Introduction to database access with DBIx::Recordset', 
                             de => 'Einführung in den Datenbankzugriff mit DBIx::Recordset' }},
@@ -170,22 +188,51 @@ BEGIN
             },
             ],
         },
-        { menu => 'Installation',           uri => 'pod/INSTALL.htm',           file => 'INSTALL.pod' },
-        #{ menu => 'FAQ',                    uri => 'pod/Faq.htm',               file => 'Faq.pod' },
+        { menu => 'Installation',           uri => 'pod/INSTALL.htm',           file => 'INSTALL.pod', sub =>
+            [
+            { menu => 'CVS',                relurl => 'pod/CVS.htm',               file => 'CVS.pod' }
+            ]
+        
+         },        #{ menu => 'FAQ',                    uri => 'pod/Faq.htm',               file => 'Faq.pod' },
         #{ menu => 'Examples',               uri => 'examples/' },
-        { menu => 'Download',                uri => 'pod/doc/Embperl.-page-13-.htm#sect_44' },
+        { menu => 'Download',                uri => 'pod/doc/Embperl.-page-13-.htm'},    #sect_44' },
         { menu => 'Support',                uri => 'pod/doc/Embperl.-page-12-.htm' },
         { menu => 'Changes',                 uri => 'pod/Changes.htm',           file => 'Changes.pod' },
         #{ menu => 'Sites using Embperl',    uri => 'pod/Sites.htm',             file => 'Sites.pod' },
-        { menu => 'News',                    uri => 'db/news/news.htm',          file => 'eg/web/db/data.epd', fdat => { 'category_id' => 1 } },
-        { menu => 'Sites using Embperl',     uri => 'db/sites/sites.htm',        file => 'eg/web/db/data.epd', fdat => { 'category_id' => 2 } },
+        { menu => 'More infos',          uri => 'db/', sub => 
+            [
+            { menu => 'News',                    uri => 'news/news.htm',          file => 'eg/web/db/news/data.epd', fdat => { 'category_id' => 1 }, 
+                  desc => { en => 'Full list of all news.',
+                            de => 'Vollständige Liste aller Neuigkeiten.' }},
+            { menu => 'Sites using Embperl',     uri => 'sites/sites.htm',        file => 'eg/web/db/data.epd', fdat => { 'category_id' => 2 },
+                  desc => { en => 'Descriptions of Websites that use Embperl.',
+                            de => 'Beschreibung von Websites die Embperl einsetzen.' }},
+            { menu => 'Books',     uri => 'sites/books.htm',        file => 'eg/web/db/data.epd', fdat => { 'category_id' => 3 },
+                  desc => { en => 'Books that contains informations about Embperl.',
+                            de => 'Bücher die Embperl behandeln.' }},
+            { menu => 'Articles',     uri => 'sites/articles.htm',        file => 'eg/web/db/data.epd', fdat => { 'category_id' => 4 },
+                  desc => { en => 'Articles that covers Embperl.',
+                            de => 'Artikel die Embperl behandeln.' }},
+            { menu => 'Modules & Examples',     uri => 'sites/examples.htm',        file => 'eg/web/db/data.epd', fdat => { 'category_id' => 6 },
+                  desc => { en => 'Modules and Examples with sourcecode for use/that uses Embperl.',
+                            de => 'Modules und Beispiele incl. Quelltext zur/unter Benutzung von Embperl.' }},
+            { menu => 'Editorsupport',     uri => 'sites/editors.htm',        file => 'eg/web/db/data.epd', fdat => { 'category_id' => 5 },
+                  desc => { en => 'Syntaxhighligthing and other support for editors.',
+                            de => 'Syntaxhervorhebungen unter Unterstützung für Editoren.' }},
+            { menu => 'Conferences',     uri => 'sites/conferences.htm',        file => 'eg/web/db/data.epd', fdat => { 'category_id' => 7 },
+                  desc => { en => 'Talks about Embperl.',
+                            de => 'Vorträge über Embperl.' }},
+            ],
+        },
         { menu => 'Add info about Embperl',  uri => 'db/addsel.epl', same => 
             [
             { menu => 'Enter info to add about Embperl',    uri => 'db/add.epl' },
             { menu => 'Show info added about Embperl',      uri => 'db/show.epl'},
-            { menu => 'Add info about Embperl',             uri => 'db/data.epd' },
+            { menu => 'Infos about Embperl',                uri => 'db/data.epd' },
+            { menu => 'Infos about Embperl',                uri => 'db/list.epl' },
             ],
         },
+        { menu => 'Login',                   uri => 'db/login.epl'},
         ) ;
 
 

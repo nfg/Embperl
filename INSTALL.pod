@@ -108,36 +108,13 @@ that xml2-config and xslt-config can be found and run by Makefile.PL)
 
 =head2 Debian packages
 
-The Debian packages are maintained by Angus Lees. Here are his
-installation hints:
+The Debian packages "libhtml-embperl-perl" and "libembperl-perl" are
+maintained by Angus Lees and are available from the usual Debian
+mirrors.
 
-i've also setup an apt repository for those using stable (potato). to
-use it, just add these lines to /etc/apt/sources.list (deb-src line is
-only necessary if you want to download the source at some point):
-
-  deb http://www.cse.unsw.edu.au/~gusl/embperl stable/binary-$(ARCH)/
-  deb-src http://www.cse.unsw.edu.au/~gusl/embperl stable/source/
-
-then run "apt-get update" followed by either
-"apt-get install libhtml-embperl-perl" or just "apt-get upgrade" if
-you already have embperl installed.
-
-if you don't like apt, and want to do it the old fashioned way, i'm
-sure you can work out how to download the .deb manually.
-
-
-notes:
-
-currently i only have i386 packages built for stable. if anyone wants
-to build other archs and let me know, i can add them in (else, i can
-probably get a sparc and alpha version compiled)
-
-
-the package for unstable is compiled against perl5.6, so it has to
-conflict with earlier mod_perl packages that are compiled against
-perl5.5. unfortunately, there is no perl5.6 apache-perl package yet
-(drow assures me he's uploading one soon), so you have to make do with
-a DSO mod-perl (ie: apache + libapache-mod-perl) for now.
+Note that libembperl-perl (Embperl v2) is currently only available
+from the "unstable" distribution.  There are no pre-built
+apache2/mod_perl2 packages currently available.
 
 
 =head2 UNIX (without Apache Source)

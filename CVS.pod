@@ -24,6 +24,37 @@ helpful.
 
 There are several ways to access the CVS tree:
 
+=head2 anoncvs
+
+To checkout a fresh copy from anoncvs use
+
+cvs -d ":pserver:anoncvs@cvs.apache.org:/home/cvspublic" login
+
+with the password "anoncvs". 
+
+cvs -d ":pserver:anoncvs@cvs.apache.org:/home/cvspublic" co embperl
+
+
+=head2 web-access
+
+You may browse the the I<Embperl> CVS via http://cvs.apache.org/viewcvs.cgi/embperl/
+
+=head2 from-cvs
+
+A snapshot is rolled off the Embperl tree every 6 hours and placed
+here:
+
+http://cvs.apache.org/snapshots/embperl/
+
+A snapshot of the Apache development tree is also rolled every 6 hours
+and placed here:
+
+http://cvs.apache.org/snapshots/apache-1.3/
+
+and mod_perl can be found here
+
+http://cvs.apache.org/snapshots/embperl/modperl/
+
 =head2 cvsup
 
 Cvsup has come out of the FreeBSD group. It's a client/server
@@ -60,36 +91,14 @@ Here's a config file for the client (cvsup) to sync Embperl sources.
  #uncomment these three for the latest apache src, docs and/or mod_perl
  #  if you want them
 
-=head2 anoncvs
+=head2 Embperl 1.x
 
-To checkout a fresh copy from anoncvs use
+There is no further developement in the Embperl 1.x branch, but case it
+will become necessary you can access the Embperl 1.x code via the branch
+B<ep1>, so when you checkout just run
 
-cvs -d ":pserver:anoncvs@cvs.apache.org:/home/cvspublic" login
+  cvs -d ":pserver:anoncvs@cvs.apache.org:/home/cvspublic" co -r ep1 embperl
 
-with the password "anoncvs". 
-
-cvs -d ":pserver:anoncvs@cvs.apache.org:/home/cvspublic" co embperl
-
-
-=head2 web-access
-
-You may browse the the I<Embperl> CVS via http://cvs.apache.org/viewcvs.cgi/embperl/
-
-=head2 from-cvs
-
-A snapshot is rolled off the Embperl tree every 6 hours and placed
-here:
-
-http:/cvs.apache.org/snapshots/embperl/
-
-A snapshot of the Apache development tree is also rolled every 6 hours
-and placed here:
-
-http:/cvs.apache.org/snapshots/apache-1.3/
-
-and mod_perl can be found here
-
-http:/cvs.apache.org/snapshots/embperl/modperl/
 
 =head2 MAILING LIST
 
@@ -100,8 +109,4 @@ you can subscribe by sending a mail to B<embperl-cvs-request@perl.apache.org>
 with B<subscribe> in the body.
 
 
-=head1 SEE ALSO
-
-cvs(1)
-mod_perl_cvs.pod
 

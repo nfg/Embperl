@@ -95,6 +95,7 @@
    sCookieDomain | cookie_domain
    sCookiePath | cookie_path
    sCookieExpires | cookie_expires
+   bCookieSecure | cookie_secure
    sLog | log
    bDebug | debug
    sMailhost | mailhost
@@ -184,6 +185,7 @@
    pExpiredFunc | expires_func
    pCacheKeyFunc | cache_key_func
    nExpiresIn | expires_in
+   sExpiresFilename | expires_filename
    sSyntax | syntax
    pRecipe | recipe
    sXsltstylesheet | xsltstylesheet
@@ -200,6 +202,7 @@
 !   _perlsv
    sInputfile   | inputfile
    sOutputfile  | outputfile
+
    sSubreq      | subreq
    pInput       | input
    pOutput      | output
@@ -229,6 +232,7 @@
    bDebug | debug
    bOptions | options
    nSessionMode | session_mode
+   nOutputMode | output_mode
    new
 !   private
  </tReqConfig>
@@ -239,6 +243,7 @@
    sFilename | filename
    sUnparsedUri | unparsed_uri
    sUri | uri
+   sServerAddr | server_addr
    sPathInfo | path_info
    sQueryInfo | query_info
    sLanguage | language

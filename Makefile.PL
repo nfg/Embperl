@@ -3,7 +3,7 @@
 #
 # (C) 1997-2001 G.Richter (richter@dev.ecos.de) / ECOS
 #
-# $Id: Makefile.PL,v 1.31.4.58 2002/06/25 07:05:25 richter Exp $
+# $Id: Makefile.PL,v 1.64 2003/04/11 05:41:16 richter Exp $
 #
 
 
@@ -154,6 +154,16 @@ stop : pure_all
 
 
 
+sub MY::top_targets
+	{
+	my ($txt) = shift -> MM::top_targets (@_) ;
+
+	$txt =~ s/subdirs :: .*?\n\s+\@\$\(NOOP\).*?\n//s ; # remove top target for subdir
+
+	return $txt ;
+	}
+
+
 sub MY::xs_c 
 	{
 	my ($txt) = shift -> MM::xs_c (@_) ;
@@ -266,12 +276,22 @@ sub MY::const_cccmd
         my $man = $self -> {MAN3PODS} ;
         while (($k, $v) = each (%$man))
             {
-            if (!($v =~ /::Embperl/))
-                {
-                $v =~ s#HTML::#HTML::Embperl::# ;
-                $man -> {$k} = $v ;
-                }
-            }
+     if ($v !~ /Embperl/)
+         {
+         $v =~ s,/([^/]+)$,/Embperl::$1, ;
+         $man -> {$k} = $v ;
+         }
+     }
+
+ foreach my $hash (qw(MAN3PODS PM))
+     {
+     foreach (keys %{$self->{$hash}})
+         {
+         delete $self->{$hash}{$_}
+         if /^(INSTALL|NEWS|Changes)|\.pl$/ ;
+         }
+     }
+ 
 
        $self -> MM::post_initialize (@_) ;
        }
@@ -508,12 +528,12 @@ elsif (defined ($ENV{APACHE_SRC}))
 if (!$apache && $apache_src eq '')
     {
     # check for mod_perl 2.0
-    eval 'use Apache::BuildConfig' ;
+    eval 'use Apache2; use Apache::BuildConfig' ;
 
     if ($@ eq '')
         { 
         $mp2cfg = Apache::BuildConfig -> new ;
-        $apache_src = $mp2cfg -> {APXS_INCLUDEDIR} ;
+        $apache_src = $mp2cfg -> {MP_AP_PREFIX} || $mp2cfg -> {ap_includedir} ;
         print "Found mod_perl 2.0\n" ;
         }
     else
@@ -528,6 +548,22 @@ if (!$apache && $apache_src eq '')
             {
             $apache_src = '' ;
             }
+        }
+    }
+elsif ($apache_src ne '' && -X "$apache_src/bin/httpd")
+    {
+    my @vers = start ("\"$apache_src/bin/httpd\" -v") ;
+    
+    if ($vers[0] =~ m#/2#)
+	{
+        # check for mod_perl 2.0
+        eval 'use Apache2; use Apache::BuildConfig' ;
+
+        if ($@ eq '')
+            { 
+            $mp2cfg = Apache::BuildConfig -> new ;
+            print "Found mod_perl 2.0\n" ;
+	    }
         }
     }
 
@@ -598,7 +634,7 @@ while ($apache && !$b)
 
     if (!$b)
     	{
-    	$base = GetString ("Apache source not found, enter path name or q to quit", '') ;
+    	$base = GetString ("Apache source not found, enter path name or q to quit", 'q') ;
     	if ($base eq 'q')
     		{
     		$apache = 0 ;
@@ -1193,7 +1229,12 @@ $i .= " -I$EPPATH/xs" ;
 
 
 
-open FH, ">xs/mmargs.pl" or die "Cannot open xs/mmargs.pl ($!)" ;
+open FH, ">xs/mmargs.pl" or die "Cannot open xs/mmargs.pl ($!).\n
+--------------------------------------------------------------------------
+If you done a CVS checkout you need to create the sources first by running
+xsbuilder/source_scan.pl and xsbuilder/xs_generate.pl.
+--------------------------------------------------------------------------
+\n" ;
 print FH Data::Dumper -> Dump ([\%MMARGS], ['MMARGS']) ;
 close FH ;
 
@@ -1229,7 +1270,7 @@ WriteMakefile(
     'INC'	   => $i,     			 
     'EXE_FILES'    => [ 'embpexec.pl' ],
     'clean'        => { FILES => 'dirent.h test/conf/httpd.conf test/tmp/* Embperl.c' },
-    'realclean'    => { FILES => 'embpexec.pl embpexec.bat embpcgi.pl embpcgi.test.pl embpcgi.bat test/conf/config.pl' },
+    'realclean'    => { FILES => 'embpexec.pl embpexec.bat embpcgi.pl embpcgi.test.pl embpcgi.bat epocgi.pl epocgi.bat epocgi.test.pl embpfastcgi.pl test/conf/config.pl' },
     'dist'         => { COMPRESS => 'gzip', SUFFIX => 'gz'},
     'dynamic_lib'  => $dynlib,
     'PREREQ_PM'    => { 'File::Spec' => 0.8 },

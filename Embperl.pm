@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Embperl.pm,v 1.118.4.117 2002/06/25 06:09:59 richter Exp $
+#   $Id: Embperl.pm,v 1.182 2003/04/11 05:41:16 richter Exp $
 #
 ###################################################################################
 
@@ -46,7 +46,7 @@ use vars qw(
 
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = '2.0b8' ;
+$VERSION = '2.0b9' ;
 
 
 if ($modperl  = $ENV{MOD_PERL})

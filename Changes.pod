@@ -1,5 +1,89 @@
 =pod
 
+=head1 2.0b9  10. Juni 2003
+
+This version is currently under developement. You can get it from the L<CVS|CVS.pod>.
+
+   - libxml now searchs through Embperl search path when includeing external entities,
+     so for example <xsl:include> directives searchs files the same way as Execute
+     does under Embperl::Object.
+   - fixed typo in JavaScript code for Form::Validate reported by Axel Beckert
+   - fixed typo in Embperl::Mail reported by Axel Beckert.
+   - fixed small bugs in Embperl::Form::Validate test code reported by Axel Beckert. 
+   - charcters 128-160 are now escaped in URLs to avoid problems with Mozilla.
+   - fixed missing escaping of '/' in Embperl::Form::Validate JS routines.
+     Patch from Axel Beckert.
+   - fixed spelling: CACKE_KEY -> CACHE_KEY. Reported by Andre Landwehr.
+   - URL escaping now fully conforms to RFC 2396. This mainly solves some problems
+     where IE interpreted characters in URLs as UTF8.
+   - Embperl::Form::Validate JavaScript code can now handle fieldnames that
+     aren't correct JavaScript identifier.
+   - Fix SIGSEGV when printing to Embperl::LOG before Embperl log file is setup.
+   - Fix problem when session id is given to Embperl, but session management
+     was not setup
+   - Added 'same' validation to check if two fileds have the same input enterd
+   - Fixed memory leak. Patch from Joshua Chamas.
+   - Use MP_AP_PREFIX as source for APache 2. Patch from Paul Dyer.
+   - Fixed a initialisation bug which caused under special conditions a segfault
+     when compiling a select tag.
+   - Fixed compiler warnings and errors when compiling with Perl 5.8.0.   
+   - Replaced PL_sv_undef with ep_sv_undef (which is a copy of PL_sv_undef),
+     because storing PL_sv_undef in a Perl 5.8.0 hash is treated as a placeholder
+     and doesn't work as before.
+   - Fixed problem with [$ sub $] when running under Perl 5.8.0.  
+   - Fixed problem when STDOUT is tied, because storage has changed in Perl 5.8.0.  
+   - Fixed problem when single quote or backslash is inside of option or input value.
+     Bug reported by Saadiq Rodgers-King.
+   - Added [$last$], [$next$], [$redo$] and documented [* next *] etc.
+   - Readdeded missing MailFormTo and added test for it.
+   - Fixed escaping inside of html attributes of Embperl generated tags like input
+     and [$ hidden $]. Reported by Axel Beckert.
+   - checked and selected attributes are now correctly set when values contains
+     entities (e.g. &lt;)
+   - Fixed segfault when cleanup is called to early. Reported by Neil Gunton.    
+   - If no name is given for a key, Form::Validate now tries to lookup the correct
+     text via Embperl's gettext method.
+   - Fixed problem with message ids that are Perl keywords. Reported by Jaak.
+   - Added EMBPERL_COOKIE_SECURE option to transfer cookie only over a secure
+     connection.
+   - Added EMBPERL_OUTPUT_MODE that allows to change to XML output, which cause
+     generated tags to contains a closing slash, so they are valid XML/XHTML. 
+   - Fixed make test to ignore different idention of newer versions of
+     libxslt.
+   - Added server_addr to the request param object.
+   - Keep spaces and newlines in <mail:send> tag.
+   - Embperl::Mail now encodes all header fields that contains characters between
+     128 and 255. Use headerencoding parameter to turn of or tell Embperl your charset.
+   - Fixed mod_perl 2 detection when mod_perl is build with MP_INST_APACHE2.
+   - Fixed problem with reseting $escmode, when using print OUT. Reported by
+     David Hull.
+   - Fixed compiling problem on FreeBSD.
+   - Added function XML::Embperl::DOM::iSetText to change name of Tag.
+     Requested by Yatin Chawathe.
+   - EMBPERL_COOKIE_EXPIRES now again accepts relatives times like +2h.
+   - embpexec.pl now correctly takes config values from environment
+     for application object.
+   - Added -type => Integer, IPAddr, IPAddr_Net, FQDN_IPAddr, TimeHHMM, TimeHHMMSS,
+     EMail and EMailRFC to Embperl::Form::Validate.
+   - Fixed problem with [$var$] and select reported by Joshua Spoerri. 
+   - Embperl compiles and tests now correctly if mod_perl installed
+     under Apache2 namespace.
+   - Added tests for epform and subreq.
+   - Added patch from David Hull, which let you specify the status-code
+     when doing a redirect via %http_headers_out.
+   - Fix SIGSEGV on sparc in cleanup. Patch from Angus Lees.
+   - Apply patch from Angus Lees which avoids a lot of (harmless) compiler
+     warnings.
+   - %idat is now also populated for checkboxes and radiobuttons where no matching
+     value in %fdat is found. This avoid duplicate submission of formdata
+     when using [$ hidden $].
+   - fixed memory allocation problem that had occured when mod_perl was
+     staticly linked into Apache.
+   - removed old Embperl 1 test files from distribution
+   - corrected initialization of ap_filter_rec structure which had lead to random
+     segfaults when using the subreq parameter.
+
+ 
 =head1 2.0b8  (BETA)  25. Juni 2002
 
    - exit can now exit the whole request. When called without argument

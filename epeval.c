@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epeval.c,v 1.23.4.25 2002/05/28 06:56:03 richter Exp $
+#   $Id: epeval.c,v 1.32 2003/03/30 18:57:02 richter Exp $
 #
 ###################################################################################*/
 
@@ -145,7 +145,7 @@ int EvalConfig (/*i/o*/ tApp *          a,
 	if (strncmp (s, "sub ", 4) == 0)
 	    {
 	    SV * pSVErr ;
-	    SV * pRV ;
+	    SV * pRV = NULL ;
             int  n ;
 
             n = perl_eval_sv (pSV, G_EVAL | G_SCALAR) ;
@@ -233,7 +233,7 @@ int EvalRegEx  (/*i/o*/ tApp *          a,
     SV * pSV ;
     char * p ;
     STRLEN l ;
-    SV * pRV ;
+    SV * pRV = NULL ;
     SV * pSVErr ;
     char c ;
     int  n ;
@@ -1393,3 +1393,4 @@ int EvalMain (/*i/o*/ register req *  r)
     return ok ; /* SvIV (pRet) ;*/
     }
 #endif
+

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Default.pm,v 1.1.2.3 2002/03/08 06:44:14 richter Exp $
+#   $Id: Default.pm,v 1.3 2003/02/19 08:30:05 richter Exp $
 #
 ###################################################################################
 
@@ -20,7 +20,7 @@ package Embperl::Form::Validate::Default;
 use strict;
 use vars qw($VERSION %error_messages %script_functions %prefixes);
 
-$VERSION = q$Id: Default.pm,v 1.1.2.3 2002/03/08 06:44:14 richter Exp $;
+$VERSION = q$Id: Default.pm,v 1.3 2003/02/19 08:30:05 richter Exp $;
 
 %script_functions = ();
 %prefixes = ();
@@ -31,6 +31,7 @@ $VERSION = q$Id: Default.pm,v 1.1.2.3 2002/03/08 06:44:14 richter Exp $;
     {
 	validate_required => 'Bitte Feld "%0" ausfüllen',
 	validate_eq => 'Falscher Inhalt "%1" des Feldes "%0": Erwartet wird "%2"',
+	validate_same => '"%0" stimmt nicht mit "%2" überein',
 	validate_lt => '%0 muß kleiner als %2 sein',
 	validate_gt => '%0 muß größer als %2 sein',
 	validate_le => '%0 muß kleiner oder gleich wie %2 sein',
@@ -39,7 +40,10 @@ $VERSION = q$Id: Default.pm,v 1.1.2.3 2002/03/08 06:44:14 richter Exp $;
 	validate_length_max => 'Inhalt des Feldes %0 ist zu lang, maximale Länge sind %2, eingegeben wurden %1 Zeichen',
 	validate_length_min => 'Inhalt des Feldes %0 ist zu kurz, minimal Länge sind %2, eingegeben wurden %1 Zeichen',
 	validate_length_eq => 'Inhalt des Feldes %0 hat die falsche Länge: Er sollte %2 Zeichen lang sein, ist aber %1 lang',
-	validate_matches_regexp => 'Inhalt "%1" des Feldes %0 entspricht nicht dem regulären Ausdruck /%2/',
+	validate_matches_regex => 'Inhalt "%1" des Feldes %0 entspricht nicht dem regulären Ausdruck /%2/',
+	validate_matches_regex_js => 'Inhalt "%1" des Feldes %0 entspricht nicht dem regulären Ausdruck /%2/',
+	validate_not_matches_regex => 'Inhalt "%1" des Feldes %0 darf nicht dem regulären Ausdruck /%2/ entsprechen',
+	validate_not_matches_regex_js => 'Inhalt "%1" des Feldes %0 darf nicht dem regulären Ausdruck /%2/ entsprechen',
 	validate_matches_wildcard => 'Inhalt "%1" des Feldes %0 entspricht nicht dem Wildcard-Ausdruck "%2"',
 	validate_must_only_contain => 'Das Feld %0 darf nur folgende Zeichen enthalten: "%2"',
 	validate_must_contain_one_of => 'Das Feld %0 muß mindestens eines der folgenden Zeichen enthalten: "%2"',
@@ -50,6 +54,7 @@ $VERSION = q$Id: Default.pm,v 1.1.2.3 2002/03/08 06:44:14 richter Exp $;
     {
 	validate_required => 'Please enter a value in %0',
 	validate_eq => 'Wrong content "%1" of field %0: Expected "%2"',
+	validate_same => '"%0" does not match "%2"',
 	validate_lt => '%0 must be less then %2',
 	validate_gt => '%0 must be greater then %2',
 	validate_le => '%0 must be less or equal then %2',
@@ -58,7 +63,10 @@ $VERSION = q$Id: Default.pm,v 1.1.2.3 2002/03/08 06:44:14 richter Exp $;
 	validate_length_max => 'Content of field %0 is too long, has %1 characters, maximum is %2 characters',
 	validate_length_min => 'Content of field %0 is too short, has %1 characters, minimum is %2 characters',
 	validate_length_eq => 'Content of field %0 has wrong length: It is %1 characters long, but should be %2 characters long',
-	validate_matches_regexp => 'Field %0 doesn"t match regexp /%2/',
+	validate_matches_regex => 'Field %0 doesn"t match regexp /%2/',
+	validate_matches_regex_js => 'Field %0 doesn"t match regexp /%2/',
+	validate_not_matches_regex => 'Field %0 must not match regexp /%2/',
+	validate_not_matches_regex_js => 'Field %0 must not match regexp /%2/',
 	validate_matches_wildcard => 'Field %0 doesn"t match wildcard expression "%2"',
 	validate_must_only_contain => 'Field %0 must contain only the following characters: "%2"',
 	validate_must_contain_one_of => 'Field %0 must contain one of the following characters: "%2"',
@@ -110,7 +118,7 @@ sub validate_required
     {
     my ($self, $key, $value, $arg, $fdat, $pref) = @_ ;
     
-    return defined($value) ? undef : ['validate_required'] ;
+    return defined($value) && $value ne '' ? undef : ['validate_required'] ;
     }
 
 # --------------------------------------------------------------
@@ -128,7 +136,7 @@ sub validate_emptyok
     {
     my ($self, $key, $value, $arg, $fdat, $pref) = @_ ;
     
-    return defined($value) ? undef : [] ;
+    return !defined($value) || $value eq ''  ? [] : undef ;
     }
 
 # --------------------------------------------------------------
@@ -156,6 +164,30 @@ sub getscript_eq
     my ($self, $arg, $pref) = @_ ;
     
     return ("obj.value == '$arg'", ['validate_eq', "+'obj.value'+", $arg]) ;
+    }
+
+# --------------------------------------------------------------
+
+sub validate_same
+    {
+    my ($self, $key, $value, $arg, $fdat, $pref) = @_ ;
+
+    my ($key2, $name2) = split (/:/, $arg) ;
+    $name2 ||= $key2 ;
+    
+    return $value eq $fdat -> {$key2} ? undef : ['validate_same', $value, $name2] ;
+    }
+
+# --------------------------------------------------------------
+
+sub getscript_same 
+    {
+    my ($self, $arg, $pref, $form) = @_ ;
+    
+    my ($key2, $name2) = split (/:/, $arg) ;
+    $name2 ||= $key2 ;
+
+    return ("obj.value == document.$form\['$key2'\].value", ['validate_same', "+'obj.value'+", $name2]) ;
     }
 
 # --------------------------------------------------------------
@@ -313,6 +345,91 @@ sub validate_matches_regex
 
 # --------------------------------------------------------------
 
+sub validate_matches_regex_perl
+    {
+    my ($self, $key, $value, $arg, $fdat, $pref) = @_ ;
+    
+    return ($value =~ /$arg/) ? undef : ['validate_matches_regex', $value, $arg] ;
+    }
+
+# --------------------------------------------------------------
+
+sub validate_matches_regex_js
+    {
+    my ($self, $key, $value, $arg, $fdat, $pref) = @_ ;
+    
+    return undef  ; # only client side!
+    }
+
+# --------------------------------------------------------------
+
+sub getscript_matches_regex
+    {
+    my ($self, $arg, $pref) = @_ ;
+    
+    $arg =~ s(/)(\\/)g; # JS needs / escaping
+    return ("obj.value.search(/$arg/) >= 0", ['validate_matches_regex', "'+obj.value+'", $arg]) ;
+    }
+
+# --------------------------------------------------------------
+
+sub getscript_matches_regex_js
+    {
+    my ($self, $arg, $pref) = @_ ;
+    
+    $arg =~ s(/)(\\/)g; # JS needs / escaping
+    return ("obj.value.search(/$arg/) >= 0", ['validate_matches_regex', "'+obj.value+'", $arg]) ;
+    }
+
+# --------------------------------------------------------------
+
+sub validate_not_matches_regex
+    {
+    my ($self, $key, $value, $arg, $fdat, $pref) = @_ ;
+    
+    return ($value !~ /$arg/) ? undef : ['validate_not_matches_regex', $value, $arg] ;
+    }
+
+# --------------------------------------------------------------
+
+sub validate_not_matches_regex_perl
+    {
+    my ($self, $key, $value, $arg, $fdat, $pref) = @_ ;
+    
+    return ($value !~ /$arg/) ? undef : ['validate_not_matches_regex', $value, $arg] ;
+    }
+
+# --------------------------------------------------------------
+
+sub validate_not_matches_regex_js
+    {
+    my ($self, $key, $value, $arg, $fdat, $pref) = @_ ;
+    
+    return undef ; # only client side!
+    }
+
+# --------------------------------------------------------------
+
+sub getscript_not_matches_regex
+    {
+    my ($self, $arg, $pref) = @_ ;
+    
+    $arg =~ s(/)(\\/)g; # JS needs / escaping
+    return ("obj.value.search(/$arg/) < 0", ['validate_not_matches_regex', "'+obj.value+'", $arg]) ;
+    }
+
+# --------------------------------------------------------------
+
+sub getscript_not_matches_regex_js
+    {
+    my ($self, $arg, $pref) = @_ ;
+    
+    $arg =~ s(/)(\\/)g; # JS needs / escaping
+    return ("obj.value.search(/$arg/) < 0", ['validate_not_matches_regex', "'+obj.value+'", $arg]) ;
+    }
+
+# --------------------------------------------------------------
+
 sub validate_matches_wildcard
     {
     my ($self, $key, $value, $wc, $fdat, $pref) = @_ ;
@@ -335,7 +452,8 @@ sub validate_must_only_contain
     $moc =~ s/^\^(.)/$1^/;
     $moc =~ s/^(.*)\]/\]$1/;
     $moc =~ s/^(.*)-/-$1/;
-    return ($value =~ /^[$moc]$/) ? undef : ['validate_must_only_contain', $value, $moc] ;
+    $moc =~ s#/#\\/#;
+    return ($value =~ /^[$moc]*$/) ? undef : ['validate_must_only_contain', $value, $moc] ;
     }
 
 # --------------------------------------------------------------
@@ -344,17 +462,24 @@ sub getscript_must_only_contain
     {
     my ($self, $arg, $pref) = @_ ;
     
-    return ("obj.value.search(/^[$arg]*$/) >= 0", ['validate_must_only_contain', "'+obj.value+'", $arg]) ;
+    $arg =~ s/^\^(.)/$1^/;
+    $arg =~ s/^(.*)\]/\]$1/;
+    $arg =~ s/^(.*)-/-$1/;
+    $arg =~ s#/#\\/#;
+    return ("obj.value.search(/^[$arg]*\$/) >= 0", ['validate_must_only_contain', "'+obj.value+'", $arg]) ;
     }
 
 # --------------------------------------------------------------
 
 sub validate_must_not_contain
     {
-    my ($self, $key, $value, $mnc, $fdat, $pref) = @_ ;
+    my ($self, $key, $value, $arg, $fdat, $pref) = @_ ;
     
-    $mnc =~ s/^\^(.)/$1^/;
-    return ($value !~ /[$mnc]/) ? undef : ['validate_must_only_contain', $value, $mnc] ;
+    $arg =~ s/^\^(.)/$1^/;
+    $arg =~ s/^(.*)\]/\]$1/;
+    $arg =~ s/^(.*)-/-$1/;
+    $arg =~ s#/#\\/#;
+    return ($value !~ /[$arg]/) ? undef : ['validate_must_only_contain', $value, $arg] ;
     }
 
 # --------------------------------------------------------------
@@ -363,6 +488,10 @@ sub getscript_must_not_contain
     {
     my ($self, $arg, $pref) = @_ ;
     
+    $arg =~ s/^\^(.)/$1^/;
+    $arg =~ s/^(.*)\]/\]$1/;
+    $arg =~ s/^(.*)-/-$1/;
+    $arg =~ s#/#\\/#;
     return ("obj.value.search(/[$arg]/) == -1", ['validate_must_not_contain', "'+obj.value+'", $arg]) ;
     }
 
@@ -370,10 +499,13 @@ sub getscript_must_not_contain
 
 sub validate_must_contain_one_of
     {
-    my ($self, $key, $value, $mcoo, $fdat, $pref) = @_ ;
+    my ($self, $key, $value, $arg, $fdat, $pref) = @_ ;
     
-    $mcoo =~ s/^\^(.)/$1^/;
-    return ($value =~ /[$mcoo]/) ? undef : ['validate_must_only_contain', $value, $mcoo] ;
+    $arg =~ s/^\^(.)/$1^/;
+    $arg =~ s/^(.*)\]/\]$1/;
+    $arg =~ s/^(.*)-/-$1/;
+    $arg =~ s#/#\\/#;
+    return ($value =~ /[$arg]/) ? undef : ['validate_must_only_contain', $value, $arg] ;
     }
 
 # --------------------------------------------------------------
@@ -382,6 +514,10 @@ sub getscript_must_contain_one_of
     {
     my ($self, $arg, $pref) = @_ ;
     
+    $arg =~ s/^\^(.)/$1^/;
+    $arg =~ s/^(.*)\]/\]$1/;
+    $arg =~ s/^(.*)-/-$1/;
+    $arg =~ s#/#\\/#;
     return ("obj.value.search(/[$arg]/) >= 0", ['validate_must_contain_one_of', "'+obj.value+'", $arg]) ;
     }
 

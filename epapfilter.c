@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epapfilter.c,v 1.1.2.1 2002/06/01 23:44:25 richter Exp $
+#   $Id: epapfilter.c,v 1.3 2003/06/09 18:03:21 richter Exp $
 #
 ###################################################################################*/
 
@@ -289,6 +289,7 @@ static int ProviderApOutFilter_GetContentSV (/*in*/ req *             r,
     ctx.pReq    = r ;
     ctx.pData   = NULL ;
     
+    memset (&frec, 0, sizeof(frec)) ;
     frec.name = "Embperl_ProviderApOutFilter" ;
     frec.filter_func.out_func = &ProviderApOutFilter_Callback ;
     frec.next        = NULL ;

@@ -254,6 +254,26 @@ first B<Arg> accordingly.
      [+ $v +] <BR>
  [$ endforeach $]
 
+=item B<next>
+
+Inside of looks same as Perl next statement. You could also use the following
+syntax, which allows to add an addtional condition (or any other Perl code):
+
+    [* next if ($foo) *]
+
+=item B<last>
+
+Inside of looks same as Perl last statement. You could also use the following
+syntax, which allows to add an addtional condition (or any other Perl code):
+
+    [* last if ($foo) *]
+
+=item B<redo>
+
+Inside of looks same as Perl redo statement. You could also use the following
+syntax, which allows to add an addtional condition (or any other Perl code):
+
+    [* redo if ($foo) *]
 
 =item B<hidden>
 
@@ -823,12 +843,19 @@ for further docs)
 
 =head2 %http_headers_out (only 1.2b10 and above)
 
-You can put any http headers you want to send into this hash. If you set a location header,
+You can put any http headers you want to send into this hash. 
+
+If you set a location header,
 Embperl will automaticly set the status to 301 (Redirect). Example:
 
   [- $http_headers_out{'Location'} = "http://www.ecos.de/embperl/" -]
 
-Starting with version 1.3.2 all headers with the exception "Location" and 
+however, it is possible to specify a two element array for Location, the second
+element of which gives the desired HTTP status:
+
+  [- $http_headers_out{Location} = [ "http://www.ecos.de/embperl/", 303 ]; -]
+
+Starting with version 1.3.2 all headers with the exception of
 "Content-Type" can take multiple values.
 For instance, if you wanted to set two cookies, you can proceed as follows:
 
@@ -1226,9 +1253,9 @@ I have tested Embperl successfully
 
 =item perl5.6.1
 
-=item perl5.7.1
+=item perl5.8.0
 
-=item apache_1.3.0 - apache_1.3.19
+=item apache_1.3.0 - apache_1.3.27, apache 2.0.45
 
 =item apache_ssl (Ben SSL)
 
@@ -1250,9 +1277,9 @@ I know from other people that it works on many other UNIX systems
 
 =item perl5.005
 
-=item perl5.6.0
+=item perl5.6.1
 
-=item apache_1.3.0 - apache_1.3.19
+=item apache_1.3.0 - apache_1.3.27
 
 =back
 
@@ -1336,7 +1363,7 @@ developement of Embperl.
 =back
 
 
-=head1 References
+=head1 Links and Download
 
 =head2 Information
 
@@ -1371,13 +1398,13 @@ DBIx::Recordset	        ftp://ftp.dev.ecos.de/pub/perl/dbi
 Debian packages         http://www.cse.unsw.edu.au/~gusl/embperl
 
 PPM for ActiveState     http://theoryx5.uwinnipeg.ca/ppmpackages/
- 
 
+B<Informations on how to install Embperl can be found in> L<INSTALL.pod>
 
 =head2 CVS
 
 The latest developments are available via CVS.
-Look at L<"perldoc CVS.pod"|CVS/INTRO> for a detailed description.
+Look at L<"perldoc CVS.pod"|CVS.pod> for a detailed description.
 
 
 =head1 Syntaxmodes for various editors
@@ -1389,7 +1416,7 @@ From: Erik Arneson [erik@mind.net]
 Here's the amount of documentation I've got right now.
 
 They need to get mmm.el from this URL:
-http://members.tripod.com/gchen2/xemacs/
+http://mmm-mode.sourceforge.net/
 
 Then download my mmm-embperl.el from this one:
 http://www.aarg.net/erik/mmm-embperl.el
@@ -1401,7 +1428,7 @@ The documentation for using these is included in those two elisp files.
 Vim Syntaxfile for Vim 5.x & 6.x from Lukas Zapletal with syntax highliting for JavaScript, VBScript,
 Perl+Embperl, CSS and HTML, yellow background for Perl`s code (like M$ Interdev) and
 working Perl folding can be found at
-http://vim.sourceforge.net/scripts/search_results.php?keywords=Embperl
+http://vim.sourceforge.net/script.php?script_id=61 
 
 Vim Syntaxfile from Steve Willer can be found at http://www.interlog.com/~willer/embperl.vim
 

@@ -17,30 +17,39 @@ $http_headers_out{'content-type'} = 'text/html' ;
             $base18 = $base . ' font-size: 18px;' ; 
             -]
 
-           .cInput              {background: #DDDDDD; }
-           .cText               {background: #AFBDCA; }
-           .cSectionInput       {background: #ddaaaa; }
-           .cSectionText        {background: #ddaaaa; }
+           .cInput              {[+ $base12 +] background: #DDDDDD; }
+           .cText               {[+ $base12 +] background: #AFBDCA; }
+           .cSectionInput       {[+ $base12 +] background: #ddaaaa; }
+           .cSectionText        {[+ $base12 +] background: #ddaaaa; }
            .cTabsOn             {[+ $base14 +] background: #ddaaaa; }
            .cTabsOff            {[+ $base14 +] background: #DDDDDD; }
            .cMenu               {[+ $base10 +] color: #000000 ; text-align: left ;}
+           .cMenuInfo           {[+ $base10 +] color: #000000 ; text-align: left ; background: #D2E9F5 }
            .cNews               {[+ $base10 +]}
+           .cContent            {[+ $base12 +] border-left: 1px black solid ; border-right: 1px black solid ; padding-left: 7px; padding-right: 7px; }
+           .cContentNews        {[+ $base12 +] border-left: 1px black solid ; margin-left: 7px; padding-left: 7px; }
 
            .cPodHeaderNavLink   {[+ $base12 +]}
            .cPodH1ContentLink   {[+ $base12 +] font-weight: bold;}
            .cPodH2ContentLink   {[+ $base10 +]}
 
            .cPodH1              {[+ $base18 +] padding-left: 15px; padding-right: 15px; background: #fefcad; color: #000000; font-weight: bold; }
+           .cPodH1Link          {[+ $base12 +] padding-left: 15px; padding-right: 15px; background: #fefcad; color: #000000; text-align: right ;}
            .cPodH2              {[+ $base14 +] padding-left: 15px; padding-right: 15px; background: #D2E9F5; color: #000000; font-weight: bold; }
+           .cPodH2Link          {[+ $base10 +] padding-left: 15px; padding-right: 15px; background: #D2E9F5; color: #000000; font-weight: bold; }
            .cTopLink            {[+ $base10 +] }
 
+           .cListOnlyText       {[+ $base12 +]  }
            .cItemText           {[+ $base14 +] font-weight: bold;  }
            .cPodVerbatim        {font-family: monospace; font-size: 12px; background: #eeeeee; 
                                  border-left: solid 1px black; border-right: solid 1px black;
                                  padding-top: 3px}
 
+           .cFoot               {[+ $base10 +]}
+
            body                 {[+ $base12 +]}
            table                {[+ $base12 +]}
+           .cHeadline           {[+ $base14 +]  font-weight: bold;}
            a:hover              { color: red ;}
         </style>
     </head>
@@ -49,13 +58,7 @@ $http_headers_out{'content-type'} = 'text/html' ;
         <table width="100%" cellspacing="0" cellpadding="0" border="0">
             <tr>
                 <td valign="top">[- Execute ('menuleft.epl') -]</td>
-                <td valign="top" width="2">&nbsp;</td>
-                <td valign="top" height="100%"><img src="[+ $r -> {imageuri} +]frame.jpg" width="1" height="100%"></td>
-                <td valign="top" width="10">&nbsp;</td>
-                <td valign="top" width="90%">[- Execute ('content.epl') -]</td>
-                <td valign="top" width="2">&nbsp;</td>
-                <td valign="top" height="100%"><img src="[+ $r -> {imageuri} +]frame.jpg" width="1" height="100%"></td>
-                <td valign="top" width="10">&nbsp;</td>
+                <td valign="top" width="90%" class="cContent">[- Execute ('content.epl') -]</td>
             </tr>
         </table>
         [- Execute ('footer.htm') -]

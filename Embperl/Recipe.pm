@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Recipe.pm,v 1.1.2.13 2002/03/13 11:44:29 richter Exp $
+#   $Id: Recipe.pm,v 1.2 2002/10/22 05:39:48 richter Exp $
 #
 ###################################################################################
  

@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: setupdb.pl,v 1.1.2.3 2002/06/24 19:22:31 richter Exp $
+#   $Id: setupdb.pl,v 1.2 2002/10/22 05:39:51 richter Exp $
 #
 ##############################################################################
 

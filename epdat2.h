@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdat2.h,v 1.1.2.35 2002/06/19 04:22:43 richter Exp $
+#   $Id: epdat2.h,v 1.4 2003/01/02 07:39:44 richter Exp $
 #
 ###################################################################################*/
 
@@ -106,6 +106,7 @@ typedef struct tReqConfig
     CV *        pUriMatch ;
     char        cMultFieldSep ;
     AV *        pPathAV ;
+    int         nOutputMode ;
     unsigned    bDebug ;
     unsigned    bOptions ;
     int         nSessionMode ;      /**< sets how to pass the session id, see smodeXXX constants */
@@ -118,6 +119,7 @@ typedef struct tReqParam
     char *  sFilename ;
     char *  sUnparsedUri ;
     char *  sUri ;
+    char *  sServerAddr ;	/**< protocol://server:port */
     char *  sPathInfo ;
     char *  sQueryInfo ;
     char *  sLanguage ;         /**< Language for the current request */
@@ -140,6 +142,7 @@ typedef struct tAppConfig
     char *  sCookieDomain ;
     char *  sCookiePath ;
     char *  sCookieExpires ;
+    bool    bCookieSecure ;
     char *  sLog ;
     unsigned    bDebug ;
     char *  sMailhost ;

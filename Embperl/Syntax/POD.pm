@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: POD.pm,v 1.1.2.20 2002/06/24 09:22:47 richter Exp $
+#   $Id: POD.pm,v 1.2 2002/10/22 05:39:49 richter Exp $
 #
 ###################################################################################
  
@@ -298,7 +298,7 @@ my %Escape2 = (
 	'text' => 'http://',
         'nodename' => 'xlink',
         'nodetype'  => ntypStartEndTag,
-        'contains'   => '/.-:~abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789',
+        'contains'   => '/.-:~?&=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789',
         'cdatatype' => ntypText,
         'donteat'   => 1,
         },
@@ -306,7 +306,7 @@ my %Escape2 = (
 	'text' => 'ftp://',
         'nodename' => 'xlink',
         'nodetype'  => ntypStartEndTag,
-        'contains'   => '/.-:~abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789',
+        'contains'   => '/.-:~?&=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789',
         'cdatatype' => ntypText,
         'donteat'   => 1,
         },

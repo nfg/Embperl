@@ -57,4 +57,35 @@ add3 =        [+ $r -> gettext ('add3') +]
 
 
 </form>
+
+[$ foreach $i (1..4) $]
+
+    addsel[+$i +] = [+ $r -> gettext ("addsel$i") +]<br>
+
+    [= next =]<br>
+
+    addsel[+$i +] (2) = [+ $r -> gettext ("addsel$i") +]<br>
+
+[$endforeach$]
+
+[$ foreach $i (1..4) $]
+
+    addsel[+$i +] = [+ $r -> gettext ("addsel$i") +]<br>
+
+    last: [= last =]<br>
+
+[$endforeach$]
+
+
+
+[$ foreach $i (1..4) $]
+
+    addsel[+$i +] = [+ $r -> gettext ("addsel$i") +]<br>
+
+    [= last =]<br>
+
+[$endforeach$]
+
+
+
              

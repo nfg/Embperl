@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Number.pm,v 1.1.2.3 2002/03/08 06:44:14 richter Exp $
+#   $Id: Number.pm,v 1.3 2003/02/19 08:30:05 richter Exp $
 #
 ###################################################################################
 
@@ -20,7 +20,7 @@ package Embperl::Form::Validate::Number ;
 use base qw(Embperl::Form::Validate::Default);
 
 my
-$VERSION = q$Id: Number.pm,v 1.1.2.3 2002/03/08 06:44:14 richter Exp $;
+$VERSION = q$Id: Number.pm,v 1.3 2003/02/19 08:30:05 richter Exp $;
 
 my %error_messages = 
 (
@@ -53,7 +53,16 @@ sub validate
     {
     my ($self, $key, $value, $fdat, $pref) = @_ ;
     
-    return $value =~ /^\s*[0-9.+-eE]+\s*$/ ? undef : ['validate_number', $value] ;
+    return $value =~ /^\s*[0-9+-.][0-9.eE]*\s*$/ ? undef : ['validate_number', $value] ;
+    }
+
+# --------------------------------------------------------------
+
+sub getscript_validate 
+    {
+    my ($self, $arg, $pref) = @_ ;
+    
+    return ('obj.value.search(/^\s*[0-9+-.][0-9.eE]*\s*$/) >= 0', ['validate_number', "'+obj.value+'"]) ;
     }
 
 # --------------------------------------------------------------

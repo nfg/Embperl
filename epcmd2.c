@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcmd2.c,v 1.4.2.21 2002/04/08 03:39:09 richter Exp $
+#   $Id: epcmd2.c,v 1.10 2003/04/11 05:41:16 richter Exp $
 #
 ###################################################################################*/
 
@@ -83,7 +83,7 @@ SV * SplitFdat     (/*i/o*/ register req * r,
 
 
 
-static embperlCmd_SetRemove (/*i/o*/ register req * r,
+static void embperlCmd_SetRemove (/*i/o*/ register req * r,
 			     /*in*/ tDomTree *	    pDomTree,
 			     /*in*/ tNode	    xNode,
 			     /*in*/ tRepeatLevel    nRepeatLevel,
@@ -100,6 +100,7 @@ static embperlCmd_SetRemove (/*i/o*/ register req * r,
     int	    bEqual = 0 ;
     SV **   ppSV = hv_fetch(r -> pThread -> pFormHash, (char *)pName, nNameLen, 0) ;  
     tNodeData * pNode = Node_selfLevel (r -> pApp, pDomTree, xNode, nRepeatLevel) ;
+    SV *    pInputHashValue = NULL ;
 
     if (ppSV)
 	{
@@ -108,20 +109,22 @@ static embperlCmd_SetRemove (/*i/o*/ register req * r,
 
 	if (SvTYPE (pSV) == SVt_PVHV)
 	    { /* -> Hash -> check if key exists */
-	    if (hv_exists ((HV *)pSV, (char *)pVal, nValLen))
+            nValLen = TransHtml (r, (char *)pVal, nValLen) ;
+            if (hv_exists ((HV *)pSV, (char *)pVal, nValLen))
 		{
 		bEqual = 1 ;
-		hv_store (r -> pThread -> pInputHash, (char *)pName, nNameLen, newSVpv ((nValLen?((char *)pVal):""), nValLen), 0) ;
+		pInputHashValue = newSVpv ((nValLen?((char *)pVal):""), nValLen) ;
 		}
 	    }
 	else
 	    {
 	    STRLEN   dlen ;
 	    char * pData = SvPV (pSV, dlen) ;
+            nValLen = TransHtml (r, (char *)pVal, nValLen) ;
 	    if ((int)dlen == nValLen && strncmp (pVal, pData, dlen) == 0)
 		{
 		bEqual = 1 ;
-		hv_store (r -> pThread -> pInputHash, (char *)pName, nNameLen, newSVsv(pSV), 0) ; 
+		pInputHashValue = newSVsv(pSV) ; 
 		}
 	    }
 
@@ -153,6 +156,15 @@ static embperlCmd_SetRemove (/*i/o*/ register req * r,
             }
 
 	}
+
+    if (pInputHashValue)
+        hv_store (r -> pThread -> pInputHash, (char *)pName, nNameLen, pInputHashValue, 0) ; 
+    else
+        {
+        if (!hv_exists (r -> pThread -> pInputHash, (char *)pName, nNameLen))
+            hv_store (r -> pThread -> pInputHash, (char *)pName, nNameLen, newSVpv ("", 0), 0) ; 
+        }
+
     }
 
 /* ---------------------------------------------------------------------------- */
@@ -318,6 +330,7 @@ int embperlCmd_Hidden	(/*i/o*/ register req *     r,
                     {
                     char * s ;
 		    STRLEN     l ;
+                    SV * sEscapedText ;
 		    tNode xInputNode = Node_appendChild (r -> pApp, pDomTree, pNewNode -> xNdx, nRepeatLevel, ntypTag, 0, "input", 5, 0, 0, NULL) ;
                     tNode xAttr      = Node_appendChild (r -> pApp, pDomTree, xInputNode, nRepeatLevel, ntypAttr, 0, "type", 4, 0, 0, NULL) ;
                                        Node_appendChild (r -> pApp, pDomTree, xAttr, nRepeatLevel, ntypAttrValue, 0, "hidden", 6, 0, 0, NULL) ;
@@ -327,6 +340,8 @@ int embperlCmd_Hidden	(/*i/o*/ register req *     r,
                           xAttr      = Node_appendChild (r -> pApp, pDomTree, xInputNode, nRepeatLevel, ntypAttr, 0, "value", 5, 0, 0, NULL) ;
 
 		    s = SvPV (*ppsv, l) ;			  
+                    sEscapedText = Escape (r, s, l, r -> Component.nCurrEscMode, NULL, '\0') ;
+                    s = SV2String (sEscapedText, l) ;
 			  
 			  Node_appendChild (r -> pApp, pDomTree, xAttr, nRepeatLevel, ntypAttrValue, 0, s, l, 0, 0, NULL) ;
                     }
@@ -350,6 +365,7 @@ int embperlCmd_Hidden	(/*i/o*/ register req *     r,
                     {
                     char * s ;
 		    STRLEN     l ;
+                    SV * sEscapedText ;
 		    tNode xInputNode = Node_appendChild (r -> pApp, pDomTree, pNewNode -> xNdx, nRepeatLevel, ntypTag, 0, "input", 5, 0, 0, NULL) ;
                     tNode xAttr      = Node_appendChild (r -> pApp, pDomTree, xInputNode, nRepeatLevel, ntypAttr, 0, "type", 4, 0, 0, NULL) ;
                                        Node_appendChild (r -> pApp, pDomTree, xAttr, nRepeatLevel, ntypAttrValue, 0, "hidden", 6, 0, 0, NULL) ;
@@ -359,6 +375,8 @@ int embperlCmd_Hidden	(/*i/o*/ register req *     r,
                           xAttr      = Node_appendChild (r -> pApp, pDomTree, xInputNode, nRepeatLevel, ntypAttr, 0, "value", 5, 0, 0, NULL) ;
 
 		    s = SvPV (psv, l) ;			  
+                    sEscapedText = Escape (r, s, l, r -> Component.nCurrEscMode, NULL, '\0') ;
+                    s = SV2String (sEscapedText, l) ;
 			  
 			  Node_appendChild (r -> pApp, pDomTree, xAttr, nRepeatLevel, ntypAttrValue, 0, s, l, 0, 0, NULL) ;
                     }
@@ -411,7 +429,7 @@ SV * Node_replaceChildWithUrlDATA (/*in*/ tReq *        r,
 	    if (ppSV && *ppSV)
 		{
 		s = SV2String (*ppSV, l) ;
-                xNode = Node_appendChild (r -> pApp, pDomTree, xOldChild, nRepeatLevel, (r -> Component.nCurrEscMode & 3)?ntypTextHTML:ntypCDATA, 0, s, l, 0, 0, NULL) ;
+                xNode = Node_appendChild (r -> pApp, pDomTree, xOldChild, nRepeatLevel, (tNodeType)((r -> Component.nCurrEscMode & 3)?ntypTextHTML:ntypCDATA), 0, s, l, 0, 0, NULL) ;
 		if (r -> Component.nCurrEscMode & 2) 
                     Node_selfLevel (r -> pApp, pDomTree, xNode, nRepeatLevel) -> bFlags |= nflgEscUrl ;
                 }
@@ -437,12 +455,12 @@ SV * Node_replaceChildWithUrlDATA (/*in*/ tReq *        r,
         lprintf (r -> pApp, "a xOldChild=%d, rl=%d\n", xOldChild, nRepeatLevel) ;
 
 	hv_iterinit (pHV) ;
-	while (pEntry = hv_iternext (pHV))
+	while ((pEntry = hv_iternext (pHV)))
 	    {
             if (i++ > 0)
                 Node_appendChild (r -> pApp, pDomTree, xOldChild, nRepeatLevel, ntypCDATA, 0, "&amp;", 5, 0, 0, NULL) ;
 	    pKey     = hv_iterkey (pEntry, &l32) ;
-            xNode = Node_appendChild (r -> pApp, pDomTree, xOldChild, nRepeatLevel, (r -> Component.nCurrEscMode & 3)?ntypTextHTML:ntypCDATA, 0, pKey, l32, 0, 0, NULL) ;
+            xNode = Node_appendChild (r -> pApp, pDomTree, xOldChild, nRepeatLevel, (tNodeType)((r -> Component.nCurrEscMode & 3)?ntypTextHTML:ntypCDATA), 0, pKey, l32, 0, 0, NULL) ;
 	    if (r -> Component.nCurrEscMode & 2) 
                 Node_self (pDomTree, xNode) -> bFlags |= nflgEscUrl ;
 
@@ -452,7 +470,7 @@ SV * Node_replaceChildWithUrlDATA (/*in*/ tReq *        r,
 	    if (pSVValue)
 		{
 		s = SV2String (pSVValue, l) ;
-                xNode = Node_appendChild (r -> pApp, pDomTree, xOldChild, nRepeatLevel, (r -> Component.nCurrEscMode & 3)?ntypTextHTML:ntypCDATA, 0, s, l, 0, 0, NULL) ;
+                xNode = Node_appendChild (r -> pApp, pDomTree, xOldChild, nRepeatLevel, (tNodeType)((r -> Component.nCurrEscMode & 3)?ntypTextHTML:ntypCDATA), 0, s, l, 0, 0, NULL) ;
 		if (r -> Component.nCurrEscMode & 2) 
                     Node_selfLevel (r -> pApp, pDomTree, xNode, nRepeatLevel) -> bFlags |= nflgEscUrl ;
                 }

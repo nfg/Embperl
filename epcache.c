@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcache.c,v 1.1.2.25 2002/05/20 07:04:24 richter Exp $
+#   $Id: epcache.c,v 1.4 2003/03/30 18:57:01 richter Exp $
 #
 ###################################################################################*/
 
@@ -122,15 +122,18 @@ int Cache_Init (/*in*/ tApp * a)
 int Cache_CleanupRequest (req * r)
 
     {
-    int n = ArrayGetSize (r -> pApp, pCachesToRelease) ;
-    int i ;
+    if (pCachesToRelease)
+        {
+        int n = ArrayGetSize (r -> pApp, pCachesToRelease) ;
+        int i ;
 
-    /* lprintf (r -> pApp, "XXXXX Cache_CleanupRequest [%d/%d] pProviders=%x pCacheItems=%x pCachesToRelease=%x", _getpid(), GetCurrentThreadId(), pProviders, pCacheItems, pCachesToRelease) ; */
+        /* lprintf (r -> pApp, "XXXXX Cache_CleanupRequest [%d/%d] pProviders=%x pCacheItems=%x pCachesToRelease=%x", _getpid(), GetCurrentThreadId(), pProviders, pCacheItems, pCachesToRelease) ; */
 
-    for (i = 0; i < n; i++)
-        Cache_FreeContent (r, pCachesToRelease[i]) ;
+        for (i = 0; i < n; i++)
+            Cache_FreeContent (r, pCachesToRelease[i]) ;
 
-    ArraySetSize(r -> pApp, &pCachesToRelease, 0) ;
+        ArraySetSize(r -> pApp, &pCachesToRelease, 0) ;
+        }
 
     return ok ;
     }
@@ -315,7 +318,7 @@ int Cache_New (/*in*/ req *             r,
             return rc ;
 
     sKey = SvPV(pKey, len) ;
-    if (pNew = Cache_GetByKey (r, sKey))
+    if ((pNew = Cache_GetByKey (r, sKey)))
         {
         Cache_ParamUpdate (r, pProviderParam, bTopLevel, "Update", pNew) ;
         
@@ -489,7 +492,7 @@ int Cache_AppendKey               (/*in*/ req *              r,
 		r -> pThread -> nPid,  sProvider) ;
             return rc ;
 	    }
-    if (pItem = Cache_GetByKey (r, SvPV(pKey, len)))
+    if ((pItem = Cache_GetByKey (r, SvPV(pKey, len))))
         {
         int bCache = pItem -> bCache ;
 

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epxalan.cpp,v 1.1.2.25 2002/06/24 09:22:47 richter Exp $
+#   $Id: epxalan.cpp,v 1.2 2002/10/22 05:45:12 richter Exp $
 #
 ###################################################################################*/
 

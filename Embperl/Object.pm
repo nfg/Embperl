@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Object.pm,v 1.1.2.25 2002/06/20 07:05:20 richter Exp $
+#   $Id: Object.pm,v 1.2 2002/10/22 05:39:48 richter Exp $
 #
 ###################################################################################
 
@@ -373,8 +373,9 @@ Embperl::Object - Extents Embperl for building whole website with reusable compo
 
 
     <Location /foo>
-        PerlSetEnv EMBPERL_OBJECT_BASE base.htm
-        PerlSetEnv EMBPERL_FILESMATCH "\.htm.?|\.epl$"
+        EMBPERL_APPNAME     unique-name
+        EMBPERL_OBJECT_BASE base.htm
+        EMBPERL_URIMATCH "\.htm.?|\.epl$"
         SetHandler perl-script
         PerlHandler Embperl::Object 
         Options ExecCGI

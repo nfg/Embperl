@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdefault.c,v 1.1.2.1 2002/05/27 17:53:12 richter Exp $
+#   $Id: epdefault.c,v 1.3 2003/03/30 18:57:02 richter Exp $
 #
 ###################################################################################*/
 
@@ -95,7 +95,6 @@ static void embperl_DefaultReqConfig (/*in*/ tReqConfig  *pCfg)
 static void embperl_DefaultComponentConfig (/*in*/ tComponentConfig  *pCfg) 
 
     {
-    pCfg -> sPackage ;
     pCfg -> bDebug = dbgStd ;
     /* pCfg -> bOptions = optRawInput | optAllFormData ; */
     pCfg -> nEscMode = escStd ;

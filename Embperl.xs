@@ -18,9 +18,8 @@
 
 
 /* for embperl_exit */
-static IV errgv_empty_set(IV ix, SV * sv)
+static IV errgv_empty_set(pTHX_ IV ix, SV * sv)
 { 
-    dTHX ;
     sv_setsv(sv, &sv_undef);
     return TRUE;
 }

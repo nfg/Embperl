@@ -186,13 +186,15 @@ sub init
 
     $r -> {imageuri} = ('../' x $depth) . $config -> {imageuri} ;
     $r -> {baseuri}  = ('../' x $depth)  ;
-    # this is when creating static pages, to let actions point to the write URL
+    # this is when creating static pages, to let actions point to the correct URL of the dynamic site
     $r -> {action_prefix} = $ENV{ACTION_PREFIX} || '' ; 
 
     my $langs  = $config -> {supported_languages} ;
     # serach the url, if there is a language embeded,
     # if yes remove it
     $r -> {selected_language} = '' ;
+    my  $accept_lang = $r -> param -> language ;
+    my  $lang_ok = 0 ;
     foreach (@$langs)
         {
         if ($uri[0] eq $_) 
@@ -202,12 +204,17 @@ sub init
             shift @uri ;
             $uri =~ s#/$_/#/# ;
             $r -> {baseuri}  = ('../' x ($depth - 1))  ; # we want to stay in the same language tree
+            $lang_ok = 1 ;
             last ;
             }
+	elsif ($accept_lang && $_ eq $accept_lang)
+	    {
+	    $lang_ok = 1 ;
+	    }
         }
 
     $r -> param -> uri ($uri) ;
-    $r -> param -> language($langs -> [0]) if (!$r -> param -> language) ;
+    $r -> param -> language($langs -> [0]) if (!$r -> param -> language || !$lang_ok) ;
 
 
     #warn "2 d = $r->{depth} bd = $config->{basedepth}  #uri=$#uri  uri = @uri new uri = $uri" ;
@@ -232,6 +239,21 @@ sub init
     }
 
 
+sub set_xslt_param
+    {
+    my ($class, $r, $config, $param) = @_ ;
+
+    $config -> xsltstylesheet('pod.xsl') ;
+    $r -> param -> uri =~ /^.*\/(.*)\.(.*?)$/ ;
+    $param -> xsltparam({
+            page      => $fdat{page} || 0, 
+            basename  => "'$1'", 
+            extension => "'$2'",
+            imageuri  => "'$r->{imageuri}'",
+            baseuri   => "'$r->{baseuri}'",
+            language  => "'" . $r -> param -> language . "'" , 
+            }) ;
+    }
 
 
 
@@ -269,14 +291,13 @@ sub get_recipe
             return Embperl::Recipe::Embperl -> get_recipe ($r, $recipe) ;
             }
 
-        $config -> xsltstylesheet('pod.xsl') ;
-        $r -> param -> uri =~ /^.*\/(.*)\.(.*?)$/ ;
-        $param -> xsltparam({
-                page      => $fdat{page} || 0, 
-                basename  => "'$1'", 
-                extension => "'$2'",
-                imageuri  => "'$r->{imageuri}'",
-                }) ;
+        $class -> set_xslt_param ($r, $config, $param) ;
+        return Embperl::Recipe::EmbperlXSLT -> get_recipe ($r, $recipe) ;
+        }
+    
+    if ($src eq 'xml')
+        {
+        $class -> set_xslt_param ($r, $config, $param) ;
         return Embperl::Recipe::EmbperlXSLT -> get_recipe ($r, $recipe) ;
         }
     
@@ -292,14 +313,7 @@ sub get_recipe
             }
 
 
-        $config -> xsltstylesheet('pod.xsl') ;
-        $r -> param -> uri =~ /^.*\/(.*)\.(.*?)$/ ;
-        $param -> xsltparam({
-                page      => $fdat{page} || 0, 
-                basename  => "'$1'", 
-                extension => "'$2'",
-                imageuri  => "'$r->{imageuri}'",
-                }) ;
+        $class -> set_xslt_param ($r, $config, $param) ;
         return Embperl::Recipe::EmbperlPODXSLT -> get_recipe ($r, $recipe) ;
         }
     
@@ -308,6 +322,13 @@ sub get_recipe
         $config -> syntax('Embperl') ;
         return Embperl::Recipe::Embperl -> get_recipe ($r, $recipe) ;
         }
+
+    if ($src eq 'mail')
+        {
+        $config -> syntax('EmbperlBlocks') ;
+        return Embperl::Recipe::Embperl -> get_recipe ($r, $recipe) ;
+        }
+
 
     $config -> syntax('Text') ;
     return Embperl::Recipe::Embperl -> get_recipe ($r, $recipe) ;

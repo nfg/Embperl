@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: SSI.pm,v 1.1.2.16 2002/03/10 20:27:19 richter Exp $
+#   $Id: SSI.pm,v 1.2 2002/10/22 05:39:49 richter Exp $
 #
 ###################################################################################
  

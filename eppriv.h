@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eppriv.h,v 1.1.2.19 2002/05/27 17:53:13 richter Exp $
+#   $Id: eppriv.h,v 1.7 2003/06/09 18:03:21 richter Exp $
 #
 ###################################################################################*/
 
@@ -50,6 +50,9 @@ void boot_Embperl__Syntax (pTHX_ CV * cv) ;
 
 
 struct tCacheItem ;
+
+extern SV ep_sv_undef ; 
+
 
 /*-----------------------------------------------------------------*/
 /*								   */
@@ -208,6 +211,31 @@ int embperl_GetCGIReqParam     (/*in*/ tApp        * pApp,
                                 /*out*/ tReqParam  * pParam) ;
 
 
+typedef struct tOptionEntry
+    {
+    const char *    sOption ;
+    int             nValue ;
+    } tOptionEntry ;
+
+extern tOptionEntry OptionsDEBUG[] ;
+extern tOptionEntry OptionsOPTIONS[] ;
+extern tOptionEntry OptionsESCMODE[] ;
+extern tOptionEntry OptionsINPUT_ESCMODE[] ;
+extern tOptionEntry OptionsOUTPUT_MODE[] ;
+extern tOptionEntry OptionsSESSION_MODE[] ;
+
+
+
+int embperl_OptionListSearch (/*in*/ tOptionEntry * pList,
+                              /*in*/ bool          bMult,
+                              /*in*/ const char *  sCmd,
+                              /*in*/ const char *  sOptions,
+                              /*in*/ int *         pnValue) ;
+
+const char * embperl_CalcExpires(const char *sTime, char * sResult, int bHTTP) ;
+
+
+
 /* --- init --- */
 
 #if 0
@@ -231,3 +259,5 @@ void Embperl__Req_destroy(pTHX_ tReq * p) ;
 void Embperl__Component__Config_destroy(pTHX_ tComponentConfig * p) ;
 void Embperl__Component__Param_destroy(pTHX_ tComponentParam * p) ;
 void Embperl__Component_destroy(pTHX_ tComponent *p) ;
+
+int    embperl_EndPass1  (void) ;

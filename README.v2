@@ -9,7 +9,7 @@ THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF 
 MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-$Id: README.v2,v 1.1.4.32 2002/06/25 05:59:17 richter Exp $
+$Id: README.v2,v 1.2 2002/10/22 05:45:12 richter Exp $
 
 
 ### !! IMPORTANT !! IMPORTANT !! IMPORTANT !! IMPORTANT !! IMPORTANT !! 
@@ -169,6 +169,7 @@ The following differences to Embperl 1.x apply:
   in 1.x)
 
 - The following options are currently not supported:
+     optRedirectStdout
      optDisableHtmlScan, optDisableTableScan,
      optDisableInputScan, optDisableMetaScan
 

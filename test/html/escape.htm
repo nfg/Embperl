@@ -281,6 +281,43 @@ escmode = [+ $escmode = 7 +]
 <input name="null">
 #]
 
+
+--> my
+
+ [!
+    sub hellomy () {
+     my $escmode = 0;
+     print OUT "&lt;b&gt;hello</b><br>\n";
+    }
+ !]
+    [- hellomy(); -]
+    [- hellomy(); -]
+  <br><br>reset<br>
+    [+ "&lt;b&gt;helloin++</b><br>\n" +]
+    [- hellomy(); -]
+    [- hellomy(); -]
+  <br><br>reset<br>
+    [- hellomy(); hellomy(); -]
+
+--> local
+
+ [!
+    sub hello () {
+     local $escmode = 0;
+     print OUT "&lt;b&gt;hello</b><br>\n";
+    }
+ !]
+    [- hello(); -]
+    [- hello(); -]
+  <br><br>reset<br>
+    [+ "&lt;b&gt;helloin++</b><br>\n" +]
+    [- hello(); -]
+    [- hello(); -]
+  <br><br>reset<br>
+    [- hello(); hello(); -]
+
+
+
 <P>Ok.<P>
 
 

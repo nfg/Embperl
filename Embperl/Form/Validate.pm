@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Validate.pm,v 1.1.2.10 2002/03/08 06:44:14 richter Exp $
+#   $Id: Validate.pm,v 1.6 2003/04/11 05:58:35 richter Exp $
 #
 ###################################################################################
 
@@ -20,7 +20,7 @@ package Embperl::Form::Validate;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = q$Id: Validate.pm,v 1.1.2.10 2002/03/08 06:44:14 richter Exp $;
+$VERSION = q$Id: Validate.pm,v 1.6 2003/04/11 05:58:35 richter Exp $;
 
 =head1 NAME
 
@@ -64,7 +64,7 @@ multilanguage support.
  print 'Validate: ' . ($result?'no':'yes');
  
  # validate the form values and reaturn all error messages, if any
- my @errors = $epf->validate_messages($fdat, $pref);
+ my $errors = $epf->validate_messages($fdat, $pref);
 
  # Get the code for a client-side form validation according to the
  # rules given to new:
@@ -134,7 +134,7 @@ sub init # $self
 Adds rules $field_rules for a (new) field $field to the validator,
 e.g.
 
- $epf->add_rule([ -key => 'fnord', -type => 'Float', -max => 1.3, -name => 'Fnord' ]);
+ $epf->add_rule([ -key => 'fnord', -type => 'Number', -max => 1.3, -name => 'Fnord' ]);
 
 The new rule will be appended to the end of the list of rules.
 
@@ -270,7 +270,7 @@ sub validate_rules
             my $arg = $frules -> [$i++] ;
             foreach my $k (@$keys) 
                 {
-                $status = &$action($k, $fdat -> {$name}, $arg, $fdat, $pref) ;
+                $status = &$action($k, $fdat -> {$k}, $arg, $fdat, $pref) ;
                 last if (!$status) ;
                 }
             }
@@ -357,7 +357,7 @@ sub build_message
     my $default_language = $pref -> {default_language} ;
     my $txt ;
 
-    $name ||= $key ;
+    $name ||=  $epreq?$epreq -> gettext($key):$key ;
     if (ref $name eq 'ARRAY')
         {
         my @names ;
@@ -382,7 +382,7 @@ sub build_message
         }
     $txt = $epreq -> gettext($id) if (!$txt && $epreq) ;
     $txt ||= "Missing Message $id: %0 %1 %2 %3" ;                 
-    my $id = $param -> [0] ;
+    $id = $param -> [0] ;
     $param -> [0] = $name ;
     $txt =~ s/%(\d+)/$param->[$1]/g ;
     $param -> [0] = $id ;
@@ -427,7 +427,7 @@ sub error_message
 =head2 $epf -> validate_messages ($fdat, [ $pref ])
 
 Validate the form content and returns the error messages
-if any. See L<validate> for details.
+as array ref if any. See L<validate> for details.
 
 =cut
 
@@ -512,6 +512,7 @@ sub gather_script_code
                 $type    = $frules->[$i++] ;
                 $typeobj = $self -> newtype ($type) ;
                 $method  = 'getscript_validate' ;
+                $arg     = '' ;
                 }
             else
                 {
@@ -528,12 +529,12 @@ sub gather_script_code
             {
             my $code ;
             my $ret ;
-            my $k = "$type*$action" ;
+            my $k = "$type*$action*$arg" ;
             if (!exists ($scriptcode -> {$k}))
                 {
                 if ($typeobj -> can ($method))
                     {
-                    ($code, $msgparam) = $typeobj -> $method ($arg, $pref) ;
+                    ($code, $msgparam) = $typeobj -> $method ($arg, $pref, $form) ;
                     $scriptcode -> {$k} = [$code, $msgparam] ;
                     }
                 else
@@ -563,7 +564,7 @@ sub gather_script_code
                     }
                 if (!ref $key)
                     {
-                    $script .= "obj = document.$form.$key ; if (!($code)) { $setmsg " . ($param{fail}?'fail=1;break;':($param{cont}?'':'break;')) . "}\n" ;
+                    $script .= "obj = document.$form\['$key'\] ; if (!($code)) { $setmsg " . ($param{fail}?'fail=1;break;':($param{cont}?'':'break;')) . "}\n" ;
                     }
                 else
                     {
@@ -661,7 +662,8 @@ The functions and methods expect the named data structures as follows:
 
 The $rules array contains a list of tests to perform. Alls the given tests
 are process sequenzially. You can group tests together, so when one test fails
-the remaining of the same group are not processed.
+the remaining tests of the same group are not processed and the processing 
+continues in the next outer group with the next test.
 
   [
     [
@@ -672,7 +674,7 @@ the remaining of the same group are not processed.
     ],
     [
     -key        => 'from',
-    -type       => 'Date',
+    -type       => 'EMail',
     emptyok     => 1,
     ],
 
@@ -705,20 +707,89 @@ hash with multiple languages, e.g.
 specfify to not use the standard tests, but the ones for a special type.
 For example there is a type C<Number> which will replaces all the comparsions
 by numeric ones instead of string comparisions. You may add your own types
-by wrting a module that contains the necessary test and dropping it under
+by writing a module that contains the necessary test and dropping it under
 Embperl::Form::Validate::<Typename>. The -type directive also can verfiy
 that the given data has a valid format for the type.
 
-At the moment the only types that are available is C<Default> and C<Number>.
-The first is the default and need not to be specified. If you are writing new 
-type make sure to send them back, so they can be part of the next distribution.
+The following types are available:
+
+=over
+
+=item Default
+
+This one is used when no type is specified. It contains all the standart
+tests.
+
+=item Number
+
+Input must be a floating point number.
+
+=item Integer
+
+Input must be a integer number.
+
+=item TimeHHMM
+
+Input must be the time in the format hh::mm
+
+=item TimeHHMMSS
+
+Input must be the time in the format hh::mm:ss
+
+=item EMail
+
+Input must be a valid email address including a top level domain
+e.g. user@example.com
+
+=item EMailRFC
+
+Input must be a valid email adress, no top level domain is required,
+so user@foo is also valid.
+
+=item IPAddr
+
+Input must be an ip-address in the form nnn.nnn.nnn.nnn
+
+=item IPAddr_Mask
+
+Input must be an ip-address and network mask in the form nnn.nnn.nnn.nnn/mm
+
+=item FQDN_IPAddr
+
+Input must be an ip-address or an fqdn (host.domain)
+
+=back
+
+
+If you write your own type package,
+make sure to send them back, so they can be part of the next distribution.
 
 =item -msg
 
 Used to give messages which should be used when the test fails. This message
 overrides the standart messages provided by Embperl::Form::Validate and
 by Embperls message management. Can also be a hash with messages for multiple
-languages.
+languages. The -msg parameter must preceed the test for which it should be
+displayed. You can have multiple different messages for different tests, e.g.
+
+       [
+	-key        => 'email',
+	-name       => 'E-Mail-Address',
+	emptyok     => 1,                   # it's ok to leave this field empty (in this case the following tests are skiped)
+
+	-msg => 'The E-Mail-Address is invalid.',
+	matches_regex => '(^[^ <>()@¡-ÿ]+@[^ <>()@¡-ÿ]+\.[a-zA-Z]{2,3}$)', 
+	
+	-msg => 'The E-Mail address must contain a "@".',
+	must_contain_one_of => '@',
+
+	-msg => 'The E-Mail address must contain at least one period.',
+	must_contain_one_of => '.',
+
+	-msg => 'The E-Mail-Address is invalid. It must only not contain any special charaters.',
+	must_not_contain => '¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ',
+       ],
+
 
 =item -fail
 
@@ -732,7 +803,8 @@ continues validation in the same group, also a error was found
 
 you can place a arrayref with tests at any point in the rules list. The array will
 be considered as a group and the default is the stop processing of a group as soon
-as the first error is found and continue with processing with the next rules.
+as the first error is found and continue with processing with the next rule in the 
+next outer group.
 
 =back
 
@@ -752,6 +824,22 @@ The following test are currently defined:
 
 =item eq
 
+=item same
+
+Value must be the same as in field given as argument. This is usefull
+if you want for example verify that two passwords are the same. The 
+Text displayed to the user for the second field maybe added to the argument
+separeted by a colon. Example:
+
+  $epf = Embperl::Form::Validate -> new (
+        [
+            -key => 'pass',  -name => 'Password', required => 1, length_min => 4,
+            -key => 'pass2', -name => 'Repeat Password', required => 1, length_min => 4,
+                             same => 'pass:Password',
+        ],
+        'passform') ; 
+
+
 =item ne
 
 =item lt
@@ -763,6 +851,28 @@ The following test are currently defined:
 =item ge
 
 =item matches_regex
+
+Value must match B<Perl> regular expression. Only executed on server side.
+
+=item matches_regex_js
+
+Value must match B<JavaScript> regular expression. Only executed on client side.
+B<IMPORTANT:> If the user has disabled JavaScript in his browser this test will
+be never executed. Use a corresponding Perl Regex with C<matches_regex>
+to get a server side validation. Use this with care, because different browser
+may have different support for regular expressions.
+
+=item not_matches_regex
+
+Value must not match B<Perl> regular expression. Only executed on server side.
+
+=item not_matches_regex_js
+
+Value must not match B<JavaScript> regular expression. Only executed on client side.
+B<IMPORTANT:> If the user has disabled JavaScript in his browser this test will
+be never executed. Use a corresponding Perl Regex with C<not_matches_regex>
+to get a server side validation. Use this with care, because different browser
+may have different support for regular expressions.
 
 =item matches_wildcard
 

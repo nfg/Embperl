@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epmain.c,v 1.75.4.125 2002/06/24 19:22:29 richter Exp $
+#   $Id: epmain.c,v 1.125 2003/06/09 18:03:21 richter Exp $
 #
 ###################################################################################*/
 
@@ -177,6 +177,8 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
         case rcRefcntNotOne:            msg ="[%d]ERR:  %d: %s There is still %s reference(s) to the %s object, while there shouldn't be any." ; break ; 
         case rcApacheErr:               msg ="[%d]ERR:  %d: %s Apache returns Error: %s %s" ; break ; 
         case rcTooDeepNested:           msg ="[%d]ERR:  %d: %s Source data is too deep nested %s %s" ; break ; 
+        case rcUnknownOption:           msg ="[%d]ERR:  %d: %s Unkown option '%s' in configuration directive '%s'" ; break ; 
+        case rcTimeFormatErr:           msg ="[%d]ERR:  %d: %s Format error in %s = %s" ; break ;
 
 	default:                        msg ="[%d]ERR:  %d: %s Error (no description) %s %s" ; break ; 
         }
@@ -255,7 +257,8 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
 #endif
         {
         PerlIO_printf (PerlIO_stderr(), "%s\n", sText) ;
-        fflush (stderr) ;
+        /* fflush (stderr) ; */
+        PerlIO_flush (PerlIO_stderr()) ;
         }
     
     if (r)
@@ -454,7 +457,7 @@ static char * CreateSessionCookie (/*i/o*/ register req * r,
     char *  pInitialUID = NULL ;
     STRLEN  ulen = 0 ;
     STRLEN  ilen = 0 ;
-    IV	    bModified ;
+    IV	    bModified = 0 ;
     char *  pCookie = NULL ;
     STRLEN  ldummy ;
     tAppConfig * pCfg = &r -> pApp -> Config ;
@@ -496,6 +499,8 @@ static char * CreateSessionCookie (/*i/o*/ register req * r,
                     pCookie = ep_pstrcat (r -> pPool, pCookie, "; domain=", pCfg -> sCookieDomain, NULL) ;
                 if (pCfg -> sCookiePath)
                     pCookie = ep_pstrcat (r -> pPool, pCookie, "; path=", pCfg -> sCookiePath, NULL) ;
+                if (pCfg -> bCookieSecure)
+                    pCookie = ep_pstrcat (r -> pPool, pCookie, "; secure", NULL) ;
                 }
 
 	    if (r -> Config.bDebug & dbgSession)  
@@ -514,6 +519,8 @@ static char * CreateSessionCookie (/*i/o*/ register req * r,
                     pCookie = ep_pstrcat (r -> pPool, pCookie, "; path=", pCfg -> sCookiePath, NULL) ;
                 if (pCfg -> sCookieExpires)
                     pCookie = ep_pstrcat (r -> pPool, pCookie, "; expires=", pCfg -> sCookieExpires, NULL) ;
+                if (pCfg -> bCookieSecure)
+                    pCookie = ep_pstrcat (r -> pPool, pCookie, "; secure", NULL) ;
 
 	        if (r -> Config.bDebug & dbgSession)  
 		    lprintf (r -> pApp,  "[%d]SES:  Send Cookie -> %s\n", r -> pThread -> nPid, pCookie) ; 
@@ -521,6 +528,8 @@ static char * CreateSessionCookie (/*i/o*/ register req * r,
             else
                 {
                 pCookie = ep_pstrdup (r -> pPool, SvPV(pSVUID, ldummy)) ;
+	        if (r -> Config.bDebug & dbgSession)  
+		    lprintf (r -> pApp,  "[%d]SES:  Add ID to URL type=%c id=%s\n", r -> pThread -> nPid, type, pCookie) ; 
                 }
 	    }
 	}
@@ -828,8 +837,11 @@ static int SendHttpHeader (/*i/o*/ register req * r)
 	/* loc = 0  =>  no location header found
 	 * loc = 1  =>  location header found
 	 * loc = 2  =>  location header + value found
+         * loc = 3  =>  location header + value + status found
 	 */
  	I32	loc;
+        I32 loc_status = 301;
+
 
 	hv_iterinit (r -> pThread -> pHeaderHash) ;
 	while ((pEntry = hv_iternext (r -> pThread -> pHeaderHash)))
@@ -868,14 +880,18 @@ static int SendHttpHeader (/*i/o*/ register req * r)
  		    for (i = 0; i <= len; i++) 
  			{
  			svp = av_fetch(arr, i, 0);
+                        if (loc == 2)
+                             {
+                             loc = 3;
+                             loc_status = SvIV(*svp);
+                             break;
+                             }
+
  			p = SvPV(*svp, ldummy);
  			apr_table_add( r->pApacheReq->headers_out, apr_pstrdup(r->pApacheReq->pool, pKey),
  				   apr_pstrdup(r->pApacheReq->pool, p ) );
  			if (loc == 1) 
-			    {
 			    loc = 2;
-			    break;
- 			    }
 			}
  		    } 
  		else 
@@ -885,7 +901,7 @@ static int SendHttpHeader (/*i/o*/ register req * r)
 		    if (loc == 1) loc = 2;
 		    }
 
-		if (loc == 2) r->pApacheReq->status = 301;
+		if (loc >= 2) r->pApacheReq->status = loc_status;
 		}
 	    }
 
@@ -927,6 +943,11 @@ static int SendHttpHeader (/*i/o*/ register req * r)
 	I32    l ;
 	char * pContentType = "text/html";
         STRLEN ldummy ;
+        /* loc = 0  =>  no location header found
+        * loc = 1  =>  location header found
+        */
+        I32 loc;
+
 
 	r -> Component.pOutput -> nMarker = 0 ; /* output directly */
 
@@ -935,10 +956,14 @@ static int SendHttpHeader (/*i/o*/ register req * r)
 	    {
 	    pKey     = hv_iterkey (pEntry, &l) ;
 	    pHeader  = hv_iterval (r -> pThread -> pHeaderHash, pEntry) ;
+            loc = 0;
 
 	    if (pHeader && pKey)
 		{			    
- 		if (SvROK(pHeader)  && SvTYPE(SvRV(pHeader)) == SVt_PVAV ) 
+ 		if (stricmp (pKey, "location") == 0)
+                    loc = 1;
+
+                if (SvROK(pHeader)  && SvTYPE(SvRV(pHeader)) == SVt_PVAV ) 
  		    {
  		    AV * arr = (AV *)SvRV(pHeader);
  		    I32 len = av_len(arr);
@@ -954,7 +979,9 @@ static int SendHttpHeader (/*i/o*/ register req * r)
 			oputs (r, "\n") ;
 			if (r -> Component.Config.bDebug & dbgHeadersIn)
                 	    lprintf (r -> pApp,   "[%d]HDR:  %s: %s\n", r -> pThread -> nPid, pKey, p) ; 
-			}
+			if (loc == 1) 
+                            break;
+                        }
  		    } 
 		else
 		    {				    
@@ -1175,7 +1202,7 @@ static int ProcessFile (/*i/o*/ register req * r,
     epTHX_    
     int rc ;
     SV * pParam ;
-    SV * pParamRV ;
+    SV * pParamRV = NULL ;
     SV * pRecipe = r -> Component.Config.pRecipe ;
     STRLEN l ;
     int num ;

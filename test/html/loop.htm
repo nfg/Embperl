@@ -96,5 +96,26 @@ y
 [$ endif $]
 
 
+[- @bar = ('a', 'b', 'c'); -]
+[$ foreach $foo (@bar) $]
+  [* next if ($foo eq 'c'); *]
+  [+ $foo +]
+[$ endforeach $]
+
+[$ foreach $foo (@bar) $]
+  [* next if ($foo eq 'c'); *]
+  x = [+ $foo +] = z
+[$ endforeach $]
+
+[$ foreach $foo (@bar) $]
+  [$if ($foo eq 'c') $][$ last $][$endif$]
+  last = [+ $foo +] = z
+[$ endforeach $]
+
+[$ foreach $foo (@bar) $]
+  [$if ($foo eq 'b') $][$ next $][$endif$]
+  next = [+ $foo +] = z
+[$ endforeach $]
+
 </body>
 </html>

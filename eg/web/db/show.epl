@@ -4,35 +4,76 @@ $r = shift ;
 
 <table width="100%">
     <tr bgcolor="#fefcad">
-        <td><font size="4">[= add1 =] [+ $r -> {category_set}{category} +]</font></td>
+        <td><font size="4">
+	  [$ if $fdat{-update_item} $]
+	    [= edit1 =] [+ $r->{category_set}{category} +]
+	  [$ elsif $fdat{-delete_item} $]
+	    [= del1 =]
+	  [$ else $]
+	    [= add1 =] [+ $r->{category_set}{category} +]
+	  [$ endif $]
+	</font></td>
     </tr>
 </table>
 
 
+[$ if $fdat{-delete_item} && !$r->{error} $]
+<P>[= del2 =]</P>
 
+<P><A HREF="addsel.epl">[= back_to_index =]</A></P>
+[$ endif $]
+
+[$ if ($item_set = $r->{item_set}) $] [# && (ref ($item_set) ne 'ARRAY' || @$item_set > 0) $]#]
 
 [= show2 =]<br><br>
 
+Status: [+ eval { $r -> gettext ($item_set->{state} ? 'display' : 'hide') } +]
+
+[-
+ $ct = $r->{category_texts}; 
+ $cy = $r->{category_types}; 
+ $cf = $r->{category_fields};
+-]
+
 <table width="100%">
     <tr bgcolor="#fefcad">
-        [- $rec = $r -> {item_set}[$row] -]
-        <td>[+ $rec -> {name} +]</td>
+        [- $rec = $item_set->[$row] -]
+        <td><font size=3><b>[+ $rec -> {name} +]</b></font></td>
     </tr>
     <tr>
         <td>
             <table>
-                <tr>
-                    <td>[= heading =]:</td><td>[+ $rec -> {heading} +]</td>
-                </tr>
-                <tr>
-                    <td>[= url =]:</td><td>[+ $rec -> {url} +]</td>
-                </tr>
-                <tr>
-                    <td>[= description =]:</td><td>[+ do { $txt = $rec -> {description} ; $txt =~ s/\\n/\\\\<br\\>/g; $txt } +]</td>
-                </tr>
+                [$ foreach $type (@$cf) $]
+                    [$ if $txt = $ct->{$type . '_text'} $]
+                        <tr>
+                           <td valign=top>[+ $txt +]:</td><td>
+			   [$ if $cy->{$type} =~ /pulldown/ $]
+			   [+ $r->app->get_title($r,$type,$fdat{$type.'_'.$rec->{language_id}}) +]
+			   [$ else $]
+			   [- @txt = split (/\n/, $rec -> {$type}) -][$ foreach $t (@txt) $][+ $t +]<br>[$ endforeach $]
+			   [$ endif $]
+			   </td>
+                        </tr>
+                    [$endif$]
+                [$endforeach$]
             </table>
         </td>
     </tr>
 </table>
 
+[$ if $udat{user_email} $]
+[- $tt = $r->{category_set}{table_type} -]
+<A HREF="add.epl?[+ $tt +]_id=[+ $fdat{"${tt}_id"} +]&amp;-edit_item=1&amp;category_id=[+ $fdat{category_id} +]">Edit</A>
+[$ endif $]
+
+[$ endif $]
+
 <br><br>
+
+[#
+[! use Data::Dumper; !]
+[- $DBIx::Recordset::FetchsizeWarn = 0; -]
+<PRE>
+[+ Dumper $r->{error},\%fdat,[keys %$r],[@{$r->{category_fields}}],{%{$r->{category_texts}}},{%{$r->{category_set}}},$r->{item_set} +]
+</PRE>
+#]

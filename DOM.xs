@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: DOM.xs,v 1.1.2.27 2002/05/21 12:09:07 richter Exp $
+#   $Id: DOM.xs,v 1.8 2003/04/11 05:41:16 richter Exp $
 #
 ###################################################################################
 
@@ -32,9 +32,9 @@ CODE:
     tDomNode * pDomNode ;
     MAGIC * mg ;
     SV *    pSV = SvRV(pRV) ;
-    if (mg = mg_find (pSV, '~'))
+    if ((mg = mg_find (pSV, '~')))
         {
-        pDomNode = (tDomNode *)(mg -> mg_len) ;
+        pDomNode = (tDomNode *)(mg -> mg_ptr) ;
         if (xDomTree)
             pDomNode -> xDomTree = xDomTree ;
         if (xNode)    
@@ -224,6 +224,24 @@ CLEANUP:
     StringFree (r -> pApp, &sText) ;
 
 
+void
+embperl_Node_iSetText (xDomTree, xNode, sText)
+    int xDomTree
+    int xNode
+    SV * sText
+PREINIT:
+    STRLEN nText ;
+    char * sT ;
+    tApp * a = CurrReq  -> pApp ;
+    tNodeData * pNode = Node_self(DomTree_self(xDomTree), xNode) ;
+CODE:
+    sT = SV2String (sText, nText) ;
+    if (pNode -> nText)
+        NdxStringFree (a, pNode -> nText) ;
+    pNode -> nText = String2Ndx (a, sT, nText) ;
+
+
+
 ################################################################################
 
 MODULE = XML::Embperl::DOM      PACKAGE = XML::Embperl::DOM::Tree     PREFIX = embperl_DomTree_
@@ -270,9 +288,13 @@ PREINIT:
     char * sA  ;
     tDomTree * pDomTree ;
     tReq * r = CurrReq ;
+    SV * sEscapedText ;
 CODE:
     sT = SV2String (sText, nText) ;
     sA = SV2String (sAttr, nAttr) ;
+
+    sEscapedText = Escape (r, sT, nText, r -> Component.nCurrEscMode, NULL, '\0') ;
+    sT = SV2String (sEscapedText, nText) ;
 
     pDomTree = DomTree_self (pDomNode -> xDomTree) ;
 
@@ -287,12 +309,16 @@ embperl_Element_iSetAttribut (xDomTree, xNode, sAttr, sText)
     SV * sText
 PREINIT:
     tReq * r = CurrReq ;
+    SV * sEscapedText ;
+    tDomTree * pDomTree ;
 CODE:
     STRLEN nAttr ;
     STRLEN nText ;
     char * sT = SV2String (sText, nText) ;
     char * sA = SV2String (sAttr, nAttr) ;
-    tDomTree * pDomTree = DomTree_self (xDomTree) ;
+    sEscapedText = Escape (r, sT, nText, r -> Component.nCurrEscMode, NULL, '\0') ;
+    sT = SV2String (sEscapedText, nText) ;
+    pDomTree = DomTree_self (xDomTree) ;
 
     Element_selfSetAttribut (r -> pApp, pDomTree, Node_self (pDomTree, xNode), r -> Component.nCurrRepeatLevel, sA, nAttr, sT, nText) ;
 

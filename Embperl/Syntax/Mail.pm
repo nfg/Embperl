@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Mail.pm,v 1.1.2.6 2002/03/15 19:53:56 richter Exp $
+#   $Id: Mail.pm,v 1.3 2003/01/07 20:43:00 richter Exp $
 #
 ###################################################################################
  
@@ -71,6 +71,14 @@ sub Init
                                         'mailhost', 'mailhelo', 'maildebug'], undef, undef, 
                 { 
                 removenode  =>  42,
+		compiletimeperlcode => q{
+			$_ep_mail_opt_save = $Embperl::req->component->config->options ;
+			$Embperl::req->component->config->options (Embperl::Constant::optKeepSpaces | $_ep_mail_opt_save) ;
+			},
+		compiletimeperlcodeend => q{
+			$Embperl::req->component->config->options ($_ep_mail_opt_save) ;
+			},
+
                 perlcodeend =>  q{
                     {
                     use Embperl::Mail ;

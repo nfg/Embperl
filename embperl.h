@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: embperl.h,v 1.19.4.30 2002/06/18 06:27:34 richter Exp $
+#   $Id: embperl.h,v 1.32 2003/02/15 20:46:31 richter Exp $
 #
 ###################################################################################*/
 
@@ -92,6 +92,8 @@ enum tRc
     rcRefcntNotOne,
     rcApacheErr,
     rcTooDeepNested,
+    rcUnknownOption,
+    rcTimeFormatErr,
     rcForbidden = 403,
     rcNotFound  = 404,
     rcDecline   = -1
@@ -184,6 +186,14 @@ enum tEscMode
     escXML      = 8,
 
     escStd      = 7
+    } ;
+
+/* --- output mode --- */
+
+enum tOutputMode
+    {
+    omodeHtml   = 0,
+    omodeXml    = 1,
     } ;
 
 /* --- input escaping --- */

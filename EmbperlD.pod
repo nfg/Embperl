@@ -254,6 +254,32 @@ Beispiel:
  [$ endforeach $]
 
 
+=item B<next>
+
+Hat die selbe Funktion wie das Perl next statement. Es kann auch folgende
+Syntax benutzt werden, wodurch eine zusätzliche Bedingung (oder anderer Perlcode)
+eingefügt werden kann:
+
+    [* next if ($foo) *]
+
+=item B<last>
+
+Hat die selbe Funktion wie das Perl last Statement. Es kann auch folgende
+Syntax benutzt werden, wodurch eine zusätzliche Bedingung (oder anderer Perlcode)
+eingefügt werden kann:
+
+    [* last if ($foo) *]
+
+
+=item B<redo>
+
+Hat die selbe Funktion wie das Perl redo statement. Es kann auch folgende
+Syntax benutzt werden, wodurch eine zusätzliche Bedingung (oder anderer Perlcode)
+eingefügt werden kann:
+
+    [* redo if ($foo) *]
+
+
 =item B<hidden>
 
 B<Arg> gibt keinen, einen oder zwei Hashs an (mit oder ohne
@@ -786,12 +812,17 @@ um Parameter an ein I<Embperl> Dokument zuübergeben oder zurückzugegben.
 =head2 %http_headers_out (ab 1.2b10)
 
 Dieser Hash ermöglicht es HTTP Header anzugeben, die I<Embperl> vor dem Dokument senden soll.
+
 Ist ein "Location" Header angegeben, setzt I<Embperl> den Status automatisch auf 301. Beispiel:
 
   [- $http_headers_out{'Location'} = "http://www.ecos.de/embperl/" -]
 
+Wird ein Array als Location angeben, gibt das zweite Element den Status Code an:
 
-Ab 1.3.2 können alle HTTP Header (außer "Location" und "Content-Type") auch 
+  [- $http_headers_out{Location} = [ "http://www.ecos.de/embperl/", 303 ]; -]
+
+
+Ab 1.3.2 können alle HTTP Header (außer "Content-Type") auch 
 mehrere Werte erhalten. Um z.B. mehrere Cookie zu setzen, kann man folgendes schreiben:
 
 
@@ -1220,9 +1251,9 @@ I<Embperl> wurde erfolgreich getestet
 
 =item perl 5.6.1
 
-=item perl 5.7.1
+=item perl 5.8.0
 
-=item apache_1.3.0 - apache_1.3.19
+=item apache_1.3.0 - apache_1.3.27, apache 2.0.45
 
 =item apache_ssl (Ben SSL)
 
@@ -1247,7 +1278,7 @@ problemlos läuft.
 
 =item perl 5.6.0
 
-=item apache_1.3.0 - apache_1.3.19
+=item apache_1.3.0 - apache_1.3.27
 
 =back
 
@@ -1335,7 +1366,7 @@ mehr Zeit und Resourcen dafür aufzubringen.
 =back
 
 
-=head1 Links
+=head1 Links und Download
 
 =head2 Informationen
 
@@ -1371,10 +1402,13 @@ Debian packages                     http://www.cse.unsw.edu.au/~gusl/embperl
 
 PPM für ActiveState                 http://theoryx5.uwinnipeg.ca/ppmpackages/
 
+
+B<Information wie Embperl installiert wird finden sich in> L<INSTALL.pod>.
+
 =head2 CVS
 
 Die aktuelle Entwicklerversion ist via CVS verfügbar.
-Weitere Informationen dazu stehen in L<"perldoc CVS.pod"|CVS/INTRO>.
+Weitere Informationen dazu stehen in L<"perldoc CVS.pod"|CVS.pod>.
 
 =head1 Syntaxmodes für verschiedene Editoren
 
@@ -1383,7 +1417,7 @@ Weitere Informationen dazu stehen in L<"perldoc CVS.pod"|CVS/INTRO>.
 Von: Erik Arneson [erik@mind.net]
 
 Man braucht mmm.el von
-http://members.tripod.com/gchen2/xemacs/
+http://mmm-mode.sourceforge.net/
 
 Anschließend muß man mein mmm-embperl.el downloaden von
 http://www.aarg.net/erik/mmm-embperl.el
@@ -1395,7 +1429,7 @@ Dokumentation ist in den Dateien enthalten.
 Vim Syntaxfile für Vim 5.x & 6.x von Lukas Zapletal mit syntax highliting für JavaScript, VBScript,
 Perl+Embperl, CSS und HTML, gelbem Hintergrund für Perl code (wie M$ Interdev) und
 funktionierendem Perl folding:
-http://vim.sourceforge.net/scripts/search_results.php?keywords=Embperl
+http://vim.sourceforge.net/script.php?script_id=61 
 
 Vim Syntaxfile von Steve Willer: http://www.interlog.com/~willer/embperl.vim
 
