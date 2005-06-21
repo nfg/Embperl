@@ -13,7 +13,7 @@ $_[1] = [+ defined ($_[1])?$_[1]:'<undef>' +] <br>
 $rec_rec  = [+ $req_rec +]<br>
 $$rec_rec = [+ $$req_rec +]<br>
 
-[- $ar = eval { Apache->request } ; $@ = '' -]
+[- $ar = $Embperl::modperlapi >= 2?eval { Apache2::RequestUtil->request }:eval { Apache->request } ; $@ = '' -]
 
 Apache->request    = [+ $ar +]<br>
 ${Apache->request} = [+ $$ar +]<br>

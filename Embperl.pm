@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Embperl.pm,v 1.198 2005/02/27 20:22:00 richter Exp $
+#   $Id: Embperl.pm,v 1.200 2005/06/17 21:14:28 richter Exp $
 #
 ###################################################################################
 
@@ -36,10 +36,12 @@ use vars qw(
     $VERSION
     $cwd 
     $req_rec
+    $srv_rec
     $importno 
     %initparam
     $modperl
     $modperl2
+    $modperlapi
     $req
     $app
     ) ;
@@ -47,15 +49,15 @@ use vars qw(
 
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = '2.0rc3' ;
+$VERSION = '2.0rc4' ;
 
 
 if ($modperl  = $ENV{MOD_PERL})
     {
     $modperl  =~ m#/(\d+)\.(\d+)# ;
     $modperl2 = 1 if ($1 == 2 || ($1 == 1 && $2 >= 99)) ;
+    $modperlapi = $ENV{MOD_PERL_API_VERSION} || 1 ;
     }
-
 
 if ($ENV{PERL_DL_NONLAZY}
 	&& substr($ENV{GATEWAY_INTERFACE} || '', 0, 8) ne 'CGI-Perl'
@@ -67,25 +69,43 @@ if ($ENV{PERL_DL_NONLAZY}
 
 if ($modperl2)
     {
-    if (($modperl =~ /_(\d+)/) && $1 < 15)
-	{
-        require Apache::Server ;
-	}
+    if ($modperlapi >= 2) 
+        {
+        require Apache2::ServerRec ;
+        require Apache2::ServerUtil ;
+        require Apache2::RequestRec ;
+        require Apache2::RequestUtil ;
+        require Apache2::SubRequest ;
+        $srv_rec = Apache2::ServerUtil -> server ;
+        }
     else
-	{
-        require Apache::ServerRec ;
-	}
-    require Apache::ServerUtil ;
-    require Apache::RequestRec ;
-    require Apache::RequestUtil ;
-    require Apache::SubRequest ;
+        {
+        if (($modperl =~ /_(\d+)/) && $1 < 15)
+	    {
+            require Apache::Server ;
+	    }
+        else
+	    {
+            require Apache::ServerRec ;
+	    }
+        require Apache::ServerUtil ;
+        require Apache::RequestRec ;
+        require Apache::RequestUtil ;
+        require Apache::SubRequest ;
+        $srv_rec = Apache -> server ;
+        }
+    }
+elsif ($modperl)
+    {
+    require Apache ;    
+    $srv_rec = Apache -> server ;
     }
 
 if (!defined(&Embperl::Init))
     {
     bootstrap Embperl $VERSION  ;
     Boot ($VERSION) ;
-    Init ($modperl?Apache -> server:undef, \%initparam) ;
+    Init ($srv_rec, \%initparam) ;
     }
 
 
@@ -107,8 +127,19 @@ sub Execute
     # when called inside a Embperl Request, Execute the component only
     return Embperl::Req::ExecuteComponent ($_ep_param, @_) if ($req) ;
 
-    local $req_rec = Apache -> request if ($Embperl::modperl) ;
-
+    local $req_rec ;
+    if ($modperl)
+        {
+        if ($modperlapi < 2)
+            {
+            $req_rec = Apache -> request  ;
+            }
+        else
+            {
+            $req_rec = Apache2::RequestUtil -> request  ;
+            }
+        }
+        
     my $rc ;
     if (!ref $_ep_param)
         {
@@ -128,6 +159,15 @@ sub handler
     {
     local $SIG{__WARN__} = \&Warn ;
     $req_rec = $_[0] ;
+    if ($modperlapi < 2)
+        {
+        Apache -> request ($req_rec) ;
+        }
+    else
+        {
+        Apache2::RequestUtil -> request ($req_rec) ;
+        }
+    
     my $rc = Embperl::Req::ExecuteRequest ($_[0]) ;
     return $rc ;
     }
@@ -163,6 +203,11 @@ if ($Embperl::modperl)
         { 
         eval 'use Apache::Constants qw(&OPT_EXECCGI &DECLINED &OK &FORBIDDEN)' ;
         die "use Apache::Constants failed: $@" if ($@); 
+        }
+    elsif ($Embperl::modperlapi >= 2)
+        { 
+        eval 'use Apache2::Const qw(&OPT_EXECCGI &DECLINED &OK &FORBIDDEN)' ;
+        die "use Apache2::Const failed: $@" if ($@); 
         }
     else
         { 
@@ -215,7 +260,17 @@ sub get_multipart_formdata
     my $dbgForm = $self -> config -> debug & Embperl::Constant::dbgForm ;
 
     # just let CGI.pm read the multipart form data, see cgi docu
-    require Apache::compat if ($Embperl::modperl2) ; # Apache::compat is need for CGI.pm
+    if ($Embperl::modperl2)
+        {
+        if ($Embperl::modperlapi < 2)
+            {
+            require Apache::compat  # Apache::compat is needed for CGI.pm
+            }
+        else
+            {
+            require Apache2::compat  # Apache::compat is needed for CGI.pm
+            }
+        }
     require CGI ;
 
     my $cgi = new CGI ;

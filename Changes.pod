@@ -1,5 +1,14 @@
 =pod
 
+=head4 2.0.rc4 19. Juni 2005
+
+   - Adapted to new mod_perl namespace. Embperl now works correctly
+     with mod_perl version >= 2.0rc5 (older version are still supported)
+     NOTE: For file uploads to work you also need to upgrade CGI.pm 
+   - Fixed problem with Execute when GlobalRequestRec option is not
+     set in mod_perl config.
+   - use gmtime_r instead of gmtime for time calculation to be thread safe
+
 =head1 2.0rc3 14. March 2005
 
    - Handle warnings the same way under Embperl and Embperl::Object, so they

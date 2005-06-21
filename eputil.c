@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eputil.c,v 1.44 2005/02/22 16:34:29 richter Exp $
+#   $Id: eputil.c,v 1.45 2005/03/22 08:06:39 richter Exp $
 #
 ###################################################################################*/
 
@@ -2011,7 +2011,7 @@ static const char ep_day_snames[7][4] =
 const char * embperl_CalcExpires(const char *sTime, char * sResult, int bHTTP)
 {
     time_t when;
-    struct tm *tms;
+    struct tm tms;
     int sep = bHTTP ? ' ' : '-';
     dTHX ;
 
@@ -2026,13 +2026,13 @@ const char * embperl_CalcExpires(const char *sTime, char * sResult, int bHTTP)
 	return sResult ;
     }
 
-    tms = gmtime(&when);
+    gmtime_r(&when, &tms);
     sprintf(sResult,
 		       "%s, %.2d%c%s%c%.2d %.2d:%.2d:%.2d GMT",
-		       ep_day_snames[tms->tm_wday],
-		       tms->tm_mday, sep, ep_month_snames[tms->tm_mon], sep,
-		       tms->tm_year + 1900,
-		       tms->tm_hour, tms->tm_min, tms->tm_sec);
+		       ep_day_snames[tms.tm_wday],
+		       tms.tm_mday, sep, ep_month_snames[tms.tm_mon], sep,
+		       tms.tm_year + 1900,
+		       tms.tm_hour, tms.tm_min, tms.tm_sec);
     return sResult ;
 }
 

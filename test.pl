@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: test.pl,v 1.156 2005/03/14 13:41:45 richter Exp $
+#   $Id: test.pl,v 1.157 2005/06/17 21:14:28 richter Exp $
 #
 ###################################################################################
 
@@ -1148,6 +1148,9 @@ BEGIN
     $SIG{__DIE__} = sub { 
 	return unless $_[0] =~ /^\*\*\*/ ;
 	return if ($opt_nokill)  ;
+
+	print $_[0] ;
+
 	if ($EPWIN32)
 	    {
 	    $HttpdObj->Kill(-1) if ($HttpdObj) ;

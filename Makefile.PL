@@ -3,7 +3,7 @@
 #
 # (C) 1997-2004 G.Richter (richter@dev.ecos.de) / ECOS
 #
-# $Id: Makefile.PL,v 1.76 2005/03/14 13:41:45 richter Exp $
+# $Id: Makefile.PL,v 1.78 2005/06/19 08:52:25 richter Exp $
 #
 
 
@@ -552,17 +552,29 @@ if (!$apache && $apache_src eq '')
         print "Found mod_perl 2.0\n" ;
         }
     else
-        {
-        eval 'use Apache::MyConfig' ;
+	{
+        eval 'use Apache2::BuildConfig' ;
 
         if ($@ eq '')
             { 
-            $apache_src = $Apache::MyConfig::Setup{Apache_Src} ; 
-            }
-        else
+	    $mp2Apache2 = 1 ;
+            $mp2cfg = Apache2::BuildConfig -> new ;
+            $apache_src = $mp2cfg -> {MP_AP_PREFIX} || $mp2cfg -> {ap_includedir} ;
+            print "Found mod_perl 2.0\n" ;
+	    }
+	else
             {
-            $apache_src = '' ;
-            }
+            eval 'use Apache::MyConfig' ;
+
+            if ($@ eq '')
+                { 
+                $apache_src = $Apache::MyConfig::Setup{Apache_Src} ; 
+                }
+            else
+                {
+                $apache_src = '' ;
+                }
+	    }
         }
     }
 elsif ($apache_src ne '' && -X "$apache_src/bin/httpd")
@@ -578,6 +590,17 @@ elsif ($apache_src ne '' && -X "$apache_src/bin/httpd")
             { 
             $mp2cfg = Apache::BuildConfig -> new ;
             print "Found mod_perl 2.0\n" ;
+	    }
+        else
+	    {
+            eval 'use Apache2::BuildConfig' ;
+
+            if ($@ eq '')
+                { 
+	        $mp2Apache2 = 1 ;
+                $mp2cfg = Apache2::BuildConfig -> new ;
+                print "Found mod_perl 2.0\n" ;
+	        }
 	    }
         }
     }
@@ -941,8 +964,16 @@ if ($b && $apache)
 
     if ($mp2cfg)
         {
-        require Apache::Build ;
-        $dynlib->{'OTHERLDFLAGS'} = Apache::Build->new->otherldflags  ;
+	if ($mp2Apache2)
+	    {
+            require Apache2::Build ;
+            $dynlib->{'OTHERLDFLAGS'} = Apache2::Build->new->otherldflags  ;
+	    }
+	else
+	    {
+            require Apache::Build ;
+            $dynlib->{'OTHERLDFLAGS'} = Apache::Build->new->otherldflags  ;
+	    }
         }
     else
         {

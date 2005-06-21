@@ -15,6 +15,11 @@ TODO
 
 - Global $r is not available. [ abe 7.3.05]
 
+- Date Header in Embper::Mail [ Robert 1.4.05]
+
+- content-type in Embperl::Mail [ abe 4.4.05]
+
+
 TODO for Embperl 2.1 and later
 
 - make Embperl run with threads and threaded Apache 2

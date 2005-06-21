@@ -8,10 +8,10 @@ $conf =  <br>
 ^\$_\[0\] = Embperl::Req=HASH\(0x.*?\) <br> 
 $_[1] =  <br> 
 
-^\$rec_rec  = Apache(::RequestRec)?=SCALAR\(0x.*?\)<br>
+^\$rec_rec  = Apache2?(::RequestRec)?=SCALAR\(0x.*?\)<br>
 ^\$\$rec_rec = -?\d+<br>
 
-^Apache->request    = Apache(::RequestRec)?=SCALAR\(0x.*?\)<br>
+^Apache->request    = Apache2?(::RequestRec)?=SCALAR\(0x.*?\)<br>
 ^\$\{Apache->request\} = -?\d+<br>
 
 ${Apache->request} = $$req_rec ?  yes <br>
