@@ -1,4 +1,4 @@
-Hi! [- $r = shift; -]
+Hi! [- $r = shift; $^W=0 -]
 
 [$ if $r->{error} $]
 There occured the following errors during item [+ $r->{is_update} ? 'update' : 'creation' +] by [+ $udat{user_email} || '[Unknown user]' +]:

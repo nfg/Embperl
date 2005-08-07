@@ -1,5 +1,5 @@
 
-# $Id: httpd.conf.src,v 1.57 2005/02/28 06:31:00 richter Exp $
+# $Id: httpd.conf.src,v 1.58 2005/07/25 07:01:36 richter Exp $
 
 print OFH <<EOD ;
 #
@@ -58,6 +58,7 @@ print OFH "$EPMODPERL\n" ;
 print OFH "LoadModule embperl_module \"$EPPATH/blib/arch/auto/Embperl/Embperl.so\"\n" if ($MP2) ;
 
 ##print OFH "PassEnv ACTION_PREFIX\n" ;
+print OFH "PerlPassEnv TEST_PRELOAD\n" ;
 
 print OFH <<EOD ;
 

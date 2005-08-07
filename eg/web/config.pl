@@ -38,7 +38,7 @@ sub new
     $self -> {lib_1_3} ||= '' ;
 
     # check if DBIx::Recordset is installed
-    my $lib_dbix = $lib_1_3  ;
+    my $lib_dbix = $self -> {lib_1_3} ;
     if (-e ($lib_dbix . '/DBIx/Intrors.pod'))
         {
         $self -> {lib_dbix}     = $lib_dbix ;

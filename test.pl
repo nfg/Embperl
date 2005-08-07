@@ -2,7 +2,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: test.pl,v 1.157 2005/06/17 21:14:28 richter Exp $
+#   $Id: test.pl,v 1.161 2005/08/07 14:40:39 richter Exp $
 #
 ###################################################################################
 
@@ -264,6 +264,10 @@
      },
     'heredoc.htm' => { },
     'epglobals.htm' => {},
+    'keepspaces.htm' => { 
+        'option'     => 0x100000,
+        'offline'    => 1,
+        },
     'post.htm' => {
         'offline'    => 0,
         'reqbody'    => "f1=abc1&f2=1234567890&f3=" . 'X' x 8192,
@@ -416,6 +420,8 @@
         },
     'subouttab.htm' => { 
         'repeat'     => 2,
+        },
+    'subempty.htm' => { 
         },
     'executesub.htm' => { 
         'version'    => 2,
@@ -1101,7 +1107,7 @@ for ($i = 0 ; $i < @testdata; $i += 2)
 # avoid some warnings:
 
 use vars qw ($httpconfsrc $httpconf $EPPORT $EPPORT2 *SAVEERR *ERR $EPHTTPDDLL $EPSTARTUP $EPDEBUG
-             $testshare
+             $testshare $keepspaces
             $EPSESSIONDS $EPSESSIONCLASS $EPSESSIONVERSION $EPSESSIONXVERSION $EP1COMPAT $EPAPACHEVERSION $EPC_ENABLE
             $opt_offline $opt_ep1 $opt_cgi $opt_modperl $opt_execute $opt_nokill $opt_loop
             $opt_multchild $opt_memcheck $opt_exitonmem $opt_exitonsv $opt_config $opt_nostart $opt_uniquefn
@@ -1360,16 +1366,19 @@ sub chompcr
     local $^W = 0 ;
 
     chomp ($_[0]) ;
-    if ($_[0] =~ /(.*?)\s*\r$/) 
-	{
-	$_[0] = $1
-	}
-    elsif ($_[0] =~ /(.*?)\s*$/) 
-	{
-	$_[0] = $1
-	}
-    $_[0] =~ s/\s+/ /g ;
-    $_[0] =~ s/\s+>/>/g ;
+    if (!$keepspaces)
+        {
+        if ($_[0] =~ /(.*?)\s*\r$/) 
+	    {
+	    $_[0] = $1
+	    }
+        elsif ($_[0] =~ /(.*?)\s*$/) 
+	    {
+	    $_[0] = $1
+	    }
+        $_[0] =~ s/\s+/ /g ;
+        $_[0] =~ s/\s+>/>/g ;
+        }
     }
 
 #####################################################
@@ -1465,8 +1474,11 @@ sub CmpFiles
 		}
 	    else
 		{
-		$l1 =~ s/\s//g ;
-		$l2 =~ s/\s//g ;
+	        if (!$keepspaces)
+                    {
+        	    $l1 =~ s/\s//g ;
+		    $l2 =~ s/\s//g ;
+                    }
 		$eq = lc ($l1) eq lc ($l2) ;
 		}
 	    }
@@ -1823,6 +1835,7 @@ $EP1COMPAT = 1 if ($opt_ep1) ;
 
 #@tests = @tests2 if ($EP2) ;
 $startnumber = 0 ;
+$keepspaces  = 0 ;
 
 if ($#ARGV >= 0)
     {
@@ -2023,6 +2036,7 @@ do
 	        
 	        if ($err == 0 && $errin != 500 && $file ne 'notfound.htm' && $file ne 'notallow.xhtm')
 		    {
+                    local $keepspaces = $test -> {option} && ($test -> {option} & 0x100000)?1:0 ;
 		    $page =~ /.*\/(.*)$/ ;
 		    $org = "$cmppath/$1" ;
 		    $org = "$cmppath$testversion/$1" if (-e "$cmppath$testversion/$1") ;
@@ -2256,15 +2270,27 @@ do
 		print "ok\n" unless ($err) ;
 		}
 
-            foreach $src ('EmbperlObject/epopage1.htm', 'EmbperlObject/sub/epopage2.htm', 'EmbperlObject/obj/epoobj3.htm',
+            foreach $src (
+                          'EmbperlObject/epopage1.htm', 'EmbperlObject/sub/epopage2.htm', 'EmbperlObject/obj/epoobj3.htm',
                           'EmbperlObject/sub/epobless.htm', 'EmbperlObject/sub/epobless.htm', 
                           'EmbperlObject/epofdat.htm',            
                           'EmbperlObject/sub/epobless2.htm', 'EmbperlObject/sub/epobless2.htm',
                           'EmbperlObject/sub/epobless3.htm', 'EmbperlObject/sub/epobless3.htm',
+                          ['EmbperlObject/app/epoapp.htm', 'epoapp.pl'],   
+                          ['EmbperlObject/app/epoapp.htm', 'epoapp.pl'],   
+                          ['EmbperlObject/app/epoapp.htm', 'epoapp.pl'],   
                           )
                 {
 	        if ($err == 0 || $opt_ignoreerror) # && $version == 1)
 		    {
+                    my $app = '' ;
+
+                    if (ref $src)
+                        {
+                        $app = $src -> [1] ;
+                        $src = $src -> [0] ;
+                        }
+
                     $src =~ m#^.*/(.*?)$# ;
 		    $org = "$cmppath/$1" ;
                     $page = $src ;
@@ -2279,7 +2305,8 @@ do
 		    $t1 = 0 ; # Embperl::Clock () ;
 		    $err = Embperl::Object::Execute ({'inputfile'  => "$EPPATH/$inpath/$src",
 						    'object_base' => 'epobase.htm',    
-                                                    'appname'     => 'eo',
+						    ($app?('object_app' => $app):()),    
+                                                    'appname'     => "eo_$app",
                                                     'debug'      => $defaultdebug,
 					            'outputfile' => $outfile,
 		                                    'errors'     => \@errors,

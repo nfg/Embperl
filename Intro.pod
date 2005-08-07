@@ -60,8 +60,7 @@ performance 2.0 indrocuces caching of the output or intermediate steps.
 Due to this modularization, it is now possible, to replace Embperl parser
 by an XML parser and to do XML processing, for example by pluging in
 an XSLT processer in the processing pipeline.
-Embperl 2.0 will soon come with modules to use the Apache XERCES C++ 
-XML Parser and XALAN C++ XSLT processor.
+Embperl 2.0 can utilize libxml2 and libxslt for XML and XSLT processing.
 
 All versions of Embperl can be used offline (as a normal CGI script or as a module
 from other Perl code), but its real power comes when running under
@@ -81,9 +80,9 @@ good job in a certain environment. Often after a while these
 programmer discover, they need more features and that other people
 in the same situation has already build a soltuion for their problems.
 At the moment there are five widely used Perl modules for generating
-dynamic web content (HTML::Embperl, Apache::ASP, HTML::Mason,
+dynamic web content (Embperl, Apache::ASP, HTML::Mason,
 Template::Toolkit and AxKit). All of these have their special strength.
-So why to use Embperl? We believe that Embperl, especialy the upcomming
+So why to use Embperl? We believe that Embperl, especialy the 
 version 2.0, covers all of the aspects of these modules and integrates them
 in one module with addtionaly benefits that are unique to Embperl.
 Addtionaly Embperl is the fastes of these solutions, because it's engine
@@ -496,6 +495,10 @@ settings, Embperl logs the following things:
 
 =item    Source
 
+=item    Parsing
+
+=item    Compiling
+
 =item    Environment
 
 =item    Form data
@@ -508,21 +511,14 @@ settings, Embperl logs the following things:
 
 =item    HTTP headers
 
+=item    and more
+
 =back
 
-=head2 Embperl log file can be viewed via the browser
 
-For debugging, you can tell Embperl to display a link at the top of
-each page to your log file. If you follow the link, Embperl will show
-the portion of the log file corresponding to that request. The log
-file lines are displayed in different colors to give a better
-overview.
-
-=head2 Embperl error page contains links to the log file
-
-If you have enabled links to the log file, every error displayed in an
-error page is a link to the corresponding position in the logfile, so
-you can easily find the place where something is going wrong.
+Addtional you can write your own debug informtion to the Embperl
+logfile by writing to the special filehandle C<LOG> which is
+opend by Embperl.
 
 =head1 Database access
 
@@ -641,37 +637,59 @@ interpreter.  This means that every application can access data from
 every other application. Embperl maintains a separate namespace for
 every document, which is enough to avoid accidentally overwriting
 other applications data, but there is no real security. You can access
-anything you like if you explicitly specify a package name.
+any data from any other application that runs on the same server process
+under mod_perl if you explicitly specify a package name.
+This is not a problem of Embperl itself, but caused by the design of
+Apache and mod_perl.
 
-=head2 Safe namespaces
-
-Therefore, Embperl incorporates Safe.pm, which will make it impossible
-to access any packages other than your own. This can be used, for
-example, to calculate something in a Perl module and then pass the
-results to an Embperl document. If the Embperl document runs in a safe
-namespace, it can access the data it has received from the browser,
-but can't access outside itself.  Therefore, it's safe to let
-different people create the layouts for Embperl pages.
-
-=head2 Operator restrictions
-
-Safe.pm also permits the administrator to disable every Perl
-opcode. If you use this, you are able to decide which Perl opcodes are
-permitted to be used by the page creators.
 
 =head1 Escaping/Unescaping
 
 =head2 Input: unescaping
 
-(disable via optRawInput)
+Embperl is able to unescape the source it reads. That is usfull
+when you use a high level HTML editor, which might add unwanted html tags
+like <BR> into your Perl code.
 
-- convert HTML escapes to characters (e.g. &lt; to <)
-- remove HTML tags from Perl code (e.g. <br> insert by high level
+This feature if off by default in Embperl 2.0 and can be turned on with the
+configuration directive EMBPERL_INPUT_ESCMODE.
+
+When turned on it does
+
+=over 4
+
+=item convert HTML escapes to characters (e.g. &lt; to <)
+
+=item remove HTML tags from Perl code (e.g. <br> insert by high level
 editor)
+
+=back
 
 =head2 Output: escaping
 
-(disable via escmode)
-convert special characters to HTML (e.g. < to
-&lt;)
+It's very important to do a correct escing of your HTML output, to avoid 
+security problems like cross-site-scripting. Therefor Embperl escapes all
+output that comes from Perl. This escaping is context sensitv and uses
+HTML or URL escaping, depending on the context. It's also possible to
+use XML escaping.
+
+
+The output escaping can be configured by the configuration directive 
+C<EMBPERL_ESCMODE> or changed anytime inside any page by setting C<$escmode>
+
+=head1 How to continue
+
+
+There are two addtionaly introduction documents:
+
+L<"perldoc IntroEmbperlObject"|"IntroEmbperlObject.pod"> gives you an
+tutorial about how to build an object-oriented website.
+
+L<"perldoc IntroEmbperl2"|"IntroEmbperl2.pod"> describes the advanced
+features of Embperl 2
+
+For a full documenation read L<"perldoc Embperl"|"Embperl.pod"> and
+L<"perldoc Config"|"Config.pod">.
+
+You find additional informations on http://perl.apache.org/embperl
 

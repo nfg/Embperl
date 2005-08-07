@@ -218,6 +218,7 @@ test/cmp/div.asc
 test/cmp/div.htm
 test/cmp/epform.htm
 test/cmp/epglobals.htm
+test/cmp/epoapp.htm
 test/cmp/epobase.htm
 test/cmp/epobaselib.htm
 test/cmp/epobless.htm
@@ -296,6 +297,7 @@ test/cmp/inputjs2.htm
 test/cmp/java.htm
 test/cmp/keepreq.htm
 test/cmp/keepreq.htm.2
+test/cmp/keepspaces.htm
 test/cmp/lists.htm
 test/cmp/loop.htm
 test/cmp/loopperl.htm
@@ -350,6 +352,7 @@ test/cmp/ssibasic.htm
 test/cmp/ssiep.htm
 test/cmp/stdout.htm
 test/cmp/sub.htm
+test/cmp/subempty.htm
 test/cmp/subout.htm
 test/cmp/subreq.htm
 test/cmp/subtab.htm
@@ -377,6 +380,8 @@ test/conf/null
 test/conf/ssldisable.conf
 test/conf/startup.pl
 test/conf/startup_dso.pl
+test/html/EmbperlObject/app/epoapp.htm
+test/html/EmbperlObject/app/epoapp.pl
 test/html/EmbperlObject/base2/epobase2.htm
 test/html/EmbperlObject/base2/epostopdir.htm
 test/html/EmbperlObject/base3/epobaselib.htm
@@ -493,6 +498,7 @@ test/html/inputjava.htm
 test/html/inputjs2.htm
 test/html/java.htm
 test/html/keepreq.htm
+test/html/keepspaces.htm
 test/html/lists.htm
 test/html/loop.htm
 test/html/loopperl.htm
@@ -551,6 +557,7 @@ test/html/sidurl/seturlsess.htm
 test/html/spaces.htm
 test/html/stdout/stdout.htm
 test/html/sub.htm
+test/html/subempty.htm
 test/html/subexec.htm
 test/html/subimp.htm
 test/html/subimp.pm

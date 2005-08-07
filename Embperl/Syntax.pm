@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Syntax.pm,v 1.4 2004/03/14 18:54:43 richter Exp $
+#   $Id: Syntax.pm,v 1.6 2005/08/07 00:03:00 richter Exp $
 #
 ###################################################################################
  
@@ -822,6 +822,12 @@ Remove all child nodes
 =item 32
 
 Set all child nodes to ignore for output.
+
+=item 64
+
+Calculate Attributes values of this node also for nodes that are set to ignore for output
+(makes only sense if 8 is also set).
+
 
 =back
 

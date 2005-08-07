@@ -43,6 +43,22 @@ BEGIN {
     } ;
 
 
+BEGIN 
+    {
+    $ENV{EMBPERL_SRC} =~ /^(.*?)$/;
+    my $cwd       = $1 ;
+
+    if ($ENV{TEST_PRELOAD})
+        {
+        $Embperl::initparam{debug} = 0x7fffffff ;
+        $Embperl::initparam{preloadfiles} = [
+                { inputfile  => "$cwd/test/html/div.htm", import => 0, input_escmode => 7, req_rec => undef }
+                ] ;
+        print "Preload initated\n" ;
+        }
+
+    }
+
 use Embperl ;
 use Embperl::Object ;
 
@@ -56,8 +72,5 @@ $cp = Embperl::Util::AddCompartment ('TEST') ;
 $cp -> deny (':base_loop') ;
 $testshare = "Shared Data" ;
 $cp -> share ('$testshare') ;  
-
-##Embperl::Execute ({ inputfile  => "$ENV{EMBPERL_SRC}/test/html/div.htm", import => 0, input_escmode => 7 }) ;
-
 
 1 ;

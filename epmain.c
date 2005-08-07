@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epmain.c,v 1.139 2005/02/28 06:31:00 richter Exp $
+#   $Id: epmain.c,v 1.140 2005/08/07 00:02:58 richter Exp $
 #
 ###################################################################################*/
 

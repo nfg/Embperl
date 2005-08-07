@@ -96,5 +96,15 @@ content="text/html; charset=iso-8859-1">
 <dir>
     <li>[+ $k[$row] +] = [+ $v[$row] +]</li>
 </dir>
+
+
+    [- $articles = [ 'one', 'two' ] -]
+    <ul class="articles_by_author">
+      [- $dn = $articles->[$row]; -]
+      <li><a href="kb.epl?-dn=[+ $dn +]">[+ uc($dn) +]</a></li>
+    </ul>
+
+
+
 </body>
 </html>

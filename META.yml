@@ -1,7 +1,7 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         Embperl
-version:      2.0rc4
+version:      2.0rc5
 version_from: Embperl.pm
 installdirs:  site
 requires:

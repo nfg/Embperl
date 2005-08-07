@@ -10,10 +10,12 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eppublic.h,v 1.4 2004/03/14 20:17:41 richter Exp $
+#   $Id: eppublic.h,v 1.6 2005/08/07 01:00:21 richter Exp $
 #
 ###################################################################################*/
 
+struct tThreadData  ;
+struct tApp  ;
 
 int embperl_Init        (pTHX_
                          SV *          pApacheSrvSV,
@@ -35,6 +37,13 @@ int     embperl_InitRequestComponent ( pTHX_
                               SV *             pApacheReqSV,
                               SV *             pPerlParam,
                               tReq * *         ppReq) ;
+
+int     embperl_InitAppForRequest (/*in*/ pTHX_
+                             /*in*/ SV *             pApacheReqSV,
+                             /*in*/ SV *             pPerlParam,
+                             /*out*/struct tThreadData * *  ppThread,
+                             /*out*/struct tApp * *         ppApp,
+                             /*out*/tApacheDirConfig * * ppApacheCfg) ;
 
 int     embperl_RunRequest (tReq * r) ;
 int     embperl_CleanupRequest (tReq *  r) ;

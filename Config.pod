@@ -107,6 +107,40 @@ For more information see: L<"perldoc Embperl::Object"|"EmbperlObject.pod">.
 Embperl accepts a lot of configuration directives to customize it's behaviour. See the next
 section for a description.
 
+B<NOTE:> If mod_perl is staticly linked into Apache you can not use B<ClearModuleList>
+in your httpd.conf
+
+=head3 Preloading pages
+
+To optimize memory usage you can preload your pages during the initialization. If you do
+so they will get loaded into the parent process and the memory will be shared by all 
+child processes.
+
+To let Embperl preload your files, you have to supply all the filename into the
+key B<preloadfiles> of the hash B<%initparam>, B<before> you load Embperl.
+
+Example:
+
+  BEGIN 
+    {
+    $Embperl::initparam{preloadfiles} = 
+        [
+        '/path/to/foo.epl',
+        '/path/to/bar.epl',
+        { inputfile  => "/path/to/other.epl", input_escmode => 7 },
+        ] ;
+    }
+
+  use Embperl ;
+
+As you see for the third file, it is also possible to give a hashref and
+supply the same parameter like L<Execute> accpets (see below).
+
+B<NOTE:> Preloading is not supported under Apache 1.3, when mod_perl is 
+loaded as DSO. To use preloading under Apache 1.3 you need to compile
+mod_perl staticly into Apache.
+
+
 =head2 CGI/FastCGI
 
 To use this mode you must copy B<embpcgi.pl> to your cgi-bin
@@ -3134,7 +3168,7 @@ $request -> apache_req I<[read only]>
 
 
 Returns a reference to mod_perls Apache request object. In mod_perl 1 this is of
-type C<Apache::> in mod_perl 2 it's a C<Apache::RequestRec>.
+type C<Apache::> in mod_perl 2 it's a C<Apache2::RequestRec>.
 
 =head2 config
 

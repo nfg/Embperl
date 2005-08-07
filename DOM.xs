@@ -1,6 +1,6 @@
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: DOM.xs,v 1.11 2004/08/16 07:36:13 richter Exp $
+#   $Id: DOM.xs,v 1.13 2005/08/07 00:02:57 richter Exp $
 #
 ###################################################################################
 
@@ -104,6 +104,7 @@ PREINIT:
     tReq * r = CurrReq ;
 PPCODE:
     RETVAL = NULL ; /* avoid warning */
+    r -> Component.bSubNotEmpty = 1 ;
     SvGETMAGIC_P4(sText) ;
     s = SV2String (sText, l) ;
     Node_replaceChildWithCDATA (r -> pApp, DomTree_self(r -> Component.xCurrDomTree), xOldChild, r -> Component.nCurrRepeatLevel, s, l, (r -> Component.nCurrEscMode & 11)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode, 0) ;
@@ -123,6 +124,7 @@ PREINIT:
     const char * s  ;
     tReq * r = CurrReq ;
 PPCODE:
+    r -> Component.bSubNotEmpty = 1 ;
     s = embperl_GetText (r, sId) ;
     l = strlen (s) ;
     Node_replaceChildWithCDATA (r -> pApp, DomTree_self(r -> Component.xCurrDomTree), xOldChild, r -> Component.nCurrRepeatLevel, s, l, (r -> Component.nCurrEscMode & 11)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode, 0) ;
@@ -155,6 +157,7 @@ PREINIT:
     tReq * r = CurrReq ;
 PPCODE:
     RETVAL = NULL ; /* avoid warning */
+    r -> Component.bSubNotEmpty = 1 ;
     SvGETMAGIC_P4(sText) ;
     sRet = Node_replaceChildWithUrlDATA (r, r -> Component.xCurrDomTree, xOldChild, r -> Component.nCurrRepeatLevel, sText) ;
 

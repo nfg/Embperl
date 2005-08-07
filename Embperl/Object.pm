@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Object.pm,v 1.14 2005/02/28 06:31:00 richter Exp $
+#   $Id: Object.pm,v 1.16 2005/08/07 14:40:39 richter Exp $
 #
 ###################################################################################
 
@@ -294,9 +294,9 @@ sub Execute
             my $cparam = {object => $appfn, syntax => 'Perl'} ;
             my $c = $r -> setup_component ($cparam) ;
             my $app = run($c) ;
-            my $package = $packages{"$fn::$appfn"} = $c -> curr_package  if (!$r -> error) ;
+            my $package = $c -> curr_package  if (!$r -> error) ;
             $c -> cleanup ;
-            print Embperl::LOG "[$$]Embperl::Object import new Application ", ($r -> error?'with ERRORS ':'') . "finished: $fn, " . ($package?"package = $package\n":"\n")  if ($debug);
+            print Embperl::LOG "[$$]Embperl::Object import new Application ", ($r -> error?'with ERRORS ':'') . "finished: $appfn, " . ($package?"package = $package\n":"\n")  if ($debug);
 
             if (!$r -> error)
                 {

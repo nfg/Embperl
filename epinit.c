@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epinit.c,v 1.28 2005/03/12 13:46:07 richter Exp $
+#   $Id: epinit.c,v 1.31 2005/08/07 14:40:39 richter Exp $
 #
 ###################################################################################*/
 
@@ -943,6 +943,26 @@ int embperl_Init        (/*in*/ pTHX_
     ep_create_mutex(RequestCountMutex) ;
     
     bInitDone = 1 ;
+
+#ifdef APACHE
+    {
+    int preload = 1 ;
+    if (ap_s)
+        {
+        module * m ;
+        if ((m = ap_find_linked_module("mod_perl.c")))
+            {
+            if (m -> dynamic_load_handle)
+                preload = 0 ;
+            }
+        }            
+    if (preload)    
+        perl_call_pv ("Embperl::PreLoadFiles", G_DISCARD) ;
+    }    
+#else
+    perl_call_pv ("Embperl::PreLoadFiles", G_DISCARD) ;
+#endif    
+    
 
     return rc ;
     }

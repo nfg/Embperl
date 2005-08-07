@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eputil.c,v 1.45 2005/03/22 08:06:39 richter Exp $
+#   $Id: eputil.c,v 1.48 2005/08/07 16:57:28 richter Exp $
 #
 ###################################################################################*/
 
@@ -2011,7 +2011,11 @@ static const char ep_day_snames[7][4] =
 const char * embperl_CalcExpires(const char *sTime, char * sResult, int bHTTP)
 {
     time_t when;
+#ifdef WIN32
+    struct tm *tms;
+#else
     struct tm tms;
+#endif
     int sep = bHTTP ? ' ' : '-';
     dTHX ;
 
@@ -2026,6 +2030,14 @@ const char * embperl_CalcExpires(const char *sTime, char * sResult, int bHTTP)
 	return sResult ;
     }
 
+#ifdef WIN32
+    tms = gmtime(&when);
+    sprintf(sResult,  "%s, %.2d%c%s%c%.2d %.2d:%.2d:%.2d GMT", 
+                      ep_day_snames[tms->tm_wday],
+                      tms->tm_mday, sep, ep_month_snames[tms->tm_mon], sep,
+                      tms->tm_year + 1900,
+                      tms->tm_hour, tms->tm_min, tms->tm_sec);
+#else
     gmtime_r(&when, &tms);
     sprintf(sResult,
 		       "%s, %.2d%c%s%c%.2d %.2d:%.2d:%.2d GMT",
@@ -2033,6 +2045,7 @@ const char * embperl_CalcExpires(const char *sTime, char * sResult, int bHTTP)
 		       tms.tm_mday, sep, ep_month_snames[tms.tm_mon], sep,
 		       tms.tm_year + 1900,
 		       tms.tm_hour, tms.tm_min, tms.tm_sec);
+#endif
     return sResult ;
 }
 

@@ -2,7 +2,6 @@
 <hr>
 <center><font color="red" size=3>[= under_construction =]</font><br></center>
 #]
-<hr>
 [! use File::Basename ; !]
 
 [- $r = shift -]
@@ -42,7 +41,11 @@
 
 [$ if $r -> {need_login} $]
     <div align="center">
-    <p>[= need_login =]</p>
+    [$ if $fdat{-logintext} $]
+  	<p>[+ $fdat{-logintext} +]</p>
+    [$else$]
+        <p>[= need_login =]</p>
+    [$endif$]	
     
     [- Execute ('loginform.epl', $r -> app -> posturl) ; -]
     </div>

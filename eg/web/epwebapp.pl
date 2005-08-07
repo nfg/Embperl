@@ -225,7 +225,7 @@ sub init
    
 
     # map the request uri to the real filename    
-    my $uri = join ('/', @uri) ;
+    $uri = join ('/', @uri) ;
     $pf = map_file ($r, $uri) ;
     
     # try different location to statisfy links in pod via xslt 

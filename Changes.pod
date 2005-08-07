@@ -1,6 +1,28 @@
 =pod
 
-=head4 2.0.rc4 19. Juni 2005
+
+=head4 2.0rc5 7. August 2005
+
+   - Added attribute content-type to mail:send tag (Syntax Mail).
+     Patch from Axel Beckert.
+   - Added preloadfiles parameter to %initparam, which allows to
+     preload files in the parent process, when running under mod_perl.
+     See perldoc Config.pod for details.
+   - Fixed unresolved symbol when compiling under SuSE 9.3 (because SuSE
+     compiles Apache 2 in maintainer mode) 
+   - Fixed strange output when Perl code inside of [$ sub $] returns
+     before any output.
+   - Fixed mail:send tag (Syntax Mail), so that Perl code inside the tag
+     for example to set an attribute, is now executed correctly.
+   - Fixed incorrect quoting of single quotes inside of <textarea> values,
+     reported by Axel Beckert.
+   - Fixed a potential segfault in cache handling. Patch from Yatin Chawathe.
+   - Documentation cleanup
+   - Added test for optKeepSpaces.
+   - Added test for application object in Execute tests.
+   - Make sure Embperl is listed after Apache itself in the server signature.
+
+=head4 2.0rc4 19. Juni 2005
 
    - Adapted to new mod_perl namespace. Embperl now works correctly
      with mod_perl version >= 2.0rc5 (older version are still supported)
@@ -8,6 +30,7 @@
    - Fixed problem with Execute when GlobalRequestRec option is not
      set in mod_perl config.
    - use gmtime_r instead of gmtime for time calculation to be thread safe
+
 
 =head1 2.0rc3 14. March 2005
 

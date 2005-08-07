@@ -1,9 +1,9 @@
 #
 # Building Makefile for Embperl
 #
-# (C) 1997-2004 G.Richter (richter@dev.ecos.de) / ECOS
+# (C) 1997-2005 G.Richter (richter@dev.ecos.de) / ECOS
 #
-# $Id: Makefile.PL,v 1.78 2005/06/19 08:52:25 richter Exp $
+# $Id: Makefile.PL,v 1.79 2005/08/07 00:02:58 richter Exp $
 #
 
 

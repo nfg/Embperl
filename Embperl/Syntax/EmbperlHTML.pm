@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: EmbperlHTML.pm,v 1.9 2004/11/04 06:19:14 richter Exp $
+#   $Id: EmbperlHTML.pm,v 1.11 2005/08/07 00:03:01 richter Exp $
 #
 ###################################################################################
  
@@ -80,7 +80,7 @@ sub Init
                 perlcode =>
                     [ 
                     '$idat{%&*\'name%}=$fdat{%&*\'name%};_ep_ac(%$n%, Embperl::Syntax::ntypText + 0x20, $fdat{%&*\'name%}) ;   %#!-0%',
-                    '$idat{%&*\'name%}=\'%#*0%\' ; ',
+                    '$idat{%&*\'name%}=%#*\'0% ; ',
                     ]
                 }) ;
 

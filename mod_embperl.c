@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: mod_embperl.c,v 1.29 2005/01/16 13:31:14 richter Exp $
+#   $Id: mod_embperl.c,v 1.31 2005/08/07 00:02:58 richter Exp $
 #
 ###################################################################################*/
 
@@ -115,6 +115,7 @@ struct tApacheDirConfig
 
 #ifdef APACHE2
 static int embperl_ApacheInit (apr_pool_t *p, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s) ;
+static int embperl_ApachePostConfig (apr_pool_t *p, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s) ;
 static apr_status_t embperl_ApacheInitCleanup (void * p) ;
 #else
 static void embperl_ApacheInitCleanup (void * p) ;
@@ -170,6 +171,7 @@ static const command_rec embperl_cmds[] =
 static void embperl_register_hooks (apr_pool_t * p)
     {
     ap_hook_open_logs(embperl_ApacheInit, NULL, NULL, APR_HOOK_LAST) ; /* make sure we run after modperl init */
+    ap_hook_post_config(embperl_ApachePostConfig, NULL, NULL, APR_HOOK_FIRST) ; 
     }
 
 
@@ -353,7 +355,6 @@ static void embperl_ApacheInit (server_rec *s, apr_pool_t *p)
         ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: ApacheInit [%d/%d]\n", getpid(), gettid()) ;
 
 #ifdef APACHE2
-    ap_add_version_component (p, "Embperl/"VERSION) ;
     bApInit = 1 ;
     return APR_SUCCESS ;
 #else
@@ -368,6 +369,17 @@ static void embperl_ApacheInit (server_rec *s, apr_pool_t *p)
 #endif
     }
 
+
+
+
+#ifdef APACHE2
+static int embperl_ApachePostConfig (apr_pool_t *p, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
+
+    {
+    ap_add_version_component (p, "Embperl/"VERSION) ;
+    return APR_SUCCESS ;
+    }
+#endif
 
 /*---------------------------------------------------------------------------
 * embperl_ApacheInitCleanup

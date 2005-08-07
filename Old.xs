@@ -97,31 +97,10 @@ INIT:
     tReq * r = CurrReq ;
 CODE:
 	{
-	/*
-        tNode xChild ;
-        */
         char * p = SvPV (sText, l) ;
-        /*
-	if (0) //Node_self(DomTree_self (r -> Component.xCurrDomTree), r -> Component.xCurrNode) -> nType == ntypDocumentFraq)
-            Node_appendChild (r->pApp, DomTree_self (r -> Component.xCurrDomTree), r -> Component.xCurrNode, r -> Component.nCurrRepeatLevel, ntypCDATA, 0, p, l, 0, 0, NULL) ; 
-        else
-        */
-	/*
-        if ((xChild = Node_firstChild(r->pApp,DomTree_self (r -> Component.xCurrDomTree),
-                                     r -> Component.xCurrNode,r -> Component.nCurrRepeatLevel)) &&
-                Node_self(DomTree_self (r -> Component.xCurrDomTree), r -> Component.xCurrNode) -> nType != ntypDocumentFraq)
-            {                                     
-	    Node_insertBefore_CDATA (r->pApp, p, l, (r -> Component.nCurrEscMode & 3)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode, 
-                                       DomTree_self (r -> Component.xCurrDomTree), 
-                                       xChild, r -> Component.nCurrRepeatLevel) ; 
-            }                         
-        else
-        */
-            {
-	    r -> Component.xCurrNode = Node_insertAfter_CDATA (r->pApp, p, l, (r -> Component.nCurrEscMode & 3)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode, DomTree_self (r -> Component.xCurrDomTree), r -> Component.xCurrNode, r -> Component.nCurrRepeatLevel) ; 
-            }
+        r -> Component.bSubNotEmpty = 1 ;
+        r -> Component.xCurrNode = Node_insertAfter_CDATA (r->pApp, p, l, (r -> Component.nCurrEscMode & 3)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode, DomTree_self (r -> Component.xCurrDomTree), r -> Component.xCurrNode, r -> Component.nCurrRepeatLevel) ; 
         r -> Component.bEscModeSet = 0 ;
-        
         }
 
 
@@ -238,6 +217,7 @@ embperl_output(r,sText)
     tReq * r
     char * sText
 CODE:
+    r -> Component.bSubNotEmpty = 1 ;
     OutputToHtml (r,sText) ;
 
 

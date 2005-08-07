@@ -1,6 +1,6 @@
 ##############################################################################
 #
-#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: db.schema,v 1.4 2004/01/23 06:50:58 richter Exp $
+#   $Id: db.schema,v 1.6 2005/08/07 15:59:09 richter Exp $
 #
 ##############################################################################
 
@@ -139,13 +139,12 @@
     '!PrimKey' => 'id',
     '!Init' =>
         [
-            { id => 1, state => 1, 'table_type' => 'item' } ,
-            { id => 2, state => 1, 'table_type' => 'item' } ,
-            { id => 3, state => 1, 'table_type' => 'item' } ,
-            { id => 4, state => 1, 'table_type' => 'item' } ,
-            { id => 5, state => 1, 'table_type' => 'item' } ,
-            { id => 6, state => 1, 'table_type' => 'item' } ,
-            { id => 7, state => 1, 'table_type' => 'foo' } ,
+            { id => 1, state => 1, 'table_type' => 'item', edit_level => 2 } ,
+            { id => 2, state => 1, 'table_type' => 'item', edit_level => 1 } ,
+            { id => 3, state => 1, 'table_type' => 'item', edit_level => 1 } ,
+            { id => 4, state => 1, 'table_type' => 'item', edit_level => 1 } ,
+            { id => 5, state => 1, 'table_type' => 'item', edit_level => 1 } ,
+            { id => 6, state => 1, 'table_type' => 'item', edit_level => 1 } ,
         ],
     },
 
@@ -159,11 +158,21 @@
         'language_id'	=> 'varchar(3) not null',
 	'fieldname'	=> 'varchar(32) not null',
 	'txt'		=> 'text',
+        'remark'        => 'text',
 	'typeinfo'      => 'tinytext',
 	'position'      => 'integer',
+        'nolang'        => 'integer',
+        'view_level'    => 'integer',
+        'edit_level'    => 'integer',
+        'validate'      => 'text',
         ],
     '!PrimKey' => 'category_id,language_id,fieldname',
-    #'!PrimKey' => 'category_id',
+    '!Default' =>
+        {
+        'view_level' => 0,
+        'edit_level' => 1,
+        },
+
     '!Init' =>
         [
 	    # News
@@ -215,19 +224,6 @@
             { category_id => 6, language_id => 'en', fieldname => 'description', typeinfo => 'textarea', txt => 'Description', typeinfo => 'textarea', position => 3 } ,
             { category_id => 6, language_id => 'en', fieldname => 'url',         txt => 'URL', typeinfo => 'url', position => 2 } ,
 
-	    # Test
-            { category_id => 7, language_id => 'de', fieldname => 'foo',     txt => 'Foo!', typeinfo => 'title', position => 1 } ,
-            { category_id => 7, language_id => 'de', fieldname => 'bar', txt => 'Bar!', position => 2 } ,
-            { category_id => 7, language_id => 'de', fieldname => 'fnord',         txt => 'Fnord!', position => 3 } ,
-            { category_id => 7, language_id => 'de', fieldname => 'fubar', txt => 'Fubar!', position => 4 } ,
-            { category_id => 7, language_id => 'de', fieldname => 'Baz',         txt => 'Bazzz!', typeinfo => 'url', position => 5 } ,
-
-            { category_id => 7, language_id => 'en', fieldname => 'foo',     txt => 'foo!', typeinfo => 'title', position => 1 } ,
-            { category_id => 7, language_id => 'en', fieldname => 'bar', txt => 'bar!', position => 2 } ,
-            { category_id => 7, language_id => 'en', fieldname => 'fnord',         txt => 'fnord!', position => 3 } ,
-            { category_id => 7, language_id => 'en', fieldname => 'fubar', txt => 'fubar!', position => 4 } ,
-            { category_id => 7, language_id => 'en', fieldname => 'Baz',         txt => 'bazzz!', typeinfo => 'url', position => 5 } ,
-
         ],
     },
 
@@ -242,11 +238,9 @@
         'language_id'                   => 'varchar(2)',
         'category'			=> 'tinytext',
         'add_info'                      => 'text',
-	# Deprecated:
-        'heading_text'			=> 'tinytext',
-        'keywords_text'			=> 'tinytext',
-        'description_text'		=> 'tinytext',
-        'url_text'			=> 'tinytext',
+        'headline'                      => 'tinytext',
+        'sendtext'                      => 'tinytext',
+        'logintext'                     => 'text',
 	],
     '!PrimKey' => 'id',
     '!Init' =>
@@ -286,7 +280,7 @@
     '!Fields' => 
         [
         'id'                        => 'counter',
-        'name'                      => 'tinytext',
+        'user_name'                 => 'tinytext',
         'email'                     => 'tinytext',
         'password'                  => 'tinytext',
         'admin'                     => 'bit',
@@ -296,62 +290,6 @@
 
 ) ;
 
-
-=pod
-
-# ----------------------------------------------------------------------
-# ----------------------------------------------------------------------
-# ----------------------------------------------------------------------
-# ----------------------------------------------------------------------
-# ----------------------------------------------------------------------
-# TEST
-# ----------------------------------------------------------------------
-# ----------------------------------------------------------------------
-# ----------------------------------------------------------------------
-# ----------------------------------------------------------------------
-# ----------------------------------------------------------------------
-
-    {
-    '!Table' => 'foo',
-    '!Fields' => 
-        [
-        'id'                            => 'counter',
-        'url'				=> 'tinytext',
-        'category_id'                   => 'integer',
-        'state'		                => 'integer',
-        'creationtime'			=> 'datetime',
-        'modtime'			=> 'datetime',
-        'user_id'		        => 'integer',
-        'checkcount'		        => 'integer',
-	],
-    '!PrimKey' => 'id',
-    '!Init' =>
-        [
-        ]
-    },
-
-# ----------------------------------------------------------------------
-
-    {
-   '!Table' => 'footext',
-    '!Fields' => 
-        [
-        'id'                            => 'counter',
-        'foo_id'                       	=> 'integer',
-        'language_id'                   => 'varchar(2)',
-        'foo'				=> 'tinytext',
-        'bar'				=> 'tinytext',
-        'fnord'				=> 'tinytext',
-        'fubar'				=> 'tinytext',
-        'baz'				=> 'tinytext',
-	],
-    '!PrimKey' => 'id',
-    '!Init' =>
-        [
-        ]
-    },
-
-=cut
 
 
 1 ;

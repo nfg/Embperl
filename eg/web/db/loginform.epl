@@ -12,8 +12,8 @@ $epf2 = new Embperl::Form::Validate([ -key => 'user_email', required => 1],
                                    'newuser');
 
 
-$r = shift 
-
+$r = shift ;
+$fdat{user_email} ||= $fdat{email} ;
 
 -]
     <script>
@@ -23,11 +23,11 @@ $r = shift
 
 
   [$ if not $udat{user_id}$]
-    [$ if ($fdat{-newuser} || $dat{-newpassword}) && !$r -> {error}$]
+    [$ if ($fdat{-newuser} || $fdat{-newpassword}) && !$r -> {error}$]
     <p>[= loginnew =]</P>
-    [$else$]
-    <p>[= login1 =]</P>
-    [$endif$]
+  [$else$]
+        <p>[= login1 =]</P>
+  [$endif$]
 
     <form action="[+ $param[0] +]" method="POST" name="login" onSubmit="return epform_validate_login()">
         <table>
@@ -55,11 +55,16 @@ $r = shift
 
     <P ALIGN="left">[= login3 =]</P>
 
-    <form action="[+ $r -> app -> posturl('login.epl') +]" method="POST" name="newuser" onSubmit="return epform_validate_newuser()">
+    <form action="[+ $param[0] +][#+ $r -> app -> posturl('login.epl') +#]" method="POST" name="newuser" onSubmit="return epform_validate_newuser()">
         <table>
             <tr>
                 <td class="cText">[= user_email =]</td>
                 <td class="cInput"><input type="text" name="user_email"></td>
+            </tr>
+            <tr>
+                [- $fdat{user_name} ||= "$fdat{firstname} $fdat{lastname}" -]
+                <td class="cText">[= user_name =]</td>
+                <td class="cInput"><input type="text" name="user_name"></td>
             </tr>
         </table>
         <p>

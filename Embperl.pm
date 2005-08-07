@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Embperl.pm,v 1.200 2005/06/17 21:14:28 richter Exp $
+#   $Id: Embperl.pm,v 1.204 2005/08/07 00:52:29 richter Exp $
 #
 ###################################################################################
 
@@ -49,7 +49,7 @@ use vars qw(
 
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = '2.0rc4' ;
+$VERSION = '2.0rc5' ;
 
 
 if ($modperl  = $ENV{MOD_PERL})
@@ -113,6 +113,7 @@ $cwd       = Cwd::fastcwd();
 
 tie *Embperl::LOG, 'Embperl::Log' ;
 
+
 1 ;
 
 #######################################################################################
@@ -127,8 +128,10 @@ sub Execute
     # when called inside a Embperl Request, Execute the component only
     return Embperl::Req::ExecuteComponent ($_ep_param, @_) if ($req) ;
 
+    $_ep_param = { inputfile => $_ep_param, param => [@_]} if (!ref $_ep_param) ;
+
     local $req_rec ;
-    if ($modperl)
+    if ($modperl && !exists ($_ep_param -> {req_rec}))
         {
         if ($modperlapi < 2)
             {
@@ -139,17 +142,17 @@ sub Execute
             $req_rec = Apache2::RequestUtil -> request  ;
             }
         }
-        
-    my $rc ;
-    if (!ref $_ep_param)
-        {
-        $rc = Embperl::Req::ExecuteRequest (undef, { inputfile => $_ep_param, param => [@_]}) ;
+    elsif (exists ($_ep_param -> {req_rec}) && defined ($_ep_param -> {req_rec}))
+        {    
+        $req_rec = $_ep_param -> {req_rec} ;
         }
-    else
+
+    my $_ep_rc ;
         {
-        $rc = Embperl::Req::ExecuteRequest (undef, $_ep_param) ;
+        $_ep_rc = Embperl::Req::ExecuteRequest (undef, $_ep_param)  ;
         }
-    return $rc ;
+    
+    return $_ep_rc ;
     }
 
 #######################################################################################
@@ -187,6 +190,31 @@ sub Warn
         $msg =~ s/at (.*?) line (\d*)/at $Inputfile in block starting at line $lineno/ ;
         }
     logerror (Embperl::Constant::rcPerlWarn, $msg);
+    }
+
+#######################################################################################
+
+
+sub PreLoadFiles 
+
+    {
+    my $files = $initparam{preloadfiles} ;
+    delete $initparam{preloadfiles} ;
+    
+    if ($files && ref $files eq 'ARRAY')
+        {
+        foreach my $file (@$files)
+            {
+            if (ref $file)
+                {
+                Execute ({%$file, import => 0}) ;
+                }
+            else
+                {
+                Execute ({inputfile => $file, import => 0}) ;
+                }
+            }
+        }
     }
 
 #######################################################################################

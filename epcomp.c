@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcomp.c,v 1.19 2005/02/25 08:42:00 richter Exp $
+#   $Id: epcomp.c,v 1.22 2005/08/07 00:02:58 richter Exp $
 #
 ###################################################################################*/
 
@@ -1102,7 +1102,8 @@ static int embperl_CompilePostProcess  (/*in*/	tReq *	       r,
     if (pCmd -> sMayJump)
 	if (embperl_CompileToPerlCode (r, pDomTree, pNode, pCmd -> sMayJump, &sStackValue))
 	    {
-	    *bCheckpointPending = -1 ;
+	    if (*bCheckpointPending <= 0)
+                *bCheckpointPending = -1 ;
 	    if (r -> Component.Config.bDebug & dbgCompile)
 		lprintf (r -> pApp,  "[%d]EPCOMP: #%d L%d Set Checkpoint pending\n", r -> pThread -> nPid, pNode -> xNdx, pNode -> nLinenumber) ;
 	    }
@@ -1138,10 +1139,11 @@ static int embperl_CompilePostProcess  (/*in*/	tReq *	       r,
         if (r -> Component.Config.bDebug & dbgCompile)
 	    lprintf (r -> pApp,  "[%d]EPCOMP: #%d L%d Remove Checkpoint\n", r -> pThread -> nPid, pNode -> xNdx, pNode -> nLinenumber) ;
 	nCheckpointCodeOffset = 0 ;
-	*bCheckpointPending = -1 ; /* set checkpoint on next possibility */
+        if (*bCheckpointPending <= 0)
+	    *bCheckpointPending = -1 ; /* set checkpoint on next possibility */
         }
 
-    if (*bCheckpointPending && (pNode -> bFlags & nflgIgnore))
+    if (*bCheckpointPending < 0 && (pNode -> bFlags & nflgIgnore))
 	{
 	int l ;
 	char buf [80] ;
@@ -1313,7 +1315,8 @@ static int embperl_CompileCmdEnd (/*in*/  tReq *	 r,
         if (pCmd -> sPerlCodeEnd && pCmd -> sMayJump)
             if (embperl_CompileToPerlCode (r, pDomTree, pNode, pCmd -> sMayJump, &sStackValue))
 	        {
-		*bCheckpointPending = -1 ;
+	        if (*bCheckpointPending <= 0)
+		    *bCheckpointPending = -1 ;
 		if (r -> Component.Config.bDebug & dbgCompile)
 		    lprintf (r -> pApp,  "[%d]EPCOMP: #%d L%d Set Checkpoint pending\n", r -> pThread -> nPid, pNode -> xNdx, pNode -> nLinenumber) ; 
 	        }
@@ -1342,7 +1345,8 @@ static int embperl_CompileCmdEnd (/*in*/  tReq *	 r,
 	if (pCmd -> nSwitchCodeType == 1)
             {
             r -> Component.pProg = &r -> Component.pProgRun ;
-	    *bCheckpointPending = -1 ;
+	    if (*bCheckpointPending <= 0)
+	        *bCheckpointPending = -1 ;
 	    if (r -> Component.Config.bDebug & dbgCompile)
 		lprintf (r -> pApp,  "[%d]EPCOMP: #%d L%d Set Checkpoint pending (switch to ProgRun)\n", r -> pThread -> nPid, pNode -> xNdx, pNode -> nLinenumber) ;
             }
@@ -1427,7 +1431,7 @@ int embperl_CompileNode (/*in*/  tReq *         r,
 
     /*    if (*bCheckpointPending && (pNode -> nType == ntypText || pNode -> nType == ntypCDATA) && pNode -> bFlags && (pNode -> bFlags & nflgIgnore) == 0) */
     /*    if (*bCheckpointPending &&	 pNode -> bFlags && (pNode -> bFlags & nflgIgnore) == 0) */
-    if (*bCheckpointPending &&	!(pCmd && pCmd -> nSwitchCodeType == 2) && pNode -> bFlags && (pNode -> bFlags & nflgIgnore) == 0)
+    if (*bCheckpointPending < 0  &&	!(pCmd && pCmd -> nSwitchCodeType == 2) && pNode -> bFlags && (pNode -> bFlags & nflgIgnore) == 0)
 	{
 	int l ;
 	char buf [80] ;
@@ -1450,8 +1454,12 @@ int embperl_CompileNode (/*in*/  tReq *         r,
         nCheckpointCodeOffset = 0 ;
         }
 	
-    if (pCmd == NULL || (pCmd -> bRemoveNode & 8) == 0)
+    if (pCmd == NULL || (pCmd -> bRemoveNode & 8) == 0 || (pCmd -> bRemoveNode & 64))
         { /* calculate attributes before tag, but not when tag should be ignored in output stream */
+        int bSaveCP = *bCheckpointPending ;
+        if (pCmd && (pCmd -> bRemoveNode & 64))
+            *bCheckpointPending = 1 ;
+        
         while ((pAttr = Element_selfGetNthAttribut (r -> pApp, pDomTree, pNode, nAttr++)))
 	    {
             if (pAttr -> bFlags & aflgAttrChilds)
@@ -1471,6 +1479,9 @@ int embperl_CompileNode (/*in*/  tReq *         r,
                 }                
 
 	    }
+        if (pCmd && (pCmd -> bRemoveNode & 64))
+            *bCheckpointPending = bSaveCP ;
+
         }            
     
 
@@ -2007,28 +2018,11 @@ int embperl_ExecuteSubStart         (/*in*/  tReq *	  r,
     	return 0 ;
     	}
 
- #if 0
-    if (SvIOK (pDomTreeSV))
-	if (xOrgDomTree = SvIVX (pDomTreeSV))
-	    {
-	    if (r -> Component.xCurrDomTree == xOrgDomTree)
-		return xOrgDomTree ;
-
-	    /*
-	    av_push (pSaveAV, newSViv (r -> Component.xCurrDomTree)) ;
-	    av_push (pSaveAV, newSViv (r -> Component.xCurrNode)) ;
-	    av_push (pSaveAV, newSViv (ArrayGetSize (r -> pApp, DomTree_self (xOrgDomTree) -> pOrder))) ;
-
-	    if (r -> Component.Config.bDebug & dbgCompile)
-		lprintf (r -> pApp,  "[%d]SUB: Enter from DomTree=%d into DomTree=%d, Source DomTree=%d \n", r -> pThread -> nPid, r -> Component.xCurrDomTree, xOrgDomTree, xDomTree) ; 
-	    return r -> Component.xCurrDomTree = xOrgDomTree ;*/ /* DomTree already cloned */
-	    }
-#endif
-
     av_push (pSaveAV, newSViv (r -> Component.xCurrDomTree)) ;
     av_push (pSaveAV, newSViv (r -> Component.xCurrNode)) ;
     av_push (pSaveAV, newSViv (r -> Component.nCurrRepeatLevel)) ;
     av_push (pSaveAV, newSViv (r -> Component.nCurrCheckpoint)) ;
+    av_push (pSaveAV, newSViv (r -> Component.bSubNotEmpty)) ;
 
     pDomTree = DomTree_self (xDomTree) ;
 
@@ -2037,9 +2031,11 @@ int embperl_ExecuteSubStart         (/*in*/  tReq *	  r,
     if (!(r -> Component.xCurrDomTree  = DomTree_clone (r -> pApp, pDomTree, &pCurrDomTree, 1)))
 	    return 0 ;
     ArrayNewZero (r -> pApp, &pCurrDomTree -> pCheckpointStatus, ArrayGetSize (r -> pApp, pCurrDomTree -> pCheckpoints), sizeof(tDomTreeCheckpointStatus)) ;
-    r -> Component.nCurrCheckpoint = 1 ;
+    r -> Component.nCurrCheckpoint  = 1 ;
     r -> Component.nCurrRepeatLevel = 0 ;
-    pCurrDomTree -> xDocument = 0 ; /* set by first checkpoint */
+    r -> Component.xCurrNode        = 0 ;  
+    r -> Component.bSubNotEmpty     = 0 ;
+    pCurrDomTree -> xDocument       = 0 ; /* set by first checkpoint */
     
     av_push (r -> pDomTreeAV, pCurrDomTree -> pDomTreeSV) ;
     av_push (r -> pCleanupAV, newRV_inc (pDomTreeSV)) ;
@@ -2071,26 +2067,29 @@ int embperl_ExecuteSubEnd           (/*in*/  tReq *	  r,
     epTHX_
     tIndex xSubDomTree = r -> Component.xCurrDomTree ;
     tIndex xDocFraq ;
+    int    bSubNotEmpty = r -> Component.bSubNotEmpty ;
     tDomTree * pCallerDomTree  ;
     tDomTree * pSubDomTree = DomTree_self (xSubDomTree) ;
 
     if (AvFILL (pSaveAV) < 1)
 	return ok ;
     
+    if (r -> Component.xCurrNode == 0)
+        bSubNotEmpty = 1 ;
+
     ArrayFree (r -> pApp, &pSubDomTree -> pCheckpointStatus) ;
-    /* DomTree_checkpoint (r, -1) ; */
 
     r -> Component.xCurrDomTree = SvIV (* av_fetch (pSaveAV, 0, 0)) ;
     r -> Component.xCurrNode    = SvIV (* av_fetch (pSaveAV, 1, 0)) ;
     r -> Component.nCurrRepeatLevel = (tRepeatLevel)SvIV (* av_fetch (pSaveAV, 2, 0)) ;
     r -> Component.nCurrCheckpoint = SvIV (* av_fetch (pSaveAV, 3, 0)) ;
+    r -> Component.bSubNotEmpty = SvIV (* av_fetch (pSaveAV, 4, 0)) + bSubNotEmpty;
 
     sv_setiv (pDomTreeSV, r -> Component.xCurrDomTree) ;
     pCallerDomTree = DomTree_self (r -> Component.xCurrDomTree) ;
-    /* xDocFraq = Node_replaceChildWithNode (pSubDomTree, pSubDomTree -> xDocument, pCallerDomTree, r -> Component.xCurrNode) ; */
-    r -> Component.xCurrNode = xDocFraq = Node_insertAfter (r -> pApp, pSubDomTree, pSubDomTree -> xDocument, 0, pCallerDomTree, r -> Component.xCurrNode, r -> Component.nCurrRepeatLevel) ;
 
-    /* Element_selfSetAttribut (pCallerDomTree, Node_self (pCallerDomTree, xDocFraq), NULL, xOrderIndexAttr, NULL, nOrderNdx, 0) ; */
+    if (bSubNotEmpty)
+        r -> Component.xCurrNode = xDocFraq = Node_insertAfter (r -> pApp, pSubDomTree, pSubDomTree -> xDocument, 0, pCallerDomTree, r -> Component.xCurrNode, r -> Component.nCurrRepeatLevel) ;
 
     if (r -> Component.Config.bDebug & dbgRun)
 	lprintf (r -> pApp,  "[%d]SUB: Leave from DomTree=%d back to DomTree=%d RepeatLevel=%d\n", r -> pThread -> nPid, xSubDomTree, r -> Component.xCurrDomTree, r -> Component.nCurrRepeatLevel) ; 

@@ -53,6 +53,7 @@ $r = shift ;
         'cookie_note' => 'HINWEIS: Zur Anmeldung ist es erforderlich das Ihr Browser Cookies akzeptiert',
         'user_email'     => 'E-Mail Adresse',
         'user_password'  => 'Kennwort',
+        'user_name'      => 'Name',
         'login'     => 'Anmelden',
         'logout'    => 'Abmelden',
         'newuser'   => 'Neuen Benutzer-Account einrichten',
@@ -91,6 +92,7 @@ $r = shift ;
 	'err_cannot_delete_maybe_wrong_user_or_no_such_item' => 'Löschen fehlgeschlagen: Berechtigung fehlt',
 	'err_cannot_delete_db_error' => 'Löschen fehlgeschlagen: Datenbankfehler',
 	'err_item_not_found_or_access_denied' => 'Eintrag nicht gefunden oder Zugriff verweigert',
+        'err_item_admin_mail'  => 'Fehler beim Mailversand',
 
 	# Warnings
 	'warn_url_removed_white_space' => 'Leerzeichen wurden aus URL entfernt',
@@ -157,6 +159,7 @@ $r = shift ;
         'cookie_note' => 'NOTE: For login it\'s necessary that your browser accepts cookies',
         'user_email'     => 'E-Mail address',
         'user_password'  => 'Password',
+        'user_name'      => 'Name',
         'login'     => 'Login',
         'logout'    => 'Logout',
         'newuser'   => 'Create new account',
@@ -195,6 +198,7 @@ $r = shift ;
 	'err_cannot_delete_maybe_wrong_user_or_no_such_item' => 'Deletion failed: Permission denied',
 	'err_cannot_delete_db_error' => 'Deletion failed: Database error',
 	'err_item_not_found_or_access_denied' => 'Item not found or access denied',
+        'err_item_admin_mail'  => 'Error sending mail',
 
 	# Warnings
 	'warn_url_removed_white_space' => 'Removed whitespaces from URL.',

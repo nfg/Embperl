@@ -40,10 +40,12 @@ $Embperl::Form::Validate::objects{'addsel'} = $epf ;
 <p class="cHeadline">[= addsel1 =]</p>
 
 <ul>
+    [- $rec = $r -> {category_set}[$row] ; -]
+    [$ if ($rec -> {edit_level} <= ($r -> {user_admin}?2:1)) $]
     <li>
-        [- $rec = $r -> {category_set}[$row] -]
         <a href="add.-category_id-[+ $rec -> {category_id} +]-.epl">[+ $rec -> {category} +]</a>
     </li>
+    [$endif$]
 </ul>
 
 
@@ -52,10 +54,12 @@ $Embperl::Form::Validate::objects{'addsel'} = $epf ;
 <p class="cHeadline">[= addsel_upd =]</p>
 
 <ul>
+    [- $rec = $r -> {category_set}[$row] ;-]
+    [$if ($rec -> {edit_level} <= ($r -> {user_admin}?2:1))  $]
     <li>
-        [- $rec = $r -> {category_set}[$row] -]
         <a href="list.-category_id-[+ $rec -> {category_id} +]-.epl">[+ $rec -> {category} +]</a>
     </li>
+    [$endif$]
 </ul>
 
 [$else$]

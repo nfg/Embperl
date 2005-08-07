@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Mail.pm,v 1.4 2004/01/23 06:50:57 richter Exp $
+#   $Id: Mail.pm,v 1.7 2005/08/07 00:03:01 richter Exp $
 #
 ###################################################################################
  
@@ -68,9 +68,10 @@ sub Init
     my ($self) = @_ ;
 
     $self -> AddTagBlock ('mail:send', ['from', 'to', 'cc', 'bcc', 'subject', 'reply-to', 
-                                        'mailhost', 'mailhelo', 'maildebug'], undef, undef, 
+                                        'mailhost', 'mailhelo', 'maildebug', 'content-type'], 
+                                        undef, undef, 
                 { 
-                removenode  =>  42,
+                removenode  =>  106,
 		compiletimeperlcode => q{
 			$_ep_mail_opt_save = $Embperl::req->component->config->options ;
 			$Embperl::req->component->config->options (Embperl::Constant::optKeepSpaces | $_ep_mail_opt_save) ;
@@ -98,6 +99,7 @@ sub Init
                         'mailhost'    => %&'mailhost%,
                         'mailhelo'    => %&'mailhelo%,
                         'maildebug'   => %&'maildebug%,
+                        'mailheaders' => [ (( %&'content-type% ) ? ('Content-Type: '.%&'content-type%) : ()) ],
                         }) ;
                     }
                   },
@@ -171,6 +173,8 @@ See L<Embperl::Mail> for an description of the attribues:
 =item mailhelo   
 
 =item maildebug  
+
+=item content-type
 
 =back
 

@@ -57,19 +57,6 @@ done in case your favorite (WYSIWYG) HTML editor inserts tags like
 line breaks or formatting into your Embperl commands where you don't
 want them.
 
-B<VERY IMPORTANT NOTE:> If you do use an ASCII editor to write your HTML documents,
-you should set the option B<optRawInput> so that Embperl does not
-preprocess your source.  You can also HTML-escape your code
-(i.e. write `&lt;' instead of `<'), to avoid ambiguity.  In most cases
-it will also work without the optRawInput and HTML-escaping, but in
-some cases Embperl will detect an HTML tag were there isn't one.
-
-B<If you have any trouble with your code, especially with HTML tags or filehandles
-in your Perl code, be sure to understand input- and output- escaping and 
-unescaping. Read the section 
-L<"Inside Embperl"|"Inside Embperl - How the embedded Perl code is actually processed">
-to see what's going on!!>
-
 
 All Embperl commands start with a `[' and end with a `]'.  To get a
 real `[' you must enter `[['.
@@ -234,15 +221,13 @@ Executes a loop until the B<Arg> given to B<while> is false.
 Example: (see eg/x/loop.htm)
 
  [- $i = 0; @k = keys %ENV -]
- [$ while ($i &lt; $#k) $]
+ [$ while ($i < $#k) $]
  [+ $k[$i] +] = [+ $ENV{$k[$i]} +]<BR>
  [- $i++ -]
  [$ endwhile $]
 
 This will send a list of all environment variables to the client.
 
-NOTE: The `&lt;' is translated to `<' before calling Perl eval,
-unless optRawInput is set.
 
 =item B<do>, B<until>
 
@@ -896,46 +881,20 @@ see also META HTTP-EQUIV=
 =head2 $optXXX $dbgXXX
 
 All options (see L<"EMBPERL_OPTIONS">) and all debugging flags (see L<"EMBPERL_DEBUG">) can
-be read and set by the corresponding variables.
+be read and most of them can be set by the corresponding variables. See L<"perldoc Config"|"Config.pod">.
 
   Example:
 
-    [- $optRawInput = 1 -] # Turn the RawInput option on
+    [- $dbgInput = 1 -] 
     
-    Now write something here
 
-    [- $optRawInput = 0 -] # Turn the RawInput option off again
+    [- $dbgInput = 0 -] 
 
 
     [+ $dbgCmd +] # Output the state of the dbgCmd flag
 
 
-There are a few exceptions, where the variables can only be read. Setting of such options
-must be done via the config-files. Read-only variables are:
 
-=over 4
-
-=item $optDisableVarCleanup 
-
-=item $optSafeNamespace     
-
-=item $optOpcodeMask        
-
-=item $optDisableChdir      
-
-=item $optEarlyHttpHeader   
-
-=item $optDisableFormData   
-
-=item $optAllFormData       
-
-=item $optRedirectStdout    
-
-=item $optAllowZeroFilesize 
-
-=item $optKeepSrcInMemory   
-
-=back
 
 
 =head2 %CLEANUP
@@ -1550,8 +1509,10 @@ run.)  You should B<never> enable B<dbgFlushOutput> or B<dbgFlushLog>
 options are useful for development where it doesn't matter if the
 request takes a little bit longer, but on a heavily-loaded server they
 should be disabled.
-Additionally the options L<optDisableChdir>, L<optDisableHtmlScan>,
-L<optDisableCleanup> have consequences for the performance.
+
+Preloading of page can save memory, because preloaded page can be 
+shared between child processes. See L<"perldoc Config"|"Config.pod">
+for more details.
 
 Also take a look at B<mod_perl_tuning.pod> for general ideas about
 performance.

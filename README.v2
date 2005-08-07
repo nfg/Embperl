@@ -1,6 +1,6 @@
 Embperl - Building dynamic Websites with Perl
 
-Copyright (c) 1997-2004 Gerald Richter / ecos gmbh  www.ecos.de
+Copyright (c) 1997-2005 Gerald Richter / ecos gmbh  www.ecos.de
 
 You may distribute under the terms of either the GNU General Public 
 License or the Artistic License, as specified in the Perl README file.
@@ -9,7 +9,7 @@ THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF 
 MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-$Id: README.v2,v 1.7 2005/02/27 20:05:47 richter Exp $
+$Id: README.v2,v 1.8 2005/08/07 00:02:58 richter Exp $
 
 
 

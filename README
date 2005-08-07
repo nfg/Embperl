@@ -1,6 +1,6 @@
 Embperl - Building dynamic Websites with Perl
 
-Copyright (c) 1997-2004 Gerald Richter / ecos gmbh  www.ecos.de
+Copyright (c) 1997-2005 Gerald Richter / ecos gmbh  www.ecos.de
 
 You may distribute under the terms of either the GNU General Public 
 License or the Artistic License, as specified in the Perl README file.
@@ -9,7 +9,7 @@ THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF 
 MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-$Id: README,v 1.39 2005/02/14 18:45:54 richter Exp $
+$Id: README,v 1.41 2005/08/07 15:59:08 richter Exp $
 
 
 
@@ -132,7 +132,7 @@ perl5.004_04
 perl5.005_01/02/03
 perl5.6.1
 perl5.8.x
-apache_1.3.0 - apache_1.3.31, - apache 2.0.50
+apache_1.3.0 - apache_1.3.31, - apache 2.0.x
 apache + mod_ssl
 apache_ssl (Ben SSL)
 Stronghold 2.2
@@ -145,6 +145,9 @@ perl5.005_xx
 perl5.6.1
 perl5.8.x
 apache_1.3.0 - apache_1.3.31
+
+Apache 2 is currently not supported on Windows.
+This is planned for Embperl 2.1
 
 on Windows 95/98 with
 

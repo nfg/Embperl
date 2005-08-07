@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdom.c,v 1.26 2005/01/15 20:17:26 richter Exp $
+#   $Id: epdom.c,v 1.28 2005/08/07 00:02:58 richter Exp $
 #
 ###################################################################################*/
 
@@ -1637,9 +1637,13 @@ void DomTree_checkpoint (tReq * r, tIndex nRunCheckpoint)
     
     if (!pDomTree -> xDocument)
         {
+        /* first checkpoint in sub -> set xDocument */
         tNodeData * pDocument ;
         tAttrData * pAttr ;
 
+        if ((a -> pCurrReq?a -> pCurrReq -> Component.Config.bDebug:a -> Config.bDebug) & dbgCheckpoint)
+            lprintf (a, "[%d]Checkpoint: Start Sub DomTree=%d xx -> %d SVs=%d\n", a -> pThread -> nPid, r -> Component.xCurrDomTree, nRunCheckpoint, sv_count) ; 
+        
         pDomTree -> xDocument = pCheckpoints[nRunCheckpoint].xNode ;
         
         pDocument = Node_self (pDomTree, pDomTree -> xDocument) ;
@@ -1654,11 +1658,12 @@ void DomTree_checkpoint (tReq * r, tIndex nRunCheckpoint)
 	    NdxStringRefcntInc (a, xDocumentFraq) ;
 	    }
         
-        
         r -> Component.nCurrCheckpoint = nRunCheckpoint+1 ;
         r -> Component.nCurrRepeatLevel = 0 ;
         return ;
         }
+
+    r -> Component.bSubNotEmpty = 1 ;
 
     pCheckpointStatus -> nRepeatLevel       = r -> Component.nCurrRepeatLevel ;
     pCheckpointStatus -> nCompileCheckpoint = nCompileCheckpoint ;
