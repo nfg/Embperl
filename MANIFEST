@@ -63,7 +63,6 @@ Intro.pod
 IntroEmbperlObject.pod
 MANIFEST
 Makefile.PL
-NEWS.pod
 Old.xs
 README
 README.v2
@@ -219,6 +218,7 @@ test/cmp/div.htm
 test/cmp/epform.htm
 test/cmp/epglobals.htm
 test/cmp/epoapp.htm
+test/cmp/epoapp2.htm
 test/cmp/epobase.htm
 test/cmp/epobaselib.htm
 test/cmp/epobless.htm
@@ -381,6 +381,7 @@ test/conf/ssldisable.conf
 test/conf/startup.pl
 test/conf/startup_dso.pl
 test/html/EmbperlObject/app/epoapp.htm
+test/html/EmbperlObject/app/epoapp2.htm
 test/html/EmbperlObject/app/epoapp.pl
 test/html/EmbperlObject/base2/epobase2.htm
 test/html/EmbperlObject/base2/epostopdir.htm

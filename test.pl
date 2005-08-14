@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: test.pl,v 1.161 2005/08/07 14:40:39 richter Exp $
+#   $Id: test.pl,v 1.162 2005/08/08 13:42:44 richter Exp $
 #
 ###################################################################################
 
@@ -2277,6 +2277,7 @@ do
                           'EmbperlObject/sub/epobless2.htm', 'EmbperlObject/sub/epobless2.htm',
                           'EmbperlObject/sub/epobless3.htm', 'EmbperlObject/sub/epobless3.htm',
                           ['EmbperlObject/app/epoapp.htm', 'epoapp.pl'],   
+                          ['EmbperlObject/app/epoapp2.htm', 'epoapp.pl'],   
                           ['EmbperlObject/app/epoapp.htm', 'epoapp.pl'],   
                           ['EmbperlObject/app/epoapp.htm', 'epoapp.pl'],   
                           )

@@ -10,7 +10,7 @@ use FindBin ;
 
 @ISA = ('ExtUtils::XSBuilder::ParseSource') ;
 
-$VERSION = '0.01';
+$VERSION = '2.0.0';
 
 
 

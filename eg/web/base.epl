@@ -42,9 +42,7 @@ $http_headers_out{'content-type'} = 'text/html' ;
            .cListOnlyText       {[+ $base12 +]  }
            .cItemText           {[+ $base14 +] font-weight: bold;  }
            .cPodVerbatim        {font-family: monospace; font-size: 12px; background: #eeeeee; 
-                                 border-left: solid 1px black; border-right: solid 1px black;
-                                 padding-top: 3px}
-
+				   border: solid 1px black; padding: 13px; margin: 20px 40px 20px 40px}
            .cFoot               {[+ $base10 +]}
 
            body                 {[+ $base12 +]}

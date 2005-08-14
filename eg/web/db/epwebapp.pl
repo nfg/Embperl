@@ -582,8 +582,10 @@ sub update_item
 	my $lang = $rec->{id};
         if (grep { $fdat{$_.'_'.$lang} || $fdat{$_} } @$cf)
             {
-            $rows = $$txtset -> Select ("${tt}_id" => $id) ;
-	    if (DBIx::Recordset->LastError)
+            $rows = $$txtset -> Search ({"${tt}_id" => $id,
+                                         language_id   => $lang
+                                         }) ;
+            if (DBIx::Recordset->LastError)
 	        {
 	        $r -> {error} = 'err_update_lang_db' ;
 	        return ;
@@ -757,11 +759,9 @@ sub redir_to_show
 
     my $dest = join ('&', map { $_ . '=' . $r -> Escape (ref ($params{$_})?join("\t", @{$params{$_}}):$params{$_} , 2) } keys %params) ;
 
-    #$http_headers_out{'location'} = "show.epl?$dest";
     my ($uri) = split (/\?/, $r -> param -> unparsed_uri, 1) ;
-    Apache -> request -> err_header_out('location', $r -> param -> server_addr . dirname ($uri) ."/show.epl?$dest") ;
-    #Apache -> request -> err_header_out('location', 'http://www.ecos.de:8766' . dirname ($r -> param -> uri) ."/show.epl?$dest") ;
-
+    $http_headers_out{'location'} = $r -> param -> server_addr . dirname ($uri) ."/show.epl?$dest" ;
+    
     return 302 ;
     }
 

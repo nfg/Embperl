@@ -81,45 +81,39 @@
 
     <!-- - - - - code - - - - -->
 
-    <!--
+<!--
     <xsl:template match="verbatim">                         
-        <xsl:if test="not(preceding-sibling::node()[position() = 2][name()='verbatim'])">       
-            <table width="100%" cellpadding="10">
-            <tr>
-            <td width="5%"><xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text></td>
-            <td  class="cPodVerbatim" width="90%">
-            <pre  class="cPodVerbatim"><xsl:value-of select="."/>
-            
-            <xsl:apply-templates select="following-sibling::node()[position() &lt; 3][name()='verbatim']" mode="verbatim"/>
-            </pre>
-            </td>
-            <td width="5%"><xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text></td>
-            </tr>
-            </table>
-        </xsl:if>
-    </xsl:template>
-
-    <xsl:template  match="verbatim" mode="verbatim">                         
-            <xsl:value-of select="."/>
-            <xsl:apply-templates select="following-sibling::node()[position() &lt; 3][name()='verbatim']" mode="verbatim"/>
-    </xsl:template>
-    -->
-
-    <xsl:template match="verbatim">                         
-            <table width="100%" cellspacing="0"><tr>
+        <xsl:if test="not(preceding-sibling::node()[1][name()='verbatim'])">    
+     	    <table width="100%" cellspacing="0"><tr>
             <td width="5%"><xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text></td>
             <td  class="cPodVerbatim"  width="90%">
             <br/><pre>
-            <xsl:apply-templates/>
+                <xsl:apply-templates/> 
+                <xsl:apply-templates select="following-sibling::node()[1][name()='verbatim']" mode="verbatim"/>
             </pre>
             </td>
             <td width="5%"><xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text></td>
             </tr></table>
+	</xsl:if>
+    </xsl:template>
+-->
+
+    <xsl:template match="verbatim">                         
+        <xsl:if test="not(preceding-sibling::node()[1][name()='verbatim'])">    
+            <pre class="cPodVerbatim">
+                <xsl:apply-templates/> 
+                <xsl:apply-templates select="following-sibling::node()[1][name()='verbatim']" mode="verbatim"/>
+            </pre>
+	</xsl:if>
     </xsl:template>
 
+
     <xsl:template  match="verbatim" mode="verbatim">                         
-            <xsl:value-of select="."/>
-            <xsl:apply-templates select="following-sibling::node()[position() &lt; 3][name()='verbatim']" mode="verbatim"/>
+		<xsl:text>
+
+</xsl:text>
+                <xsl:apply-templates/> 
+                <xsl:apply-templates select="following-sibling::node()[1][name()='verbatim']" mode="verbatim"/>
     </xsl:template>
 
     <!-- - - - - link - - - - -->
@@ -158,16 +152,16 @@
                         <a href="{$basename}.-page-{$page}-.{$extension}"><xsl:value-of select="$txt"/></a>
                     </xsl:when>
                     <xsl:otherwise>
-                        <xsl:variable name="page">
+                        <xsl:variable name="page2">
                             <xsl:apply-templates select="//sect1[sect2/title=$uri]" mode="number"/>     
                         </xsl:variable>
-                        <xsl:variable name="sect">
+                        <xsl:variable name="sect2">
                             <xsl:apply-templates select="//sect2[title=$uri]" mode="number"/>     
                         </xsl:variable>
 
                         <xsl:choose>
-                            <xsl:when test="$page!=''">
-                                <a href="{$basename}.-page-{$page}-.{$extension}#sect_{$sect}"><xsl:value-of select="$txt"/></a>
+                            <xsl:when test="$page2!=''">
+                                <a href="{$basename}.-page-{$page2}-.{$extension}#sect_{$sect2}"><xsl:value-of select="$txt"/></a>
                             </xsl:when>
                             <xsl:otherwise>
                               <xsl:choose>

@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Mail.pm,v 1.38 2005/08/07 00:03:00 richter Exp $
+#   $Id: Mail.pm,v 1.39 2005/08/13 19:43:04 richter Exp $
 #
 ###################################################################################
 
@@ -31,7 +31,7 @@ use vars qw(
 @ISA = qw(Embperl);
 
 
-$VERSION = '2.0';
+$VERSION = '2.0.0';
 
 
 sub _quote_hdr

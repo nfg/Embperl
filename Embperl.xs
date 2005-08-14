@@ -128,6 +128,15 @@ OUTPUT:
     RETVAL
 
 
+int
+embperl_send_http_header(pReq)
+    tReq * pReq;
+CODE:
+    RETVAL = embperl_SendHttpHeader (pReq) ;
+OUTPUT:
+    RETVAL
+
+
 
 
 

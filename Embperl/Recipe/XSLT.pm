@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: XSLT.pm,v 1.4 2005/08/07 00:03:01 richter Exp $
+#   $Id: XSLT.pm,v 1.5 2005/08/13 19:43:05 richter Exp $
 #
 ###################################################################################
  
@@ -64,3 +64,29 @@ sub get_recipe
     }
 
 1 ;
+
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Embperl::Recipe::XSLT
+
+=head1 SYNOPSIS
+
+
+=head1 DESCRIPTION
+
+This recipe does an XSLT transformation.
+
+=head1 Author
+
+G. Richter (richter@dev.ecos.de)
+
+=head1 See Also
+
+L<Embperl::Recipe|EmbperlRecipe.pod>
+
+L<Embperl::Recipe::EmbperlXSLT|EmbperlRecipe/XSLT.pod>

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Number.pm,v 1.5 2005/08/07 00:03:01 richter Exp $
+#   $Id: Number.pm,v 1.6 2005/08/13 19:43:05 richter Exp $
 #
 ###################################################################################
 
@@ -20,7 +20,7 @@ package Embperl::Form::Validate::Number ;
 use base qw(Embperl::Form::Validate::Default);
 
 my
-$VERSION = q$Id: Number.pm,v 1.5 2005/08/07 00:03:01 richter Exp $;
+$VERSION = '2.0.0' ;
 
 my %error_messages = 
 (

@@ -124,7 +124,7 @@ package HTML::Embperl::Session;
 use strict;
 use vars qw(@ISA $VERSION);
 
-$VERSION = '1.50';
+$VERSION = '2.0.0';
 @ISA = qw(Apache::Session);
 
 use Apache::Session;

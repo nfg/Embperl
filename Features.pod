@@ -70,6 +70,11 @@ Supports caching of intermediate results and output.
 Embperl encompasses several features that ease the task of dynamic web-site content generation, 
 including dynamic-tables, form-field-processing, escaping/unescaping, etc.
 
+=item * 
+
+Contains a module for easy form input validation, which is able to validate user input
+at the server side and on the client side by one definition of rules.
+
 =item *
 
 Handles per-user and per-module persistent session requiring only storage and retrieval of 

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Default.pm,v 1.5 2005/08/07 00:03:01 richter Exp $
+#   $Id: Default.pm,v 1.6 2005/08/13 19:43:05 richter Exp $
 #
 ###################################################################################
 
@@ -20,7 +20,7 @@ package Embperl::Form::Validate::Default;
 use strict;
 use vars qw($VERSION %error_messages %script_functions %prefixes);
 
-$VERSION = q$Id: Default.pm,v 1.5 2005/08/07 00:03:01 richter Exp $;
+$VERSION = '2.0.0' ;
 
 %script_functions = ();
 %prefixes = ();

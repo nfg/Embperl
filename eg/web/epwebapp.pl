@@ -5,8 +5,6 @@ use Embperl::Recipe::EmbperlXSLT  ;
 use Embperl::Recipe::EmbperlPODXSLT  ;
 use Embperl::Constant ;
 
-use Data::Dumper ;
-
    
 sub fill_menu 
 
@@ -263,15 +261,18 @@ sub set_xslt_param
     my ($class, $r, $config, $param) = @_ ;
 
     $config -> xsltstylesheet('pod.xsl') ;
+    my $page = $fdat{page} || 0 ;
     $r -> param -> uri =~ /^.*\/(.*)\.(.*?)$/ ;
-    $param -> xsltparam({
-            page      => $fdat{page} || 0, 
+    my $p = {
+            page      => "'$page'", 
             basename  => "'$1'", 
             extension => "'$2'",
             imageuri  => "'$r->{imageuri}'",
             baseuri   => "'$r->{baseuri}'",
             language  => "'" . $r -> param -> language . "'" , 
-            }) ;
+            } ;
+
+    $param -> xsltparam($p) ;
     }
 
 

@@ -76,6 +76,11 @@ Erlaubt das Zwischenspeichern (Cachen) von Zwischenschritten und Ausgabe.
 Stellt verschiedenste Features für das Webumfeld zur Verfügung, wei z.B.
 dynamischen Tabellen, Formularfeldverarbeitung, HTML/URL-Kodierung etc.
 
+=item *
+
+Enthält ein Modul zur Überprüfung von Benutzereingaben in Formularfeldern.
+Damit kann mit der Defintion eines Regelsatz, sowohl die serverseitige
+wie auch die Clientseitige Überprüfung veranlasst werden.
 
 
 =item *

@@ -34,7 +34,7 @@ and extent Embperl by writing their own providers and much more
 B<IMPORTANT:> This document describes the syntax and several features of Embperl.
 Please read also L<perldoc Config.pod|Config.pod>, which describes how to
 configure Embperl and how to access the different Embperl objects and 
-there data. Also take a look at L<perldoc Embperl::Object|EmbperlObject.pod>
+their data. Also take a look at L<perldoc Embperl::Object|EmbperlObject.pod>
 to learn how to use Embperl page as objects.
 
 Additionaly there are a few introductions documents should consider to read:
@@ -1284,13 +1284,13 @@ for XML.
 =head1 Form Validation
 
 Embperl comes with the ability to validate form data. Rules can be defined how the
-data from forms should be validated. This done by the module Embperl::Form::Validate.
+data from forms should be validated. This done by the module L<Embperl::Form::Validate|EmbperlFormValidate.pod>.
 This module is able to do client side verification by generation JavaScript code 
 and server side verification by providing a Perl method to validate the data.
 Embperl::Form::Validate comes with a lot of standard tests and you can extent it
 by providing your own test classes, which can inherit from the shiped test classes.
 
-For further details see perldoc Embperl::Form::Validate.
+For further details see perldoc L<Embperl::Form::Validate|EmbperlFormValidate.pod>.
 
 
 =head1 Caching
@@ -1302,7 +1302,7 @@ With Embperl is also possible to cache the output of pages or components. This i
 by parameters passed to the providers via recipes or as configuration directives inside
 the page, passed to Execute or in your httpd.conf.
 
-See Emperl_Cache_* and Embperl_Expires_* in Config.pod.
+See Emperl_Cache_* and Embperl_Expires_* in L<Config.pod>.
 
 
 =head1 Internationalisation (I18N)

@@ -215,50 +215,9 @@ int Term (void) ;
 int ExecuteReq (/*i/o*/ register req * r,
                 /*in*/  SV *           pReqSV) ;
 
-#if 0
-tReq * SetupRequest (/*in*/ SV *    pApacheReqSV,
-                     /*in*/ char *  sSourcefile,
-                     /*in*/ double  mtime,
-                     /*in*/ long    nFilesize,
-                     /*in*/ int     nFirstLine,
-                     /*in*/ char *  sOutputfile,
-                     /*in*/ tConf * pConf,
-                     /*in*/ int     nIOType,
-                     /*in*/ SV *    pIn,
-                     /*in*/ SV *    pOut,
-    		     /*in*/ char *  sSubName,
-		     /*in*/ char *  sImport,
-		     /*in*/ int	    nSessionMgnt,
-                     /*in*/ tTokenTable * pTokenTable) ;
 
-void FreeRequest (/*i/o*/ register req * r) ;
-                   
-tFile * SetupFileData   (/*i/o*/ register req * r,
-                         /*in*/ char *  sSourcefile,
-                         /*in*/ double  mtime,
-                         /*in*/ long    nFilesize,
-                         /*in*/ int     nFirstLine,
-                         /*in*/ tConf * pConf) ;
+int embperl_SendHttpHeader (/*i/o*/ register req * r) ;
 
-tFile * GetFileData     (/*in*/  char *  sSourcefile,
-                         /*in*/  char *  sPackage,
-                         /*in*/  double  mtime,
-			 /*in*/  int     bEP1Compat) ;
-
-			 
-tConf * SetupConfData   (/*in*/ HV *   pReqInfo,
-                         /*in*/ SV *   pOpcodeMask) ;
-
-void FreeConfData       (/*in*/ tConf *   pConf) ;
-                         
-#endif
-
-int ScanCmdEvalsInString (/*i/o*/ register req * r,
-			/*in*/  char *   pIn,
-                          /*out*/ char * * pOut,
-                          /*in*/  size_t   nSize,
-                          /*out*/ char * * pFree) ;
-    
 char * LogError        (/*i/o*/ register req * r,
 			/*in*/  int   rc) ;
 char * LogErrorParam   (/*i/o*/ struct tApp * a,
@@ -273,12 +232,6 @@ int ProcessBlock	(/*i/o*/ register req * r,
 			 /*in*/  int	 nBlockStart,
 			 /*in*/  int	 nBlockSize,
                          /*in*/  int     nBlockNo) ;
-#if 0
-int ProcessSub		(/*i/o*/ register req * r,
-			 /*in*/  tFile * pFile,
-			 /*in*/  int	 nBlockStart,
-                         /*in*/  int     nBlockNo) ;
-#endif
 void NewEscMode (/*i/o*/ register req * r,
 			           SV * pSV) ;
 

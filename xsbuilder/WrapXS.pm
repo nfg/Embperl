@@ -8,7 +8,7 @@ use ExtUtils::XSBuilder::WrapXS ;
 
 @ISA = ('ExtUtils::XSBuilder::WrapXS') ;
 
-$VERSION = '0.01';
+$VERSION = '2.0.0';
 
 # ============================================================================
 

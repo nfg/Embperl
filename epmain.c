@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epmain.c,v 1.140 2005/08/07 00:02:58 richter Exp $
+#   $Id: epmain.c,v 1.141 2005/08/09 05:12:19 richter Exp $
 #
 ###################################################################################*/
 
@@ -821,8 +821,7 @@ static int GenerateErrorPage (/*i/o*/ register req * r)
 
 
 
-static int SendHttpHeader (/*i/o*/ register req * r)
-                     
+int embperl_SendHttpHeader (/*i/o*/ register req * r)
 
     {                    
     epTHX_
@@ -1157,7 +1156,7 @@ static int EndOutput (/*i/o*/ register req * r,
 
     if (!(r -> Config.bOptions & optEarlyHttpHeader) && 
         (r -> Config.bOptions & optSendHttpHeader) && !r -> Component.Param.pOutput)
-        SendHttpHeader (r) ;
+        embperl_SendHttpHeader (r) ;
 
     if (r -> Component.Param.pOutput)
         return OutputToMem (r) ;

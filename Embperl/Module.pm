@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Module.pm,v 1.32 2005/08/07 00:03:00 richter Exp $
+#   $Id: Module.pm,v 1.33 2005/08/13 19:43:04 richter Exp $
 #
 ###################################################################################
 
@@ -20,7 +20,7 @@ package Embperl::Module ;
 use Embperl ;
 
 
-$VERSION = '0.01_dev-1';
+$VERSION = '2.0.0';
 
 
 # define subs

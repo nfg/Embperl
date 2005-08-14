@@ -52,7 +52,8 @@ BEGIN
         {
         $Embperl::initparam{debug} = 0x7fffffff ;
         $Embperl::initparam{preloadfiles} = [
-                { inputfile  => "$cwd/test/html/div.htm", import => 0, input_escmode => 7, req_rec => undef }
+                { inputfile  => "$cwd/test/html/div.htm",  input_escmode => 7, debug => 0x7fffffff },
+                { inputfile  => "$cwd/test/html/EmbperlObject/sub/eposubs.htm", input_escmode => 7, debug => 0x7fffffff }
                 ] ;
         print "Preload initated\n" ;
         }

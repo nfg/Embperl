@@ -1,6 +1,16 @@
 =pod
 
 
+=head4 2.0rc6
+
+   - http headers from %http_headers_out will now also be send when the
+     init method of an application object return non zero (e.g. 302 for redirect).
+   - Updated xsl stylesheet and css styles of website for better display
+     of code sections.
+   - Updated db/epwebapp.pl to make it more robust and fix some minor bugs
+     and also allows to set edit and view_level (anonymous, login, admin)
+     for every table.
+
 =head4 2.0rc5 7. August 2005
 
    - Added attribute content-type to mail:send tag (Syntax Mail).

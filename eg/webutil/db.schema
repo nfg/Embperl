@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: db.schema,v 1.6 2005/08/07 15:59:09 richter Exp $
+#   $Id: db.schema,v 1.7 2005/08/13 16:53:24 richter Exp $
 #
 ##############################################################################
 
@@ -133,10 +133,15 @@
         'id'                        => 'counter',
         'state'                     => 'integer',
 	'table_type'		    => 'tinytext',
-	'viev_level'		    => 'integer',
+	'view_level'		    => 'integer',
 	'edit_level'		    => 'integer',
         ],
     '!PrimKey' => 'id',
+    '!Default' =>
+        {
+        'view_level' => 0,
+        'edit_level' => 1,
+        },
     '!Init' =>
         [
             { id => 1, state => 1, 'table_type' => 'item', edit_level => 2 } ,
@@ -265,8 +270,6 @@
             { id => 11, category_id => 6, language_id => 'de', 'category' => 'Module und Beispiele für Embperl' } ,
             { id => 12, category_id => 6, language_id => 'en', 'category' => 'Modules and examples for Embperl' } ,
 
-            { id => 13, category_id => 7, language_id => 'de', 'category' => 'Was ist Foobar?!?' } ,
-            { id => 14, category_id => 7, language_id => 'en', 'category' => 'What is foobar?!?' } ,
         ],
     },
 

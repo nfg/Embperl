@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Object.pm,v 1.16 2005/08/07 14:40:39 richter Exp $
+#   $Id: Object.pm,v 1.20 2005/08/13 19:43:04 richter Exp $
 #
 ###################################################################################
 
@@ -48,7 +48,7 @@ use vars qw(
 @ISA = qw(Exporter DynaLoader);
 
 
-$VERSION = '2.0';
+$VERSION = '2.0.0';
 
 
 $volume = (File::Spec -> splitpath ($Embperl::cwd))[0] ;
@@ -291,7 +291,7 @@ sub Execute
 
             print Embperl::LOG "[$$]Embperl::Object import new Application: $appfn\n"  if ($debug);
             
-            my $cparam = {object => $appfn, syntax => 'Perl'} ;
+            my $cparam = {object => $appfn, syntax => 'Perl', debug => $req -> {debug}} ;
             my $c = $r -> setup_component ($cparam) ;
             my $app = run($c) ;
             my $package = $c -> curr_package  if (!$r -> error) ;
@@ -318,6 +318,7 @@ sub Execute
                     }
                 elsif ($status) 
                     {
+                    $r -> send_http_header ;
                     $r -> cleanup ;
                     print Embperl::LOG "[$$]Embperl::Object Application -> init had returned $status\n"  if ($debug);
                     return $status ;
@@ -550,6 +551,9 @@ If set this file is searched throught the same search path as any content file.
 After a successfull load the init method is called with the Embperl request object
 as parameter. The init method can change the parameters inside the request object
 to influence the current request.
+
+The init method should return zero or a valid HTTP status code (e.g. return 302
+and set the location header in %http_headers_out)
 
 =head1 Execute
 

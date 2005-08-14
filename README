@@ -9,7 +9,7 @@ THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF 
 MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-$Id: README,v 1.41 2005/08/07 15:59:08 richter Exp $
+$Id: README,v 1.42 2005/08/13 20:06:30 richter Exp $
 
 
 
@@ -25,7 +25,7 @@ Additionaly Embperl support including XML, XSLT tranformations and
 a lot of other sources formats.
 
 Embperl has several features which are especially useful for creating
-HTML, including dynamic tables, form field processing, URL
+HTML, including dynamic tables, form field processing and validation, URL
 escaping/unescaping, session handling, and more.
 
 Embperl is a server-side tool, which means that it's browser-independent. 
@@ -106,6 +106,9 @@ The interaction of the providers can be individually configured for each compone
 * Embperl encompasses several features that ease the task of dynamic web-site content generation, 
 including dynamic-tables, form-field-processing, escaping/unescaping, etc.
 
+* Contains a module for easy form input validation, which is able to validate user input
+at the server side and on the client side by one definition of rules.
+
 * Handles per-user and per-module persistent session requiring only storage and retrieval of 
 the session data from a special hash.
 
@@ -132,7 +135,7 @@ perl5.004_04
 perl5.005_01/02/03
 perl5.6.1
 perl5.8.x
-apache_1.3.0 - apache_1.3.31, - apache 2.0.x
+apache_1.3.x, apache 2.0.x
 apache + mod_ssl
 apache_ssl (Ben SSL)
 Stronghold 2.2
@@ -165,8 +168,8 @@ Please let me know if you use or test this module.  Bugs, questions,
 suggestions for things you would find useful, etc., are discussed on
 the Embperl mailing list. If you have a site that is using Embperl,
 I would love to mention it in the list of sites using Embperl 
-(http://perl.apache.org/embperl/Sites.pod.1.html). Please drop
-me a mail with a short description, if your site uses Embperl.
+(http://perl.apache.org/embperl/db/sites/sites.htm). Please go
+to the Embperl website and add your site.
 
 
 The Embperl mailing list (embperl@perl.apache.org) is available for Embperl users

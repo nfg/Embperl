@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Validate.pm,v 1.11 2005/08/07 00:03:01 richter Exp $
+#   $Id: Validate.pm,v 1.12 2005/08/13 19:43:04 richter Exp $
 #
 ###################################################################################
 
@@ -20,7 +20,7 @@ package Embperl::Form::Validate;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = q$Id: Validate.pm,v 1.11 2005/08/07 00:03:01 richter Exp $;
+$VERSION = '2.0.0' ;
 
 =head1 NAME
 
@@ -786,16 +786,16 @@ displayed. You can have multiple different messages for different tests, e.g.
 	-key        => 'email',
 	-name       => 'E-Mail-Address',
 	emptyok     => 1,                   # it's ok to leave this field empty (in this case the following tests are skiped)
-
+         
 	-msg => 'The E-Mail-Address is invalid.',
 	matches_regex => '(^[^ <>()@΅-ÿ]+@[^ <>()@΅-ÿ]+\.[a-zA-Z]{2,3}$)', 
-	
+        	
 	-msg => 'The E-Mail address must contain a "@".',
 	must_contain_one_of => '@',
-
+         
 	-msg => 'The E-Mail address must contain at least one period.',
 	must_contain_one_of => '.',
-
+        
 	-msg => 'The E-Mail-Address is invalid. It must only not contain any special charaters.',
 	must_not_contain => '΅Ά£¤¥¦§¨©ª«¬­®―°±²³΄µ¶·ΈΉΊ»Ό½ΎΏΐΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡÒΣΤΥΦΧΨΩΪΫάέήίΰαβγδεζηθικλμνξοπρςστυφχψωϊϋόύώÿ',
        ],

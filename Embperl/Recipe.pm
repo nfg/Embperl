@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Recipe.pm,v 1.4 2005/08/07 00:03:00 richter Exp $
+#   $Id: Recipe.pm,v 1.5 2005/08/13 19:43:04 richter Exp $
 #
 ###################################################################################
  
@@ -69,7 +69,7 @@ Embperl base class for defining custom recipes
 
 =head1 SYNOPSIS
 
-EMBPERL_RECIPE "XSLT Embperl"
+   EMBPERL_RECIPE "XSLT Embperl"
 
 =head1 DESCRIPTION
 
