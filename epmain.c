@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epmain.c,v 1.141 2005/08/09 05:12:19 richter Exp $
+#   $Id: epmain.c,v 1.143 2005/10/01 17:20:04 richter Exp $
 #
 ###################################################################################*/
 
@@ -135,6 +135,7 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
         case rcIsDir:                   msg ="[%d]ERR:  %d: %s Forbidden %s is a directory%s" ; break ;
         case rcXNotSet:                 msg ="[%d]ERR:  %d: %s Forbidden %s X Bit not set%s" ; break ;
         case rcNotFound:                msg ="[%d]ERR:  %d: %s Not found '%s', searched: %s" ; break ;
+        case rcTokenNotFound:           msg ="[%d]ERR:  %d: %s Token not found '%s', %s" ; break ;
         case rcUnknownVarType:          msg ="[%d]ERR:  %d: %s Type for Variable %s is unknown %s" ; break ;
         case rcPerlWarn:                msg ="[%d]ERR:  %d: %s Warning in Perl code: %s%s" ; break ;
         case rcVirtLogNotSet:           msg ="[%d]ERR:  %d: %s EMBPERL_VIRTLOG must be set, when dbgLogLink is set %s%s" ; break ;
@@ -746,7 +747,8 @@ static int StartOutput (/*i/o*/ register req * r)
 
 
 
-static int GenerateErrorPage (/*i/o*/ register req * r)
+static int GenerateErrorPage (/*i/o*/ register req * r,
+               		      /*in*/  int    rc)
                      
 
     {
@@ -803,7 +805,10 @@ static int GenerateErrorPage (/*i/o*/ register req * r)
         SPAGAIN ;
 #ifdef APACHE
 	if (r -> pApacheReq)
-	    r -> pApacheReq -> status = 500 ;
+	    if (rc >= 400)
+	        r -> pApacheReq -> status = rc ;
+            else
+                r -> pApacheReq -> status = 500 ;
 #endif
         
 	SetHashValueInt (r, r -> pThread -> pHeaderHash, "Content-Length", GetContentLength (r) ) ;
@@ -1149,7 +1154,7 @@ static int EndOutput (/*i/o*/ register req * r,
 
     if (rc != ok ||  r -> bError)
         { /* --- generate error page if necessary --- */
-        GenerateErrorPage (r) ;
+        GenerateErrorPage (r, rc) ;
         if (r -> bExit)
             return ok ;
         }

@@ -48,6 +48,7 @@ extern "C" {
 }
 #endif
 
+#undef AP_DEBUG
 
 #ifdef APACHE
 /* form mod_perl.h ->

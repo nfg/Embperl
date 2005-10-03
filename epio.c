@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epio.c,v 1.31 2005/08/07 00:02:58 richter Exp $
+#   $Id: epio.c,v 1.32 2005/09/25 13:43:38 richter Exp $
 #
 ###################################################################################*/
 
@@ -601,6 +601,10 @@ int ReadHTML (/*i/o*/ register req * r,
         {
         strncpy (r -> errdat1, sInputfile, sizeof (r -> errdat1) - 1) ;
         strncpy (r -> errdat2, Strerror(errno), sizeof (r -> errdat2) - 1) ; 
+        if (errno == EACCES)
+            return rcForbidden ;
+        else if (errno == ENOENT)
+            return rcNotFound ;
         return rcFileOpenErr ;
         }
 

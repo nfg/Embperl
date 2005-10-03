@@ -62,6 +62,10 @@ $Embperl::Form::Validate::objects{'addsel'} = $epf ;
     [$endif$]
 </ul>
 
+
+<p class="cHeadline"><a href="wiki/index.cgi">Wiki</a></p>
+
+
 [$else$]
 
 <p class="cHeadline">[= addsel_login1 =] <a href="login.epl">[= addsel_login2 =]</a> [= addsel_login3 =]</p>

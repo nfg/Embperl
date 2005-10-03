@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epinit.c,v 1.31 2005/08/07 14:40:39 richter Exp $
+#   $Id: epinit.c,v 1.32 2005/09/25 13:43:38 richter Exp $
 #
 ###################################################################################*/
 
@@ -1423,10 +1423,12 @@ int    embperl_SetupRequest (/*in*/ pTHX_
     
     if (pParamHV)
         {
+        char * fn = GetHashValueStrDup(aTHX_ pPool, pParamHV, "inputfile", NULL) ;
         Embperl__Req__Config_new_init(aTHX_ &r -> Config, (SV *)pParamHV, 0) ;
         Embperl__Req__Param_new_init(aTHX_ &r -> Param, (SV *)pParamHV, 0) ;
-        if (!r -> Param.sFilename || !*r -> Param.sFilename)
-            r -> Param.sFilename = GetHashValueStrDup(aTHX_ pPool, pParamHV, "inputfile", NULL) ;
+        if (fn)
+            r -> Param.sFilename = fn ;
+        
         }
 
     tainted = 0 ;

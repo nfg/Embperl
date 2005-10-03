@@ -202,6 +202,7 @@ BEGIN
         { menu => 'Support',                uri => 'pod/doc/Embperl.-page-17-.htm' },
         { menu => 'Changes',                 uri => 'pod/Changes.htm',           file => 'Changes.pod' },
         #{ menu => 'Sites using Embperl',    uri => 'pod/Sites.htm',             file => 'Sites.pod' },
+        { menu => 'Wiki',                uri => 'db/wiki/index.cgi', file => '/eg/web/db/wiki.epl' }, 
         { menu => 'More infos',          uri => 'db/', sub => 
             [
             { menu => 'News',                    uri => 'news/news.htm',          file => 'eg/web/db/news/data.epd', fdat => { 'category_id' => 1 }, 

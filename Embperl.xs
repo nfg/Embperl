@@ -86,6 +86,17 @@ PPCODE:
     PUSHs(epxs_Embperl__Thread_2obj(pThread)) ;
     PUSHs(epxs_Embperl__App_2obj(pApp)) ;
 
+
+
+char *
+embperl_get_date_time()
+PREINIT:
+    char buf[256] ;
+CODE:
+    RETVAL = embperl_GetDateTime(buf) ;
+OUTPUT:
+    RETVAL
+
     
 
 MODULE = Embperl::Req    PACKAGE = Embperl::Req   PREFIX = embperl_
@@ -135,9 +146,6 @@ CODE:
     RETVAL = embperl_SendHttpHeader (pReq) ;
 OUTPUT:
     RETVAL
-
-
-
 
 
 

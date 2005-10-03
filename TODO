@@ -20,6 +20,17 @@ TODO
 - content-type in Embperl::Mail [ abe 4.4.05]
 
 
+- Mail Date Header [Robert]
+
+- 404 Error for not found [Cliff Raymann]
+
+- %Udat not clearing after 500 error [Cliff Raymann]
+
+- $req_rec not available in preload pages [Neil Gunton]
+
+
+
+
 TODO for Embperl 2.1 and later
 
 - make Embperl run with threads and threaded Apache 2

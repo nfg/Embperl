@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: App.pm,v 1.6 2005/08/07 00:03:00 richter Exp $
+#   $Id: App.pm,v 1.7 2005/09/25 13:43:38 richter Exp $
 #
 ###################################################################################
  
@@ -81,6 +81,7 @@ sub send_error_page
     my $logfilepos  = $r -> log_file_start_pos ;
     my $url         = '' ; # $Embperl::dbgLogLink?"<A HREF=\"$virtlog\?$logfilepos\&$$\">Logfile</A>":'' ;    
     my $req_rec     = $r -> apache_req ;
+    my $status      = $req_rec?$req_rec -> status:0 ;
     my $err ;
     my $cnt = 0 ;
     local $Embperl::escmode = 0 ;
@@ -91,7 +92,18 @@ sub send_error_page
 
     # don't use method call to avoid trouble with overloading
     Embperl::Req::output ($r,"<HTML><HEAD><TITLE>Embperl Error</TITLE></HEAD><BODY bgcolor=\"#FFFFFF\">\r\n$url") ;
-    Embperl::Req::output ($r,"<H1>Internal Server Error</H1>\r\n") ;
+    if ($status == 403)
+        {
+        Embperl::Req::output ($r,"<H1>Forbidden</H1>\r\n") ;
+        }
+    elsif ($status == 404)
+        {
+        Embperl::Req::output ($r,"<H1>Not Found</H1>\r\n") ;
+        }
+    else
+        {
+        Embperl::Req::output ($r,"<H1>Internal Server Error</H1>\r\n") ;
+        }
     Embperl::Req::output ($r,"The server encountered an internal error or misconfiguration and was unable to complete your request.<P>\r\n") ;
     Embperl::Req::output ($r,"Please contact the server administrator, $mail and inform them of the time the error occurred, and anything you might have done that may have caused the error.<P><P>\r\n") ;
 

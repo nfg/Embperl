@@ -1,7 +1,17 @@
 =pod
 
+=head4 2.0.1  3. October 2005
 
-=head4 2.0rc6
+    - Turn off Apache maintainer mode symbols, so it works with SuSE Apache
+    - Integrated KWiki into Embperl website (available under eg/web)
+    - Don't croak if Apache request record is not available (e.g. during startup)
+    - Fixed wrong setup of $epreq -> param -> filename, when a Embperl offline
+      processing is made inside an Embperl page. Reported by Gavin Carr.
+    - Return correct http status codes 403 and 404 if access to a file is
+      forbidden or the file was not found. Reported by Cliff Rayman.
+    - Added Date header for Embperl::Mail, Suggested by Robert.
+ 
+=head4 2.0.0  14. August 2005
 
    - http headers from %http_headers_out will now also be send when the
      init method of an application object return non zero (e.g. 302 for redirect).

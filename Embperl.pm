@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Embperl.pm,v 1.205 2005/08/13 19:43:04 richter Exp $
+#   $Id: Embperl.pm,v 1.207 2005/10/03 05:16:20 richter Exp $
 #
 ###################################################################################
 
@@ -49,7 +49,7 @@ use vars qw(
 
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = '2.0.0' ;
+$VERSION = '2.0.1' ;
 
 
 if ($modperl  = $ENV{MOD_PERL})
@@ -133,14 +133,17 @@ sub Execute
     local $req_rec ;
     if ($modperl && !exists ($_ep_param -> {req_rec}))
         {
-        if ($modperlapi < 2)
+        eval
             {
-            $req_rec = Apache -> request  ;
-            }
-        else
-            {
-            $req_rec = Apache2::RequestUtil -> request  ;
-            }
+            if ($modperlapi < 2)
+                {
+                $req_rec = Apache -> request  ;
+                }
+            else
+                {
+                $req_rec = Apache2::RequestUtil -> request  ;
+                }
+            } ;    
         }
     elsif (exists ($_ep_param -> {req_rec}) && defined ($_ep_param -> {req_rec}))
         {    

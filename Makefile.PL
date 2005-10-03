@@ -3,7 +3,7 @@
 #
 # (C) 1997-2005 G.Richter (richter@dev.ecos.de) / ECOS
 #
-# $Id: Makefile.PL,v 1.79 2005/08/07 00:02:58 richter Exp $
+# $Id: Makefile.PL,v 1.80 2005/10/02 13:30:14 richter Exp $
 #
 
 
@@ -241,7 +241,9 @@ sub MY::cflags
         if ($mp2cfg)
             { # with Apache 2, make sure we have the same defines as mod_perl
             $txt =~ s/-O\d//g if ($ccdebug =~ /-O\d/) ;
-            $txt =~ s/CCFLAGS\s*=.*?\n/CCFLAGS = $ccdebug $mp2cfg->{MODPERL_CCOPTS}\n/s ;
+            $txt =~ /CCFLAGS\s*=(.*?)\n/s ;
+	    my $flags = $mp2cfg->{MODPERL_CCOPTS} || $1 ;
+            $txt =~ s/CCFLAGS\s*=(.*?)\n/CCFLAGS = $ccdebug $flags\n/s ;
             }
         else
             {

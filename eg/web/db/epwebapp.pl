@@ -154,14 +154,26 @@ sub posturl
 
     return $dest if (!$r -> {action_prefix}) ;
 
-
-    my $buri = $r->{config}{baseuri} ;
+    my $config = $r->{config} ;
+    my $buri = $config -> {baseuri} ;
+    $buri .= '/' if (!$buri =~ m#/$#) ;
     my $uri  = $r-> param -> uri ;
-    my $path = ($uri =~ /$buri(.*?)$/)?$1:$uri ;
+    my $path = ($uri =~ /\Q$buri\E(.*?)$/)?$1:$uri ;
     my $lang = (@{$config -> {supported_languages}} > 1)?$r -> param -> language . '/':'' ;
 
-    return $r -> {action_prefix} . $buri . $lang . $path if (!$dest) ;
-    return $r -> {action_prefix} . $buri . $lang . dirname("/$path") .'/' . $dest ;
+    my $url ;
+    if (!$dest)
+        {
+        $url = $r -> {action_prefix} . $buri . $lang . $path ;
+        }
+    else
+        {
+        $path =~ m#^/?(.*)/# ;
+        my $dir = $1 ;
+        $url = $r -> {action_prefix} . $buri . $lang . $dir . '/' . $dest ;
+        }
+
+    return $url ;    
     }
 
 
@@ -194,6 +206,7 @@ sub checkuser_light
         {
         $r -> {user_id}    = $udat{user_id} ;
         $r -> {user_email} = $udat{user_email} ;
+        $r -> {user_name}  = $udat{user_name} ;
         $r -> {user_admin} = $udat{user_admin} ;
         return $r -> {user_admin}?2:1 ;
         }
@@ -210,6 +223,7 @@ sub checkuser
         {
         $r -> {user_id}    = $udat{user_id} ;
         $r -> {user_email} = $udat{user_email} ;
+        $r -> {user_name}  = $udat{user_name} ;
         $r -> {user_admin} = $udat{user_admin} ;
         return $r -> {user_admin}?2:1 ;
         }
@@ -236,6 +250,7 @@ sub checkuser
             {
             $r -> {user_id}    = $udat{user_id}    = $user -> {id} ;
             $r -> {user_email} = $udat{user_email} = $user -> {email} ;
+            $r -> {user_name}  = $udat{user_name}  = $user -> {user_name} ;
             $r -> {user_admin} = $udat{user_admin} = $user -> {admin} ;
 	    $r -> {success} = "suc_login";
             return $r -> {user_admin}?2:1 ;
@@ -250,6 +265,7 @@ sub checkuser
         {
         $r -> {user_id}    = $udat{user_id}    = undef ;
         $r -> {user_email} = $udat{user_email} = undef ;
+        $r -> {user_name}  = $udat{user_name}  = undef ;
         $r -> {user_admin} = $udat{user_admin} = undef ;
 	$r -> {success} = 'suc_logout';
         return ;

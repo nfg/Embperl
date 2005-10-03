@@ -76,7 +76,7 @@ $app  = $r -> app ;
     <tr> 
         <td><img src="[+ $r -> {imageuri} +]linie-nav.gif" width="152" height="1"></td>
     </tr>
-    [- menuitem ($r -> {baseuri} . 'pod/doc/Embperl.-page-18-.htm', 'Stable 2.0.0', 0, 1) -]
+    [- menuitem ($r -> {baseuri} . 'pod/doc/Embperl.-page-18-.htm', 'Stable 2.0.1', 0, 1) -]
     <tr> 
         <td><img src="[+ $r -> {imageuri} +]linie-nav.gif" width="152" height="1"></td>
     </tr>

@@ -1,5 +1,5 @@
 
-# $Id: httpd.conf.src,v 1.58 2005/07/25 07:01:36 richter Exp $
+# $Id: httpd.conf.src,v 1.59 2005/09/04 12:55:59 richter Exp $
 
 print OFH <<EOD ;
 #
@@ -68,7 +68,11 @@ DirectoryIndex index.htm
 $EPSTRONGHOLDKEY
 
 #-Tw
-PerlTaintCheck On
+EOD
+
+print OFH "PerlTaintCheck On\n" if (!$ENV{NOTAINT}) ;
+
+print OFH <<EOD ;
 PerlWarn On
 
 
@@ -665,7 +669,8 @@ SetHandler server-status
 SetHandler server-info
 </Location>
 
-
+###########  web site #####################
+#
 # redirect all languages of the web to the same directory
 Alias /eg/web/de/ \"$EPPATH/eg/web/\"
 Alias /eg/web/en/ \"$EPPATH/eg/web/\"
@@ -740,6 +745,20 @@ EMBPERL_RECIPE XSLT
 #
 #</location>
 
+######## kwiki ##################
+
+<Location /kwiki>
+   SetHandler  perl-script
+   PerlSetVar  KwikiBaseDir $EPPATH/eg/kwiki
+   PerlHandler Kwiki::ModPerl
+</Location>
+Alias /ckwiki $EPPATH/eg/kwiki
+
+<Location /ckwiki>
+   SetHandler  cgi-script
+</Location>
+
+
 
 
 
@@ -762,6 +781,8 @@ DavLockDB tmp/DAVLockDB
 <Location /dav>
 DAV on
 </Location>
+
+
 
 </IfModule>
 

@@ -49,6 +49,50 @@ $http_headers_out{'content-type'} = 'text/html' ;
            table                {[+ $base12 +]}
            .cHeadline           {[+ $base14 +]  font-weight: bold;}
            a:hover              { color: red ;}
+
+
+            .diff-added, .diff-removed, .diff-unmodified, .diff-changed {
+                font-family: monospace;
+            }
+            .diff-added {
+                background: #cfc;
+                color: #000;
+            }
+            .diff-removed {
+                background: #fcc;
+                color: #000;
+            }
+            .diff-unmodified {
+                background: inherit;
+                color: #000;
+            }
+            .diff-changed {
+                background: #ffc;
+                color: #000;
+            }
+
+            table.diff {
+                border: 1px solid #666;
+            }
+
+            table th {
+                border-bottom: 1px solid #666;
+            }
+
+            th.lhs, td.lhs {
+                padding-right: 1em;
+            }
+            th.rhs, td.rhs {
+                padding-left: 1em;
+                border-left: 1px solid #666;
+            }
+
+            h1 small {
+                color: #f00;
+            }
+
+
+
         </style>
     </head>
     <body bgcolor="#ffffff">

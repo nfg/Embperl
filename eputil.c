@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eputil.c,v 1.48 2005/08/07 16:57:28 richter Exp $
+#   $Id: eputil.c,v 1.49 2005/10/02 13:30:14 richter Exp $
 #
 ###################################################################################*/
 
@@ -2051,6 +2051,44 @@ const char * embperl_CalcExpires(const char *sTime, char * sResult, int bHTTP)
 
 
 
+#ifdef WIN32
+extern long _timezone;
+#else
+extern long timezone;
+#endif
+
+
+char * embperl_GetDateTime (char * sResult)
+{
+    time_t when = time(NULL);
+    int sep =  ' ' ;
+    int tz ;
+#ifdef WIN32
+    struct tm *tms;
+#else
+    struct tm tms;
+#endif
+    dTHX ;
+
+#ifdef WIN32
+    tms = localtime(&when);
+    sprintf(sResult,  "%s, %.2d%c%s%c%.2d %.2d:%.2d:%.2d %s%04d", 
+                      ep_day_snames[tms->tm_wday],
+                      tms->tm_mday, sep, ep_month_snames[tms->tm_mon], sep,
+                      tms->tm_year + 1900,
+                      tms->tm_hour, tms->tm_min, tms->tm_sec, tz > 0?"+":"", tz);
+#else
+    localtime_r(&when, &tms);
+    tz = -timezone / 36 + (tms.tm_isdst?100:0) ;
+    sprintf(sResult,
+		       "%s, %.2d%c%s%c%.2d %.2d:%.2d:%.2d %s%04d",
+		       ep_day_snames[tms.tm_wday],
+		       tms.tm_mday, sep, ep_month_snames[tms.tm_mon], sep,
+		       tms.tm_year + 1900,
+		       tms.tm_hour, tms.tm_min, tms.tm_sec, tz > 0?"+":"", tz);
+#endif
+    return sResult ;
+}
 
 
 

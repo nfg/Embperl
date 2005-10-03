@@ -50,7 +50,7 @@
     [- Execute ('loginform.epl', $r -> app -> posturl) ; -]
     </div>
 [$ else $]
-    [$if $r -> param -> uri !~ /html?$|epl$/ $]<pre>[$endif$]
+    [$if $r -> param -> uri !~ /html?$|epl$|cgi$/ $]<pre>[$endif$]
     [- $x = Execute ({inputfile => '*'}) -] 
-    [$if $r -> param -> uri !~ /html?$|epl$/ $]</pre>[$endif$]
+    [$if $r -> param -> uri !~ /html?$|epl$|cgi$/ $]</pre>[$endif$]
 [$ endif $]

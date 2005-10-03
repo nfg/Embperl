@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Mail.pm,v 1.39 2005/08/13 19:43:04 richter Exp $
+#   $Id: Mail.pm,v 1.41 2005/10/03 05:16:21 richter Exp $
 #
 ###################################################################################
 
@@ -31,7 +31,7 @@ use vars qw(
 @ISA = qw(Embperl);
 
 
-$VERSION = '2.0.0';
+$VERSION = '2.0.1';
 
 
 sub _quote_hdr
@@ -138,6 +138,7 @@ sub Execute
         $smtp->datasend("To: " . _quote_hdr(join (', ', @$to), $enc) . "\n")  or die "smtp datasend failed" ;
         $smtp->datasend("Cc: " . _quote_hdr(join (', ', @$cc), $enc) . "\n")  or die "smtp datasend failed" if ($req -> {'cc'}) ;
         $smtp->datasend("Subject: " . _quote_hdr($req->{subject}, $enc) . "\n") or die "smtp datasend failed" ;
+        $smtp->datasend("Date: " . _quote_hdr(Embperl::get_date_time(), $enc) . "\n") or die "smtp datasend failed" ;
         if (ref ($headers) eq 'ARRAY')
             {
             foreach (@$headers)

@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epparse.c,v 1.15 2005/08/07 00:02:58 richter Exp $
+#   $Id: epparse.c,v 1.16 2005/09/25 13:43:38 richter Exp $
 #
 ###################################################################################*/
 
@@ -178,7 +178,7 @@ static int BuildSubTokenTable (/*i/o*/ register req * r,
 		{
 		strncpy (r -> errdat1, "BuildTokenHash", sizeof (r -> errdat1)) ;
 		sprintf (r -> errdat2, "%s => %s does not contain any tokens", pKey, pAttr) ;
-		return rcNotFound ;
+		return rcTokenNotFound ;
 		}
 
 	    hv_store(pSubHash, "--cptr", sizeof ("--cptr") - 1, newSViv ((IV)pNewTokenTable), 0) ;
@@ -425,7 +425,7 @@ int BuildTokenTable (/*i/o*/ register req *	  r,
 		{
 		strncpy (r -> errdat1, "BuildTokenHash", sizeof (r -> errdat1)) ;
 		sprintf (r -> errdat2, " EndTag %s for %s not found", pTable[i].sText, s) ;
-		return rcNotFound ;
+		return rcTokenNotFound ;
 		}
 	    
 	    }
@@ -444,7 +444,7 @@ int BuildTokenTable (/*i/o*/ register req *	  r,
 		{
 		strncpy (r -> errdat1, "BuildTokenHash", sizeof (r -> errdat1)) ;
 		sprintf (r -> errdat2, " StartTag %s for %s not found", pTable[i].sText, s) ;
-		return rcNotFound ;
+		return rcTokenNotFound ;
 		}
 	    
 	    }
@@ -854,7 +854,7 @@ static int ParseTokens (/*i/o*/ register req *		r,
                                             pToken -> bDontEat) ;
 			if (rc == ok)
 			    bInsideMustExist = 0 ;
-			else if (pToken -> bInsideMustExist && rc == rcNotFound)
+			else if (pToken -> bInsideMustExist && rc == rcTokenNotFound)
 			    {
 			    rc = ok ;
 			    /*
@@ -876,7 +876,7 @@ static int ParseTokens (/*i/o*/ register req *		r,
 			    if (!(xNewNode = Node_appendChild (r -> pApp, pDomTree, xParentNode, 0, (tNodeType)pTokenTable -> nDefNodeType, 0, pCurrStart, pCurr - pCurrStart, level, GetLineNoOf (r, pCurrStart), NULL)))
 				return 1 ;
 			    }
-			else if (rc != rcNotFound)
+			else if (rc != rcTokenNotFound)
                             {
                             return rc ;
                             }
@@ -1015,7 +1015,7 @@ static int ParseTokens (/*i/o*/ register req *		r,
 		    return 1 ;
 		}
             *ppCurr = pCurr ;
-            return bInsideMustExist?rcNotFound:ok ;
+            return bInsideMustExist?rcTokenNotFound:ok ;
             }
         else if (sEndText == NULL ||
 	    ((*pCurr == *sEndText && (strncmp (pCurr, sEndText, nEndText) == 0)) || 
@@ -1044,7 +1044,7 @@ static int ParseTokens (/*i/o*/ register req *		r,
             if (!pCDATAStart && !sStopText && (bDontEat & 2) == 0)
 		pCurr += nEndText ;
             *ppCurr = pCurr ;
-            return bInsideMustExist?rcNotFound:ok ;
+            return bInsideMustExist?rcTokenNotFound:ok ;
             }
         else if (!pToken && bFollow < 2)
 	    pCurr++ ;
@@ -1063,7 +1063,7 @@ static int ParseTokens (/*i/o*/ register req *		r,
 	    return 1 ;
 
     *ppCurr = pCurr ;
-    return bInsideMustExist?rcNotFound:ok ;
+    return bInsideMustExist?rcTokenNotFound:ok ;
     }
 
 

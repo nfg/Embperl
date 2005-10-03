@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Object.pm,v 1.20 2005/08/13 19:43:04 richter Exp $
+#   $Id: Object.pm,v 1.21 2005/10/03 05:16:21 richter Exp $
 #
 ###################################################################################
 
@@ -48,7 +48,7 @@ use vars qw(
 @ISA = qw(Exporter DynaLoader);
 
 
-$VERSION = '2.0.0';
+$VERSION = '2.0.1';
 
 
 $volume = (File::Spec -> splitpath ($Embperl::cwd))[0] ;

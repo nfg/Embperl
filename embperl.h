@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: embperl.h,v 1.36 2005/08/07 00:02:58 richter Exp $
+#   $Id: embperl.h,v 1.37 2005/09/25 13:43:38 richter Exp $
 #
 ###################################################################################*/
 
@@ -96,6 +96,7 @@ enum tRc
     rcUnknownOption,
     rcTimeFormatErr,
     rcSubCallNotRequest,
+    rcTokenNotFound,  
     rcForbidden = 403,
     rcNotFound  = 404,
     rcDecline   = -1

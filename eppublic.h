@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eppublic.h,v 1.6 2005/08/07 01:00:21 richter Exp $
+#   $Id: eppublic.h,v 1.7 2005/10/02 13:30:14 richter Exp $
 #
 ###################################################################################*/
 
@@ -65,6 +65,7 @@ int     embperl_ExecuteComponent(tReq *           r,
 const char * embperl_GetText (tReq *       r, 
                         const char * sMsgId) ;
 
+char * embperl_GetDateTime (char * sResult) ;
 
 
 #define ERRDATLEN 1024
