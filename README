@@ -9,7 +9,7 @@ THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF 
 MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-$Id: README,v 1.42 2005/08/13 20:06:30 richter Exp $
+$Id: README 344310 2005-11-15 05:22:19Z richter $
 
 
 
@@ -49,8 +49,9 @@ Introduction to EmbperlObject:  perldoc IntroEmbperlObject.pod
 Installation of Embperl:        perldoc INSTALL.pod
 Full documentation:             perldoc Config.pod
                                 perldoc Embperl.pod
-                                perldoc EmbperlObject.pm
+                                perldoc Embperl/Object.pm
                                 perldoc Embperl/Mail.pm
+                                perldoc Embperl/Inline.pm
 Tips and Tricks:                perldoc TipsAndTricks.pod
 Changes:                        perldoc Changes.pod
 Examples:		        eg/x/README
@@ -112,6 +113,8 @@ at the server side and on the client side by one definition of rules.
 * Handles per-user and per-module persistent session requiring only storage and retrieval of 
 the session data from a special hash.
 
+* UTF-8 Support (honours Perl's internal UTF-8 flag during in- and output)
+
 * Offers flexible configuration options to suite individual tastes and needs.
 
 * Fully integrated into Apache and mod_perl to acheive the best performance. 
@@ -121,6 +124,7 @@ Can also run as a free standing CGI-script, off-line or can be called from anoth
 
 * Embperl::Mail enables redirecting the result output to a mail-recipient.
 
+* Embperl::Inline allows to embedd Embperl code in normal Perl code
 
 
 

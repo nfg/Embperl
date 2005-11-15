@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eppriv.h,v 1.10 2005/08/07 00:02:58 richter Exp $
+#   $Id: eppriv.h 331953 2005-11-09 05:11:19Z richter $
 #
 ###################################################################################*/
 
@@ -223,6 +223,7 @@ extern tOptionEntry OptionsOPTIONS[] ;
 extern tOptionEntry OptionsESCMODE[] ;
 extern tOptionEntry OptionsINPUT_ESCMODE[] ;
 extern tOptionEntry OptionsOUTPUT_MODE[] ;
+extern tOptionEntry OptionsOUTPUT_ESC_CHARSET[] ;
 extern tOptionEntry OptionsSESSION_MODE[] ;
 
 

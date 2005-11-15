@@ -41,6 +41,7 @@ EPCFG_INTOPT (ReqConfig,     unsigned,    bDebug,        DEBUG)
 EPCFG_INTOPT (ReqConfig,     unsigned,    bOptions,      OPTIONS) 
 EPCFG_INTOPT (ReqConfig,     int   ,  nSessionMode,     SESSION_MODE) 
 EPCFG_INTOPT (ReqConfig,     int   ,      nOutputMode,   OUTPUT_MODE) 
+EPCFG_INTOPT (ReqConfig,     int   ,      nOutputEscCharset,   OUTPUT_ESC_CHARSET) 
 #endif
 
 

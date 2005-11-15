@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcache.c,v 1.9 2005/08/07 00:02:58 richter Exp $
+#   $Id: epcache.c 294756 2005-08-07 00:03:03Z richter $
 #
 ###################################################################################*/
 

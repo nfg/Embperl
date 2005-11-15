@@ -27,7 +27,15 @@ sub new
     $self -> {root}      = $ENV{EMBPERL_SRC} . '/' ;
     
     # check if Embperl 1.3 is installed
-    if ($INC{'Apache.pm'})
+    if ($INC{'Apache2/RequestRec.pm'})
+	{
+        my $lib_1_3 = dirname ($INC{'Apache2/RequestRec.pm'})  ;
+        if (-e ($lib_1_3 . '/../HTML/Embperl.pod'))
+            {
+            $self -> {lib_1_3}     = dirname($lib_1_3) ;
+            }
+	}
+    elsif ($INC{'Apache.pm'})
 	{
         my $lib_1_3 = dirname ($INC{'Apache.pm'})  ;
         if (-e ($lib_1_3 . '/HTML/Embperl.pod'))
@@ -86,7 +94,7 @@ BEGIN
         { menu => 'Home',                   uri => '',                          file => { en => 'eg/web/index.htm', de => 'eg/web/indexD.htm'} },
         { menu => 'Features',               uri => 'pod/list/Features.htm',          file => { en => 'Features.pod',     de => 'FeaturesD.pod' }, sub =>
             [
-            { menu => 'Features 1.3',               uri => 'Features13.htm',          path => { en => '%lib_1_3%/HTML/Features.pod',     de => '%lib_1_3%/HTML/FeaturesD.pod' } }
+            { menu => 'Features 1.3',               uri => 'Features13.htm',          path => { en => '%lib_1_3%/HTML/Embperl/Features.pod',     de => '%lib_1_3%/HTML/Embperl/FeaturesD.pod' } }
             ]
         
          },
@@ -108,10 +116,10 @@ BEGIN
         },
         { menu => 'Documentation',          uri => 'pod/doc/', sub => 
             [
-                { menu => 'README',            uri => 'README',          file => { en => 'README', de => 'README'},
+                { menu => 'README',            uri => 'README.txt',         file => { en => 'README', de => 'README'},
                   desc => { en => 'Short overview',
                             de => 'Kurzüberblick' }},
-                { menu => 'README.v2',            uri => 'README.v2',          file => { en => 'README.v2', de => 'README.v2'},
+                { menu => 'README.v2',            uri => 'README.v2.txt',          file => { en => 'README.v2', de => 'README.v2'},
                   desc => { en => 'Contains what\'s new in Embperl 2.0 and differences to Embperl 1.3',
                             de => 'Enthält die Neuigkeiten von Embperl 2.0 und die Unterschiede zu Embperl 1.3' }},
                 { menu => 'Configuration',           uri => 'Config.htm',               file => { en => 'Config.pod', de => 'Config.pod'},
@@ -179,21 +187,24 @@ BEGIN
                 { menu => 'HTML::Embperl::Session',uri => 'HTML/Embperl/Session.htm',       path => '%lib_1_3%/HTML/Embperl/Session.pm' ,
                   desc => { en => 'Documentation for Embperls session handling object', 
                             de => 'Dokumentation über Embperls Session Objekt' }},
-                { menu => 'Tips & Tricks',         uri => 'HTML/Embperl/TipsAndTricks.htm', path => '%lib_1_3%/HTML/TipsAndTricks.pod' ,
+                { menu => 'Tips & Tricks',         uri => 'HTML/Embperl/TipsAndTricks.htm', path => '%lib_1_3%/HTML/Embperl/TipsAndTricks.pod' ,
                   desc => { en => 'Tips & Tricks for Embperl 1.3.6', 
                             de => 'Tips & Tricks für Embperl 1.3.6' }},
 
-                { menu => 'FAQ',                    uri => 'pod/Faq.htm',               path => '%lib_1_3%/HTML/Faq.pod',
+                { menu => 'FAQ',                    uri => 'pod/Faq.htm',               path => '%lib_1_3%/HTML/Embperl/Faq.pod',
                   desc => { en => 'FAQ for Embperl 1.3.6', 
                             de => 'FAQ für Embperl 1.3.6' }},
 
                 ],
             },
+            { menu => 'DBIx::Recordset',   uri => 'Recordset.htm',    path => '%lib_dbix%/DBIx/Recordset.pm',
+                  desc => { en => 'Documentation of DBIx::Recordset', 
+                            de => 'Dokumentation von DBIx::Recordset' }},
             ],
         },
         { menu => 'Installation',           uri => 'pod/INSTALL.htm',           file => 'INSTALL.pod', sub =>
             [
-            { menu => 'CVS',                relurl => 'pod/doc/CVS.htm',               file => 'CVS.pod' }
+            { menu => 'SVN',                relurl => 'pod/doc/SVN.htm',               file => 'SVN.pod' }
             ]
         
          },        #{ menu => 'FAQ',                    uri => 'pod/Faq.htm',               file => 'Faq.pod' },
@@ -202,7 +213,10 @@ BEGIN
         { menu => 'Support',                uri => 'pod/doc/Embperl.-page-17-.htm' },
         { menu => 'Changes',                 uri => 'pod/Changes.htm',           file => 'Changes.pod' },
         #{ menu => 'Sites using Embperl',    uri => 'pod/Sites.htm',             file => 'Sites.pod' },
-        { menu => 'Wiki',                uri => 'db/wiki/index.cgi', file => '/eg/web/db/wiki.epl' }, 
+        { menu => 'Wiki',                uri => 'db/wiki/index.htm', file => '/eg/web/db/wiki.epl', same =>
+          [ 
+          { menu => 'Wiki',                uri => 'db/wiki/index.cgi', file => '/eg/web/db/wiki.epl' }, 
+          ] },
         { menu => 'More infos',          uri => 'db/', sub => 
             [
             { menu => 'News',                    uri => 'news/news.htm',          file => 'eg/web/db/news/data.epd', fdat => { 'category_id' => 1 }, 

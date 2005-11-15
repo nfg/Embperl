@@ -365,8 +365,7 @@ or via the Embperl::Execute function.
 
 The difference is that the Execute function will reset the internal
 states of Embperl like they were before the subrountine call, when 
-the subroutine returns. Also Execute could handle recursive call, which
-currently not work when calling it as a Perl subroutine.
+the subroutine returns. 
 
 You may also pass Parameters to the subroutine:
 
@@ -378,6 +377,24 @@ You may also pass Parameters to the subroutine:
   
   [- foo ('value') -]
 
+
+In Embperl 2.0.2 and up you can use a shortcut syntax for passing parameters:
+
+    [$ sub foo ($p) $]
+     <p> Here we show the first parameter [+ $p +]</p>
+    [$ endsub $]
+
+This behaves the same as the example above, but in addition the parameters
+defined in this way are lexcialy scoped and therefore only available inside
+the subroutine.
+
+In addtion you can define some initial Perl code for the subroutine:
+
+   [$ sub foo ($a, $b)
+   my $c = $a + $b ;
+   $]
+     <p> The result is [+ $c +]</p>
+   [$ endsub $]
 
 If you have a couple of commonly used subroutines you can define then in one
 file and import them into the modules where they are neccesary:
@@ -1383,6 +1400,51 @@ to the application object.
 In case you need to retrieve a text inside your Perl code, you can do this
 with $r -> gettext('bar')
 
+=head1 Encoding/UTF-8
+
+Requires Embperl 2.1.0 and up.
+
+I<Embperl> tries to do the right thing to handle ISO-8859-1 and UTF-8
+out of the box. There are three places where encoding comes into places:
+
+=over 4
+
+=item Posted form data
+
+=item Output escaping
+
+=item Source code
+
+=back
+
+While the first two things are handled by Embperl itself, the third item is
+currently left to handle by Perl.
+
+Perl carries for each string value a flag that tells if the string
+is UTF-8 or not. Embperl uses this flag.
+
+Posted form data is examined. If a string contains valid UTF-8 
+characters Perl's internal UTF-8 flag is set. You can disable
+setting the UTF-8 flag by setting C<optFormDataNoUtf8> in C<EMBPERL_OPTIONS>.
+
+Output escaping is done based on the UTF-8 flag. In case the UTF-8
+flags is set characters above 127 are not escaped. To get the
+correct appearance in your browser you also have to specify the
+encoding as UTF-8 in your content-type http header.
+
+If the UTF-8 flag is not set the output escaping is done based on the
+setting of C<EMBPERL_OUTPUT_ESC_CHARSET>, which defaults to
+ISO-8859-1 (latin1). ISO-8859-2 (latin2) is also selectable.
+
+If you wish to have your Perl source code in UTF-8, you have to
+add a C<use utf8;> at the top of each page.
+
+Please note that not all modules sets Perl's internal UTF-8 flag
+correctly. At the time of this writing for example
+DBI and Net::LDAP does not set this flag. You have to correct
+it manualy, for example by using C<Encode::_utf8_on>.
+ 
+
 
 =head1 Error trapping
 
@@ -1687,10 +1749,10 @@ PPM for ActiveState
 
 B<Informations on how to install Embperl can be found in> L<INSTALL.pod>
 
-=head2 CVS
+=head2 SVN
 
-The latest developments are available via CVS.
-Look at L<"perldoc CVS.pod"|CVS.pod> for a detailed description.
+The latest developments are available via SVN.
+Look at L<"perldoc SVN.pod"|SVN.pod> for a detailed description.
 
 
 =head1 Syntaxmodes for various editors

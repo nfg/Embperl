@@ -1,5 +1,5 @@
 
-# $Id: httpd.stop.conf.src,v 1.2 2002/10/22 06:06:48 richter Exp $
+# $Id: httpd.stop.conf.src 294581 2002-10-22 06:06:48Z richter $
 
 print OFH <<EOD ;
 #

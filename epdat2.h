@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdat2.h,v 1.11 2005/08/07 00:02:58 richter Exp $
+#   $Id: epdat2.h 331953 2005-11-09 05:11:19Z richter $
 #
 ###################################################################################*/
 
@@ -108,6 +108,7 @@ typedef struct tReqConfig
     char        cMultFieldSep ;
     AV *        pPathAV ;
     int         nOutputMode ;
+    int         nOutputEscCharset ; /**< 0 = utf-8 (min) 1 = latin1 2 = latin2 */
     unsigned    bDebug ;
     unsigned    bOptions ;
     int         nSessionMode ;      /**< sets how to pass the session id, see smodeXXX constants */
@@ -374,6 +375,8 @@ struct tReq
     request_rec * pApacheReq ;	/* apache request record */
     SV *          pApacheReqSV ;
     tApacheDirConfig * pApacheConfig ;
+
+    tReq *        pPrevReq ;     /**< Stack in case a new request is startet, when a request is active */
   
     tReqConfig    Config ;    /**< request configuration data */
     tReqParam     Param ;     /**< request parameter data */

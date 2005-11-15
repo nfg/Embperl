@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcomp.c,v 1.22 2005/08/07 00:02:58 richter Exp $
+#   $Id: epcomp.c 330373 2005-11-02 22:00:14Z richter $
 #
 ###################################################################################*/
 
@@ -2088,7 +2088,7 @@ int embperl_ExecuteSubEnd           (/*in*/  tReq *	  r,
     sv_setiv (pDomTreeSV, r -> Component.xCurrDomTree) ;
     pCallerDomTree = DomTree_self (r -> Component.xCurrDomTree) ;
 
-    if (bSubNotEmpty)
+    if (bSubNotEmpty && r -> Component.xCurrNode)
         r -> Component.xCurrNode = xDocFraq = Node_insertAfter (r -> pApp, pSubDomTree, pSubDomTree -> xDocument, 0, pCallerDomTree, r -> Component.xCurrNode, r -> Component.nCurrRepeatLevel) ;
 
     if (r -> Component.Config.bDebug & dbgRun)

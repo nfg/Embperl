@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epinit.c,v 1.32 2005/09/25 13:43:38 richter Exp $
+#   $Id: epinit.c 331995 2005-11-09 08:11:00Z richter $
 #
 ###################################################################################*/
 
@@ -141,6 +141,7 @@ tOptionEntry OptionsOPTIONS[] =
     OPTION_OPT(DisableSelectScan)
     OPTION_OPT(ShowBacktrace)
     OPTION_OPT(EnableChdir)
+    OPTION_OPT(FormDataNoUtf8)
     } ;
 
 
@@ -173,6 +174,15 @@ tOptionEntry OptionsOUTPUT_MODE[] =
     {
     OPTION_OMODE(Html)
     OPTION_OMODE(Xml)
+    } ;
+
+#define OPTION_OCHARSET(a) OPTION(ocharset##a, a) 
+
+tOptionEntry OptionsOUTPUT_ESC_CHARSET[] =
+    {
+    OPTION_OCHARSET(Utf8)
+    OPTION_OCHARSET(Latin1)
+    OPTION_OCHARSET(Latin2)
     } ;
 
 #define OPTION_SMODE(a) OPTION(smode##a, a) 
@@ -1002,7 +1012,10 @@ static int embperl_GetFormData (/*i/o*/ register req * r,
     AV *    pFormArray      = r -> pThread -> pFormArray ;
     HV *    pFormHash       = r -> pThread -> pFormHash ;
     bool    bAll            = (r -> Config.bOptions & optAllFormData) != 0 ;
+    bool    bNoUtf8         = (r -> Config.bOptions & optFormDataNoUtf8) != 0 ;
     bool    bDebug          = (r -> Config.bDebug   & dbgForm) != 0 ;
+    int     mayutf8  = 0 ;
+    char    c ;
     epTHX ;
 
     if (nLen == 0)
@@ -1102,6 +1115,10 @@ static int embperl_GetFormData (/*i/o*/ register req * r,
 			else
 			    { /* New Field -> store it */
 			    pSVV = newSVpv (pVal, nVal) ;
+#ifdef UTF8_IS_START
+			    if (mayutf8 && is_utf8_string(pVal, nVal))
+			    	SvUTF8_on (pSVV) ;
+#endif
 			    if (hv_store (pFormHash, pKey, nKey, pSVV, 0) == NULL)
 				{
 				_free (r, pMem) ;
@@ -1121,7 +1138,8 @@ static int embperl_GetFormData (/*i/o*/ register req * r,
                     }
                 pKey = pVal = p ;
                 nKey = nVal = 0 ;
-                
+		mayutf8 = 0 ;
+				                
                 if (*pQueryString == '\0')
                     {
                     _free (r, pMem) ;
@@ -1131,8 +1149,12 @@ static int embperl_GetFormData (/*i/o*/ register req * r,
                 
                 break ;
             default:
-                *p++ = *pQueryString++ ;
+                c = *p++ = *pQueryString++ ;
                 nLen-- ;
+#ifdef UTF8_IS_START
+                if (!bNoUtf8)
+                    mayutf8 += UTF8_IS_START(c) ;
+#endif
                 break ;
             }
         }
@@ -1383,6 +1405,7 @@ int    embperl_SetupRequest (/*in*/ pTHX_
 
     r -> pApp = pApp ;
     pThread = r -> pThread = pApp -> pThread  ;
+    r -> pPrevReq = pThread -> pCurrReq  ;
     pThread -> pCurrReq = r ;
     pApp ->    pCurrReq = r ;
     sv_setsv(pThread -> pReqRV, r -> _perlsv) ;   
@@ -1826,9 +1849,13 @@ int    embperl_CleanupRequest (/*in*/ tReq *  r)
     if (r -> Config.bDebug)
 	DomStats (r -> pApp) ;
 
-    r -> pThread -> pCurrReq = NULL ;
-    r -> pApp ->    pCurrReq = NULL ;
+    r -> pThread -> pCurrReq = r -> pPrevReq ;
+    r -> pApp ->    pCurrReq = r -> pPrevReq ;
 
+    if (r -> pPrevReq)
+        sv_setsv(r -> pThread -> pReqRV, r -> pPrevReq -> _perlsv) ;   
+
+    
     return ok ;
     }
 

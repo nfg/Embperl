@@ -1,5 +1,5 @@
 
-# $Id: httpd.conf.src,v 1.59 2005/09/04 12:55:59 richter Exp $
+# $Id: httpd.conf.src 330373 2005-11-02 22:00:14Z richter $
 
 print OFH <<EOD ;
 #
@@ -151,6 +151,7 @@ EOD
 print OFH <<EOD ;
 
 Embperl_Cookie_Path /
+Embperl_Cookie_Expires "+1d"
 EMBPERL_ALLOW (asc|\\.xml\$|\\.htm\$)
 
 

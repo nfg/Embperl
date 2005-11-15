@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Constant.pm,v 1.4 2005/08/07 00:03:00 richter Exp $
+#   $Id: Constant.pm 294756 2005-08-07 00:03:03Z richter $
 #
 ###################################################################################
 

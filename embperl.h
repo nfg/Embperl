@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: embperl.h,v 1.37 2005/09/25 13:43:38 richter Exp $
+#   $Id: embperl.h 331995 2005-11-09 08:11:00Z richter $
 #
 ###################################################################################*/
 
@@ -175,8 +175,9 @@ enum opt
     optOpenLogEarly            = 0x200000,
     optNoUncloseWarn	       = 0x400000,
     optDisableSelectScan       = 0x800000,
-    optShowBacktrace           = 0x8000000,
-    optEnableChdir             = 0x1000000
+    optEnableChdir             = 0x1000000,
+    optFormDataNoUtf8          = 0x2000000,
+    optShowBacktrace           = 0x8000000
     } ;
 
 /* --- output escaping --- */
@@ -189,7 +190,9 @@ enum tEscMode
     escEscape   = 4,
     escXML      = 8,
 
-    escStd      = 7
+    escStd      = 7,
+    
+    escHtmlUtf8 = 128
     } ;
 
 /* --- output mode --- */
@@ -198,6 +201,15 @@ enum tOutputMode
     {
     omodeHtml   = 0,
     omodeXml    = 1,
+    } ;
+
+/* --- output esc charset --- */
+
+enum tOutputEscChareset
+    {
+    ocharsetUtf8  = 0,
+    ocharsetLatin1  = 1,
+    ocharsetLatin2  = 2,
     } ;
 
 /* --- input escaping --- */

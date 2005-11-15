@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdom.h,v 1.10 2005/08/07 00:02:58 richter Exp $
+#   $Id: epdom.h 331953 2005-11-09 05:11:19Z richter $
 #
 ###################################################################################*/
 
@@ -141,11 +141,11 @@ enum tNodeFlags
     nflgOK	     = 1,
     nflgEscUrl       = 2,
     nflgEscChar	     = 4,
-    nflgEscXML	     = 8,
     nflgIgnore       = 16,	/**< Ignore this node */
     nflgNewLevelNext = 32,	/**< Next sibling has new RepeatLevel */
     nflgNewLevelPrev = 64,	/**< Previous sibling has new RepeatLevel */
-    nflgStopOutput   = 128	/**< Do not make any further output after this node */
+    nflgStopOutput   = 8,	/**< Do not make any further output after this node */
+    nflgEscUTF8	     = 128
     } ;
 
 enum tAttrFlags

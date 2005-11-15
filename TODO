@@ -1,34 +1,19 @@
 
 TODO 
 
-- en/de select parameter passing in eg/web/header.epl
-
-- textarea escape [Doug Rayner 6.5.04]
-
 - doc that %mdat is per application
 
 - check memory on recompile of epl files
 
-- make test fedora 1 [13.12.04]
-
 - escape.htm hash order [ abe 7.3.05]
 
-- Global $r is not available. [ abe 7.3.05]
-
-- Date Header in Embper::Mail [ Robert 1.4.05]
-
 - content-type in Embperl::Mail [ abe 4.4.05]
-
-
-- Mail Date Header [Robert]
-
-- 404 Error for not found [Cliff Raymann]
 
 - %Udat not clearing after 500 error [Cliff Raymann]
 
 - $req_rec not available in preload pages [Neil Gunton]
 
-
+- Check CGI.pm version >= 3.10 in Makefile.PL [Gavin Carr, 4.10.05]
 
 
 TODO for Embperl 2.1 and later

@@ -80,6 +80,9 @@ at the server side and on the client side by one definition of rules.
 Handles per-user and per-module persistent session requiring only storage and retrieval of 
 the session data from a special hash.
 
+=item *
+
+UTF-8 Support (honours Perl's internal UTF-8 flag during in- and output)
 
 =item *
 
@@ -100,6 +103,12 @@ The Perl module DBIx::Recordset offers high level, easy to use database access f
 =item *
 
 I<Embperl::Mail> enables redirecting the result output to a mail-recipient.
+
+
+=item *
+
+I<Embperl::Inline> allows to embedd Embperl code in normal Perl code
+
 
 
 =back

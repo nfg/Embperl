@@ -99,7 +99,7 @@ CODE:
 	{
         char * p = SvPV (sText, l) ;
         r -> Component.bSubNotEmpty = 1 ;
-        r -> Component.xCurrNode = Node_insertAfter_CDATA (r->pApp, p, l, (r -> Component.nCurrEscMode & 3)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode, DomTree_self (r -> Component.xCurrDomTree), r -> Component.xCurrNode, r -> Component.nCurrRepeatLevel) ; 
+        r -> Component.xCurrNode = Node_insertAfter_CDATA (r->pApp, p, l, (SvUTF8(sText)?nflgEscUTF8:0) + ((r -> Component.nCurrEscMode & 3)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode), DomTree_self (r -> Component.xCurrDomTree), r -> Component.xCurrNode, r -> Component.nCurrRepeatLevel) ; 
         r -> Component.bEscModeSet = 0 ;
         }
 

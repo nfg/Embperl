@@ -1,5 +1,5 @@
 Config.pod
-CVS.pod
+SVN.pod
 Changes.pod
 Cmd.xs
 DOM.xs
@@ -18,12 +18,14 @@ Embperl/Form/Validate/FQDN_IPAddr.pm
 Embperl/Form/Validate/IPAddr.pm
 Embperl/Form/Validate/IPAddr_Mask.pm
 Embperl/Form/Validate/Integer.pm
+Embperl/Form/Validate/PosInteger.pm
 Embperl/Form/Validate/Select.pm
 Embperl/Form/Validate/TimeHHMM.pm
 Embperl/Form/Validate/TimeHHMMSS.pm
+Embperl/Form/Validate/TimeValue.pm
+Embperl/Inline.pm
 Embperl/Log.pm
 Embperl/Mail.pm
-Embperl/Module.pm
 Embperl/Object.pm
 Embperl/Out.pm
 Embperl/Recipe.pm
@@ -168,8 +170,6 @@ epcache.c
 epcfg.h
 epcgiinit.c
 epchar.c
-epchar.c.iso-latin-2
-epchar.c.min
 epcmd.c
 epcmd2.c
 epcomp.c
@@ -248,6 +248,7 @@ test/cmp/errormismatchcmd.htm
 test/cmp/errpage.htm
 test/cmp/escape.htm
 test/cmp/escraw.htm
+test/cmp/escutf8.htm
 test/cmp/execfirst.htm
 test/cmp/execgetsess.htm
 test/cmp/execnotfound.htm
@@ -352,6 +353,7 @@ test/cmp/ssibasic.htm
 test/cmp/ssiep.htm
 test/cmp/stdout.htm
 test/cmp/sub.htm
+test/cmp/subargs.htm
 test/cmp/subempty.htm
 test/cmp/subout.htm
 test/cmp/subreq.htm
@@ -448,6 +450,7 @@ test/html/errmsg2.htm
 test/html/error.htm
 test/html/escape.htm
 test/html/escraw.htm
+test/html/escutf8.htm
 test/html/execfirst.htm
 test/html/execgetsess.htm
 test/html/execnotfound.htm
@@ -558,6 +561,7 @@ test/html/sidurl/seturlsess.htm
 test/html/spaces.htm
 test/html/stdout/stdout.htm
 test/html/sub.htm
+test/html/subargs.htm
 test/html/subempty.htm
 test/html/subexec.htm
 test/html/subimp.htm

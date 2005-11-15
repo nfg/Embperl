@@ -1505,10 +1505,6 @@ EMBPERL_OPTIONS
 
 $request -> config -> options 
 
-=item Since:
-
-yes
-
 =back
 
 
@@ -1571,7 +1567,7 @@ HTML
 
 =item Since:
 
-yes
+2.0b9
 
 =back
 
@@ -1585,6 +1581,52 @@ specs. e.g.
 B<NOTE:> If you set output_mode to XML you should also change L<escmode> to XML escaping.
 
 
+=head2 Embperl_Output_Esc_Charset
+
+=over
+
+=item Env:
+
+EMBPERL_OUTPUT_ESC_CHARSET
+
+=item Method:
+
+$request -> config -> output_esc_charset I<[read only]>
+
+=item Default:
+
+ocharsetLatin1 = 1
+
+=item Since:
+
+2.0.2
+
+=back
+
+
+Set the charset which to assume when escaping. This can only be set
+before the request starts (e.g. httpd.conf or top of the page). 
+Setting it inside the page has undefined results.
+
+=over
+
+=item ocharsetUtf8 = 0
+
+UTF-8 or any non known charset. Characters with codes above 128 will not be escaped
+at all
+
+=item ocharsetLatin1 = 1
+
+ISO-8859-1, the default. When a Perl string has it's utf-8 bit set, this mode
+will behave the same as mode 0, i.e. will not escape anything above 128.
+
+=item ocharsetLatin2 = 2
+
+ISO-8859-2. When a Perl string has it's utf-8 bit set, this mode
+will behave the same as mode 0, i.e. will not escape anything above 128.
+
+=back
+
 =head2 Embperl_Session_Mode
 
 =over
@@ -1595,7 +1637,7 @@ EMBPERL_SESSION_MODE
 
 =item Method:
 
-$request -> config -> session_mode 
+$request -> config -> session_mode I<[read only]>
 
 =item Default:
 
@@ -1603,7 +1645,7 @@ smodeUDatCookie = 1
 
 =item Since:
 
-no
+2.0b6
 
 =back
 
@@ -1803,6 +1845,15 @@ below for more details.)
 This option disables the setup of %fdat and @Z<>ffld. Embperl will not do anything
 with the posted form data.
 Set this when using Execute from your perl script and you have already read the Form Data (via eg. CGI.pm).
+
+=item optFormDataNoUtf8 = 0x2000000
+
+By default Embperl checks all formfields in %fdat 
+if they contain valid UTF-8 strings and if yes sets Perl's
+internals UTF-8 flag.
+
+If this option is set Embperl will never set the UTF-8 on any
+data in %fdat.
 
 
 =item optAllFormData = 8192

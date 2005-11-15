@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdefault.c,v 1.6 2005/08/07 00:02:58 richter Exp $
+#   $Id: epdefault.c 331953 2005-11-09 05:11:19Z richter $
 #
 ###################################################################################*/
 
@@ -72,6 +72,7 @@ static void embperl_DefaultReqConfig (/*in*/ tReqConfig  *pCfg)
     {
     pCfg -> cMultFieldSep = '\t' ;
     pCfg -> nSessionMode = smodeUDatCookie ;
+    pCfg -> nOutputEscCharset = ocharsetLatin1 ;
     }
 
 

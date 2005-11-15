@@ -3,7 +3,7 @@
 #
 # (C) 1997-2005 G.Richter (richter@dev.ecos.de) / ECOS
 #
-# $Id: Makefile.PL,v 1.80 2005/10/02 13:30:14 richter Exp $
+# $Id: Makefile.PL 328577 2005-10-26 06:44:05Z richter $
 #
 
 
@@ -1293,7 +1293,7 @@ if ($mp2cfg && $mp2cfg->{'MP_INCLUDE_DIR'})
 
 open FH, ">xs/mmargs.pl" or die "Cannot open xs/mmargs.pl ($!).\n
 --------------------------------------------------------------------------
-If you done a CVS checkout you need to create the sources first by running
+If you done a SVN checkout you need to create the sources first by running
 xsbuilder/source_scan.pl and xsbuilder/xs_generate.pl.
 --------------------------------------------------------------------------
 \n" ;

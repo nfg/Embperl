@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epnames.h,v 1.33 2005/08/07 00:02:58 richter Exp $
+#   $Id: epnames.h 332139 2005-11-09 20:46:38Z richter $
 #
 ###################################################################################*/
 
@@ -258,6 +258,9 @@
 #define XSprePUSH (sp = PL_stack_base + ax - 1)
 #endif
 
+#ifndef SvUTF8
+#define SvUTF8(x) 0
+#endif
 
 #if PERL_VERSION >= 5
 

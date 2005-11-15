@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdom.c,v 1.28 2005/08/07 00:02:58 richter Exp $
+#   $Id: epdom.c 331953 2005-11-09 05:11:19Z richter $
 #
 ###################################################################################*/
 
@@ -3127,8 +3127,8 @@ tNode Node_insertBefore_CDATA    (/*in*/ tApp * a,
     if (nEscMode != -1)
 	{
         pNew -> nType  = (nEscMode & 8)?ntypText:((nEscMode & 3)?ntypTextHTML:ntypCDATA) ;
-	pNew -> bFlags &= ~(nflgEscXML + nflgEscUrl + nflgEscChar) ;
-	pNew -> bFlags |= (nEscMode ^ nflgEscChar) & (nflgEscXML + nflgEscUrl + nflgEscChar) ;
+	pNew -> bFlags &= ~(nflgEscUTF8 + nflgEscUrl + nflgEscChar) ;
+	pNew -> bFlags |= (nEscMode ^ nflgEscChar) & (nflgEscUTF8 + nflgEscUrl + nflgEscChar) ;
 	}
     else
 	pNew -> nType  = ntypCDATA ;
@@ -3286,8 +3286,8 @@ tNode Node_insertAfter_CDATA    (/*in*/ tApp * a,
     if (nEscMode != -1)
 	{
         pNew -> nType  = (nEscMode & 8)?ntypText:((nEscMode & 3)?ntypTextHTML:ntypCDATA) ;
-	pNew -> bFlags &= ~(nflgEscXML + nflgEscUrl + nflgEscChar) ;
-	pNew -> bFlags |= (nEscMode ^ nflgEscChar) & (nflgEscXML + nflgEscUrl + nflgEscChar) ;
+	pNew -> bFlags &= ~(nflgEscUTF8 + nflgEscUrl + nflgEscChar) ;
+	pNew -> bFlags |= (nEscMode ^ nflgEscChar) & (nflgEscUTF8 + nflgEscUrl + nflgEscChar) ;
 	}
     else
 	pNew -> nType  = ntypCDATA ;
@@ -3362,8 +3362,8 @@ tNode Node_replaceChildWithCDATA (/*in*/ tApp * a,
     if (nEscMode != -1)
 	{
         pOldChild -> nType  = (nEscMode & 8)?ntypText:((nEscMode & 3)?ntypTextHTML:ntypCDATA) ;
-	pOldChild -> bFlags &= ~(nflgEscXML + nflgEscUrl + nflgEscChar) ;
-	pOldChild -> bFlags |= (nEscMode ^ nflgEscChar) & (nflgEscXML + nflgEscUrl + nflgEscChar) ;
+	pOldChild -> bFlags &= ~(nflgEscUTF8 + nflgEscUrl + nflgEscChar) ;
+	pOldChild -> bFlags |= (nEscMode ^ nflgEscChar) & (nflgEscUTF8 + nflgEscUrl + nflgEscChar) ;
 	}
     else
 	pOldChild -> nType  = ntypCDATA ;
@@ -3655,6 +3655,14 @@ static tNodeData * Node_toString2 (/*i/o*/ register req *   r,
     tRepeatLevel nRepeatLevel = *pRepeatLevel ;
     tNodeData * pNode = Node_self (pDomTree, xNode) ;
     tNodeData * pLast ;
+    struct tCharTrans * pChar2Html  ;
+
+    if (r -> Config.nOutputEscCharset == ocharsetLatin1)
+    	pChar2Html = Char2Html ;
+    else if (r -> Config.nOutputEscCharset == ocharsetLatin2)
+    	pChar2Html = Char2HtmlLatin2 ;
+    else
+    	pChar2Html = Char2HtmlMin ;
     
     
     if (pNode -> nType == ntypDocumentFraq)
@@ -3846,7 +3854,7 @@ static tNodeData * Node_toString2 (/*i/o*/ register req *   r,
 	        char * s ;
 	        int    l ;
 	        Ndx2StringLen (pNode -> nText,s,l) ;
-                OutputEscape (r, s, l, (pNode -> bFlags & nflgEscXML)?Char2XML:(pNode -> bFlags & nflgEscUrl)?Char2Url:Char2Html, (char)((pNode -> bFlags & nflgEscChar)?'\\':0)) ;
+                OutputEscape (r, s, l, (pNode -> bFlags & nflgEscUTF8)?(pNode -> bFlags & nflgEscUrl)?Char2Url:Char2HtmlMin:(pNode -> bFlags & nflgEscUrl)?Char2Url:pChar2Html, (char)((pNode -> bFlags & nflgEscChar)?'\\':0)) ;
 	        }
 	    else 
 	        {

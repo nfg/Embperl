@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eputil.c,v 1.49 2005/10/02 13:30:14 richter Exp $
+#   $Id: eputil.c 331953 2005-11-09 05:11:19Z richter $
 #
 ###################################################################################*/
 
@@ -161,7 +161,19 @@ SV * Escape	  (/*i/o*/ register req * r,
 	if ((nEscMode & escXML) && !r -> Component.bEscInUrl)
 	    pEscTab = Char2XML ;
 	else if ((nEscMode & escHtml) && !r -> Component.bEscInUrl)
-	    pEscTab = Char2Html ;
+	    {
+    	    struct tCharTrans * pChar2Html  ;
+
+    	    if (nEscMode & escHtmlUtf8)
+	    	pChar2Html = Char2HtmlMin ;
+    	    else if (r -> Config.nOutputEscCharset == ocharsetLatin1)
+	    	pChar2Html = Char2Html ;
+	    else if (r -> Config.nOutputEscCharset == ocharsetLatin2)
+	    	pChar2Html = Char2HtmlLatin2 ;
+	    else
+	    	pChar2Html = Char2HtmlMin ;
+    	    pEscTab = pChar2Html ;
+    	    }
 	else if (nEscMode & escUrl)
 	    pEscTab = Char2Url ;
 	else 
@@ -2054,7 +2066,9 @@ const char * embperl_CalcExpires(const char *sTime, char * sResult, int bHTTP)
 #ifdef WIN32
 extern long _timezone;
 #else
+#ifndef __BSD_VISIBLE
 extern long timezone;
+#endif
 #endif
 
 
@@ -2079,7 +2093,11 @@ char * embperl_GetDateTime (char * sResult)
                       tms->tm_hour, tms->tm_min, tms->tm_sec, tz > 0?"+":"", tz);
 #else
     localtime_r(&when, &tms);
+#ifndef __BSD_VISIBLE
     tz = -timezone / 36 + (tms.tm_isdst?100:0) ;
+#else
+    tz = -tms.tm_gmtoff / 36 + (tms.tm_isdst?100:0) ;
+#endif
     sprintf(sResult,
 		       "%s, %.2d%c%s%c%.2d %.2d:%.2d:%.2d %s%04d",
 		       ep_day_snames[tms.tm_wday],

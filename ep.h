@@ -353,6 +353,8 @@ struct tCharTrans
 
 
 extern struct tCharTrans Char2Html [] ;
+extern struct tCharTrans Char2HtmlLatin2 [] ;
+extern struct tCharTrans Char2HtmlMin [] ;
 extern struct tCharTrans Char2Url  [] ; 
 extern struct tCharTrans Char2XML  [] ; 
 extern struct tCharTrans Html2Char [] ;

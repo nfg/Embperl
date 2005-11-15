@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epmain.c,v 1.143 2005/10/01 17:20:04 richter Exp $
+#   $Id: epmain.c 331953 2005-11-09 05:11:19Z richter $
 #
 ###################################################################################*/
 
@@ -380,7 +380,18 @@ void NewEscMode (/*i/o*/ register req * r,
     if (r -> Component.Config.nEscMode & escXML && !r -> Component.bEscInUrl)
 	r -> Component.pNextEscape = Char2XML ;
     else if (r -> Component.Config.nEscMode & escHtml && !r -> Component.bEscInUrl)
-	r -> Component.pNextEscape = Char2Html ;
+	{
+    	struct tCharTrans * pChar2Html  ;
+
+    	if (r -> Config.nOutputEscCharset == ocharsetLatin1)
+	    	pChar2Html = Char2Html ;
+	else if (r -> Config.nOutputEscCharset == ocharsetLatin2)
+	    	pChar2Html = Char2HtmlLatin2 ;
+	else
+	    	pChar2Html = Char2HtmlMin ;
+	
+	r -> Component.pNextEscape = pChar2Html ;
+	}
     else if (r -> Component.Config.nEscMode & escUrl)
         r -> Component.pNextEscape = Char2Url ;
     else 

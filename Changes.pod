@@ -1,6 +1,43 @@
 =pod
 
-=head4 2.0.1  3. October 2005
+=head1 2.1.0  15. Nov 2005
+
+    - Added better UTF-8 support:
+	- Output escaping now takes Perl's UTF-8 flags into
+          account and will not escape UTF-8 chars anymore
+        - Diretive Embperl_Output_Esc_Charset allows to
+          generaly switch between Latin1, Latin2 and UTF-8.
+          (For UTF-8 this is not necessary when Perl's UTF-8
+           Flag is correctly set, but this is not the case
+           for all datasources)
+        - Form data that is send to Embperl and put into %fdat
+          get now Perl's internal UTF8 flags set, in case
+          the data posted contains a valid UTF8 string.
+          This can be disabled with the option
+          optFormDataNoUtf8.
+    - Added Module Embperl::Inline, which allows to embed
+      Embperl code in an ordinary Perl module. This makes
+      is easy to install system wide libraries, which need
+      to contain Embperl code/markup. See perldoc Embperl::Inline
+    - [$ sub $] now can takes arguments and inital code like:
+        [$ sub foo ($self, $a, $b)  my $c = $self -> {bar} $] 
+    - Embperl subroutines are now called in array context, to
+      allow to return multiple return values.
+    - Added validate type TimeValue, which is a numeric value
+      followed by s, m, h, d or w.
+    - Added validate type PosInteger, which is a positiv integer
+      value
+    - Added Support for calling Embperl::Object::Execute inside
+      an Embperl page. (Allow to nest new requests)      
+    - Corrected HTML/XML escaping inside from <textarea> tags.
+    - Fixed Segfault that could occur when a Embperl sub does
+      not contain anything.
+    - Fixed compile problem with timezone on BSD systems
+    - Fixed URLs in website to work correctly on static mirrors
+    - Embperl development has been moved from CVS to SVN. 
+      See L<"SVN.pod"|SVN.pod> .
+
+=head1 2.0.1  3. October 2005
 
     - Turn off Apache maintainer mode symbols, so it works with SuSE Apache
     - Integrated KWiki into Embperl website (available under eg/web)
@@ -10,8 +47,8 @@
     - Return correct http status codes 403 and 404 if access to a file is
       forbidden or the file was not found. Reported by Cliff Rayman.
     - Added Date header for Embperl::Mail, Suggested by Robert.
- 
-=head4 2.0.0  14. August 2005
+
+=head1 2.0.0  14. August 2005
 
    - http headers from %http_headers_out will now also be send when the
      init method of an application object return non zero (e.g. 302 for redirect).
@@ -21,7 +58,7 @@
      and also allows to set edit and view_level (anonymous, login, admin)
      for every table.
 
-=head4 2.0rc5 7. August 2005
+=head1 2.0rc5 7. August 2005
 
    - Added attribute content-type to mail:send tag (Syntax Mail).
      Patch from Axel Beckert.
@@ -42,7 +79,7 @@
    - Added test for application object in Execute tests.
    - Make sure Embperl is listed after Apache itself in the server signature.
 
-=head4 2.0rc4 19. Juni 2005
+=head1 2.0rc4 19. Juni 2005
 
    - Adapted to new mod_perl namespace. Embperl now works correctly
      with mod_perl version >= 2.0rc5 (older version are still supported)

@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: test.pl,v 1.162 2005/08/08 13:42:44 richter Exp $
+#   $Id: test.pl 331997 2005-11-09 08:15:21Z richter $
 #
 ###################################################################################
 
@@ -199,6 +199,11 @@
         },
     'escraw.htm' => { 
         'version'    => 1,
+        },
+    'escutf8.htm' => { 
+        'query_info' => "poststd=abcäöü&postutf8=abcÃ¤Ã¶Ã¼",
+        'offline'    => 1,
+        'condition'  => '$] >= 5.008000', 
         },
     'spaces.htm' => { 
         'version'    => 1,
@@ -413,6 +418,9 @@
         'repeat'     => 2,
         },
     'sub2.htm' => { 
+        'repeat'     => 2,
+        },
+    'subargs.htm' => { 
         'repeat'     => 2,
         },
     'subout.htm' => { 

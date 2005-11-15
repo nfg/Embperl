@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: DOM.xs,v 1.13 2005/08/07 00:02:57 richter Exp $
+#   $Id: DOM.xs 331953 2005-11-09 05:11:19Z richter $
 #
 ###################################################################################
 
@@ -65,7 +65,7 @@ PPCODE:
     RETVAL = NULL ; /* avoid warning */
     SvGETMAGIC_P4(sText) ;
     s = SV2String (sText, l) ;
-    Node_replaceChildWithCDATA (CurrApp, DomTree_self(pDomNode -> xDomTree), pDomNode -> xNode, r -> Component.nCurrRepeatLevel, s, l, (r -> Component.nCurrEscMode & 11)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode, 0) ;
+    Node_replaceChildWithCDATA (CurrApp, DomTree_self(pDomNode -> xDomTree), pDomNode -> xNode, r -> Component.nCurrRepeatLevel, s, l, (SvUTF8(sText)?nflgEscUTF8:0) + ((r -> Component.nCurrEscMode & 11)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode), 0) ;
     r -> Component.nCurrEscMode = r -> Component.Config.nEscMode ;
     r -> Component.bEscModeSet = -1 ;
     /*SvREFCNT_inc (sText) ;*/
@@ -86,7 +86,7 @@ PPCODE:
     RETVAL = NULL ; /* avoid warning */
     SvGETMAGIC_P4(sText) ;
     s = SV2String (sText, l) ;
-    Node_replaceChildWithCDATA (CurrApp, DomTree_self(xDomTree), xOldChild, r -> Component.nCurrRepeatLevel, s, l, (r -> Component.nCurrEscMode & 11)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode, 0) ;
+    Node_replaceChildWithCDATA (CurrApp, DomTree_self(xDomTree), xOldChild, r -> Component.nCurrRepeatLevel, s, l, (SvUTF8(sText)?nflgEscUTF8:0) + ((r -> Component.nCurrEscMode & 11)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode), 0) ;
     r -> Component.nCurrEscMode = r -> Component.Config.nEscMode ;
     r -> Component.bEscModeSet = -1 ;
     /*SvREFCNT_inc (sText) ;*/
@@ -107,7 +107,7 @@ PPCODE:
     r -> Component.bSubNotEmpty = 1 ;
     SvGETMAGIC_P4(sText) ;
     s = SV2String (sText, l) ;
-    Node_replaceChildWithCDATA (r -> pApp, DomTree_self(r -> Component.xCurrDomTree), xOldChild, r -> Component.nCurrRepeatLevel, s, l, (r -> Component.nCurrEscMode & 11)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode, 0) ;
+    Node_replaceChildWithCDATA (r -> pApp, DomTree_self(r -> Component.xCurrDomTree), xOldChild, r -> Component.nCurrRepeatLevel, s, l, (SvUTF8(sText)?nflgEscUTF8:0) + ((r -> Component.nCurrEscMode & 11)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode), 0) ;
     r -> Component.nCurrEscMode = r -> Component.Config.nEscMode ;
     r -> Component.bEscModeSet = -1 ;
     /*SvREFCNT_inc (sText) ;*/
@@ -205,10 +205,17 @@ embperl_Node_iAppendChild (xDomTree, xParent, nType, sText)
     tReq * r = CurrReq ;
 CODE:
     STRLEN nText ;
+    tNodeData * pNode ;
+    tNode xNode ;
+    int nEscMode = (SvUTF8(sText)?escHtmlUtf8:0) + ((r -> Component.nCurrEscMode & 11)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode) ;
     char * sT = SV2String (sText, nText) ;
     tDomTree * pDomTree = DomTree_self(xDomTree) ;
-    Node_appendChild (r -> pApp, pDomTree, xParent, r -> Component.nCurrRepeatLevel, (tNodeType)nType, 0, sT, nText, 0, 0, NULL) ;
-
+    xNode = Node_appendChild (r -> pApp, pDomTree, xParent, r -> Component.nCurrRepeatLevel, (tNodeType)nType, 0, sT, nText, 0, 0, NULL) ;
+    pNode = Node_self(pDomTree,xNode) ;
+    pNode -> nType  = (nEscMode & 8)?ntypText:((nEscMode & 3)?ntypTextHTML:ntypCDATA) ;
+    pNode -> bFlags &= ~(nflgEscUTF8 + nflgEscUrl + nflgEscChar) ;
+    pNode -> bFlags |= (nEscMode ^ nflgEscChar) & (nflgEscUTF8 + nflgEscUrl + nflgEscChar) ;
+    	
 
 char *
 embperl_Node_iChildsText (xDomTree, xChild, bDeep=0)
@@ -296,7 +303,7 @@ CODE:
     sT = SV2String (sText, nText) ;
     sA = SV2String (sAttr, nAttr) ;
 
-    sEscapedText = Escape (r, sT, nText, r -> Component.nCurrEscMode, NULL, '\0') ;
+    sEscapedText = Escape (r, sT, nText, (SvUTF8(sText)?escHtmlUtf8:0) + r -> Component.nCurrEscMode, NULL, '\0') ;
     sT = SV2String (sEscapedText, nText) ;
 
     pDomTree = DomTree_self (pDomNode -> xDomTree) ;
@@ -320,7 +327,7 @@ CODE:
     STRLEN nText ;
     char * sT = SV2String (sText, nText) ;
     char * sA = SV2String (sAttr, nAttr) ;
-    sEscapedText = Escape (r, sT, nText, r -> Component.nCurrEscMode, NULL, '\0') ;
+    sEscapedText = Escape (r, sT, nText, (SvUTF8(sText)?escHtmlUtf8:0) + r -> Component.nCurrEscMode, NULL, '\0') ;
     sT = SV2String (sEscapedText, nText) ;
     pDomTree = DomTree_self (xDomTree) ;
 

@@ -236,6 +236,7 @@
    bOptions | options
    nSessionMode | session_mode
    nOutputMode | output_mode
+   nOutputEscCharset | output_esc_charset
    new
 !   private
  </tReqConfig>

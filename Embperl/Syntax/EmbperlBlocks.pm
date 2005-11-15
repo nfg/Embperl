@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: EmbperlBlocks.pm,v 1.6 2005/08/07 00:03:01 richter Exp $
+#   $Id: EmbperlBlocks.pm 330373 2005-11-02 22:00:14Z richter $
 #
 ###################################################################################
  
@@ -371,8 +371,27 @@ sub Init
                 ) ;
     $self -> AddMetaStartEnd ('sub', 'endsub',
                 { 
-                perlcode => 'sub _ep_sub_%&<noname>% { ', 
-                perlcodeend => '};  sub %^subname% { my @_ep_save ; Embperl::Cmd::SubStart($_ep_DomTree,%$q%,\\@_ep_save); my $_ep_ret = _ep_sub_%^subname% (@_); Embperl::Cmd::SubEnd($_ep_DomTree,\\@_ep_save); return $_ep_ret } ; $_ep_exports{%^"subname%} = \&%^subname% ; ', 
+                perlcode => 'sub _ep_sub_ ', 
+                compiletimeperlcode => q[ 
+                                          my $args = %&'<noname>% ;
+                                            if ($args =~ /^([^ ]+)\s*\((.*?)\)\s*(.*?)$/s)
+                                                {
+                                                $Embperl::req -> component -> code ("sub _ep_sub_$1 { my ($2) = \@_ ; $3 ") ;
+                                                }
+                                            else
+                                                {
+                                                $args =~ /^([^ ]+)\s*(.*?)$/s ;
+                                                $Embperl::req -> component -> code ("sub _ep_sub_$1 { $2 ") ;
+                                                }
+                                         ], 
+                perlcodeend => ' };  sub #subname# { my @_ep_save ; Embperl::Cmd::SubStart($_ep_DomTree,%$q%,\\@_ep_save); my @_ep_ret = _ep_sub_#subname# (@_); Embperl::Cmd::SubEnd($_ep_DomTree,\\@_ep_save); return @_ep_ret } ; $_ep_exports{%^"subname%} = \&#subname# ; ', 
+                compiletimeperlcodeend => q[ 
+                                          my $args = %^'subname% ;
+                                          $args =~ s/\s+.+$//s ;
+                                          my $code = $Embperl::req -> component -> code ;
+                                          $code =~ s/#subname#/$args/g ;
+                                          $Embperl::req -> component -> code ($code);
+                                         ], 
                 removenode => 10,
                 mayjump     => 1,
                 stackname2   => 'subname',
