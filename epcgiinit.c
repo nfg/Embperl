@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcgiinit.c 294756 2005-08-07 00:03:03Z richter $
+#   $Id: epcgiinit.c 355598 2005-12-09 20:59:37Z richter $
 #
 ###################################################################################*/
 
@@ -74,7 +74,7 @@
         if (!embperl_CalcExpires (s, buf, 0)) \
             LogErrorParam (NULL, rcTimeFormatErr, "EMBPERL_"#CFGNAME, s) ; \
         else \
-            pConfig -> NAME   = ep_pstrdup (pPool, buf) ; \
+            pConfig -> NAME   = ep_pstrdup (pPool, s) ; \
         } \
     } \
     tainted = 0 ; 

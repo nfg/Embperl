@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epparse.c 294776 2005-09-25 13:43:39Z richter $
+#   $Id: epparse.c 387723 2006-03-22 05:02:29Z richter $
 #
 ###################################################################################*/
 
@@ -1147,7 +1147,7 @@ static int embperl_ParseSource (/*i/o*/ register req * r,
     if (!(xNode = Node_appendChild (r -> pApp, pDomTree, xDocNode, 0, ntypAttr, 0, NULL, xDomTreeAttr, 0, 0, NULL)))
 	return rcOutOfMemory ;
 
-    if (!(xNode = Node_appendChild (r -> pApp, pDomTree, xNode, 0, ntypAttrValue, 0, NULL, r -> Component.xCurrDomTree, 0, 0, NULL)))
+    if (!(xNode = Node_appendChild (r -> pApp, pDomTree, xNode, 0, ntypAttrValue, 0, (char *)&(r -> Component.xCurrDomTree), sizeof (r -> Component.xCurrDomTree), 0, 0, NULL)))
 	return rcOutOfMemory ;
 
     /* Add at least one child node to document to make insertafter at the beginning of the document work */

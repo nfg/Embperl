@@ -37,6 +37,7 @@
    sSessionID | session_id
    sSessionStateID | session_state_id
    sSessionUserID  | session_user_id
+   sCookieExpires | cookie_expires
    bExit | had_exit
    nLogFileStartPos | log_file_start_pos
    bError | error

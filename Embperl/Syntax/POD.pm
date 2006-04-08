@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: POD.pm 294756 2005-08-07 00:03:03Z richter $
+#   $Id: POD.pm 355574 2005-12-09 18:15:54Z richter $
 #
 ###################################################################################
  
@@ -739,7 +739,17 @@ Embperl::Syntax::POD
 
 =head1 DESCRIPTION
 
-Documenation is still not written!!!!!!!    
+Class derived from Embperl::Syntax to convert Perl Plain Old
+Documentation (POD) files on the fly into XML.
+
+Used for generating the Embperl online documentation from the Embperl
+POD files. See to eg directory in the distribution for an example how
+to use it.
+
+
+=head1 TODO
+
+Documenation of the resulting XML format still has to be written...
 
 
 =head1 Methods

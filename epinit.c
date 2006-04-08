@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epinit.c 331995 2005-11-09 08:11:00Z richter $
+#   $Id: epinit.c 355598 2005-12-09 20:59:37Z richter $
 #
 ###################################################################################*/
 
@@ -1480,6 +1480,16 @@ int    embperl_SetupRequest (/*in*/ pTHX_
         if (pVal)
             r -> sSessionUserID = ep_pstrdup (r -> pPool, pVal) ;
         }
+
+    if (r -> pApp -> Config.sCookieExpires)
+        {
+        char buf[256] ; 
+
+        if (!embperl_CalcExpires(r -> pApp -> Config.sCookieExpires, buf, 0)) 
+            LogErrorParam (r -> pApp, rcTimeFormatErr, "EMBPERL_COOKIE_EXPIRES", r -> pApp -> Config.sCookieExpires) ; 
+        else
+            r -> sCookieExpires = ep_pstrdup (r -> pPool, buf) ;    
+        }    
 
     if (r -> pApp -> pUserHash)
         r -> nSessionMgnt = 1 ;

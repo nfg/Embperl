@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epnames.h 332139 2005-11-09 20:46:38Z richter $
+#   $Id: epnames.h 392518 2006-04-08 12:28:12Z richter $
 #
 ###################################################################################*/
 
@@ -466,11 +466,13 @@
 
 #define apr_pstrdup         ap_pstrdup
 #define apr_palloc          ap_palloc
+#define apr_pcalloc         ap_pcalloc
 #define apr_pool_t          pool
 #define apr_array_header_t  array_header
 #define apr_table_entry_t   table_entry
 #define apr_table_elts      table_elts
 #define apr_table_get       ap_table_get
+#define apr_table_do        ap_table_do
 #define apr_table_set       ap_table_set
 #define apr_table_add       ap_table_add
 

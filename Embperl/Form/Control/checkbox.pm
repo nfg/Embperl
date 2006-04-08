@@ -1,0 +1,112 @@
+
+###################################################################################
+#
+#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#
+#   You may distribute under the terms of either the GNU General Public
+#   License or the Artistic License, as specified in the Perl README file.
+#
+#   THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+#   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+#   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+#
+#   $Id$
+#
+###################################################################################
+
+package Embperl::Form::Control::checkbox ;
+
+use strict ;
+use vars qw{%fdat} ;
+
+use base 'Embperl::Form::Control' ;
+
+use Embperl::Inline ;
+
+
+# ---------------------------------------------------------------------------
+#
+#   get_active_id - get the id of the value which is currently active
+#
+
+sub get_active_id
+
+    {
+    my ($self)   = @_ ;
+
+    my $name     = $self -> {name} ;
+    my $val      = $self -> {value} || 1 ;
+
+    return $val eq $fdat{$name}?"$name-0":"$name-1" ;
+    }
+
+
+1 ;
+
+__EMBPERL__
+    
+[# ---------------------------------------------------------------------------
+#
+#   show_control - output the control
+#]
+
+[$ sub show_control ($self) 
+
+    my $name     = $self -> {name} ;
+    my $val      = $self -> {value} || 1 ;
+$]    
+<input type="checkbox"   class="cBase cControlCheckbox"  name="[+ $name +]" value="[+ $val +]"
+[$if ($self -> {sublines} || $self -> {subobjects}) $] OnClick="show_checked(this)" [$endif$]
+>
+[$endsub$]
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Embperl::Form::Control::checkbox - A checkbox control inside an Embperl Form
+
+
+=head1 SYNOPSIS
+
+  { 
+  type  => 'checkbox',
+  text  => 'blabla', 
+  name  => 'foo',
+  value => 'bar'
+  }
+
+=head1 DESCRIPTION
+
+Used to create an checkbox control inside an Embperl Form.
+See Embperl::Form on how to specify parameters.
+
+=head2 PARAMETER
+
+=head3 type
+
+Needs to be 'checkbox'
+
+=head3 name
+
+Specifies the name of the checkbox control
+
+=head3 text 
+
+Will be used as label for the checkbox control
+
+=head3 value
+
+Gives the value of the checkbox
+
+=head1 Author
+
+G. Richter (richter@dev.ecos.de)
+
+=head1 See Also
+
+perl(1), Embperl, Embperl::Form
+
+

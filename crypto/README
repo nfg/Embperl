@@ -11,7 +11,7 @@ THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF 
 MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-$Id: README 294756 2005-08-07 00:03:03Z richter $
+$Id: README 355574 2005-12-09 18:15:54Z richter $
 
 
 Sourcecode encryption
@@ -24,8 +24,8 @@ your code.
 To enable encrypted sourcefile, go to the crypto directory and edit
 the epcrypto_config.h file. Here you can enable/disable encryption,
 choose which algorithmus to use, the encryption key and whenever
-Embperl should still work with unencrypted files. Make sure to use a 
-unique encryption key. Addtionaly OpenSSL must be already installed
+Embperl should still work with unencrypted files. Make sure to use a
+unique encryption key. Additionally OpenSSL must be already installed
 on your system. Now install Embperl as usual, by running
 
 perl Makefile.PL
@@ -36,7 +36,7 @@ make install
 To encrypt your source files go to the crypto directory and start the
 epcrypto program. It takes a source and a destination filename. If you 
 are using Embperl 2.x, you have to specify the syntax the sourcefile
-uses as third parameter, if it is any other then "Embperl".
+uses as third parameter, if it is any other than "Embperl".
 
 IMPORTANT:  Make sure to not distribute any files from the crypto
             directory, because it contains the key. Anybody who

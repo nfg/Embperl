@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdom.c 331953 2005-11-09 05:11:19Z richter $
+#   $Id: epdom.c 392518 2006-04-08 12:28:12Z richter $
 #
 ###################################################################################*/
 
@@ -133,6 +133,13 @@ tNodeData * dom_malloc (/*in*/ tApp * a,
     pMemLast = malloc(sizeof (tPad)) ;
 #endif
 
+    if (pMemLast == NULL)
+        {
+        char buf[256] ;
+        sprintf (buf, "dom_malloc: Out of memory (%u bytes)", sizeof (tPad)) ;
+    	mydie (a, buf) ;
+    	}
+    	
     nMemUsage += sizeof (tPad) ;
 
     pMemEnd = pMemLast + sizeof (tPad) ;
@@ -235,9 +242,13 @@ void * str_malloc (/*in*/ tApp * a,
     else
         {
         char buf[256] ;
+        /*
         sprintf (buf, "%u bytes", n) ;
         LogErrorParam (a, rcOutOfMemory, "str_malloc failed", buf) ;
-        }
+        */
+        sprintf (buf, "str_malloc: Out of memory (%u bytes)", n + sizeof (size_t)) ;
+    	mydie (a, buf) ;
+    	}
 
     return m ;
     }
@@ -262,9 +273,13 @@ void * str_malloc_dbg (/*in*/ tApp * a,
     else
         {
         char buf[256] ;
+	/*
         sprintf (buf, "%u bytes", n) ;
         LogErrorParam (a, rcOutOfMemory, "str_malloc_dbg failed", buf) ;
-        }
+        */
+        sprintf (buf, "str_malloc: Out of memory (%u bytes)", n + sizeof (size_t)) ;
+    	mydie (a, buf) ;
+    	}
 
     return m ;
     }
@@ -290,9 +305,13 @@ void * str_realloc (/*in*/ tApp * a,
     else
         {
         char buf[256] ;
+	/*
         sprintf (buf, "%zu bytes", n) ;
         LogErrorParam (a, rcOutOfMemory, "str_realloc failed", buf) ;
-        }
+        */
+        sprintf (buf, "str_realloc: Out of memory (%u bytes)", n + sizeof (size_t)) ;
+    	mydie (a, buf) ;
+    	}
     
     return m ;
     }
@@ -319,9 +338,13 @@ void * str_realloc_dbg (/*in*/ tApp * a,
     else
         {
         char buf[256] ;
+	/*
         sprintf (buf, "%zu bytes", n) ;
         LogErrorParam (a, rcOutOfMemory, "str_realloc failed", buf) ;
-        }
+        */
+        sprintf (buf, "str_realloc: Out of memory (%u bytes)", n + sizeof (size_t)) ;
+    	mydie (a, buf) ;
+    	}
 
     return m ;
     }
@@ -3463,7 +3486,7 @@ tNodeData * Node_selfNextSibling (/*in*/ tApp * a,
     tNodeData * pParent  ;
     tNodeData * pNxt ;
 
-    if (pNode -> xNext == pNode -> xNdx)
+    if (pNode -> nType == ntypAttr || pNode -> xNext == pNode -> xNdx)
         return NULL ;
     
     if ((pParent = Node_selfLevel (a, pDomTree, pNode -> xParent, nRepeatLevel)) != NULL)
@@ -3513,7 +3536,7 @@ tNode Node_nextSibling (/*in*/ tApp * a,
     tNodeData * pNode = Node_selfNotNullLevel (a, pDomTree, xNode, nRepeatLevel) ;
     tNodeData * pParent  ;
 
-    if (pNode -> xNext == pNode -> xNdx)
+    if (pNode -> nType == ntypAttr || pNode -> xNext == pNode -> xNdx)
         return 0 ;
     
     pParent = Node_selfLevel (a, pDomTree, pNode -> xParent, nRepeatLevel) ;
@@ -3541,7 +3564,7 @@ tNodeData * Node_selfPreviousSibling (/*in*/ tApp * a,
     {
     tNodeData * pParent  ;
 
-    if (pNode -> xPrev == pNode -> xNdx)
+    if (pNode -> nType == ntypAttr || pNode -> xPrev == pNode -> xNdx)
         return 0 ;
     
     pParent = Node_selfLevel (a, pDomTree, pNode -> xParent, nRepeatLevel) ;
@@ -3574,7 +3597,7 @@ tNode Node_previousSibling (/*in*/ tApp * a,
     tNodeData * pNode = Node_selfNotNullLevel (a, pDomTree, xNode, nRepeatLevel) ;
     tNodeData * pParent  ;
 
-    if (pNode -> xPrev == pNode -> xNdx)
+    if (pNode -> nType == ntypAttr || pNode -> xPrev == pNode -> xNdx)
         return 0 ;
     
     pParent = Node_selfLevel (a, pDomTree, pNode -> xParent, nRepeatLevel) ;

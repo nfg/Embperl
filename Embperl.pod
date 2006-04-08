@@ -1,10 +1,14 @@
-
 =head1 NAME
 
 Embperl - Building dynamic Websites with Perl
 
 
 =head1 SYNOPSIS
+
+For a list of available Embperl documentation please view
+L<Embperl::TOC> with perldoc(1) or man(1). If Embperl is not yet
+installed, have a look at perldoc TOC.pod in the distribution archive.
+
 
 
 =head1 DESCRIPTION
@@ -403,6 +407,46 @@ file and import them into the modules where they are neccesary:
 
 This will import all subroutines from the file I<mylib.htm> into the current page
 where they could call just as a normal Perl subroutine.
+
+
+=item B<dump>
+
+Embperl 2.1.1 and above.
+
+C<dump> can be used to output the values of variables either to the output or
+to logfiles. The first parameter specifies the output channel:
+
+=over 4
+
+=item out
+
+Output to the page output
+
+=item pre
+
+Same as C<out>, but suround with a <pre> tag. This is the default, if
+the output parameter is omitted.
+
+=item log
+
+Output to embperl log file
+
+=item err
+
+Output to stderr, which normaly goes to the httpd error log.
+
+=back
+
+If the output paramter is omitted, C<pre> is assumed.
+
+The following parameter can be a literal text (in quotes) or a list
+of variables.
+
+Example:
+
+  [$ dump err 'dump test', %fdat $]
+
+  [$ dump %fdat, $i, @array $]
 
 
 
@@ -1455,7 +1499,7 @@ Sometimes you want to have a different behaviour. One possibility is to let
 Apache display a custom error page (of course only when you run under mod_perl).
 
 To get this working you need to set the option C<optReturnError> (262144)
-in your httpd.conf in the C<EMBPERL_DEBUG> directive.
+in your httpd.conf in the C<EMBPERL_OPTIONS> directive.
 
 With this option set, Embperl sends no output in case of an error.
 It returns the error back to Apache or the calling program. When running
@@ -1788,11 +1832,11 @@ Dreamweaver extension which tells Dreamweaver not to touch Embperl code can
 be found at http://www.somewhere.com/software/
 
 
-=head1 Author
+=head1 AUTHOR
 
 G. Richter (richter@dev.ecos.de)
 
 
-=head1 See Also
+=head1 SEE ALSO
 
 perl(1), mod_perl, Apache httpd

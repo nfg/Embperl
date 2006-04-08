@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdat2.h 331953 2005-11-09 05:11:19Z richter $
+#   $Id: epdat2.h 355598 2005-12-09 20:59:37Z richter $
 #
 ###################################################################################*/
 
@@ -144,7 +144,7 @@ typedef struct tAppConfig
     char *  sCookieName ;
     char *  sCookieDomain ;
     char *  sCookiePath ;
-    char *  sCookieExpires ;
+    char *  sCookieExpires ;   /**< Argument given in config for cookie expires **/
     bool    bCookieSecure ;
     char *  sLog ;
     unsigned    bDebug ;
@@ -393,6 +393,7 @@ struct tReq
     char *  sSessionID ;        /**< stores session name and id for status session data */
     char *  sSessionUserID ;    /**< received id of user session data */
     char *  sSessionStateID ;   /**< received id of state session data */
+    char *  sCookieExpires ;	/**< Time when cookie expires **/	
 
     int	    bExit ;	        /**< We should exit the request */
     long    nLogFileStartPos ;  /**< file position of logfile, when logfile started */

@@ -3413,6 +3413,23 @@ $request -> session_user_id I<[read only]>
 Id of the current user session as received by the browser, this
 means this method returns C<undef> for a new session.
 
+=head2 cookie_expires
+
+=over
+
+=item Method:
+
+$request -> cookie_expires 
+
+=item Since:
+
+2.1.1
+
+=back
+
+
+Can be used to retrieve the actual expiration date that Embperl uses for the cookie with the session id.
+
 =head2 had_exit
 
 =over

@@ -1,5 +1,29 @@
 =pod
 
+=head1 2.2.0  8. Apr. 2006
+
+    - Added new command [$ dump $] which can be used
+      to dump variables to logfiles or to the output
+      for debugging purpose.
+    - [$ sub $] return value is handled now corretly
+      in scalar and array context
+    - Added support for Apache 2.2
+    - Added Table of Content pod file, which lists
+      all available Embperl documentation, to get
+      a better overview. Thanks to Axel Beckert.
+    - Fixed Cookie expire calculation, because
+      relative exipre times where only calculated
+      once at server startup. Spotted by Derrick Spell. 
+    - Fixed parsing of Cache configuration functions in
+      httpd.conf. Spotted by Carl Eklof.
+    - Added better handling of Out Of Memory condition,
+      i.e. log error end try to clean up instead of
+      segfault.
+    - Fixed segfault that could occur because a non
+      string value is passed as string index, which 
+      crashed if such a string index doesn't exists.
+      Spotted by Carl Eklof.
+    
 =head1 2.1.0  15. Nov 2005
 
     - Added better UTF-8 support:

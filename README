@@ -9,7 +9,7 @@ THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF 
 MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-$Id: README 344310 2005-11-15 05:22:19Z richter $
+$Id: README 355574 2005-12-09 18:15:54Z richter $
 
 
 
@@ -41,6 +41,7 @@ DOCUMENTATION
 
 The following documentation is available within the distribution
 
+Detailed list of documenation:  perldoc TOC.pod
 Features of Embperl:            perldoc Features.pod
 Introduction to basic Embperl:  perldoc Intro.pod
 Introduction to Embperl 2 
@@ -54,7 +55,7 @@ Full documentation:             perldoc Config.pod
                                 perldoc Embperl/Inline.pm
 Tips and Tricks:                perldoc TipsAndTricks.pod
 Changes:                        perldoc Changes.pod
-Examples:		        eg/x/README
+Examples:		        eg/README
 Sourcecode encryption:          crypto/README
 
 All the above and further information can be found at the Embperl website 

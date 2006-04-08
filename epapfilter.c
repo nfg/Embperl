@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epapfilter.c 294756 2005-08-07 00:03:03Z richter $
+#   $Id: epapfilter.c 392518 2006-04-08 12:28:12Z richter $
 #
 ###################################################################################*/
 
@@ -206,7 +206,10 @@ static apr_status_t ProviderApOutFilter_Callback(ap_filter_t *f, apr_bucket_brig
     epTHX_
 
 
-    APR_BRIGADE_FOREACH(b, bb) 
+    //APR_BRIGADE_FOREACH(b, bb) 
+    for (b = APR_BRIGADE_FIRST(bb);
+         b != APR_BRIGADE_SENTINEL(bb);
+         b = APR_BUCKET_NEXT(b)) 
         {
         /* APR_BUCKET_IS_EOS(b) does give undefined symbol, when running outside of Apache */
         /* if (APR_BUCKET_IS_EOS(b)) */

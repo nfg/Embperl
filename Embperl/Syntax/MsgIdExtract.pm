@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: MsgIdExtract.pm 294756 2005-08-07 00:03:03Z richter $
+#   $Id: MsgIdExtract.pm 355574 2005-12-09 18:15:54Z richter $
 #
 ###################################################################################
  
@@ -158,8 +158,10 @@ Embperl::Syntax::MsgIdExtract
 
 =head1 DESCRIPTION
 
-Class derived from Embperl::Syntax to define the syntax for 
-Embperl Blocks and metacommands.
+Class derived from Embperl::Syntax to define the syntax for the
+internationalisation using "[= =]" Embperl blocks and metacommands.
+
+See L<Embperl>, section I18N for details.
 
 =head1 Methods
 

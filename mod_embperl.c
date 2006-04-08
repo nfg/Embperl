@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: mod_embperl.c 294756 2005-08-07 00:03:03Z richter $
+#   $Id: mod_embperl.c 392518 2006-04-08 12:28:12Z richter $
 #
 ###################################################################################*/
 
@@ -570,11 +570,11 @@ static void *embperl_create_dir_config(apr_pool_t * p, char *d)
     embperl_ApacheInitUnload (p) ;
 
 #ifdef APACHE2
-    apr_pool_sub_make(&subpool, p, NULL);
+    apr_pool_create_ex(&subpool, p, NULL, NULL);
 #else
     subpool = ap_make_sub_pool(p);
 #endif
-    cfg = (tApacheDirConfig *) ap_pcalloc(subpool, sizeof(tApacheDirConfig));
+    cfg = (tApacheDirConfig *) apr_pcalloc(subpool, sizeof(tApacheDirConfig));
 
 #if 0
 #ifdef APACHE2
@@ -602,7 +602,7 @@ static void *embperl_create_dir_config(apr_pool_t * p, char *d)
 
 static void *embperl_create_server_config(apr_pool_t * p, server_rec *s)
     {
-    tApacheDirConfig *cfg = (tApacheDirConfig *) ap_pcalloc(p, sizeof(tApacheDirConfig));
+    tApacheDirConfig *cfg = (tApacheDirConfig *) apr_pcalloc(p, sizeof(tApacheDirConfig));
 
     bApDebug |= ap_exists_config_define("EMBPERL_APDEBUG") ;
 
@@ -726,11 +726,11 @@ static void *embperl_merge_dir_config (apr_pool_t *p, void *basev, void *addv)
 #endif
 
 #ifdef APACHE2
-        apr_pool_sub_make(&subpool, p, NULL);
+        apr_pool_create_ex(&subpool, p, NULL, NULL);
 #else
         subpool = ap_make_sub_pool(p);
 #endif
-        mrg = (tApacheDirConfig *)ap_palloc (subpool, sizeof(tApacheDirConfig));
+        mrg = (tApacheDirConfig *)apr_palloc (subpool, sizeof(tApacheDirConfig));
 
         if (bApDebug)
             ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: merge_dir/server_config base=0x%p add=0x%p mrg=0x%p\n", basev, addv, mrg) ;
@@ -826,7 +826,7 @@ const char * embperl_Apache_Config_##STRUCT##NAME (cmd_parms *cmd, /* tApacheDir
 const char * embperl_Apache_Config_##STRUCT##NAME (cmd_parms *cmd, /* tApacheDirConfig */ void * pDirCfg, const char* arg) \
     { \
     apr_pool_t * p = cmd -> pool ;    \
-    ((tApacheDirConfig *)pDirCfg) -> STRUCT.NAME = ap_pstrdup(p, arg) ; \
+    ((tApacheDirConfig *)pDirCfg) -> STRUCT.NAME = apr_pstrdup(p, arg) ; \
     ((tApacheDirConfig *)pDirCfg) -> set_##STRUCT##NAME = 1 ; \
     if (bApDebug) \
         ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: Set "#CFGNAME" (type="#TYPE";STR) = %s\n", arg) ; \
@@ -842,7 +842,7 @@ const char * embperl_Apache_Config_##STRUCT##NAME (cmd_parms *cmd, /* tApacheDir
     if (!embperl_CalcExpires(arg, buf, 0)) \
         LogErrorParam (NULL, rcTimeFormatErr, "EMBPERL_"#CFGNAME, arg) ; \
     else \
-        ((tApacheDirConfig *)pDirCfg) -> STRUCT.NAME = ap_pstrdup(p, buf) ; \
+        ((tApacheDirConfig *)pDirCfg) -> STRUCT.NAME = apr_pstrdup(p, arg) ; \
     ((tApacheDirConfig *)pDirCfg) -> set_##STRUCT##NAME = 1 ; \
     if (bApDebug) \
         ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: Set "#CFGNAME" (type="#TYPE";STR) = %s\n", arg) ; \
@@ -875,7 +875,7 @@ const char * embperl_Apache_Config_##STRUCT##NAME (cmd_parms *cmd, /* tApacheDir
 #define EPCFG_SAVE(STRUCT,TYPE,NAME,CFGNAME) \
 const char * embperl_Apache_Config_##STRUCT##NAME (cmd_parms *cmd, /* tApacheDirConfig */ void * pDirCfg, const char* arg) \
     { \
-    ((tApacheDirConfig *)pDirCfg) -> save_##STRUCT##NAME = ap_pstrdup(cmd -> pool, arg) ; \
+    ((tApacheDirConfig *)pDirCfg) -> save_##STRUCT##NAME = apr_pstrdup(cmd -> pool, arg) ; \
     ((tApacheDirConfig *)pDirCfg) -> set_##STRUCT##NAME = 1 ; \
     if (bApDebug) \
         ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: Set "#CFGNAME" (type="#TYPE") = %s (save for later conversion to Perl data)\n", arg) ; \
@@ -953,10 +953,11 @@ char * embperl_GetApacheAppName (/*in*/ tApacheDirConfig * pDirCfg)
             ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: Get: about to convert "#CFGNAME" (type="#TYPE";CV) to perl data: %s\n", pDirCfg -> save_##STRUCT##NAME) ; \
 \
         if ((rc = EvalConfig (pApp, sv_2mortal(newSVpv(pDirCfg -> save_##STRUCT##NAME, 0)), 0, NULL, "Configuration: EMBPERL_"#CFGNAME, &pDirCfg -> STRUCT.NAME)) != ok) \
-            LogError (pReq, rc) ; \
-            return rc ; \
+            pDirCfg -> STRUCT.NAME = NULL ; \
+        tainted = 0 ; \
         } \
-    SvREFCNT_inc((SV *)(pDirCfg -> STRUCT.NAME)) ;
+    if (pDirCfg -> STRUCT.NAME) \
+        SvREFCNT_inc((SV *)(pDirCfg -> STRUCT.NAME)) ;
 
 
 #undef EPCFG_AV
@@ -994,10 +995,11 @@ char * embperl_GetApacheAppName (/*in*/ tApacheDirConfig * pDirCfg)
             ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: Get: about to convert "#CFGNAME" (type="#TYPE";REGEX) to perl data: %s\n", pDirCfg -> save_##STRUCT##NAME) ; \
 \
         if ((rc = EvalRegEx (pApp, pDirCfg -> save_##STRUCT##NAME, "Configuration: EMBPERL_"#CFGNAME, &pDirCfg -> STRUCT.NAME)) != ok) \
-            return rc ; \
+            pDirCfg -> STRUCT.NAME = NULL ; \
         tainted = 0 ; \
         } \
-    SvREFCNT_inc((SV *)(pDirCfg -> STRUCT.NAME)) ;
+    if (pDirCfg -> STRUCT.NAME) \
+        SvREFCNT_inc((SV *)(pDirCfg -> STRUCT.NAME)) ;
 
 
 /*---------------------------------------------------------------------------
@@ -1162,7 +1164,7 @@ int embperl_GetApacheReqParam  (/*in*/  tApp        * pApp,
     pParam -> sUri         = r -> uri ;
     pParam -> sPathInfo    = r -> path_info ;
     pParam -> sQueryInfo   = r -> args ;  
-    if ((p = ep_pstrdup (pPool, ap_table_get (r -> headers_in, "Accept-Language"))))
+    if ((p = ep_pstrdup (pPool, apr_table_get (r -> headers_in, "Accept-Language"))))
         {
         while (isspace(*p))
             p++ ;
@@ -1172,7 +1174,7 @@ int embperl_GetApacheReqParam  (/*in*/  tApp        * pApp,
         *p = '\0' ;
         }
 
-    ap_table_do (embperl_AddCookie, &s, r -> headers_in, "Cookie", NULL) ;
+    apr_table_do (embperl_AddCookie, &s, r -> headers_in, "Cookie", NULL) ;
 
     buf[0] = '\0' ;
 #ifdef APACHE2

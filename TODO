@@ -15,6 +15,11 @@ TODO
 
 - Check CGI.pm version >= 3.10 in Makefile.PL [Gavin Carr, 4.10.05]
 
+- Make enity substitution for xslt configurable [Kathryn Anderson, 22.12.05]
+
+- curr_esc_mode in map [Robert 24.1.06]
+
+- Apache2:compat fuer session setup [Aare Vesi 1.2.06]
 
 TODO for Embperl 2.1 and later
 

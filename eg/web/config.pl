@@ -209,8 +209,8 @@ BEGIN
         
          },        #{ menu => 'FAQ',                    uri => 'pod/Faq.htm',               file => 'Faq.pod' },
         #{ menu => 'Examples',               uri => 'examples/' },
-        { menu => 'Download',                uri => 'pod/doc/Embperl.-page-18-.htm'},    #sect_44' },
-        { menu => 'Support',                uri => 'pod/doc/Embperl.-page-17-.htm' },
+        { menu => 'Download',                uri => 'pod/doc/Embperl.-page-19-.htm'},    #sect_44' },
+        { menu => 'Support',                uri => 'pod/doc/Embperl.-page-18-.htm' },
         { menu => 'Changes',                 uri => 'pod/Changes.htm',           file => 'Changes.pod' },
         #{ menu => 'Sites using Embperl',    uri => 'pod/Sites.htm',             file => 'Sites.pod' },
         { menu => 'Wiki',                uri => 'db/wiki/index.htm', file => '/eg/web/db/wiki.epl', same =>

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: EmbperlBlocks.pm 330373 2005-11-02 22:00:14Z richter $
+#   $Id: EmbperlBlocks.pm 355574 2005-12-09 18:15:54Z richter $
 #
 ###################################################################################
  
@@ -56,6 +56,8 @@ sub new
         $self -> AddToRoot ($self -> {-epbBlocks}) ;
 
         Init ($self, ref $exchange?$exchange:undef) ;
+
+        $self -> AddInitCode ('use Data::Dumper ;') ;
         }
 
     return $self ;
@@ -360,6 +362,47 @@ sub Init
                 perlcode => '_ep_hid(%$n%,%&\'<noname>%);', 
                 removenode => 8,
                 }) ;
+    $self -> AddMetaCmd ('dump',
+                { 
+                compiletimeperlcode => q[ 
+                   {
+                   my $line = __LINE__ - 2 ;
+                   my $code ;
+                   my $out ;
+                   my ($dest, @vars) = split (/\s*,\s*/, %&'<noname>%) ;
+                   if ($dest ne 'pre' && $dest ne 'out' && $dest ne 'log' && $dest ne 'err')
+                        {
+                        unshift @vars, $dest ;
+                        $dest = 'pre' ;
+                        }
+
+                   if ($vars[0] =~ /^\'|\"/)
+                        {
+                        $out = (shift @vars) . '.' ;
+                        } 
+                   $out = "Data::Dumper -> Dump ([" . join (',', map { s/^(\@|\%%)/\\\\$1/; $_ } @vars) . "],['" . join ("','", @vars) . "'])" ;
+                   if ($dest eq 'pre')
+                        {
+                        $code = '%$c%' . "{ local \$escmode = 0; print OUT '<pre>' ; \$escmode = 7; my \$o = $out ; print OUT \$o, \"\\n\"; \$escmode = 0; print OUT \"<pre>\\n\" ; }" ; 
+                        }
+                   elsif ($dest eq 'out')
+                        {
+                        $code = '%$c%' . "{my \$o = $out ; print OUT \$o, \"\\n\"; }" ; 
+                        }
+                   elsif ($dest eq 'err')
+                        {
+                        $code = "{my \$o = $out . ' in " .  __FILE__ . " line " . $line . "'. \"\\n\"; print STDERR \$o ;}" ; 
+                        }
+                   elsif ($dest eq 'log')
+                        {
+                        $code = "{my \$o = $out . ' in " .  __FILE__ . " line " . $line . "'. \"\\n\"; print LOG \$o ;}" ; 
+                        }
+                   $Embperl::req -> component -> code ($code) ;
+                   }
+                   ],
+                removenode => 3,
+                compilechilds => 0,
+                }) ;
     $self -> AddMetaCmd ('syntax',
                 { 
                 compiletimeperlcode => '$Embperl::req -> component -> syntax (Embperl::Syntax::GetSyntax(%&\'<noname>%, $Embperl::req -> component -> syntax -> name));', 
@@ -384,7 +427,7 @@ sub Init
                                                 $Embperl::req -> component -> code ("sub _ep_sub_$1 { $2 ") ;
                                                 }
                                          ], 
-                perlcodeend => ' };  sub #subname# { my @_ep_save ; Embperl::Cmd::SubStart($_ep_DomTree,%$q%,\\@_ep_save); my @_ep_ret = _ep_sub_#subname# (@_); Embperl::Cmd::SubEnd($_ep_DomTree,\\@_ep_save); return @_ep_ret } ; $_ep_exports{%^"subname%} = \&#subname# ; ', 
+                perlcodeend => ' };  sub #subname# { my @_ep_save ; Embperl::Cmd::SubStart($_ep_DomTree,%$q%,\\@_ep_save); my @_ep_ret ; my $_ep_ret ;  if (wantarray()) { @_ep_ret = _ep_sub_#subname# (@_)}else {$_ep_ret = _ep_sub_#subname# (@_);} Embperl::Cmd::SubEnd($_ep_DomTree,\\@_ep_save); return wantarray()?@_ep_ret:$_ep_ret } ; $_ep_exports{%^"subname%} = \&#subname# ; ', 
                 compiletimeperlcodeend => q[ 
                                           my $args = %^'subname% ;
                                           $args =~ s/\s+.+$//s ;
@@ -403,35 +446,6 @@ sub Init
                 addfirstchild => 1,
                 },
                 ) ;
-
-=pod
-                { 
-                perlcode => '};  sub %^subname% { my @_ep_save ; Embperl::Cmd::SubStart($_ep_DomTree,%$q%,\\@_ep_save); my $_ep_ret = _ep_sub_%^subname% (@_); Embperl::Cmd::SubEnd($_ep_DomTree,\\@_ep_save); return $_ep_ret } ; $_ep_exports{%^"subname%} = \&%^subname% ; ', 
-                removenode => 10,
-                mayjump     => 0,
-                pop2        => 'subname',
-                switchcodetype => 1,
-                callreturn => 1,
-                }) ;
-    $self -> AddMetaStartEnd ('sub', 'endsub',
-                { 
-                perlcode => 'sub _ep_sub_%&<noname>% { ', 
-                removenode => 10,
-                mayjump     => 1,
-                stackname2   => 'subname',
-                push2        => '%&<noname>%',
-                switchcodetype => 2,
-                callreturn => 1,
-                },
-                { 
-                perlcode => '};  sub %^subname% { my @_ep_save ; Embperl::Cmd::SubStart($_ep_DomTree,%$q%,\\@_ep_save); my $_ep_ret = _ep_sub_%^subname% (@_); Embperl::Cmd::SubEnd($_ep_DomTree,\\@_ep_save); return $_ep_ret } ; $Embperl::req -> component -> exports -> {%^"subname%} = \&%^subname% ; ', 
-                removenode => 10,
-                mayjump     => 0,
-                pop2        => 'subname',
-                switchcodetype => 1,
-                callreturn => 1,
-                }) ;
-=cut
     } 
 
 

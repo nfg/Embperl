@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: RTF.pm 294756 2005-08-07 00:03:03Z richter $
+#   $Id: RTF.pm 355574 2005-12-09 18:15:54Z richter $
 #
 ###################################################################################
  
@@ -272,121 +272,7 @@ sub Init
                             'cdatatype' => 0,
 			    },
                             ) ;
-
-
-=pod
-    $self -> AddRTFCmdWithEnd ('if', 'endif',
-                            {
-                            perlcode    => 'if (%&<noname>%) { ', 
-                            removenode  => 10,
-                            mayjump     => 1,
-                            stackname   => 'metacmd',
-                            'push'      => 'if',
-                            }) ;
-
-    $self -> AddRTFCmdWithEnd  ('else', 'endif',
-                            { 
-                            perlcode => '} else {',
-                            removenode => 10,
-                            mayjump     => 1,
-                            stackname   => 'metacmd',
-                            stackmatch  => 'if',
-                            'push'      => 'if',
-                            }) ;
-    $self -> AddRTFCmdWithEnd  ('elsif', 'endif',
-                            { 
-                            perlcode => '} elsif (%&<noname>%) { ', 
-                            removenode => 10,
-                            mayjump     => 1,
-                            stackname   => 'metacmd',
-                            stackmatch  => 'if',
-                            'push'      => 'if',
-                            }) ;
-    $self -> AddRTFCmd ('endif',
-                            { 
-                            perlcode => '}', 
-                            removenode => 10,
-                            mayjump     => 1,
-                            stackname   => 'metacmd',
-                            stackmatch  => 'if',
-                            }) ;
-    $self -> AddRTFCmdBlock  ('while', 'endwhile',
-                { 
-                perlcode => 'while (%&<noname>%) { ', 
-                removenode => 10,
-                mayjump     => 1,
-                },
-                { 
-                perlcode => '};', 
-                removenode => 10,
-                mayjump     => 1,
-                }) ;
-    $self -> AddRTFCmdBlock  ('foreach', 'endforeach',
-                { 
-                perlcode => 'foreach %&<noname>% { ', 
-                removenode => 10,
-                mayjump     => 1,
-                },
-                { 
-                perlcode => '};', 
-                removenode => 10,
-                mayjump     => 1,
-                }) ;
-    $self -> AddRTFCmdBlock  ('do', 'until',
-                { 
-                perlcode => 'do { ', 
-                removenode => 10,
-                mayjump     => 1,
-                },
-                { 
-                perlcode => '} until (%&<noname>%) ; ',
-                removenode => 10,
-                mayjump     => 1,
-                }) ;
-    $self -> AddRTFCmd ('var',
-                { 
-                compiletimeperlcode => 'use strict ; use vars qw{%%CLEANUP %&<noname>%} ; map { $CLEANUP{substr($_,1)} = 1 } qw{%&<noname>%} ;', 
-                perlcode => 'use strict ;', 
-                removenode => 3,
-                }) ;
-    $self -> AddRTFCmd ('hidden',
-                { 
-                perlcode => '_ep_hid(%$n%,%&\'<noname>%);', 
-                removenode => 8,
-                }) ;
-    $self -> AddRTFCmd ('syntax',
-                { 
-                compiletimeperlcode => '$_[0] -> Syntax (Embperl::Syntax::GetSyntax(%&\'<noname>%, $_[0] -> SyntaxName));', 
-                removenode => 3,
-                },
-                { 
-                parsetimeperlcode => '$_[0] -> Syntax (Embperl::Syntax::GetSyntax(\'%%\', $_[0] -> SyntaxName)) ;', 
-                },
-                ) ;
-    $self -> AddRTFCmdBlock ('sub', 'endsub',
-                { 
-                perlcode => 'sub _ep_sub_%&<noname>% { ', 
-                removenode => 10,
-                mayjump     => 1,
-                stackname2   => 'subname',
-                push2        => '%&<noname>%',
-                switchcodetype => 2,
-                },
-                { 
-                perlcode => '};  sub %^subname% { my @_ep_save ; Embperl::Cmd::SubStart(\\$_ep_DomTree,%$q%,\\@_ep_save); my $_ep_ret = _ep_sub_%^subname% (@_); Embperl::Cmd::SubEnd(\\@_ep_save); return $_ep_ret } ; $_[0] -> ExportHash ->
-
-
-
- {%^"subname%} = \&%^subname% ; ', 
-                removenode => 10,
-                mayjump     => 1,
-                pop2        => 'subname',
-                switchcodetype => 1,
-                }) ;
-
-=cut
-
-    } 
+    }
 
 
 

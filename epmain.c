@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epmain.c 331953 2005-11-09 05:11:19Z richter $
+#   $Id: epmain.c 355598 2005-12-09 20:59:37Z richter $
 #
 ###################################################################################*/
 
@@ -538,8 +538,8 @@ static char * CreateSessionCookie (/*i/o*/ register req * r,
                     pCookie = ep_pstrcat (r -> pPool, pCookie, "; domain=", pCfg -> sCookieDomain, NULL) ;
                 if (pCfg -> sCookiePath)
                     pCookie = ep_pstrcat (r -> pPool, pCookie, "; path=", pCfg -> sCookiePath, NULL) ;
-                if (pCfg -> sCookieExpires)
-                    pCookie = ep_pstrcat (r -> pPool, pCookie, "; expires=", pCfg -> sCookieExpires, NULL) ;
+                if (r -> sCookieExpires)
+                    pCookie = ep_pstrcat (r -> pPool, pCookie, "; expires=", r -> sCookieExpires, NULL) ;
                 if (pCfg -> bCookieSecure)
                     pCookie = ep_pstrcat (r -> pPool, pCookie, "; secure", NULL) ;
 
