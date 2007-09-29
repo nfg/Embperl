@@ -32,9 +32,10 @@ __EMBPERL__
 
 [$ sub show ($self, $data)
 
-my $span = ($self->{width_percent})  ;
+my $span = ($self->{width_percent});
+my $section = $self->{section};
 $]
-<td class="cBase cInfoBox" colspan="[+ $span +]">[+ $self->{text} +]</td>
+<td class="cBase cInfoBox" colspan="[+ $span +]">[$ if $section $]<b>[$ endif $][+ $self->{text} +][$ if $section $]</b>[$ endif $]</td>
 [$endsub$]
 
 

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: IPAddr_Mask.pm 294756 2005-08-07 00:03:03Z richter $
+#   $Id: IPAddr_Mask.pm 410198 2006-05-30 06:49:55Z richter $
 #
 ###################################################################################
 
@@ -24,6 +24,11 @@ my %error_messages =
     de => 
     {
 	validate_ipaddr_mask => 'Feld %0: "%1" ist keine gültige IP-Adresse/Netzmaske. Geben Sie die IP-Adresse/Netzmaske in der Form nnn.nnn.nnn.nnn/mm ein',
+    },
+
+    'de.utf-8' => 
+    {
+	validate_ipaddr_mask => 'Feld %0: "%1" ist keine gÃ¼ltige IP-Adresse/Netzmaske. Geben Sie die IP-Adresse/Netzmaske in der Form nnn.nnn.nnn.nnn/mm ein',
     },
 
     en =>

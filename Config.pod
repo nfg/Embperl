@@ -219,13 +219,24 @@ F</tmp/embperl.log> on unix and F<\embperl.log> on windows.
 Optional. Specifies the level of debugging (what is written to the
 log file). The default is nothing.  See L<"EMBPERL_DEBUG"> for exact values.
 
-=item -o options
+=item -t options
 
 See L<"EMBPERL_OPTIONS"> for option values.
 
 =item -s syntax
 
 Defines the syntax of the source. See See L<"EMBPERL_SYNTAX">
+
+=item -p param
+
+Gives a value which is passed in the @param array to the executed page.
+Can be given multiple times.
+
+=item -f fdat value
+
+Gives a name/value pair which is passed in the %fdat hash to the executed page.
+Can be given multiple times.
+
 
 =back
 

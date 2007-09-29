@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Validate.pm 294769 2005-08-13 19:43:05Z richter $
+#   $Id: Validate.pm 474140 2006-11-13 04:41:09Z richter $
 #
 ###################################################################################
 
@@ -74,7 +74,7 @@ multilanguage support.
 
 The following methods are available:
 
-=head2 $epf = Embperl::Form::Validate -> new ($rules [, $form_id ], [$default_language]);
+=head2 $epf = Embperl::Form::Validate -> new ($rules [, $form_id ], [$default_language], [$charset]);
 
 Constructor for a new form validator. Returns a reference to a
 Embperl::Form::Validate object.
@@ -98,6 +98,10 @@ which should be the first form in your page.
 language to use when no messages are available in the desired language.
 Defaults to 'en'.
 
+=item $charset
+
+Pass 'utf-8' in case you want utf-8 messages.
+
 =back
 
 =cut
@@ -106,12 +110,13 @@ sub new
     {
     my $invokedby = shift;
     my $class = ref($invokedby) || $invokedby;
-    my ($frules, $form_id, $default_language) = @_ ;
+    my ($frules, $form_id, $default_language, $charset) = @_ ;
 
     my $self = {
 	         form_id          => $form_id || 'forms[0]', # The name 
 		 frules           => $frules || [],          # \@frules
 		 default_language => $default_language || 'en',
+		 charset          => $charset || 'iso8859-15',
 	       };
     bless($self, $class);
     $self->init;
@@ -359,7 +364,8 @@ sub build_message
     my ($self, $id, $key, $name, $msg, $param, $typeobj, $pref, $epreq) = @_ ;
 
     my $language = $pref -> {language} ;
-    my $default_language = $pref -> {default_language} ;
+    my $default_language = $pref -> {default_language} || $self -> {default_language} ;
+    my $charset = $pref -> {charset} ;
     my $txt ;
 
     $name ||=  $epreq?$epreq -> gettext($key):$key ;
@@ -368,22 +374,23 @@ sub build_message
         my @names ;
         foreach my $n (@$name)
             {
-            push @names, ref $n ? ($n -> {$language} || $n -> {$default_language} || (each %$n)[1] || $key):$n ; 
+            push @names, ref $n ? ($n -> {"$language.$charset"} || $n -> {"$default_language.$charset"} || $n -> {$language} || $n -> {$default_language} || (each %$n)[1] || $key):$n ; 
             }
         $name = join (', ', @names) ;
         }
     else
         {
-        $name = ref $name ? ($name -> {$language} || $name -> {$default_language} || (each %$name)[1] || $key):$name ; 
+        $name = ref $name ? ($name -> {"$language.$charset"} || $name -> {"$default_language.$charset"} || $name -> {$language} || $name -> {$default_language} || (each %$name)[1] || $key):$name ; 
         }
 
     if ($msg)
         {
-        $txt = ref $msg ? ($msg -> {$language} || $msg -> {$default_language} || (each %$msg)[1] || undef):$msg ; 
+        $txt = ref $msg ? ($msg -> {"$language.$charset"} || $msg -> {"$default_language.$charset"} || $msg -> {$language} || $msg -> {$default_language} || (each %$msg)[1] || undef):$msg ; 
         }
     else
         {
-        $txt = $typeobj -> getmsg ($id, $language, $default_language) ;
+        $txt = $typeobj -> getmsg ($id, "$language.$charset", "$default_language.$charset") ;
+        $txt ||= $typeobj -> getmsg ($id, $language, $default_language) ;
         }
     $txt = $epreq -> gettext($id) if (!$txt && $epreq) ;
     $txt ||= "Missing Message $id: %0 %1 %2 %3" ;                 
@@ -444,6 +451,7 @@ sub validate_messages
     $epreq ||= $Embperl::req ;
     $pref -> {language} ||= $epreq -> param -> language if ($epreq) ;
     $pref -> {default_language} ||= $self -> {default_language} ;
+    $pref -> {charset} ||= $self -> {charset} ;
 
     my $result = $self -> validate ($fdat, $pref, $epreq) ;
     return [] if (!@$result) ;
@@ -634,6 +642,7 @@ sub get_script_code
     $pref  ||= {} ;
     $pref -> {language} ||= $epreq -> param -> language if ($epreq) ;
     $pref -> {default_language} ||= $self -> {default_language} ;
+    $pref -> {charset} ||= $self -> {charset} ;
     
     my $script ;
     $script = $self -> gather_script_code ($self->{frules}, $pref, $epreq) ;
@@ -905,6 +914,14 @@ may have different support for regular expressions.
 =item must_not_contain
 
 =item must_contain_one_of
+
+=item checked
+
+Checkbox must be selected
+
+=item notchecked
+
+Checkbox must not be selected
 
 =back
 

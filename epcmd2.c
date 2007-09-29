@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcmd2.c 294756 2005-08-07 00:03:03Z richter $
+#   $Id: epcmd2.c 580573 2007-09-29 11:05:54Z richter $
 #
 ###################################################################################*/
 
@@ -134,7 +134,10 @@ static void embperlCmd_SetRemove (/*i/o*/ register req * r,
 
 	if (bEqual)
 	    {
-	    Element_selfSetAttribut (r -> pApp, pDomTree, pNode, nRepeatLevel, sAttrName, nAttrLen, NULL, 0) ;
+	    if (r -> Config.nOutputMode)   
+	        Element_selfSetAttribut (r -> pApp, pDomTree, pNode, nRepeatLevel, sAttrName, nAttrLen, sAttrName, nAttrLen) ;
+	    else    
+	        Element_selfSetAttribut (r -> pApp, pDomTree, pNode, nRepeatLevel, sAttrName, nAttrLen, NULL, 0) ;
 	    if (r -> Component.Config.bDebug & dbgInput)
 		lprintf (r -> pApp,  "[%d]INPU: Set Attribut: Name: '%*.*s' Value: '%*.*s' Attribute: '%*.*s' nRepeatLevel=%d\n", r -> pThread -> nPid, nNameLen, nNameLen, pName, nValLen, nValLen, pVal, nAttrLen, nAttrLen, sAttrName, nRepeatLevel) ; 
             }

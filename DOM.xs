@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: DOM.xs 331953 2005-11-09 05:11:19Z richter $
+#   $Id: DOM.xs 580492 2007-09-28 21:44:19Z richter $
 #
 ###################################################################################
 
@@ -62,6 +62,8 @@ PREINIT:
     char * s  ;
     tReq * r = CurrReq ;
 PPCODE:
+    if (!r)
+	 Perl_croak(aTHX_ "$Embperl::req undefined %s %d", __FILE__, __LINE__) ; 
     RETVAL = NULL ; /* avoid warning */
     SvGETMAGIC_P4(sText) ;
     s = SV2String (sText, l) ;
@@ -83,6 +85,8 @@ PREINIT:
     char * s  ;
     tReq * r = CurrReq ;
 PPCODE:
+    if (!r)
+	 Perl_croak(aTHX_ "$Embperl::req undefined %s %d", __FILE__, __LINE__) ; 
     RETVAL = NULL ; /* avoid warning */
     SvGETMAGIC_P4(sText) ;
     s = SV2String (sText, l) ;
@@ -103,6 +107,8 @@ PREINIT:
     char * s  ;
     tReq * r = CurrReq ;
 PPCODE:
+    if (!r)
+	 Perl_croak(aTHX_ "$Embperl::req undefined %s %d", __FILE__, __LINE__) ; 
     RETVAL = NULL ; /* avoid warning */
     r -> Component.bSubNotEmpty = 1 ;
     SvGETMAGIC_P4(sText) ;
@@ -124,6 +130,8 @@ PREINIT:
     const char * s  ;
     tReq * r = CurrReq ;
 PPCODE:
+    if (!r)
+	 Perl_croak(aTHX_ "$Embperl::req undefined %s %d", __FILE__, __LINE__) ; 
     r -> Component.bSubNotEmpty = 1 ;
     s = embperl_GetText (r, sId) ;
     l = strlen (s) ;
@@ -141,6 +149,8 @@ PREINIT:
     SV * sRet  ;
     tReq * r = CurrReq ;
 PPCODE:
+    if (!r)
+	 Perl_croak(aTHX_ "$Embperl::req undefined %s %d", __FILE__, __LINE__) ; 
     RETVAL = NULL ; /* avoid warning */
     SvGETMAGIC_P4(sText) ;
     sRet = Node_replaceChildWithUrlDATA (r, pDomNode -> xDomTree, pDomNode -> xNode, r -> Component.nCurrRepeatLevel, sText) ;
@@ -156,6 +166,8 @@ PREINIT:
     SV * sRet  ;
     tReq * r = CurrReq ;
 PPCODE:
+    if (!r)
+	 Perl_croak(aTHX_ "$Embperl::req undefined %s %d", __FILE__, __LINE__) ; 
     RETVAL = NULL ; /* avoid warning */
     r -> Component.bSubNotEmpty = 1 ;
     SvGETMAGIC_P4(sText) ;
@@ -191,6 +203,8 @@ PREINIT:
     tDomTree * pDomTree  ;
     tReq * r = CurrReq ;
 CODE:
+    if (!r)
+	 Perl_croak(aTHX_ "$Embperl::req undefined %s %d", __FILE__, __LINE__) ; 
     sT = SV2String (sText, nText) ;
     pDomTree = DomTree_self(pParentNode -> xDomTree) ;
     Node_appendChild (r -> pApp, pDomTree, pParentNode -> xNode, r -> Component.nCurrRepeatLevel, (tNodeType)nType, 0, sT, nText, 0, 0, NULL) ;
@@ -210,6 +224,8 @@ CODE:
     int nEscMode = (SvUTF8(sText)?escHtmlUtf8:0) + ((r -> Component.nCurrEscMode & 11)== 3?1 + (r -> Component.nCurrEscMode & 4):r -> Component.nCurrEscMode) ;
     char * sT = SV2String (sText, nText) ;
     tDomTree * pDomTree = DomTree_self(xDomTree) ;
+    if (!r)
+	 Perl_croak(aTHX_ "$Embperl::req undefined %s %d", __FILE__, __LINE__) ; 
     xNode = Node_appendChild (r -> pApp, pDomTree, xParent, r -> Component.nCurrRepeatLevel, (tNodeType)nType, 0, sT, nText, 0, 0, NULL) ;
     pNode = Node_self(pDomTree,xNode) ;
     pNode -> nType  = (nEscMode & 8)?ntypText:((nEscMode & 3)?ntypTextHTML:ntypCDATA) ;
@@ -226,6 +242,8 @@ PREINIT:
     char * sText ;
     tReq * r = CurrReq ;
 CODE:
+    if (!r)
+	 Perl_croak(aTHX_ "$Embperl::req undefined %s %d", __FILE__, __LINE__) ; 
     sText = Node_childsText (r -> pApp, DomTree_self (xDomTree), xChild, r -> Component.nCurrRepeatLevel, 0, bDeep) ;
     RETVAL = sText?sText:"" ;
 OUTPUT:
@@ -262,6 +280,8 @@ embperl_DomTree_iCheckpoint (nCheckpoint)
 PREINIT:
     tReq * r = CurrReq ;
 CODE:
+    if (!r)
+	 Perl_croak(aTHX_ "$Embperl::req undefined %s %d", __FILE__, __LINE__) ; 
     r -> Component.nCurrEscMode = r -> Component.Config.nEscMode ;
     r -> Component.bEscModeSet = -1 ;
     DomTree_checkpoint (r, nCheckpoint) ;
@@ -300,6 +320,8 @@ PREINIT:
     tReq * r = CurrReq ;
     SV * sEscapedText ;
 CODE:
+    if (!r)
+	 Perl_croak(aTHX_ "$Embperl::req undefined %s %d", __FILE__, __LINE__) ; 
     sT = SV2String (sText, nText) ;
     sA = SV2String (sAttr, nAttr) ;
 
@@ -327,6 +349,8 @@ CODE:
     STRLEN nText ;
     char * sT = SV2String (sText, nText) ;
     char * sA = SV2String (sAttr, nAttr) ;
+    if (!r)
+	 Perl_croak(aTHX_ "$Embperl::req undefined %s %d", __FILE__, __LINE__) ; 
     sEscapedText = Escape (r, sT, nText, (SvUTF8(sText)?escHtmlUtf8:0) + r -> Component.nCurrEscMode, NULL, '\0') ;
     sT = SV2String (sEscapedText, nText) ;
     pDomTree = DomTree_self (xDomTree) ;
@@ -347,6 +371,8 @@ PREINIT:
     tDomTree * pDomTree ;
     tReq * r = CurrReq ;
 CODE:
+    if (!r)
+	 Perl_croak(aTHX_ "$Embperl::req undefined %s %d", __FILE__, __LINE__) ; 
     sA = SV2String (sAttr, nAttr) ;
     pDomTree = DomTree_self (pDomNode -> xDomTree) ;
 
@@ -364,6 +390,8 @@ CODE:
     STRLEN nAttr ;
     char * sA = SV2String (sAttr, nAttr) ;
     tDomTree * pDomTree = DomTree_self (xDomTree) ;
+    if (!r)
+	 Perl_croak(aTHX_ "$Embperl::req undefined %s %d", __FILE__, __LINE__) ; 
 
     Element_selfRemoveAttribut (r -> pApp, pDomTree, Node_self (pDomTree, xNode), r -> Component.nCurrRepeatLevel, sA, nAttr) ;
 
@@ -382,6 +410,8 @@ PREINIT:
     char * sAttrText = NULL ;
     tReq * r = CurrReq ;
 CODE:
+    if (!r)
+	 Perl_croak(aTHX_ "$Embperl::req undefined %s %d", __FILE__, __LINE__) ; 
     pDomTree = DomTree_self (pAttr -> xDomTree) ;
 
     Attr_selfValue (r -> pApp, pDomTree, Attr_self(pDomTree, pAttr -> xNode), r -> Component.nCurrRepeatLevel, &sAttrText) ;
@@ -402,6 +432,8 @@ CODE:
     char * sAttrText = NULL ;
     tAttrData * pAttr  ;
     
+    if (!r)
+	 Perl_croak(aTHX_ "$Embperl::req undefined %s %d", __FILE__, __LINE__) ; 
     /* lprintf (CurrReq, "xDomTree=%d, xAttr=%d pDomTree=%x\n", xDomTree, xAttr, pDomTree) ;*/
     
     pAttr = Attr_self(pDomTree, xAttr) ;

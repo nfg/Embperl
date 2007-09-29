@@ -34,10 +34,10 @@ sub new
 
     {
     my ($class, $args) = @_ ;
-    
+
     my $self = Embperl::Form::ControlMultValue -> new($args) ;
     bless $self, $class ;
-    
+
     $self -> {width} = 1 ;
     return $self ;
     }
@@ -62,9 +62,9 @@ sub noframe
 sub get_active_id
 
     {
-    my ($self)   = @_ ;
+    my ($self, $req)   = @_ ;
 
-    my ($values, $options) = $self -> get_values ;
+    my ($values, $options) = $self -> get_values ($req) ;
     my $name     = $self -> {name} ;
     my $dataval  = $fdat{$name} || $values -> [0] ;
     my $activeid ;
@@ -87,23 +87,24 @@ sub get_active_id
 1 ;
 
 __EMBPERL__
-    
+
 [# ---------------------------------------------------------------------------
 #
 #   show - output the control
 #]
 
-[$ sub show ($self) 
+[$ sub show ($self)
 
     my ($values, $options) = $self -> get_values ;
     my $span = ($self->{width_percent})  ;
     my $name     = $self -> {name} ;
     my $dataval  = $fdat{$name} || $values -> [0] ;
     my $activeid = $self -> get_active_id ;
-    
-    my $val ;     
+    my $nsprefix = $self -> form -> {jsnamespace} ;
+
+    my $val ;
     my $i = 0 ;
-$]    
+$]
 
 <td class="cBase cTabTD" colspan="[+ $span +]">
     <table  class="cBase cTabTable" ><tr  class="cBase cTabRow">
@@ -115,16 +116,18 @@ $]
 
         my $form = $self -> form ;
         my @switch_code ;
-    
+
         foreach my $sub (@{$form -> {controls}})
             {
             my $code = $sub -> get_on_show_code ;
             push @switch_code, $code if ($code) ;
             }
-        my $js = join (';', @switch_code) ;    
-        *]   
-        <td class="cBase $cellclass"><div class="cBase [+ $divclass +]" id="__tabs_[+ $id +]">
-        <a href="#" onClick="tab_selected('[+ $id +]','[+ $name +]'); [+ do { local $escmode = 0 ; $js } +]" style="color:black; text-decoration: none;">[+ $options ->[$i] || $val +]</a></div></td>
+        my $js = join (';', @switch_code) ;
+        *]
+        <td class="cBase [+ $cellclass +]"><div class="cBase [+ $divclass +]" 
+              [$ if $i == 0 $]style="border-left: black 1px solid" [$endif$]
+              id="__tabs_[+ $id +]">
+        <a href="#" onClick="[+ $nsprefix +]tab_selected(document, '[+ $id +]','[+ $name +]'); [+ do { local $escmode = 0 ; $js } +]" style="color:black; text-decoration: none;">[+ $options ->[$i] || $val +]</a></div></td>
         [* $i++ *]
     [$endforeach $]
     <td class="cBase cTabCellBlank">&nbsp;</td>
@@ -144,7 +147,7 @@ Embperl::Form::Control::tabs - A tab control inside an Embperl Form
 
 =head1 SYNOPSIS
 
-            Embperl::Form -> add_tabs ( 
+            Embperl::Form -> add_tabs (
                 [
                     {
                     text => 'First Tab',
@@ -152,7 +155,7 @@ Embperl::Form::Control::tabs - A tab control inside an Embperl Form
                               ...
                               ]
                     },
-                    { 
+                    {
                     text => 'Second Tab',
                     fields => [
                               ...
@@ -165,7 +168,7 @@ Embperl::Form::Control::tabs - A tab control inside an Embperl Form
 =head1 DESCRIPTION
 
 Control to display tabs at the top of the form and control the switching between sub forms.
-The switching is done by Javascript, so it can only be used in environment where 
+The switching is done by Javascript, so it can only be used in environment where
 Javascript is available.
 
 You can use the method Embperl::Form -> add_tabs
@@ -175,13 +178,13 @@ See Embperl::Form on how to specify parameters.
 =head2 PARAMETER
 
 
-=head3 text 
+=head3 text
 
 Text that will be displayed on the tab
 
 =head3 fields
 
-List of fields that should be displayed in this subform. 
+List of fields that should be displayed in this subform.
 Given in the same form as form Embperl::Form.
 
 

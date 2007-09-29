@@ -1,5 +1,50 @@
 =pod
 
+=head1 2.3.0  30. Sept. 2007
+
+    - Added support for Code ref in language message lookup hash.
+      That allows for internationalization to call a sub instead
+      of only looking up keys in a hash.
+    - Added UTF-8 messages to Embperl::Form::Validate.
+    - Include patch from Mark D. Anderson to make SSI syntax
+      behave more like mod_include.
+    - Make component -> curr_esc_mode available in Perl, requested
+      by Robert.
+    - Improve XHTML/XML support. Tags that are parsed by Embperl
+      like input, are now only have one slash at the end, if there
+      is already a slash in the source and output_mode is set to
+      xml. In addition checked attributes for input tags are now
+      added as checked="checked" to be valid xml.
+      Spotted by Villu Roogna.
+    - A lot of code was written for Embperl::Form a sophisticated
+      form creation/handling framework, which also contains some
+      nice AJAX and JS stuff like autocomplete input boxes,
+      grids and tabbed dialogs. Also the framework itself is ready
+      to use, there is not much documentation yet...
+    - Fixed wrong version numbers in make test files, 
+      which caused make test to fail. Spotted by Matt Bockol.
+    - Use _stat() instead of stat() on Win32 to work around the problem
+      that Perl redefines stat() in an incompatibel way. 
+      Spotted by Randy Korbes.
+    - Documented all options of embpexec.pl.
+    - Fixed default_language handling in Embperl::Form::Validate.
+      Patch from Kathryn Andersen.
+    - In Makefile.PL check for mod_perl2.pm instead of mod_perl
+      when mod_perl 2.x is used. Spotted by Dan Clawson.
+    - Included patch from Andrew O'Brian to correctly retrieve
+      Cookie header when running under Apache 2.
+    - Fixed timezone compiletime error on Mac OS-X. Patch from
+      Wolfgang Kinkeldei.
+    - Fixed segfault that might occur when an value of an input
+      attribute is removed. Spotted by Andrew Sitnikov.
+    - Fixed missing Perl Stack setup which causes memory errors on
+      BSD systems. Patch from Doug Rayner.
+    - Added internal check and error message when, due to a syntax
+      error in the source, a node is parsed as attribute. 
+      Spotted by Kato M. Yoshiro.
+    - Fix segfault that occured during output of an error message
+      when not inside an Embperl request.
+
 =head1 2.2.0  8. Apr. 2006
 
     - Added new command [$ dump $] which can be used
@@ -11,6 +56,7 @@
     - Added Table of Content pod file, which lists
       all available Embperl documentation, to get
       a better overview. Thanks to Axel Beckert.
+    - Additional checked and notchecked Validationrules
     - Fixed Cookie expire calculation, because
       relative exipre times where only calculated
       once at server startup. Spotted by Derrick Spell. 
@@ -23,7 +69,7 @@
       string value is passed as string index, which 
       crashed if such a string index doesn't exists.
       Spotted by Carl Eklof.
-    
+
 =head1 2.1.0  15. Nov 2005
 
     - Added better UTF-8 support:

@@ -147,6 +147,9 @@ void Embperl__Component_new_init (pTHX_ Embperl__Component  obj, SV * item, int 
         if ((tmpsv = hv_fetch((HV *)item, "syntax", sizeof("syntax") - 1, 0)) || overwrite) {
             obj -> pTokenTable = (struct tTokenTable *)epxs_sv2_Embperl__Syntax((tmpsv && *tmpsv?*tmpsv:&PL_sv_undef)) ;
         }
+        if ((tmpsv = hv_fetch((HV *)item, "curr_esc_mode", sizeof("curr_esc_mode") - 1, 0)) || overwrite) {
+            obj -> nCurrEscMode = (int)epxs_sv2_IV((tmpsv && *tmpsv?*tmpsv:&PL_sv_undef)) ;
+        }
         if ((tmpsv = hv_fetch((HV *)item, "ifdobj", sizeof("ifdobj") - 1, 0)) || overwrite) {
             SV * tmpobj = ((SV *)epxs_sv2_SVPTR((tmpsv && *tmpsv?*tmpsv:&PL_sv_undef)));
             if (tmpobj)
@@ -675,6 +678,24 @@ syntax(obj, val=NULL)
 
     if (items > 1) {
         obj->pTokenTable = (Embperl__Syntax) val;
+    }
+  OUTPUT:
+    RETVAL
+
+MODULE = Embperl::Component    PACKAGE = Embperl::Component 
+
+int
+curr_esc_mode(obj, val=0)
+    Embperl::Component obj
+    int val
+  PREINIT:
+    /*nada*/
+
+  CODE:
+    RETVAL = (int)  obj->nCurrEscMode;
+
+    if (items > 1) {
+        obj->nCurrEscMode = (int) val;
     }
   OUTPUT:
     RETVAL

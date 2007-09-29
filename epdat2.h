@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdat2.h 355598 2005-12-09 20:59:37Z richter $
+#   $Id: epdat2.h 580573 2007-09-29 11:05:54Z richter $
 #
 ###################################################################################*/
 
@@ -107,7 +107,7 @@ typedef struct tReqConfig
     CV *        pUriMatch ;
     char        cMultFieldSep ;
     AV *        pPathAV ;
-    int         nOutputMode ;
+    int         nOutputMode ;       /**< 0 = html 1 = xml */
     int         nOutputEscCharset ; /**< 0 = utf-8 (min) 1 = latin1 2 = latin2 */
     unsigned    bDebug ;
     unsigned    bOptions ;

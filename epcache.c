@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcache.c 294756 2005-08-07 00:03:03Z richter $
+#   $Id: epcache.c 396402 2006-04-24 03:44:17Z richter $
 #
 ###################################################################################*/
 
@@ -730,7 +730,11 @@ int Cache_IsExpired     (/*in*/ req *           r,
 
     if (pItem -> sExpiresFilename)
         {
+#ifdef WIN32
+        if (_stat (pItem -> sExpiresFilename, &pItem -> FileStat))
+#else
         if (stat (pItem -> sExpiresFilename, &pItem -> FileStat))
+#endif
             {
             if (r -> Component.Config.bDebug & dbgCache)
                 lprintf (r -> pApp,  "[%d]CACHE: %s expired because cannot stat file %s\n", r -> pThread -> nPid,  pItem -> sKey, pItem -> sExpiresFilename) ; 

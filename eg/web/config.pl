@@ -87,6 +87,7 @@ BEGIN
             'Books'                           => 'Bücher',
             'Articles'                        => 'Artikel',
             'Modules & Examples'              => 'Module & Beispiele',
+            'Donate'                          => 'Spenden',
             }
         ) ;
 
@@ -210,7 +211,12 @@ BEGIN
          },        #{ menu => 'FAQ',                    uri => 'pod/Faq.htm',               file => 'Faq.pod' },
         #{ menu => 'Examples',               uri => 'examples/' },
         { menu => 'Download',                uri => 'pod/doc/Embperl.-page-19-.htm'},    #sect_44' },
-        { menu => 'Support',                uri => 'pod/doc/Embperl.-page-18-.htm' },
+        { menu => 'Support',                uri => 'pod/doc/Embperl.-page-18-.htm', sub =>
+            [
+            { menu => 'Donate',                relurl => 'donate.htm',               file => { en => 'eg/web/donate.htm', de => 'eg/web/donateD.htm'} }
+            ]
+        
+         },
         { menu => 'Changes',                 uri => 'pod/Changes.htm',           file => 'Changes.pod' },
         #{ menu => 'Sites using Embperl',    uri => 'pod/Sites.htm',             file => 'Sites.pod' },
         { menu => 'Wiki',                uri => 'db/wiki/index.htm', file => '/eg/web/db/wiki.epl', same =>

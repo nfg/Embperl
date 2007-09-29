@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: TimeHHMMSS.pm 294756 2005-08-07 00:03:03Z richter $
+#   $Id: TimeHHMMSS.pm 410198 2006-05-30 06:49:55Z richter $
 #
 ###################################################################################
 
@@ -24,6 +24,11 @@ my %error_messages =
     de => 
     {
 	validate_time_long => 'Feld %0: "%1" ist kein gültiges Zeitformat. Geben Sie die Zeit in der Form hh:mm:ss ein',
+    },
+
+    'de.utf-8' => 
+    {
+	validate_time_long => 'Feld %0: "%1" ist kein gÃ¼ltiges Zeitformat. Geben Sie die Zeit in der Form hh:mm:ss ein',
     },
 
     en =>

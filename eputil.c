@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eputil.c 331953 2005-11-09 05:11:19Z richter $
+#   $Id: eputil.c 580492 2007-09-28 21:44:19Z richter $
 #
 ###################################################################################*/
 
@@ -1813,6 +1813,44 @@ static char * embperl_GetText1 (/*in*/ tReq *       r,
         if (pHVREF && *pHVREF && SvROK (*pHVREF))
             {
             HV * pHV = (HV *)SvRV (*pHVREF) ;
+    	    if (SvTYPE (pHV) == SVt_PVCV)
+		{
+		SV * pSVErr ;
+		SV * pRet ;
+		int num ;
+				
+		dSP ;
+		PUSHMARK(sp) ;
+		XPUSHs (sv_2mortal(newSVpv(sMsgId,0))) ;
+		PUTBACK ;
+		num = perl_call_sv ((SV *)pHV, G_EVAL) ;
+		pSVErr = ERRSV ;
+		if (SvTRUE (pSVErr))
+	    	    {
+	    	    STRLEN l ;
+	    	    char * p = SvPV (pSVErr, l) ;
+	            if (l > sizeof (r -> errdat1) - 1)
+		       	l = sizeof (r -> errdat1) - 1 ;
+	            strncpy (r -> errdat1, p, l) ;
+	            if (l > 0 && r -> errdat1[l-1] == '\n')
+		        l-- ;
+	            r -> errdat1[l] = '\0' ;
+     
+	            LogError (r, rcEvalErr) ;
+
+	            sv_setpv(pSVErr,"");
+		    return NULL ;	
+	            }
+	        else
+	            {
+	            SPAGAIN ;
+	            if (num > 0)
+	                pRet = POPs ;
+	            PUTBACK ;
+	            return num && pRet && SvOK(pRet)?SvPV (pRet, l):NULL ;
+	            }    
+		}
+
             if (SvTYPE (pHV) != SVt_PVHV)
                 continue ;
 
@@ -2066,7 +2104,7 @@ const char * embperl_CalcExpires(const char *sTime, char * sResult, int bHTTP)
 #ifdef WIN32
 extern long _timezone;
 #else
-#ifndef __BSD_VISIBLE
+#if !defined(__BSD_VISIBLE) && !defined(__DARWIN_UNIX03)
 extern long timezone;
 #endif
 #endif
@@ -2093,7 +2131,7 @@ char * embperl_GetDateTime (char * sResult)
                       tms->tm_hour, tms->tm_min, tms->tm_sec, tz > 0?"+":"", tz);
 #else
     localtime_r(&when, &tms);
-#ifndef __BSD_VISIBLE
+#if !defined(__BSD_VISIBLE) && !defined(__DARWIN_UNIX03)
     tz = -timezone / 36 + (tms.tm_isdst?100:0) ;
 #else
     tz = -tms.tm_gmtoff / 36 + (tms.tm_isdst?100:0) ;

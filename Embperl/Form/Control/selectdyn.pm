@@ -14,7 +14,7 @@
 #
 ###################################################################################
 
-package Embperl::Form::Control::select ;
+package Embperl::Form::Control::selectdyn ;
 
 use strict ;
 use vars qw{%fdat} ;
@@ -50,39 +50,85 @@ __EMBPERL__
 
     my ($values, $options) = $self -> get_values ($req) ;
     my $name     = $self -> {name} ;
-    $filter      ||= $self -> {filter} ;
-    my $addtop   = $self -> {addtop} || [] ;
-    my $addbottom= $self -> {addbottom} || [] ;
+    #$filter      ||= $self -> {filter} ;
+    #my $addtop   = $self -> {addtop} || [] ;
+    #my $addbottom= $self -> {addbottom} || [] ;
+    my $noscript  = $req -> {epf_no_script} ;
     my $nsprefix = $self -> form -> {jsnamespace} ;
-    my $val ;
+    my $jsname = $name ;
+    if ($noscript)
+        {
+        $jsname =~ s/[^a-zA-Z0-9%]/_/g ;
+        }
+    else
+        {
+        $jsname =~ s/[^a-zA-Z0-9]/_/g ;
+        }
+    $self -> {size} ||= 75 / ($self -> {width} || 2) ;
+    my $initval ;
+    my $fdatval = $fdat{$name} ;
     my $i = 0 ;
+    foreach (@$values)
+        {
+        if ($_ eq $fdatval)
+            {
+            $initval = $options->[$i] ;
+            last ;
+            }
+        $i++ ;
+        }
+
 $]
-<select  class="cBase cControl" name="[+ $name +]" id="[+ $name +]"
-[$if ($self -> {sublines} || $self -> {subobjects}) $] OnChange="[+ $nsprefix +]show_selected(document, this)" [$endif$]
-[$if ($self -> {rows}) $] size="[+ $self->{rows} +]" [$endif$]
+
+<div class="cAutoCompDiv">
+
+[# --- Popup --- #]
+<div class="cPopupMenu" id="_menu_[+ $jsname +]"
+style="display:none; position: absolute; top: 15px; z-index: 99; margin: 0px; padding: 0px;
+border: 2px grey outset; background: white; text-align: center;"
 >
-[$ foreach $val (@$addtop) $]
-    [$if !defined ($filter) || ($val->[0] =~ /$filter/i) $]
-    <option value="[+ $val->[0] +]">[+ $val ->[1] || $val -> [0] +]</option>
-    [$endif$]
-[$endforeach$]
-[$ foreach $val (@$values) $]
-    [$if !defined ($filter) || ($val =~ /$filter/i) $]
-    <option value="[+ $val +]">[+ $options ->[$i] || $val +]</option>
-    [$endif$]
-    [* $i++ ; *]
-[$endforeach$]
-[$ foreach $val (@$addbottom) $]
-    [$if !defined ($filter) || ($val->[0] =~ /$filter/i) $]
-    <option value="[+ $val->[0] +]">[+ $val ->[1] || $val -> [0] +]</option>
-    [$endif$]
-[$endforeach$]
-</select>
+
+<a href="#" onClick="location.href='ldapTreeData.epl?-id=' + encodeURIComponent([+ $jsname +]Popup.idval)">Anzeigen</a>&nbsp;
+[#
+<a href="#" onClick="alert('ldapTreeData.epl?-id=' + [+ $jsname +]Popup.idval)">Durchsuchen</a>&nbsp;
+<a href="ldapTreeData?-id=">Neu</a>
+#]
+<div class="cPopupContainer" id="_info_[+ $jsname +]" style="margin: 0px; padding: 0px;">
+</div>
+</div>
+
+[# --- Autocomplete --- #]
+<div class="cAutoCompContainer" id="_cont_[+ $jsname +]" style="display:none">
+</div>
+
+[# --- input --- #]
+<input class="cBase cControl cAutoCompInput" id="_inp_[+ $jsname +]" type="text"
+[$if $self -> {size} $]size="[+ $self->{size} +]"[$endif$]
+value="[+ $initval +]"
+>
+<div  class="cAutoCompArrow" onclick="[+ $jsname +]Popup.showPopup()"
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+<input type="hidden" name="[+ $name +]" id="[+ $name +]" >
+</div>
+
+[# --- interface --- #]
+<[$if $noscript $]x-[$endif$]script type="text/javascript">
+
+        [+ $jsname +]Popup = new [+ $nsprefix +]Popup (document.getElementById('_menu_[+ $jsname +]'),
+                                        document.getElementById('[+ $name +]'),
+                                        document.getElementById('_info_[+ $jsname +]'),
+                                        document.getElementById('_inp_[+ $jsname +]')) ;
+
+        [+ $jsname +]AutoComp = new [+ $nsprefix +]Ajax.Autocompleter(document.getElementById('_inp_[+ $jsname +]'),document.getElementById('_cont_[+ $jsname +]'),
+            '/epfctrl/datasrc.exml', {paramName: "query", parameters: "datasrc=[+ $self -> {datasrc} +]", frequency: 0.3, update: document.getElementById('[+ $name +]')}) ; 
+        [+ $jsname +]AutoComp.updateChoices ;
+
+</[$if $noscript $]x-[$endif$]script>
 
 [$endsub$]
 
 __END__
-
+, afterUpdateElement: [+ $jsname +]savevalue
 =pod
 
 =head1 NAME

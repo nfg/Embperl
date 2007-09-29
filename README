@@ -9,7 +9,7 @@ THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF 
 MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-$Id: README 355574 2005-12-09 18:15:54Z richter $
+$Id: README 394068 2006-04-14 12:10:38Z richter $
 
 
 
@@ -217,7 +217,9 @@ you have two possibilities:
 
 1. Send me patches for things you like to see in Embperl
 
-2. Buy commercial support (see above). Also you _may_ get the same answers
+2. Donate money to Embperl. See http://perl.apache.org/donate.htm
+
+3. Buy commercial support (see above). Also you _may_ get the same answers
    to your questions on the mailing list, by buying the commercial support
    you not only buy support for yourself and can be sure you get an answer,
    you also give us the possibility to put more power in the further

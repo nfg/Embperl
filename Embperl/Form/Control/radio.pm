@@ -27,61 +27,101 @@ use Embperl::Inline ;
 #   show_control_readonly - output readonly control
 #
 
-sub show_control_readonly 
+sub show_control_readonly
     {
-    my ($self) = @_ ;
-    
+    my ($self, $req) = @_ ;
+
+    my ($values, $options) = $self -> get_values ;
     my $name     = $self -> {name} ;
-    $self -> show_control ("^\Q$fdat{$name}\\E\$") ;
+    my $addtop   = $self -> {addtop} || [] ;
+    my $addbottom= $self -> {addbottom} || [] ;
+    my $set      = !defined ($fdat{$name})?1:0 ;
+    my $filter   = $self -> {filter} ;
+
+    my $val ;
+    my $i = 0 ;
+
+    if ($set)
+        {
+        foreach $val ((@$addtop, @$values, @$addbottom))
+            {
+            if (!defined ($filter) || (ref $val?$val -> [0]:$val =~ /$filter/i))
+                {
+                $fdat{$name} = ref $val?$val -> [0]:$val  ;
+                last ;
+                }
+            }
+        }
+
+    $self -> show_control ($req, "^\Q$fdat{$name}\\E\$", $values, $options) ;
     }
 
 1 ;
 
 __EMBPERL__
-    
+
 [# ---------------------------------------------------------------------------
 #
 #   show_control - output the control
 #]
 
-[$ sub show_control ($self, $filter) 
+[$ sub show_control ($self, $req, $filter, $values, $options)
 
-    my ($values, $options) = $self -> get_values ;
+    ($values, $options) = $self -> get_values ($req) if (!$values) ;
     my $name     = $self -> {name} ;
     $filter    ||= $self -> {filter} ;
     my $addtop   = $self -> {addtop} || [] ;
     my $addbottom= $self -> {addbottom} || [] ;
+    my $ignorecase= $self -> {ignorecase} ;
     my $max      = @$values ;
     my $set      = !defined ($fdat{$name})?1:0 ;
+    my $nsprefix = $self -> form -> {jsnamespace} ;
 
-    my $val ;     
+    my $val ;
     my $i = 0 ;
+
+if ($self -> {vert})
+    {
+    $tr = '<tr>' ;
+    $trend = '</tr>' ;
+    $trglob = '' ;
+    $trendglob = '' ;
+    }
+else
+    {
+    $tr = '' ;
+    $trend = '' ;
+    $trglob = '<tr>' ;
+    $trendglob = '</tr>' ;
+    }
+
 $]
+<table class="cRadioTab">[+ do { local $escmode = 0 ; $trglob }+]
 [$ foreach $val (@$addtop) $]
     [$if !defined ($filter) || ($val->[0] =~ /$filter/i) $]
     [- $fdat{$name} = $val -> [0], $set = 0 if ($set) ; -]
-    <input type="radio" name="[+ $name +]" value="[+ $val -> [0] +]"
-    >[+ $val ->[1] || $val -> [0] +]
+    [+ do { local $escmode = 0 ; $tr }+]<td><input type="radio" name="[+ $name +]" value="[+ $val -> [0] +]"
+    ></td><td>[+ $val ->[1] || $val -> [0] +]</td>[+ do { local $escmode = 0 ; $trend }+]
     [$endif$]
 [$endforeach$]
 [$ foreach $val (@$values) $]
     [$if !defined ($filter) || ($val =~ /$filter/i) $]
-    [- $fdat{$name} = $val, $set = 0 if ($set) ; -]
-    <input type="radio" name="[+ $name +]" value="[+ $val +]"
-    [$if ($self -> {sublines} || $self -> {subobjects}) $] OnClick="show_radio_checked(this,[+ $i +],[+ $max +])" [$endif$]
-    >[+ $options ->[$i] || $val +]
-    [- $vert = $self -> {vert} -][$while $vert-- > 0 $]<br/>[$endwhile$]
+    [- $fdat{$name} = $val, $set = 0 if ($set) ;
+       $fdat{$name} = $val if ($ignorecase && lc($fdat{$name}) eq lc($val)) ; -]
+    [+ do { local $escmode = 0 ; $tr }+]<td><input type="radio" name="[+ $name +]" value="[+ $val +]"
+    [$if ($self -> {sublines} || $self -> {subobjects}) $] OnClick="[+ $nsprefix +]show_radio_checked(document, this,[+ $i +],[+ $max +])" [$endif$]
+    ></td><td>[+ $options ->[$i] || $val +]</td>[+ do { local $escmode = 0 ; $trend }+]
     [$endif$]
     [* $i++ ; *]
 [$endforeach$]
 [$ foreach $val (@$addbottom) $]
     [$if !defined ($filter) || ($val->[0] =~ /$filter/i) $]
     [- $fdat{$name} = $val -> [0], $set = 0 if ($set) ; -]
-    <input type="radio" name="[+ $name +]" value="[+ $val -> [0] +]"
-    >[+ $val ->[1] || $val -> [0] +]
+    [+ do { local $escmode = 0 ; $tr }+]<td><input type="radio" name="[+ $name +]" value="[+ $val -> [0] +]"
+    ></td><td>[+ $val ->[1] || $val -> [0] +]</td>[+ do { local $escmode = 0 ; $trend }+]
     [$endif$]
 [$endforeach$]
-
+[+ do { local $escmode = 0 ; $trendglob }+]</table>
 [$endsub$]
 
 
@@ -97,9 +137,9 @@ Embperl::Form::Control::radio - A radio control inside an Embperl Form
 
 =head1 SYNOPSIS
 
-  { 
+  {
   type    => 'radio',
-  text    => 'blabla', 
+  text    => 'blabla',
   name    => 'foo',
   values  => [1,2,3],
   options => ['foo', 'bar', 'none'],
@@ -120,7 +160,7 @@ Needs to be 'radio'
 
 Specifies the name of the radio control
 
-=head3 text 
+=head3 text
 
 Will be used as label for the radio control
 
@@ -138,10 +178,15 @@ If no options are given, the values from values are used.
 If specified arranges the radio button vertically. The number given specifies
 the number of <br>'s used the separate the radio buttons.
 
+=head3 ignorecase
+
+If given, ignore the case of the posted values in %fdat, when selecting
+a radio button.
+
 =head3 addtop
 
 Array ref which contains items that should be added at the left or top
-of the radio buttons. Each item consists of an array ref with two 
+of the radio buttons. Each item consists of an array ref with two
 entries, the first is the value and the second is the option
 that is displayed on the page. If the second is missing the
 value (first entry)is displayed. Example:
@@ -151,7 +196,7 @@ value (first entry)is displayed. Example:
 =head3 addbottom
 
 Array ref which contains items that should be added at the right or bottom
-of the radio buttons. Each item consists of an array ref with two 
+of the radio buttons. Each item consists of an array ref with two
 entries, the first is the value and the second is the option
 that is displayed on the page. If the second is missing the
 value (first entry)is displayed. Example:
@@ -160,7 +205,7 @@ value (first entry)is displayed. Example:
 
 =head3 filter
 
-If given, only items where the value matches the regex given in 
+If given, only items where the value matches the regex given in
 C<filter> are displayed.
 
 =head1 Author

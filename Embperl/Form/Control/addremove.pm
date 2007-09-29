@@ -32,10 +32,10 @@ sub new
 
     {
     my ($class, $args) = @_ ;
-    
+
     my $self = Embperl::Form::Control -> new($args) ;
     bless $self, $class ;
-    
+
     $self -> {removesource} ||= 0 ;
     $self -> form -> add_code_at_bottom("addremoveInitOptions (document.getElementById('$self->{src}'), document.getElementById('$self->{dest}'), document.getElementById('$self->{name}'), $self->{removesource})") ;
     return $self ;
@@ -46,27 +46,29 @@ sub new
 1 ;
 
 __EMBPERL__
-    
+
 [# ---------------------------------------------------------------------------
 #
 #   show - output the control
 #]
 
-[$ sub show ($self) 
+[$ sub show ($self)
 
     my $span = $self->{width_percent}  ;
     my $name = $self->{name} ;
-$]    
+    my $nsprefix = $self -> form -> {jsnamespace} ;
+
+$]
 
 <td class="cBase cControlBox" colspan="[+ $span +]">
 <input type="hidden" id="[+ $name +]" name="[+ $name +]">
-<img src="toleft.gif" title="Hinzufügen" onClick="addremoveAddOption (document.getElementById('[+ $self->{src} +]'), document.getElementById('[+ $self->{dest} +]'), document.getElementById('[+ $name +]'), [+ $self->{removesource} +])">
+<img src="toleft.gif" title="Hinzufügen" onClick="[+ $nsprefix +]addremoveAddOption (document, document.getElementById('[+ $self->{src} +]'), document.getElementById('[+ $self->{dest} +]'), document.getElementById('[+ $name +]'), [+ $self->{removesource} +])">
 <br>
-<img src="toright.gif" title="Entfernen" onClick="addremoveRemoveOption (document.getElementById('[+ $self->{src} +]'), document.getElementById('[+ $self->{dest} +]'), document.getElementById('[+ $name +]'), [+ $self->{removesource} +])">
+<img src="toright.gif" title="Entfernen" onClick="[+ $nsprefix +]addremoveRemoveOption (document, document.getElementById('[+ $self->{src} +]'), document.getElementById('[+ $self->{dest} +]'), document.getElementById('[+ $name +]'), [+ $self->{removesource} +])">
 
 [#
-    print "<input class="cStandardButton" type=button value="Hinzufügen" onClick="addremoveAddOption (this.form.elements['$self->{src}'], this.form.elements['$self->{dest}'], this.form.elements['$self->{name}'], $self->{removesource})">\n" ;
-    print "<input class="cStandardButton" type=button value="Entfernen" onClick="addremoveRemoveOption (this.form.elements['$self->{src}'], this.form.elements['$self->{dest}'], this.form.elements['$self->{name}'], $self->{removesource})">\n" ;
+    print "<input class="cStandardButton" type=button value="Hinzufügen" onClick="[+ $nsprefix +]addremoveAddOption (document, this.form.elements['$self->{src}'], this.form.elements['$self->{dest}'], this.form.elements['$self->{name}'], $self->{removesource})">\n" ;
+    print "<input class="cStandardButton" type=button value="Entfernen" onClick="[+ $nsprefix +]addremoveRemoveOption (document, this.form.elements['$self->{src}'], this.form.elements['$self->{dest}'], this.form.elements['$self->{name}'], $self->{removesource})">\n" ;
 #]
 </td>
 [$endsub$]
@@ -82,12 +84,12 @@ Embperl::Form::Control::addremove - A control to add and remove items from two s
 
 =head1 SYNOPSIS
 
-  { 
+  {
   type         => 'addremove',
   name         => 'foo',
-  src          => 'src_select_name', 
-  dest         => 'dest_select_name', 
-  removesource => 1, 
+  src          => 'src_select_name',
+  dest         => 'dest_select_name',
+  removesource => 1,
   }
 
 =head1 DESCRIPTION
@@ -115,7 +117,7 @@ Gives the name of the select box which serves as destionations of the data items
 
 =head3 removesource
 
-If set to a true value the items will be removed from the source select box and 
+If set to a true value the items will be removed from the source select box and
 move to the destionation box. If set to false, the items will be copied.
 
 =head1 Author

@@ -14,10 +14,10 @@
 #
 ###################################################################################
 
-package Embperl::Form::Control::grid ;
+package Embperl::Form::Control::mult ;
 
 use strict ;
-use base 'Embperl::Form::ControlMultValue' ;
+use base 'Embperl::Form::Control::grid' ;
 
 use vars qw{%fdat $epreq} ;
 
@@ -51,11 +51,10 @@ sub init
 
     {
     my ($self) = @_ ;
-
-    $self -> {header_bottom} = 10 if (!exists ($self -> {header_bottom})) ;
-    $self -> {width} = 1 ;
     
     my $form = $self -> form ;
+    $self -> {fields} ||= [$self -> {field}] ;
+    $self -> {class}  ||= 'cMult' ;
     $form -> new_controls ($self -> {fields}, $form -> {options}) ;
 
     return $self ;
@@ -73,20 +72,15 @@ sub init_data
     my $ldap    = $req->{ldap};
     my $name    = $self->{name} ;
     my @entries = split("\t",$fdat{$name});
-    my $fields  = $self -> {fields} ;
+use Data::Dumper ;
+print STDERR 'init_data', Dumper (\%fdat, $name, \@entries) ;
 
-    my @data;
     my $i = 0 ;
-    my $j ;
     foreach my $entry (@entries)
         {
-        @data = ecos::LdapBase -> splitAttrValue($entry);
-        my $rowno = shift @data ;
-        $j = 0 ;
-        foreach my $field (@$fields)
-            {
-            $fdat{"$name-$field->{name}-$i"} = $data[$j++] ;
-            }
+            $fdat{"$name--$i"} = $entry ;
+warn "init_data mult     field=$name--$i fd=" . $fdat{"$name--$i"} ;
+            
         $i++ ;
         }
     $fdat{"$name-max"} = $i?$i:1;
@@ -100,28 +94,26 @@ sub init_data
 sub prepare_fdat
     {
     my ($self, $req) = @_ ;
-    
     my $ldap    = $req->{ldap};
     my $name    = $self->{name} ;
-    my $fields  = $self -> {fields} ;
-    my $max     = $fdat{"$name-max"} ;
+    my $max     = $fdat{"$name-max"} || 1 ;
+warn "prepare_dat mult     name =$name, max=$max" ;
+use Data::Dumper ;
+print STDERR Dumper (\%fdat) ;
 
     my @rows;
-    my $j ;
     my $val ;
     for (my $i = 0; $i < $max; $i++)
         {
-        $j = 0 ;
-        my @data = ($i+1) ;
-        foreach my $field (@$fields)
-            {
-            push @data, $fdat{"$name-$field->{name}-$i"} ;
-            }
-        $val = ecos::LdapBase -> joinAttrValue(\@data) ;
-        push @rows, $val if ($val ne '') ;    
+warn "prepare_dat mult     field=$name--$i fd=" . $fdat{"$name--$i"} ;
+        $val = $fdat{"$name--$i"} ;
+        push @rows, $val if ($val ne '') ;
         }
     $fdat{$name} = \@rows ;    
+print STDERR Dumper (\%fdat, \@rows) ;
     }
+
+sub show { Embperl::Form::Control::show (@_) } 
 
 1 ;
 
@@ -130,10 +122,10 @@ __EMBPERL__
 
 [# ---------------------------------------------------------------------------
 #
-#   show - output the control
+#   show_control - output the control
 #]
 
-[$ sub show ($self, $req)
+[$ sub show_control ($self, $req)
 
     my $name     = $self -> {name} ;
     my $span = ($self->{width_percent})  ;
@@ -143,19 +135,14 @@ __EMBPERL__
     $jsname .= 'Grid' ;
     my $max    = $fdat{"$name-max"} ;
 $]
-  <td class="cBase cLabelBox" colspan="[+ $span +]">
   [-
     $fdat{$name} = $self -> {default} if ($fdat{$name} eq '' && exists ($self -> {default})) ;
     my $span = 0 ;
-    $self -> show_grid_title ($jsname);
   -]
   <input type="hidden" name="[+ $self -> {name} +]-max" id="[+ $self -> {id} +]-max">
-  <table class="cGridTable cBase" id="[+ $self -> {id} +]">
-    [- $self -> show_grid_header ($req); -]
+  <table class="[+ $self -> {class} +]Table cBase" id="[+ $self -> {id} +]">
     [- $self -> show_grid_table ($req) ; -]
   </table>
-  [- $self -> show_grid_title ($jsname)
-            if ($max > $self -> {header_bottom}) -]
   <table id="[+ $self -> {id} +]-newrow" style="display: none">
     [-
     local $req -> {epf_no_script} = 1 ;
@@ -167,43 +154,9 @@ $]
                                                document.getElementById('[+ $self -> {id} +]-newrow'),
                                                document.getElementById('[+ $self -> {id} +]-max')) ;
   </script>
-  </td>
 [$endsub$]
   
 
-[# -----------------------------------------------------------------------------
-#
-#   show_grid_title - Zeigt den Titel der Tabelle an
-#]
-
-[$ sub show_grid_title ($self, $jsname)
-$]
-<table class="cBase cGridTitle">
-  <tr class="cTableRow">
-    <td class="cBase cGridLabelBox">[+ $self->{text} +]</td>
-    <td class="cBase cGridControlBox">
-        <img src="/images/button_neu.gif" id="cmdAdd" name="-add" title="Zeile Hinzuf&uuml;gen" onclick="[+ $jsname +].addRow()">
-        <img src="/images/button_loeschen.gif"  id="cmdDelete"  name="-delete" title="Markierte Zeile L&ouml;schen" onclick="[+ $jsname +].delRow()">
-    </td>
-  </tr>
-</table>
-[$ endsub $]
-  
-[# ---------------------------------------------------------------------------
-#
-#    show_grid_header    Erzeugt den Tabellenkopf
-#]
-
-[$ sub show_grid_header ($self, $req)
-
-  my $fields = $self->{'fields'};
- $]
-         <tr class="cGridHeader">
-         [$ foreach my $field (@$fields) $]
-            <td class="cGridHeader" [$if($width = $field->{width})$]width="[+$width+]"[$endif$]>[+$field->{text}+]</td>
-         [$ endforeach $]
-         </tr>
-[$ endsub $]
 
 [# ---------------------------------------------------------------------------
 #
@@ -212,21 +165,37 @@ $]
 
 [$ sub show_grid_table_row ($self, $req, $i) 
 
-    $fields = $self -> {fields} ;
+    $field = $self -> {fields}[0] ;
     $id     = $self -> {id};
     $name   = $self -> {name} ;
+    my $jsname = $name ;
+    $jsname =~ s/[^a-zA-Z0-9]/_/g ;
+    $jsname .= 'Grid' ;
     $]
 
     <tr class="cGridRow" id="[+ "$id-row-$i" +]">
 
-        [$foreach $field (@$fields)$]
-            <td class="cGridCell">[-
-                local $field -> {name} = "$name-$field->{name}-$i" ;
+            <td class="[+ $self -> {class} +]Cell">
+              [-
+                local $field -> {name} = "$name--$i" ;
                 $field -> show_control ($req)
-                -]</td>
-        [$endforeach$]     
+                -]
+            </td>
     </tr>             
 [$ endsub $]
+
+
+[$ sub show_label_icon ($self)
+    $name   = $self -> {name} ;
+    my $jsname = $name ;
+    $jsname =~ s/[^a-zA-Z0-9]/_/g ;
+    $jsname .= 'Grid' ;
+ 
+ 
+ $]
+              <img src="/images/button_plus.gif" id="cmdAdd" name="-add" title="Zeile Hinzuf&uuml;gen" onclick="[+ $jsname +].addRow()">
+              <img src="/images/button_kreuz.gif"  id="cmdDelete"  name="-delete" title="Zeile L&ouml;schen" onclick="[+ $jsname +].delRow()">
+[$endsub$]
              
 [# ---------------------------------------------------------------------------
 #

@@ -151,7 +151,7 @@
    pTokenTable | syntax
 !   pCurrEscape | curr_escape
 !   pNextEscape | next_escape
-!   nCurrEscMode | curr_esc_mode
+   nCurrEscMode | curr_esc_mode
 !   bEscModeSet | esc_mode_set
 !   bEscInUrl | esc_in_url
    ifd

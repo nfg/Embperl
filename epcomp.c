@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcomp.c 330373 2005-11-02 22:00:14Z richter $
+#   $Id: epcomp.c 580492 2007-09-28 21:44:19Z richter $
 #
 ###################################################################################*/
 
@@ -2014,8 +2014,8 @@ int embperl_ExecuteSubStart         (/*in*/  tReq *	  r,
 
     if (!r || !r -> Component.bReqRunning)
     	{
-    	LogErrorParam (r -> pApp, rcSubCallNotRequest, "", "") ;
-    	return 0 ;
+    	LogErrorParam (r?r -> pApp:NULL, rcSubCallNotRequest, "", "") ;
+    	return rcSubCallNotRequest ;
     	}
 
     av_push (pSaveAV, newSViv (r -> Component.xCurrDomTree)) ;

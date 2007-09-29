@@ -34,8 +34,14 @@ __EMBPERL__
 
 my $name = $self->{name};
 my $value = exists $self->{value} ? $self->{value} : $fdat{$name};
+$value = [ split /\t/, $value ] if $self->{split};
+$value = [ split /\n/, $value ] if $self->{splitlines};
 
-$][+ $value +]
+$][$ if ref $value eq 'ARRAY' $][$ foreach $v (@$value) $][+ $v +]<br />[$ endforeach
+$][$ elsif ref $value eq 'HASH' $][$ foreach $k (keys %$value) $][+ $k +]: [+ $value->{$k} +]<br />[$ endforeach
+$][$ elsif ref $value $]<em>[+ ref $value +]</em>[$ 
+     else $][+ $value +][$ endif $] 
+
 [$ if $self->{hidden} $]
 <input type="hidden" name="[+ $name +]" value="[+ $value +]">
 [$endif$]
@@ -57,6 +63,7 @@ Embperl::Form::Control::display - A text display control inside an Embperl Form
   text   => 'blabla', 
   hidden => 1,
   name   => 'foo',
+  split  => 1
   }
 
 =head1 DESCRIPTION
@@ -74,6 +81,12 @@ Needs to be set to 'display'.
 
 Will be used as label for the text display control.
 
+=head3 value
+
+value to display. If not given $fdat{<name>} will be used. 
+If the data given within value is an arrayref, every element will be displayed
+on a separate line.
+
 =head3 hidden 
 
 If set, an appropriate hidden input field will be created
@@ -83,9 +96,19 @@ automatically.
 
 Will be used as name for the hidden input field.
 
+=head3 split 
+
+Splits the value into an array at \t if set and displays every array element
+on a new line.
+
+=head3 splitlines
+
+Splits the value into an array at \n if set and displays every array element
+on a new line.
+
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter@dev.ecos.de), A. Beckert (beckert@ecos.de)
 
 =head1 See Also
 

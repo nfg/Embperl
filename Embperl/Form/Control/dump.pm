@@ -14,29 +14,30 @@
 #
 ###################################################################################
 
-package Embperl::Form::Control::transparent ;
+package Embperl::Form::Control::dump ;
 
 use strict ;
 use base 'Embperl::Form::Control' ;
 
 use Embperl::Inline ;
-
+use Data::Dumper;
 1 ;
 
 __EMBPERL__
-
+    
 [# ---------------------------------------------------------------------------
 #
-#   show - output the control
+#   show_control - output the control
 #]
 
-[$ sub show ($self, $req)
+[$ sub show_control ($self)
 
-my $span = ($self->{width_percent})  ;
+my $name = $self->{name};
+my $value = exists $self->{value} ? $self->{value} : exists $fdat{$name} ? $fdat{$name} : \%fdat;
+
 $]
-<td class="cBase cTransparentBox" colspan="[+ $span +]">[+ $self->{text} +]&nbsp;</td>
+<pre>[+ Dumper($value) +]</pre>
 [$endsub$]
-
 
 __END__
 
@@ -44,35 +45,39 @@ __END__
 
 =head1 NAME
 
-Embperl::Form::Control::transparent - A transparent area inside an Embperl Form
+Embperl::Form::Control::dump - A debug control inside an Embperl Form
 
 
 =head1 SYNOPSIS
 
-  {
-  type => 'transparent',
-  text => 'blabla'
+  { 
+  type   => 'dump',
+  text   => 'blabla', 
+  data   => $some_data_structure_to_be_displayed
   }
 
 =head1 DESCRIPTION
 
-Used to create a transparent area with optional text inside an Embperl Form.
+Used to create a debug control inside an Embperl Form.
 See Embperl::Form on how to specify parameters.
 
 =head2 PARAMETER
 
 =head3 type
 
-Needs to be 'transparent'
+Needs to be set to 'dump'.
 
-=head3 text (optional)
+=head3 text 
 
-Could be used to give a text that should be displayed inside the transparent area
+Will be used as label for the debug control.
 
+=head3 data 
+
+Some data structure to be displayed, e.g. hashref, arrayref or scalar.
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter@dev.ecos.de), A. Beckert (beckert@ecos.de)
 
 =head1 See Also
 

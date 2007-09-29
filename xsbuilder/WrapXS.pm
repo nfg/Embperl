@@ -73,7 +73,8 @@ sub pm_text { undef } ;
 sub makefilepl_text {
     my $self = shift ;
 
-    my $code = $self -> SUPER::makefilepl_text (@_) ;
+    my $code = "local \$mp2cfg ;\nlocal \$ccdebug ;\n" .
+                $self -> SUPER::makefilepl_text (@_) ;
 
     $code .= q[
 
@@ -82,6 +83,30 @@ sub MY::top_targets
 	my ($txt) = shift -> MM::top_targets (@_) ;
         $txt =~ s/config\s+pm_to_blib\s+subdirs\s+linkext/\$(O_FILES) subdirs/ ; 
 	return $txt ;
+	}
+
+
+sub MY::cflags 
+	{
+	my $self = shift ;
+        
+        my $txt = $self -> MM::cflags (@_) ;
+
+        if ($mp2cfg)
+            { # with Apache 2, make sure we have the same defines as mod_perl
+            $txt =~ s/-O\d//g if ($ccdebug =~ /-O\d/) ;
+            $txt =~ /CCFLAGS\s*=(.*?)\n/s ;
+	    my $flags = $mp2cfg->{MODPERL_CCOPTS} || $1 ;
+            $txt =~ s/CCFLAGS\s*=(.*?)\n/CCFLAGS = $ccdebug $flags\n/s ;
+            }
+        else
+            {
+            $txt =~ s/-O\d//g if ($ccdebug =~ /-O\d/) ;
+	    $txt =~ s/CCFLAGS\s*=/CCFLAGS = $ccdebug / ;
+            }
+
+        
+        return $txt ;
 	}
 
 ] ;

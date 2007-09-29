@@ -252,7 +252,7 @@ first B<Arg> accordingly.
  Example:
 
  [- @arr = (1, 3, 5) -]
- [$ foreach $v @arr $]
+ [$ foreach $v (@arr) $]
      [+ $v +] <BR>
  [$ endforeach $]
 
@@ -1395,6 +1395,10 @@ ref on which you can push your message hashs. Embperl consults first the message
 and if not found afterwards the default_message array for the correct message.
 Because both are arrays you can push multiple message sets on it. This is handy when
 your application object calls it's base class, which also may define some messages.
+Starting with version 2.3.0 it is also possible, to add a code ref instead of a
+hash ref to the arrays. The code is than called with the key as argument and
+must return the translated text.
+
 Here is an example:
 
 
@@ -1425,6 +1429,20 @@ Here is an example:
         push @{$r -> messages}, $messages{$lang} ;
         push @{$r -> default_messages}, $messages{'en'} if ($lang ne 'en') ;
         }
+
+    # Code ref works too...
+    @{$r -> messages} = (\&ecos::I18L::translate::gettext) ;
+
+    # and gettext is defined as
+    sub gettext 
+	{
+	my ($key) = @_ ;
+
+	return "translated text" ;
+	}
+
+
+	
 
     1 ;
 
@@ -1719,7 +1737,7 @@ archive at http://forum.swarthmore.edu/epigone/modperl
 
 =head2 Commerical Support
 
-You can get free support on the mod_perl mailing list (see above).  If
+You can get free support on the Embperl mailing list (see above).  If
 you need commercial support, ecos can provide it for you. We offer:
 
 =over 4
@@ -1751,6 +1769,10 @@ you have two possibilities:
 Send me patches for things you like to see in Embperl
 
 =item 2
+
+Donate money to Embperl. See http://perl.apache.org/donate.htm
+
+=item 3
 
 Buy commercial support (see above). Also you B<may> get the same answers
 to your questions on the mailing list, by buying the commercial support

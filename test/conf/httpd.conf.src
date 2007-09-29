@@ -1,5 +1,5 @@
 
-# $Id: httpd.conf.src 330373 2005-11-02 22:00:14Z richter $
+# $Id: httpd.conf.src 441950 2006-09-10 13:19:35Z richter $
 
 print OFH <<EOD ;
 #
@@ -153,7 +153,7 @@ print OFH <<EOD ;
 Embperl_Cookie_Path /
 Embperl_Cookie_Expires "+1d"
 EMBPERL_ALLOW (asc|\\.xml\$|\\.htm\$)
-
+Embperl_Top_Include "use strict;"
 
 <Location /embperl/log>
 SetHandler perl-script

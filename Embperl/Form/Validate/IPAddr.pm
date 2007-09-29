@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: IPAddr.pm 294756 2005-08-07 00:03:03Z richter $
+#   $Id: IPAddr.pm 410198 2006-05-30 06:49:55Z richter $
 #
 ###################################################################################
 
@@ -24,6 +24,11 @@ my %error_messages =
     de => 
     {
 	validate_ipaddr => 'Feld %0: "%1" ist keine gültige IP-Adresse. Geben Sie die IP-Adresse in der Form nnn.nnn.nnn.nnn ein',
+    },
+
+    'de.utf-8' => 
+    {
+	validate_ipaddr => 'Feld %0: "%1" ist keine gÃ¼ltige IP-Adresse. Geben Sie die IP-Adresse in der Form nnn.nnn.nnn.nnn ein',
     },
 
     en =>

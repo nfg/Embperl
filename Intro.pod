@@ -261,7 +261,8 @@ first row:
  $head = $sth -> {NAME} ;
 
  #continues on the next page...
- # get the result in $dat $dat = $sth -> fetchall_arrayref ;
+ # get the result in $dat 
+ $dat = $sth -> fetchall_arrayref ;
  -]
 
  <table>
@@ -543,13 +544,13 @@ chapter about dynamic tables, this example works with explicit loops.
 
  <table>
     <tr>
-    [$ foreach $h @$head $]
+    [$ foreach $h (@$head) $]
         <th>[+ $h +]</th>
     [$ endforeach $]
     </tr>
     [$ while $dat = $sth -> fetchrow_arrayref $]
         <tr>
-            [$ foreach $v @$dat $]
+            [$ foreach $v (@$dat) $]
                 <td>[+ $v +]</td>
             [$ endforeach $]   
         </tr>

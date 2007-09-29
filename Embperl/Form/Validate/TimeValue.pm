@@ -26,6 +26,11 @@ my %error_messages =
 	validate_timevalue => 'Feld %0: "%1" ist keine gültige Zeit. Geben Sie eine Zahl gefolgt von s, m, h, d oder w ein.',
     },
 
+    'de.utf-8' => 
+    {
+	validate_timevalue => 'Feld %0: "%1" ist keine gÃ¼ltige Zeit. Geben Sie eine Zahl gefolgt von s, m, h, d oder w ein.',
+    },
+
     en =>
     {
 	validate_timevalue => 'Field %0: "%1" isn\\\'t a valid time value. Please enter a number followed by s, m, h, d or w.',

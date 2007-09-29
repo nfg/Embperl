@@ -36,6 +36,9 @@ $escmode = 12 ;
 
 [$hidden$]
 
+--- NO slashes in the source ---
+
+
 <input type="text" name="b">
 <input type="text" name="c">
 
@@ -44,6 +47,29 @@ $escmode = 12 ;
 <select name="a">
     <option>xxx</option>
 </select>
+
+--- slashes in the source ---
+
+<input type="text" name="b" />
+<input type="text" name="c"/>
+
+<input type="checkbox" name="a" value="1" />
+<input type="checkbox" name="a" value="2" />
+<input type="checkbox" name="a" value="3" checked="checked" />
+<input type="checkbox" name="b" />
+<input type="checkbox" name="c"/>
+
+<a href="bla.htm">bla</a>
+
+<select name="a">
+    <option>xxx</option>
+</select>
+
+
+<blabla />
+<blabla/>
+
+
 
 
 

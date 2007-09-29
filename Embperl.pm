@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Embperl.pm 354348 2005-12-06 07:45:12Z richter $
+#   $Id: Embperl.pm 580573 2007-09-29 11:05:54Z richter $
 #
 ###################################################################################
 
@@ -49,7 +49,7 @@ use vars qw(
 
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = '2.2.0' ;
+$VERSION = '2.3.0' ;
 
 
 if ($modperl  = $ENV{MOD_PERL})
@@ -76,6 +76,7 @@ if ($modperl2)
         require Apache2::RequestRec ;
         require Apache2::RequestUtil ;
         require Apache2::SubRequest ;
+        require APR::Table ;
         $srv_rec = Apache2::ServerUtil -> server ;
         }
     else
@@ -352,7 +353,7 @@ sub SetupSession
     my $debug = $appparam?$appparam -> {debug} & Embperl::Constant::dbgSession:0 ;
     if (!$uid)
         {
-        my $cookie_val  = $ENV{HTTP_COOKIE} || ($req_rec?$req_rec->header_in('Cookie'):undef) ;
+        my $cookie_val  = $ENV{HTTP_COOKIE} || ($req_rec?$req_rec->headers_in -> {'Cookie'}:undef) ;
 
 	if ((defined ($cookie_val) && ($cookie_val =~ /$cookie_name=(.*?)(\;|\s|$)/)) || ($ENV{QUERY_STRING} =~ /$cookie_name=.*?:(.*?)(\;|\s|&|$)/) || $ENV{EMBPERL_UID} )
 	    {

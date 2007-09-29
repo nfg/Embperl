@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: SSI.pm 294756 2005-08-07 00:03:03Z richter $
+#   $Id: SSI.pm 580573 2007-09-29 11:05:54Z richter $
 #
 ###################################################################################
  
@@ -183,7 +183,7 @@ sub InitSSI
     $ENV{DATE_GMT}      = gmtime ;
     $ENV{DATE_LOCAL}    = localtime ;
     $ENV{DOCUMENT_NAME} = basename ($fn = $Embperl::req -> component -> sourcefile) ;
-    $ENV{DOCUMENT_URI}  = $Embperl::req -> apache_req?$Embperl::req -> apache_req -> uri:'' ;
+    $ENV{DOCUMENT_URI}  = $Embperl::req -> apache_req?$Embperl::req -> apache_req -> uri:$ENV{REQUEST_URI} ;
     $ENV{LAST_MODIFIED} = format_time('', (stat ($fn))[9]) ;
     }
      
@@ -194,14 +194,27 @@ sub InitSSI
 #
 # ---------------------------------------------------------------------------------
 
+sub map_ssi_ops_to_perl
+    {
+    my $val = shift ;
+
+    $val =~ s/\$(\w)([a-zA-Z0-9_]*)/\$ENV{'$1$2'}/g ;
+    $val =~ s/\$\{(\w)([a-zA-Z0-9_]*?)\}/\$ENV{'$1$2'}/g ;
+    $val =~ s,!=\s*/,!~ /,;
+    $val =~ s,=\s*/,=~ /,;
+    $val =~ s/!=/ne/;
+    $val =~ s/=([^~])/eq$1/;    
+
+    return $val ;
+    }
 
 sub InterpretVars
 
     {
     my $val = shift ;
     my $esc = shift ;
-    $val =~ s/\$(\w)([a-zA-Z0-9_]*)/\$ENV{'$1$2'}/g ;
-    $val =~ s/\$\{(\w)([a-zA-Z0-9_]*?)\}/\$ENV{'$1$2'}/g ;
+    my @fields = ($val =~ m/\s* ("(?:(?!(?<!\\)").)*" | '(?:(?!(?<!\\)').)*' | \S+)/gx);
+    $val = join(' ', map {m/^[\"\']/ ? $_ : map_ssi_ops_to_perl($_)} @fields );
     $val =~ s/\'/\\\'/g if ($esc) ;
     return $val ;
     }

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: HTML.pm 294756 2005-08-07 00:03:03Z richter $
+#   $Id: HTML.pm 580573 2007-09-29 11:05:54Z richter $
 #
 ###################################################################################
  
@@ -83,7 +83,17 @@ sub AddElement
                               } ;
     $tag -> {'procinfo'} = { $self -> {-procinfotype} => $procinfo, (ref($taginfo) eq 'HASH'?%{$taginfo->{procinfo}}:()) } if ($procinfo) ;
 
-    my %inside = %{$self -> {-htmlQuotes}} ;
+    my %inside = (%{$self -> {-htmlQuotes}},
+                   'removeslash' =>
+        {
+        'text' => "/",
+        'nodetype' => 0,
+        'cdatatype' => 0,
+        'removespaces' => 0,
+        'nodename' => '',
+        },
+
+                 ) ;
     my $addinside = 0 ;
     if ($attrs)
         {

@@ -44,19 +44,22 @@ sub get_active_id
 1 ;
 
 __EMBPERL__
-    
+
 [# ---------------------------------------------------------------------------
 #
 #   show_control - output the control
 #]
 
-[$ sub show_control ($self) 
+[$ sub show_control ($self)
 
     my $name     = $self -> {name} ;
     my $val      = $self -> {value} || 1 ;
-$]    
+    my $nsprefix = $self -> form -> {jsnamespace} ;
+
+    push @{$self -> form -> {fields2empty}}, $name ;
+$]
 <input type="checkbox"   class="cBase cControlCheckbox"  name="[+ $name +]" value="[+ $val +]"
-[$if ($self -> {sublines} || $self -> {subobjects}) $] OnClick="show_checked(this)" [$endif$]
+[$if ($self -> {sublines} || $self -> {subobjects}) $] OnClick="[+ $nsprefix +]show_checked(document, this)" [$endif$]
 >
 [$endsub$]
 
@@ -71,9 +74,9 @@ Embperl::Form::Control::checkbox - A checkbox control inside an Embperl Form
 
 =head1 SYNOPSIS
 
-  { 
+  {
   type  => 'checkbox',
-  text  => 'blabla', 
+  text  => 'blabla',
   name  => 'foo',
   value => 'bar'
   }
@@ -93,7 +96,7 @@ Needs to be 'checkbox'
 
 Specifies the name of the checkbox control
 
-=head3 text 
+=head3 text
 
 Will be used as label for the checkbox control
 

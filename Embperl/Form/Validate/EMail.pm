@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: EMail.pm 294756 2005-08-07 00:03:03Z richter $
+#   $Id: EMail.pm 410198 2006-05-30 06:49:55Z richter $
 #
 ###################################################################################
 
@@ -24,6 +24,12 @@ my %error_messages =
     de => 
     {
 	validate_email => 'Die eingegebene E-Mail-Adresse "%0" in Feld "%1" ist ungültig, sie muß genau ein "@" enthalten und darf keine Leerzeichen, Klammern oder Umlaute enthalten.',
+	validate_email_nomailto => 'Die eingegebene E-Mail-Adresse "%0" in Feld "%1" scheint mit einem "mailto:" zu beginnen. Bitte geben Sie nur eine E-Mail-Adresse ein und keine mit "mailto:" beginnende URL.',
+    },
+
+    'de.utf-8' => 
+    {
+	validate_email => 'Die eingegebene E-Mail-Adresse "%0" in Feld "%1" ist ungÃ¼ltig, sie muÃŸ genau ein "@" enthalten und darf keine Leerzeichen, Klammern oder Umlaute enthalten.',
 	validate_email_nomailto => 'Die eingegebene E-Mail-Adresse "%0" in Feld "%1" scheint mit einem "mailto:" zu beginnen. Bitte geben Sie nur eine E-Mail-Adresse ein und keine mit "mailto:" beginnende URL.',
     },
 

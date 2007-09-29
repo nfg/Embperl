@@ -3,7 +3,7 @@
 #
 # (C) 1997-2005 G.Richter (richter@dev.ecos.de) / ECOS
 #
-# $Id: Makefile.PL 328577 2005-10-26 06:44:05Z richter $
+# $Id: Makefile.PL 580573 2007-09-29 11:05:54Z richter $
 #
 
 
@@ -157,6 +157,10 @@ stop : pure_all
         
         $txt =~ s/\@cd/\n#\t\@cd/ ;  # remove tests for subdirs
         $txt =~ s/\$\(NOECHO\) cd/\n#\t\$\(NOECHO\) cd/ ;  # remove tests for subdirs
+
+        $txt =~ s/(\$\(NOECHO\) \$\(ABSPERLRUN\)  \-e \'chdir)/\n#$1/ ; # remove tests for subdirs
+        $txt =~ s/-e/\n# -e/g ; # remove tests for subdirs
+
 
 	$txt =~ s/\r\n/\n/g ;  # make doesn't like \r\n!
 
@@ -1051,7 +1055,7 @@ if ($b && $apache)
 
     ### check for required modules ###
     
-    if (($MPVer = CheckModule ("mod_perl", "-> Cannot build for mod_perl without mod_perl installed!!")))
+    if (($MPVer = CheckModule ("mod_perl" . ($mp2Apache2?'2':''), "-> Cannot build for mod_perl without mod_perl installed!!")))
         {
         if ($win32 && $MPVer lt "1.12")
             {
@@ -1297,7 +1301,7 @@ If you done a SVN checkout you need to create the sources first by running
 xsbuilder/source_scan.pl and xsbuilder/xs_generate.pl.
 --------------------------------------------------------------------------
 \n" ;
-print FH Data::Dumper -> Dump ([\%MMARGS], ['MMARGS']) ;
+print FH Data::Dumper -> Dump ([\%MMARGS, $mp2cfg, $ccdebug], ['MMARGS', 'mp2cfg', 'ccdebug']) ;
 close FH ;
 
 

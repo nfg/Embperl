@@ -1,11 +1,14 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         Embperl
-version:      2.2.0
-version_from: Embperl.pm
-installdirs:  site
-requires:
+--- #YAML:1.0
+name:                Embperl
+version:             2.3.0
+abstract:            Embed Perl code in HTML documents
+license:             ~
+generated_by:        ExtUtils::MakeMaker version 6.36
+distribution_type:   module
+requires:     
     File::Spec:                    0.8
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.30
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.2.html
+    version: 1.2
+author:
+    - Gerald Richter <richter@dev.ecos.de>

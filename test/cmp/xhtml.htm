@@ -22,6 +22,9 @@ a <br>
 
 <input type="hidden" name="a" value="1" /><input type="hidden" name="b" value="&apos;2&apos;" /><input type="hidden" name="c" value="&quot;3&quot;" />
 
+--- NO slashes in the source ---
+
+
 <input type="text" name="b" value="&apos;2&apos;" />
 <input type="text" name="c" value="&quot;3&quot;" />
 
@@ -30,6 +33,29 @@ a <br>
 <select name="a">
     <option>xxx</option>
 </select>
+
+--- slashes in the source ---
+
+<input type="text" name="b"  value="&apos;2&apos;" />
+<input type="text" name="c"  value="&quot;3&quot;" />
+
+<input type="checkbox" name="a" value="1"  checked="checked" />
+<input type="checkbox" name="a" value="2"  />
+<input type="checkbox" name="a" value="3" ="checked" />
+<input type="checkbox" name="b"  value="&apos;2&apos;" />
+<input type="checkbox" name="c"  value="&quot;3&quot;" />
+
+<a href="bla.htm">bla</a>
+
+<select name="a">
+    <option>xxx</option>
+</select>
+
+
+<blabla />
+<blabla/>
+
+
 
 
 

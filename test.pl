@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: test.pl 331997 2005-11-09 08:15:21Z richter $
+#   $Id: test.pl 498924 2007-01-23 05:31:44Z richter $
 #
 ###################################################################################
 
@@ -267,6 +267,7 @@
     'inputjs2.htm' => {
         'version'    => 2,
      },
+    'inputattr.htm' => { },
     'heredoc.htm' => { },
     'epglobals.htm' => {},
     'keepspaces.htm' => { 
@@ -806,7 +807,7 @@
     'EmbperlObject/errdoc/epoerrdoc2.htm' => {
         'offline'    => 0,
         'cgi'        => 0,
-        'errors'     => 4, # 4-8
+        'errors'     => 2, # 2-8
         'noerrtest'  => 1,
         },
     'EmbperlObject/epobase.htm' => {

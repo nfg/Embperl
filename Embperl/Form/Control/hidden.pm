@@ -1,4 +1,3 @@
-
 ###################################################################################
 #
 #   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
@@ -14,29 +13,42 @@
 #
 ###################################################################################
 
-package Embperl::Form::Control::transparent ;
+package Embperl::Form::Control::hidden ;
 
 use strict ;
 use base 'Embperl::Form::Control' ;
 
 use Embperl::Inline ;
 
+sub noframe { return 1; }
+
 1 ;
 
 __EMBPERL__
 
+[$ sub show_sub_begin ($self) $][$ endsub $]
+[$ sub show_sub_end ($self) $][$ endsub $]
+[$ sub show_label ($self) $][$ endsub $]
+[$ sub show_label_icon ($self) $][$ endsub $]
+[$ sub show_label_cell ($self) $][$ endsub $]
+
+[$ sub show_control_cell ($self, $x) $]
+  [* my @ret = $self->show_control; return @ret; *]
+[$ endsub $]
+
 [# ---------------------------------------------------------------------------
 #
-#   show - output the control
+#   show_control - output the control
 #]
 
-[$ sub show ($self, $req)
+[$ sub show_control ($self)
 
-my $span = ($self->{width_percent})  ;
+my $name = $self->{name};
+my $value = exists $self->{value} ? $self->{value} : $fdat{$name};
+
 $]
-<td class="cBase cTransparentBox" colspan="[+ $span +]">[+ $self->{text} +]&nbsp;</td>
+<input type="hidden" name="[+ $name +]" value="[+ $value +]">
 [$endsub$]
-
 
 __END__
 
@@ -44,35 +56,34 @@ __END__
 
 =head1 NAME
 
-Embperl::Form::Control::transparent - A transparent area inside an Embperl Form
+Embperl::Form::Control::hidden - A hidden form field control inside an Embperl Form
 
 
 =head1 SYNOPSIS
 
-  {
-  type => 'transparent',
-  text => 'blabla'
+  { 
+  type   => 'hidden',
+  name   => 'foo',
   }
 
 =head1 DESCRIPTION
 
-Used to create a transparent area with optional text inside an Embperl Form.
+Used to create a hidden form field control inside an Embperl Form.
 See Embperl::Form on how to specify parameters.
 
 =head2 PARAMETER
 
 =head3 type
 
-Needs to be 'transparent'
+Needs to be set to 'hidden'.
 
-=head3 text (optional)
+=head3 name 
 
-Could be used to give a text that should be displayed inside the transparent area
-
+Will be used as name for the hidden input field.
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter@dev.ecos.de), A. Beckert (beckert@ecos.de)
 
 =head1 See Also
 

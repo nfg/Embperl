@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epinit.c 355598 2005-12-09 20:59:37Z richter $
+#   $Id: epinit.c 498941 2007-01-23 06:58:44Z richter $
 #
 ###################################################################################*/
 
@@ -966,11 +966,19 @@ int embperl_Init        (/*in*/ pTHX_
                 preload = 0 ;
             }
         }            
-    if (preload)    
+    if (preload)
+        {
+        dSP;
+        PUSHMARK(sp) ;
         perl_call_pv ("Embperl::PreLoadFiles", G_DISCARD) ;
+        }
     }    
 #else
+    {
+    dSP;
+    PUSHMARK(sp) ;
     perl_call_pv ("Embperl::PreLoadFiles", G_DISCARD) ;
+    }
 #endif    
     
 

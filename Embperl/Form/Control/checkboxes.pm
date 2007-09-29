@@ -14,7 +14,7 @@
 #
 ###################################################################################
 
-package Embperl::Form::Control::select ;
+package Embperl::Form::Control::checkboxes ;
 
 use strict ;
 use vars qw{%fdat} ;
@@ -35,8 +35,6 @@ sub show_control_readonly
     $self -> show_control ($req, "^\Q$fdat{$name}\\E\$") ;
     }
 
-
-
 1 ;
 
 __EMBPERL__
@@ -50,36 +48,43 @@ __EMBPERL__
 
     my ($values, $options) = $self -> get_values ($req) ;
     my $name     = $self -> {name} ;
-    $filter      ||= $self -> {filter} ;
+    $filter    ||= $self -> {filter} ;
     my $addtop   = $self -> {addtop} || [] ;
     my $addbottom= $self -> {addbottom} || [] ;
-    my $nsprefix = $self -> form -> {jsnamespace} ;
+    my $max      = @$values ;
+    my $set      = !defined ($fdat{$name})?1:0 ;
+
     my $val ;
     my $i = 0 ;
 $]
-<select  class="cBase cControl" name="[+ $name +]" id="[+ $name +]"
-[$if ($self -> {sublines} || $self -> {subobjects}) $] OnChange="[+ $nsprefix +]show_selected(document, this)" [$endif$]
-[$if ($self -> {rows}) $] size="[+ $self->{rows} +]" [$endif$]
->
 [$ foreach $val (@$addtop) $]
     [$if !defined ($filter) || ($val->[0] =~ /$filter/i) $]
-    <option value="[+ $val->[0] +]">[+ $val ->[1] || $val -> [0] +]</option>
+    [- $fdat{$name} = $val -> [0], $set = 0 if ($set) ; -]
+    <input type="checkboxes" name="[+ $name +]" value="[+ $val -> [0] +]"
+    >[+ $val ->[1] || $val -> [0] +]
     [$endif$]
 [$endforeach$]
 [$ foreach $val (@$values) $]
     [$if !defined ($filter) || ($val =~ /$filter/i) $]
-    <option value="[+ $val +]">[+ $options ->[$i] || $val +]</option>
+    [- $fdat{$name} = $val, $set = 0 if ($set) ; -]
+    <input type="checkbox" name="[+ $name +]" value="[+ $val +]"
+    [$if ($self -> {sublines} || $self -> {subobjects}) $] OnClick="show_checkboxes_checked(this,[+ $i +],[+ $max +])" [$endif$]
+    >[+ $options ->[$i] || $val +]
+    [- $vert = $self -> {vert} -][$while $vert-- > 0 $]<br/>[$endwhile$]
     [$endif$]
     [* $i++ ; *]
 [$endforeach$]
 [$ foreach $val (@$addbottom) $]
     [$if !defined ($filter) || ($val->[0] =~ /$filter/i) $]
-    <option value="[+ $val->[0] +]">[+ $val ->[1] || $val -> [0] +]</option>
+    [- $fdat{$name} = $val -> [0], $set = 0 if ($set) ; -]
+    <input type="checkboxes" name="[+ $name +]" value="[+ $val -> [0] +]"
+    >[+ $val ->[1] || $val -> [0] +]
     [$endif$]
 [$endforeach$]
-</select>
 
 [$endsub$]
+
+
 
 __END__
 
@@ -87,57 +92,56 @@ __END__
 
 =head1 NAME
 
-Embperl::Form::Control::select - A select control inside an Embperl Form
+Embperl::Form::Control::checkboxes - A multiple checkbox control inside an Embperl Form
 
 
 =head1 SYNOPSIS
 
   {
-  type    => 'select',
+  type    => 'checkboxes',
   text    => 'blabla',
   name    => 'foo',
   values  => [1,2,3],
   options => ['foo', 'bar', 'none'],
-  rows    => 5
   }
 
 =head1 DESCRIPTION
 
-Used to create an select control inside an Embperl Form.
+Used to create an checkboxes control inside an Embperl Form.
 See Embperl::Form on how to specify parameters.
 
 =head2 PARAMETER
 
 =head3 type
 
-Needs to be 'select'
+Needs to be 'checkboxes'
 
 =head3 name
 
-Specifies the name of the select control
+Specifies the name of the checkboxes control
 
 =head3 text
 
-Will be used as label for the select control
+Will be used as label for the checkboxes control
 
 =head3 values
 
-Gives the values as an array ref of the select control.
+Gives the values as an array ref of the checkboxes control.
 
 =head3 options
 
 Gives the options as an array ref that should be displayed to the user.
 If no options are given, the values from values are used.
 
-=head3 rows
+=head3 vert
 
-If specified a select box is display with the given number of lines.
-If not specified or undef, a drop down list is shown.
+If specified arranges the checkboxes button vertically. The number given specifies
+the number of <br>'s used the separate the checkboxes buttons.
 
 =head3 addtop
 
-Array ref which contains items that should be added at the top
-of the select box. Each item consists of an array ref with two
+Array ref which contains items that should be added at the left or top
+of the checkboxes buttons. Each item consists of an array ref with two
 entries, the first is the value and the second is the option
 that is displayed on the page. If the second is missing the
 value (first entry)is displayed. Example:
@@ -146,8 +150,8 @@ value (first entry)is displayed. Example:
 
 =head3 addbottom
 
-Array ref which contains items that should be added at the bottom
-of the select box. Each item consists of an array ref with two
+Array ref which contains items that should be added at the right or bottom
+of the checkboxes buttons. Each item consists of an array ref with two
 entries, the first is the value and the second is the option
 that is displayed on the page. If the second is missing the
 value (first entry)is displayed. Example:
@@ -158,7 +162,6 @@ value (first entry)is displayed. Example:
 
 If given, only items where the value matches the regex given in
 C<filter> are displayed.
-
 
 =head1 Author
 

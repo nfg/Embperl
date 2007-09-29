@@ -34,7 +34,7 @@ __EMBPERL__
 $self -> {size} ||= 80 / ($self -> {width} || 2) ;
 $]
 
-<input type="text"  class="cBase cControl"  name="[+ $self->{name} +]"
+<input type="text"  class="cBase cControl"  name="[+ $self->{name} +]" id="[+ $self->{name} +]"
 [$if $self -> {size} $]size="[+ $self->{size} +]"[$endif$]
 [$if $self -> {maxlength} $]maxlength="[+ $self->{maxlength} +]"[$endif$]
 >

@@ -35,6 +35,7 @@ __EMBPERL__
 <textarea type="text"  class="cBase cControl"  name="[+ $self->{name} +]"
 [$if $self -> {cols} $]cols="[+ $self->{cols} +]"[$endif$]
 [$if $self -> {rows} $]rows="[+ $self->{rows} +]"[$endif$]
+[$if $self -> {id}   $]id="[+ $self->{id} +]"[$endif$]
 ></textarea>
 [$endsub$]
 
@@ -53,6 +54,7 @@ Embperl::Form::Control::textarea - A textarea input control inside an Embperl Fo
   type => 'textarea',
   text => 'blabla', 
   name => 'foo',
+  id   => 'id_foo',
   rows => 10,
   cols => 80,
   }
@@ -71,6 +73,14 @@ Needs to be 'textarea'
 =head3 text 
 
 Will be used as label for the text input control
+
+=head3 name 
+
+Will be used as field name for the text input control
+
+=head3 name 
+
+Will be used as id of the text input control
 
 =head3 cols
 

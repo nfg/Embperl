@@ -24,18 +24,19 @@ use Embperl::Inline ;
 1 ;
 
 __EMBPERL__
-    
+
 [# ---------------------------------------------------------------------------
 #
 #   show_control - output the control
 #]
 
-[$ sub show_control ($self) 
+[$ sub show_control ($self)
 
-    $self->{size} ||= 10 ;
-$]    
+    $self->{size}      ||= 10 ;
+    $self->{css_width} ||= '50%' ;
+$]
 [-     $self -> SUPER::show_control ; -]
-[$if ($self->{unit}) $][+ $self ->{unit} +][$endif$] ;
+[$if ($self->{unit}) $][+ $self ->{unit} +][$endif$]
 [$endsub$]
 
 __END__
@@ -49,9 +50,9 @@ Embperl::Form::Control::number - A numeric input control with optional unit insi
 
 =head1 SYNOPSIS
 
-  { 
+  {
   type => 'input',
-  text => 'blabla', 
+  text => 'blabla',
   name => 'foo',
   unit => 'sec',
   }
@@ -72,7 +73,7 @@ Needs to be 'number'
 
 Specifies the name of the control
 
-=head3 text 
+=head3 text
 
 Will be used as label for the numeric input control
 

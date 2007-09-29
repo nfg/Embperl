@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdom.c 392518 2006-04-08 12:28:12Z richter $
+#   $Id: epdom.c 552019 2007-06-29 20:11:56Z richter $
 #
 ###################################################################################*/
 
@@ -895,8 +895,9 @@ tStringIndex String2NdxInc (/*in*/ tApp * a,
 
     numStr++ ;
 
+    
     /*
-    if (nNdx < 6 || nNdx == 92)
+    if (nNdx < 6 || nNdx == 124)
     	lprintf (a, "new string %s (#%d) refcnt=%d\n", Ndx2String (nNdx), nNdx, SvREFCNT(pSVNdx)) ;
     */
 
@@ -2430,6 +2431,9 @@ tNodeData * Node_selfCondCloneNode (/*in*/ tApp * a,
     tRepeatLevelLookupItem * pLookupLevelNodeLevel ;
 
     ASSERT_NODE_VALID(a,pNode) ;
+    
+    if (pNode -> nType == ntypAttr)
+        mydie (a, "Node expected, but Attribute found. Maybe unclosed quote?") ;
     
     if (pNode -> xDomTree == pDomTree -> xNdx && pNode -> nRepeatLevel == nRepeatLevel)
         return pNode ;
@@ -4194,11 +4198,11 @@ tAttrData *  Element_selfRemoveAttributPtr (/*in*/ tApp * a,
 
     if (pAttr)
 	{
-	pAttr -> bFlags = 0 ;
 	if (pAttr -> xName)
 	    NdxStringFree (a, pAttr -> xName) ;
 	if (pAttr -> xValue && (pAttr -> bFlags & aflgAttrValue))
 	    NdxStringFree (a, pAttr -> xValue) ;
+	pAttr -> bFlags = 0 ;
 	}
 
     /*
@@ -4299,7 +4303,7 @@ char *       Attr_selfValue (/*in*/ tApp * a,
 
     ASSERT_ATTR_VALID(a,pAttr) ;
       
-      if (!pAttr)
+      if (!pAttr || pAttr -> bFlags == aflgDeleted)
 	return NULL ;
 /* lprintf (a, "selvalue 1 f=%x a=%x aa=%x an=%d off=%d av=%d\n", pAttr -> bFlags , aflgAttrChilds, pAttr, pAttr -> xNdx, pAttr -> nNodeOffset, pAttr -> xValue) ; */
 

@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Number.pm 294769 2005-08-13 19:43:05Z richter $
+#   $Id: Number.pm 410198 2006-05-30 06:49:55Z richter $
 #
 ###################################################################################
 
@@ -27,6 +27,11 @@ my %error_messages =
     de => 
     {
 	validate_number => '%0 muß eine Zahl sein',
+    },
+
+    'de.utf-8' => 
+    {
+	validate_number => '%0 muÃŸ eine Zahl sein',
     },
 
     en =>

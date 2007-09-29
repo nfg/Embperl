@@ -31,17 +31,33 @@ sub new
 
     {
     my ($class, $args) = @_ ;
-    
-    bless $args, $class ;
-    
-    return $args ;
+
+    my $self = { %$args } ;
+    bless $self, $class ;
+
+    $self -> init ;
+
+    return $self ;
     }
-    
+
+# ---------------------------------------------------------------------------
+#
+#   init - init the new control
+#
+
+sub init
+
+    {
+    my ($self) = @_ ;
+
+    return $self ;
+    }
+
+
 # ---------------------------------------------------------------------------
 #
 #   noframe - do not draw frame border if this is the only control
 #
-
 
 sub noframe
 
@@ -54,12 +70,11 @@ sub noframe
 #   is_disabled - do not display this control at all
 #
 
-
 sub is_disabled
 
     {
-    my ($self) = @_ ;
-    
+    my ($self, $req) = @_ ;
+
     return $self -> {disable} ;
     }
 
@@ -68,41 +83,38 @@ sub is_disabled
 #   is_readonly - could value of this control be changed ?
 #
 
-
 sub is_readonly
 
     {
-    my ($self) = @_ ;
-    
+    my ($self, $req) = @_ ;
+
     return $self -> {readonly} ;
     }
 
-
-
 # ---------------------------------------------------------------------------
 #
-#   show - output the control
+#   show - output the whole control including the label
 #
 
 sub show
 
     {
-    my ($self, $data) = @_ ;
+    my ($self, $req) = @_ ;
 
     $fdat{$self -> {name}} = $self -> {default} if ($fdat{$self -> {name}} eq '' && exists ($self -> {default})) ;
     my $span = 0 ;
-    $span += $self -> show_label_cell ($span);
-    return $self -> show_control_cell ($span, $data) ;
+    $span += $self -> show_label_cell ($req, $span);
+    return $self -> show_control_cell ($req, $span) ;
     }
-    
+
 # ---------------------------------------------------------------------------
 #
-#   get_on_show_code 
+#   get_on_show_code
 #
 #   retuns js code that should be excuted when form becomes visible
 #
 
-sub get_on_show_code 
+sub get_on_show_code
     {
     return ;
     }
@@ -118,7 +130,6 @@ sub get_active_id
     return ;
     }
 
-
 # ---------------------------------------------------------------------------
 #
 #   form - return form object
@@ -128,23 +139,22 @@ sub form
     {
     my ($self) = @_ ;
 
-    return $Embperl::Form::forms{$self -> {formid}} ;
+    return $Embperl::FormData::forms{$self -> {formptr}} ;
     }
-
 
 # ---------------------------------------------------------------------------
 #
 #   get_validate_rules - get rules for validation
 #
-    
+
 sub get_validate_rules
     {
-    my ($self) = @_ ;
+    my ($self, $req) = @_ ;
 
     my @local_rules ;
     if ($self -> {validate})
         {
-    
+
         @local_rules = ( -key => $self->{name} );
         push @local_rules, -name => $self->{text} if ($self -> {text}) ;
         push @local_rules, @{$self -> {validate}};
@@ -160,43 +170,43 @@ sub get_validate_rules
 __EMBPERL__
 
 [$syntax EmbperlBlocks $]
-    
+
 [# ---------------------------------------------------------------------------
 #
 #   show_sub_begin - output begin of sub form
 #]
 
-[$sub show_sub_begin ($self)
-    
+[$sub show_sub_begin ($self, $req)
+
 my $span = $self->{width_percent}  ;
 $]
 </tr><tr><td class="cBase cTabTD" colspan="[+ $span +]">
 [$endsub$]
-    
+
 [# ---------------------------------------------------------------------------
 #
 #   show_sub_end - output end of sub form
 #]
 
-[$sub show_sub_end ($self) $]
+[$sub show_sub_end ($self, $req) $]
 </td>
 [$endsub$]
 
 [# ---------------------------------------------------------------------------
 #
-#   show - output the control
+#   show - output the label
 #]
 
-[$ sub show_label ($self) $][+ $self->{text} || $self->{name} +][$endsub$]
+[$ sub show_label ($self, $req) $][+ $self->{text} || $self->{name} +][$endsub$]
 
 [# ---------------------------------------------------------------------------
 #
 #   show_label_icon - output the icon before the label
 #]
 
-[$sub show_label_icon ($self) $]
-[$if $self -> {sublines} $]&nbsp;<img src="plus.png" style="vertical-align: middle;">[$endif$]
-[$if $self -> {parentid} $]&nbsp;<img src="vline.png" style="vertical-align: middle;">[$endif$]
+[$sub show_label_icon ($self, $req) $]
+[$if $self -> {sublines} $]&nbsp;<img src="/images/plus.png" style="vertical-align: middle;">[$endif$]
+[$if $self -> {parentid} $]&nbsp;<img src="/images/vline.png" style="vertical-align: middle;">[$endif$]
 [$endsub$]
 
 [# ---------------------------------------------------------------------------
@@ -204,7 +214,7 @@ $]
 #   show - output the control
 #]
 
-[$ sub show_label_cell ($self) 
+[$ sub show_label_cell ($self, $req)
 
 my $style = "";
 $style = "white-space:nowrap;" if ($self->{labelnowrap}) ;
@@ -213,8 +223,8 @@ $]
   <td class="cLabelBox[$ if $self->{labelclass} $][+ " $self->{labelclass}" +][$ endif $]"
       colspan="1" [$ if $style $]style="[+ $style +]"[$ endif $]>
     [-
-    $self -> show_label ;
-    $self -> show_label_icon ;
+    $self -> show_label ($req);
+    $self -> show_label_icon ($req) ;
     -]
   </td>
   [- return 1; -]
@@ -222,17 +232,17 @@ $]
 
 [# ---------------------------------------------------------------------------
 #
-#   show_control - output the control
+#   show_control - output the control itself
 #]
 
-[$ sub show_control ($self) $][+ $self->{value} +][$endsub$]
+[$ sub show_control ($self, $req) $][+ $self->{value} +][$endsub$]
 
 [# ---------------------------------------------------------------------------
 #
 #   show_control_readonly - output the control as readonly
 #]
 
-[$ sub show_control_readonly ($self) $][+ $self -> {value} || $fdat{$self -> {name}} +][$endsub$]
+[$ sub show_control_readonly ($self, $req) $][+ $self -> {value} || $fdat{$self -> {name}} +][$endsub$]
 
 
 [# ---------------------------------------------------------------------------
@@ -240,12 +250,12 @@ $]
 #   show_controll_cell - output the table cell for the control
 #]
 
-[$ sub show_control_cell ($self, $x)
+[$ sub show_control_cell ($self, $req, $x)
 
     my $span = $self->{width_percent} - $x ;
 $]
     <td class="cControlBox" colspan="[+ $span +]">
-    [* my @ret = $self -> is_readonly?$self -> show_control_readonly:$self -> show_control ; *]
+    [* my @ret = $self -> is_readonly?$self -> show_control_readonly($req):$self -> show_control ($req); *]
     </td>
 [* return @ret ; *]
 [$endsub$]
@@ -275,6 +285,10 @@ that could be overwritten to customize the behaviour of your controls.
 
 Create a new control
 
+=head2 init
+
+Init the new control
+
 =head2 noframe
 
 Do not draw frame border if this is the only control
@@ -289,45 +303,49 @@ Could value of this control be changed ?
 
 =head2 show
 
-output the control
+Output the control
 
-=head2 get_on_show_code 
+=head2 get_on_show_code
 
-returns JavaScript code that should be executed when the form becomes visible
+Returns JavaScript code that should be executed when the form becomes visible
+
+=head2 get_active_id
+
+Get the id of the value which is currently active
 
 =head2 form
 
-return the form object of this control
+Return the form object of this control
 
 =head2 show_sub_begin
 
-output begin of sub form
+Output begin of sub form
 
 =head2 show_sub_end
 
-output end of sub form
+Output end of sub form
 
 =head2 show_label
 
-output the label of the control
+Output the label of the control
 
 =head2 show_label_icon
 
-output the icon after the label
+Output the icon after the label
 
 =head2 show_label_cell
 
-output the table cell in which the label will be displayed
+Output the table cell in which the label will be displayed
 
 Must return the columns it spans (default: 1)
 
 =head2 show_control
 
-output the control itself
+Output the control itself
 
 =head2 show_control_cell
 
-output the table cell in which the control will be displayed
+Output the table cell in which the control will be displayed
 
 Gets the x position as argument
 
@@ -338,7 +356,7 @@ Gets the x position as argument
 
 Specifies the name of the control
 
-=head3 text 
+=head3 text
 
 Will be used as label for the control, if not given
 name is used as default
@@ -353,7 +371,7 @@ If set, will be used as additional CSS classes for the label text cell.
 
 =head2 readonly
 
-If set, displays a readonly version of t control.
+If set, displays a readonly version of the control.
 
 =head2 disable
 
@@ -376,6 +394,10 @@ is 2.
 With this parameter you can also specify the width of
 the control in percent. This parameter take precendence over
 C<width>
+
+=head2 default
+
+Default value of the control
 
 =head1 AUTHOR
 

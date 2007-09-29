@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Default.pm 294769 2005-08-13 19:43:05Z richter $
+#   $Id: Default.pm 474140 2006-11-13 04:41:09Z richter $
 #
 ###################################################################################
 
@@ -47,6 +47,29 @@ $VERSION = '2.0.0' ;
 	validate_matches_wildcard => 'Inhalt "%1" des Feldes %0 entspricht nicht dem Wildcard-Ausdruck "%2"',
 	validate_must_only_contain => 'Das Feld %0 darf nur folgende Zeichen enthalten: "%2"',
 	validate_must_contain_one_of => 'Das Feld %0 mu� mindestens eines der folgenden Zeichen enthalten: "%2"',
+	validate_must_not_contain => 'Das Feld %0 darf folgende Zeichen nicht enthalten: "%2"'
+    },
+
+    'de.utf-8' => 
+    {
+	validate_required => 'Bitte Feld "%0" ausfüllen',
+	validate_eq => 'Falscher Inhalt "%1" des Feldes "%0": Erwartet wird "%2"',
+	validate_same => '"%0" stimmt nicht mit "%2" überein',
+	validate_lt => '%0 muß kleiner als %2 sein',
+	validate_gt => '%0 muß größer als %2 sein',
+	validate_le => '%0 muß kleiner oder gleich wie %2 sein',
+	validate_ge => '%0 muß größer oder gleich %2 sein',
+	validate_ne => '%0 muß ungleich %2 sein',
+	validate_length_max => 'Inhalt des Feldes %0 ist zu lang, maximale Länge sind %2, eingegeben wurden %1 Zeichen',
+	validate_length_min => 'Inhalt des Feldes %0 ist zu kurz, minimal Länge sind %2, eingegeben wurden %1 Zeichen',
+	validate_length_eq => 'Inhalt des Feldes %0 hat die falsche Länge: Er sollte %2 Zeichen lang sein, ist aber %1 lang',
+	validate_matches_regex => 'Inhalt "%1" des Feldes %0 entspricht nicht dem regulären Ausdruck /%2/',
+	validate_matches_regex_js => 'Inhalt "%1" des Feldes %0 entspricht nicht dem regulären Ausdruck /%2/',
+	validate_not_matches_regex => 'Inhalt "%1" des Feldes %0 darf nicht dem regulären Ausdruck /%2/ entsprechen',
+	validate_not_matches_regex_js => 'Inhalt "%1" des Feldes %0 darf nicht dem regulären Ausdruck /%2/ entsprechen',
+	validate_matches_wildcard => 'Inhalt "%1" des Feldes %0 entspricht nicht dem Wildcard-Ausdruck "%2"',
+	validate_must_only_contain => 'Das Feld %0 darf nur folgende Zeichen enthalten: "%2"',
+	validate_must_contain_one_of => 'Das Feld %0 muß mindestens eines der folgenden Zeichen enthalten: "%2"',
 	validate_must_not_contain => 'Das Feld %0 darf folgende Zeichen nicht enthalten: "%2"'
     },
 
@@ -146,6 +169,43 @@ sub getscript_emptyok
     my ($self, $arg, $pref) = @_ ;
     
     return ('obj.value') ;
+    }
+
+
+# --------------------------------------------------------------
+
+sub validate_checked
+    {
+    my ($self, $key, $value, $arg, $fdat, $pref) = @_ ;
+    
+    return !defined($value) || $value eq ''  ? undef : []  ;
+    }
+
+# --------------------------------------------------------------
+
+sub getscript_checked
+    {
+    my ($self, $arg, $pref) = @_ ;
+    
+    return ('obj.checked') ;
+    }
+
+# --------------------------------------------------------------
+
+sub validate_notchecked
+    {
+    my ($self, $key, $value, $arg, $fdat, $pref) = @_ ;
+    
+    return !defined($value) || $value eq ''  ? [] : undef ;
+    }
+
+# --------------------------------------------------------------
+
+sub getscript_notchecked
+    {
+    my ($self, $arg, $pref) = @_ ;
+    
+    return ('!obj.checked') ;
     }
 
 # --------------------------------------------------------------

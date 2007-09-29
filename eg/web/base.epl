@@ -6,7 +6,14 @@ $http_headers_out{'content-type'} = 'text/html' ;
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-        <title>Embperl</title>
+        <title>Embperl 
+	    [$if @{$r -> {menuitems}} > 1 || $r -> {menuitems}[0]{menu} ne 'Home' $]
+                [- $i = 0 -]
+		[$foreach $item (@{$r -> {menuitems}}) $]
+		    - [+ $r -> gettext($item -> {menu}) +]
+		[$endforeach$] 
+            [$endif$]
+        </title>
         <style type="text/css">
             [-
             $font = 'font-family: Geneva,Arial,Helvetica;' ;
