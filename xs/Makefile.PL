@@ -1,5 +1,6 @@
 local $mp2cfg ;
 local $ccdebug ;
+local $addcflags;
 
 # 
 # /*
@@ -37,6 +38,8 @@ ExtUtils::MakeMaker::WriteMakefile(
 
 
 
+
+
 sub MY::top_targets
 	{
 	my ($txt) = shift -> MM::top_targets (@_) ;
@@ -56,12 +59,12 @@ sub MY::cflags
             $txt =~ s/-O\d//g if ($ccdebug =~ /-O\d/) ;
             $txt =~ /CCFLAGS\s*=(.*?)\n/s ;
 	    my $flags = $mp2cfg->{MODPERL_CCOPTS} || $1 ;
-            $txt =~ s/CCFLAGS\s*=(.*?)\n/CCFLAGS = $ccdebug $flags\n/s ;
+            $txt =~ s/CCFLAGS\s*=(.*?)\n/CCFLAGS = $ccdebug $flags $addcflags\n/s ;
             }
         else
             {
             $txt =~ s/-O\d//g if ($ccdebug =~ /-O\d/) ;
-	    $txt =~ s/CCFLAGS\s*=/CCFLAGS = $ccdebug / ;
+	    $txt =~ s/CCFLAGS\s*=/CCFLAGS = $ccdebug $addcflags/ ;
             }
 
         

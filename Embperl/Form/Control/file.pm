@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -30,9 +30,13 @@ __EMBPERL__
 #   show_control - output the control
 #]
 
-[$ sub show_control ($self) $]
+[$ sub show_control ($self) 
 
-<input type="file"  class="cBase cControl"  name="[+ $self->{name} +]"
+$self -> {size} ||= 80 / ($self -> {width} || 2) ;
+$class = $self -> {class} ||= 'cControlWidthInput' ;
+$]
+
+<input type="file"  class="cBase cControl [+ $class +]"  name="[+ $self->{name} +]" id="[+ $self->{name} +]"
 [$if $self -> {size} $]size="[+ $self->{size} +]"[$endif$]
 [$if $self -> {maxlength} $]size="[+ $self->{maxlength} +]"[$endif$]
 >

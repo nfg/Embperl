@@ -1,6 +1,6 @@
 Embperl - Building dynamic Websites with Perl
 
-Copyright (c) 1997-2005 Gerald Richter / ecos gmbh  www.ecos.de
+Copyright (c) 1997-2010 Gerald Richter / ecos gmbh  www.ecos.de
 
 You may distribute under the terms of either the GNU General Public 
 License or the Artistic License, as specified in the Perl README file.
@@ -9,7 +9,6 @@ THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF 
 MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-$Id: README 394068 2006-04-14 12:10:38Z richter $
 
 
 
@@ -57,6 +56,9 @@ Tips and Tricks:                perldoc TipsAndTricks.pod
 Changes:                        perldoc Changes.pod
 Examples:		        eg/README
 Sourcecode encryption:          crypto/README
+Documentation and example for
+Embperl::Form can be found at:  eg/forms
+
 
 All the above and further information can be found at the Embperl website 
 
@@ -127,6 +129,8 @@ Can also run as a free standing CGI-script, off-line or can be called from anoth
 
 * Embperl::Inline allows to embedd Embperl code in normal Perl code
 
+* Embperl::Form is a sophisticated library for building HTML forms
+
 
 
 COMPATIBILITY
@@ -140,7 +144,9 @@ perl5.004_04
 perl5.005_01/02/03
 perl5.6.1
 perl5.8.x
-apache_1.3.x, apache 2.0.x
+perl5.10.x
+perl5.12.x
+apache_1.3.x, apache 2.0.x, apache 2.2.x
 apache + mod_ssl
 apache_ssl (Ben SSL)
 Stronghold 2.2
@@ -155,7 +161,7 @@ perl5.8.x
 apache_1.3.0 - apache_1.3.31
 
 Apache 2 is currently not supported on Windows.
-This is planned for Embperl 2.1
+This is planned for Embperl 3
 
 on Windows 95/98 with
 
@@ -182,10 +188,12 @@ and developers to share ideas, solve problems and discuss things related to Embp
 To subscribe to this list, send mail to embperl-subscribe@perl.apache.org.
 To unsubscribe send email to embperl-unsubscribe@perl.apache.org . 
 
-There is an archive for the Embperl mailing list at http://www.ecos.de/~mailarc/embperl/
+There is an archive for the Embperl mailing list at
+http://mail-archives.apache.org/mod_mbox/perl-embperl
 
 For mod_perl related questions you may search the mod_perl mailing list
-archive at http://forum.swarthmore.edu/epigone/modperl
+archive at http://mail-archives.apache.org/mod_mbox/perl-modperl
+
 
 
 
@@ -205,7 +213,7 @@ you need commercial support, ecos can provide it for you. We offer:
 
 * Adding new features
 
-You can reach us via http://www.ecos.de or info@ecos.de 
+You can reach us via http://www.ecos.de or richter at embperl dot org 
 
 
 
@@ -236,6 +244,6 @@ The Embperl distribution contains a "Powered by Embperl" Logo
 AUTHOR
 ======
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 

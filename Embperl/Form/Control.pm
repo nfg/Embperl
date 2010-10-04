@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -50,6 +50,16 @@ sub init
     {
     my ($self) = @_ ;
 
+    my $eventattrs = '' ;	
+    if (my $e = $self -> {event}) 
+	{
+	for (my $i = 0; $i < @$e; $i += 2) 
+	    {
+	    $eventattrs .= $e -> [$i] . '="' . $e -> [$i+1] . '" ' ;
+	    }
+	}
+    $self -> {eventattrs} = $eventattrs ;
+
     return $self ;
     }
 
@@ -89,6 +99,19 @@ sub is_readonly
     my ($self, $req) = @_ ;
 
     return $self -> {readonly} ;
+    }
+
+# ---------------------------------------------------------------------------
+#
+#   is_hidden - returns true if this is a hidden control
+#
+
+sub is_hidden
+
+    {
+    my ($self, $req) = @_ ;
+
+    return  ;
     }
 
 # ---------------------------------------------------------------------------
@@ -144,6 +167,22 @@ sub form
 
 # ---------------------------------------------------------------------------
 #
+#   label_text - return text of label
+#
+
+sub label_text
+    {
+    my ($self) = @_ ;
+
+    return $self -> {label_text} if ($self -> {label_text}) ;
+
+    return $self -> {label_text} = $self -> {showtext}?($self->{text} ||
+			$self->{name}):$self -> form -> convert_label ($self) ;
+    }
+
+
+# ---------------------------------------------------------------------------
+#
 #   get_validate_rules - get rules for validation
 #
 
@@ -156,12 +195,21 @@ sub get_validate_rules
         {
 
         @local_rules = ( -key => $self->{name} );
-        push @local_rules, -name => $self->{text} if ($self -> {text}) ;
+        push @local_rules, -name => $self -> label_text ;
         push @local_rules, @{$self -> {validate}};
         }
     return \@local_rules ;
     }
 
+# ---------------------------------------------------------------------------
+#
+#   has_auto_label_size - returns true if label should be auto sized for this control
+#
+
+sub has_auto_label_size
+    {
+    return 1 ;
+    }
 
 1 ;
 
@@ -197,7 +245,15 @@ $]
 #   show - output the label
 #]
 
-[$ sub show_label ($self, $req) $][+ $self->{text} || $self->{name} +][$endsub$]
+[$ sub show_label ($self, $req) $][-
+
+    if ($self -> {showoptionslabel})
+	{
+	my $opts = $self -> form -> convert_options ($self, [$self -> {value}]) ;
+	$self -> {text} = $opts -> [0] ;
+	$self -> {showtext} = 1 ;
+	}
+-][+ $self -> label_text +][$endsub$]
 
 [# ---------------------------------------------------------------------------
 #
@@ -205,8 +261,8 @@ $]
 #]
 
 [$sub show_label_icon ($self, $req) $]
-[$if $self -> {sublines} $]&nbsp;<img src="/images/plus.png" style="vertical-align: middle;">[$endif$]
-[$if $self -> {parentid} $]&nbsp;<img src="/images/vline.png" style="vertical-align: middle;">[$endif$]
+[$if $self -> {xxsublines} $]&nbsp;<img src="/images/plus.png" style="vertical-align: middle;">[$endif$]
+[$if $self -> {xxparentid} $]&nbsp;<img src="/images/vline.png" style="vertical-align: middle;">[$endif$]
 [$endsub$]
 
 [# ---------------------------------------------------------------------------
@@ -216,18 +272,32 @@ $]
 
 [$ sub show_label_cell ($self, $req)
 
-my $style = "";
-$style = "white-space:nowrap;" if ($self->{labelnowrap}) ;
+my $style = '';
+my $addclass = '' ;
+my $span = 20 ;
+if ($self -> {width} > 2 && $self -> has_auto_label_size ())
+    {
+    $span = int(40 / $self -> {width}) if ($self -> {x_percent} != 0) ;
+    }
 
+$style = 'white-space:nowrap; ' if ($self->{labelnowrap}) ;
+if ($self -> {width_precent} && !$self -> {width})
+    {
+    $style .= 'width: 20%; '  ;
+    }
+else
+    {
+    $addclass = 'cLabelBoxWidth' . ($self->{width} || 2 ) ;
+    }
 $]
-  <td class="cLabelBox[$ if $self->{labelclass} $][+ " $self->{labelclass}" +][$ endif $]"
-      colspan="1" [$ if $style $]style="[+ $style +]"[$ endif $]>
+  <td class="cLabelBox [+ $addclass +] [$ if $self->{labelclass} $][+ " $self->{labelclass}" +][$ endif $]"
+      colspan="[+ $span +]" [$ if $style $]style="[+ $style +]"[$ endif $]>
     [-
     $self -> show_label ($req);
     $self -> show_label_icon ($req) ;
     -]
   </td>
-  [- return 1; -]
+  [- return $span ; -]
 [$endsub$]
 
 [# ---------------------------------------------------------------------------
@@ -244,6 +314,13 @@ $]
 
 [$ sub show_control_readonly ($self, $req) $][+ $self -> {value} || $fdat{$self -> {name}} +][$endsub$]
 
+[# ---------------------------------------------------------------------------
+#
+#   show_control_addons - output additional things after the control
+#]
+
+[$ sub show_control_addons ($self, $req) $][$endsub$]
+
 
 [# ---------------------------------------------------------------------------
 #
@@ -253,9 +330,22 @@ $]
 [$ sub show_control_cell ($self, $req, $x)
 
     my $span = $self->{width_percent} - $x ;
+    my $addclass = '' ;
+    my $style    = '' ;
+    if ($self -> {width_precent} && !$self -> {width})
+        {
+        $style = "width: " . int($self -> {width_precent} * 100 / 80) . '; '  ;
+        }
+    else
+        {
+        $addclass = 'cControlBoxWidth' . ($self->{width} || 2 ) ;
+        }
 $]
-    <td class="cControlBox" colspan="[+ $span +]">
-    [* my @ret = $self -> is_readonly?$self -> show_control_readonly($req):$self -> show_control ($req); *]
+    <td class="cControlBox [+ $addclass +]" colspan="[+ $span +]" [$ if $style $]style="[+ $style +]"[$ endif $]>
+    [*
+     my @ret = $self -> is_readonly?$self -> show_control_readonly($req):$self -> show_control ($req);
+     $self -> show_control_addons ($req) ;
+     *]
     </td>
 [* return @ret ; *]
 [$endsub$]
@@ -301,6 +391,10 @@ Do not display this control at all.
 
 Could value of this control be changed ?
 
+=head2 label_text
+
+Returns the text of the label
+
 =head2 show
 
 Output the control
@@ -343,6 +437,14 @@ Must return the columns it spans (default: 1)
 
 Output the control itself
 
+=head2 show_control_readonly
+
+Output the control itself as readonly
+
+=head2 show_control_addons
+
+output additional things after the control
+
 =head2 show_control_cell
 
 Output the table cell in which the control will be displayed
@@ -359,7 +461,18 @@ Specifies the name of the control
 =head3 text
 
 Will be used as label for the control, if not given
-name is used as default
+'name' is used as default.
+
+Normaly the the name and text parameters are processed
+by the method C<convert_label> of the C<Embperl::Form>
+object. This method can be overwritten, to allow translation etc.
+
+If the parameter C<showtext> is given a true value, C<convert_label>
+is not called and the text is displayed as it is.
+
+=head3 showtext
+
+Display label without passing it through C<convert_label>. See C<text>.
 
 =head2 labelnowrap
 

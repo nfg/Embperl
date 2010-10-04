@@ -225,4 +225,4 @@ See perldoc L<Changes.pod>
 
 =head1 AUTHOR
 
-G. Richter (richter@dev.ecos.de), A. Beckert (beckert@ecos.de)
+G. Richter (richter at embperl dot org), A. Beckert (beckert@ecos.de)

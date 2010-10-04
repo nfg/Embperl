@@ -3,7 +3,7 @@
 #
 # (C) 1997-2005 G.Richter (richter@dev.ecos.de) / ECOS
 #
-# $Id: Makefile.PL 580573 2007-09-29 11:05:54Z richter $
+# $Id: Makefile.PL 924770 2010-03-18 13:38:01Z richter $
 #
 
 
@@ -15,6 +15,7 @@ use Data::Dumper ;
 
 $win32 = ($Config{osname} =~ /win32/i) ;
 $aix = ($Config{osname} =~ /aix/i);
+$perl32bit = $Config{ptrsize} == 4 ;
 $dynlib = {};
 print "\nRunning on Win 32\n" if ($win32) ;
 
@@ -247,12 +248,12 @@ sub MY::cflags
             $txt =~ s/-O\d//g if ($ccdebug =~ /-O\d/) ;
             $txt =~ /CCFLAGS\s*=(.*?)\n/s ;
 	    my $flags = $mp2cfg->{MODPERL_CCOPTS} || $1 ;
-            $txt =~ s/CCFLAGS\s*=(.*?)\n/CCFLAGS = $ccdebug $flags\n/s ;
+            $txt =~ s/CCFLAGS\s*=(.*?)\n/CCFLAGS = $ccdebug $flags $addcflags\n/s ;
             }
         else
             {
             $txt =~ s/-O\d//g if ($ccdebug =~ /-O\d/) ;
-	    $txt =~ s/CCFLAGS\s*=/CCFLAGS = $ccdebug / ;
+	    $txt =~ s/CCFLAGS\s*=/CCFLAGS = $ccdebug $addcflags/ ;
             }
 
         
@@ -847,6 +848,14 @@ if ($b && $apache)
         $EPHTTPD = $ENV{EPHTTPD} if (defined ($ENV{EPHTTPD})) ;
         $EPHTTPD = "$apache_src/httpsd" if (!-e $EPHTTPD && -e "$apache_src/httpsd") ;
         $EPHTTPD = "$apache_src/bin/httpd" if (!-e $EPHTTPD && -e "$apache_src/bin/httpd") ;
+
+	if (!-e $EPHTTPD && $mp2cfg)
+	    {
+	    my $sbindir = `$mp2cfg->{MP_APXS} -q SBINDIR` ;
+	    chomp ($sbindir) ;
+	    $EPHTTPD = "$sbindir/httpd" ;
+	    $EPHTTPD = "$sbindir/httpd2" if (-e "$sbindir/httpd2") ;
+	    }
         
         if (!-e $EPHTTPD)
             {
@@ -881,6 +890,9 @@ if ($b && $apache)
     
     @EPAPACHEVERSION = start ("\"$EPHTTPD\" -v") ;
     @modules         = start ("\"$EPHTTPD\" -l") ;
+    @apacheinfo      = start ("\"$EPHTTPD\" -V") ;
+
+    my ($mpm) = grep /Server MPM/, @apacheinfo ; 
 
     chomp ($EPAPACHEVERSION[0]) ;
     print "Apache Version $EPAPACHEVERSION[0]\n" ;
@@ -893,6 +905,12 @@ if ($b && $apache)
     $EPMODPERL	  = '' ;
     
     $addmodpath = $mp2cfg?$mp2cfg -> {MODPERL_AP_LIBEXECDIR}:'' ;
+    if ($addmodpath && $mpm)
+	{
+	# openSuSE has some modules in special directory for MPM
+	$mpm =~ /Server MPM:\s+(.+)$/ ;
+	$addmodpath2 = $addmodpath . '-' . lc($1) ;
+	} 	
     while (($mod, $opt) = each %neededmodules)
 	{
 	if (!grep (/$mod/, @modules))
@@ -910,6 +928,21 @@ if ($b && $apache)
                     foreach $modfile (@{$opt->{file}})
                         {
 		        $path = cnvpath ("$addmodpath/$modfile") ;
+		        #print "path = $_ -> $path\n" ;
+		        if (-f $path)
+			    { ## module fould
+	    		    $EPMODPERL .= "\r\nLoadModule ". ($mp2cfg?($opt->{name2} || $opt->{name}):$opt->{name}) . " \"$path\"" ;
+			    print " + Load dynamic module $mod\n   ($path)\n" ;
+			    $found = 1 ;
+			    last searchmod ;
+			    }
+		        }
+                    }
+		if ($addmodpath2)
+		    {
+                    foreach $modfile (@{$opt->{file}})
+                        {
+		        $path = cnvpath ("$addmodpath2/$modfile") ;
 		        #print "path = $_ -> $path\n" ;
 		        if (-f $path)
 			    { ## module fould
@@ -1105,7 +1138,15 @@ if ($b && $apache)
         print "-> EmbperlObject requires File::Spec 0.8 or higher, found $FSVer, please upgrade!\n" ;
         }
         
-    CheckModule ("CGI", "-> File Upload will not work without CGI.pm installed") ;
+    if (my $CGIVer = CheckModule ("CGI", "-> File Upload will not work without CGI.pm installed"))
+	{
+        $CGIVer =~ /(\d+)\.(\d+)/ ;
+	if ($1 < 2 || ($1 == 2 && $2 < 43))
+	    {
+	    print "-> File Upload will not work with CGI.pm < 2.43, please upgrade!\n" ;
+	    }
+
+	} ;
 
     ### write out test configuration file ###
 
@@ -1226,6 +1267,11 @@ if ($win32)
 $d .= ' -DEP2' if ($EP2) ;
 
 $dynlib->{'OTHERLDFLAGS'} .= " $lddebug" ;
+if ($perl32bit)
+    {
+    $dynlib->{'OTHERLDFLAGS'} .= " -m32" ;
+    $dynlib->{'OTHERLDFLAGS'} .= " -L" . join (' -L', split / /, $Config{libpth})  ;
+    }
 
 # 
 # See if we need to link to any other libraries
@@ -1283,10 +1329,11 @@ if ($mp2cfg && $mp2cfg->{'MP_INCLUDE_DIR'})
     $i .= ' -I' . join (' -I', @inc) if (@inc) ;
     }
 
+$addcflags = $perl32bit?'-m32':'' ;
 
 %MMARGS = (
     'LIBS'	   => [$libs || ''],   			 
-    'DEFINE'	   => "$d \$(DEFS)", 			 
+    'DEFINE'	   => "$d \$(DEFS) " . ($mp2cfg?$mp2cfg->{MODPERL_CCOPTS}:''), 			 
     'INC'	   => "-I$EPPATH $i",     			 
     'VERSION'      => undef,
     'VERSION_FROM' => "$EPPATH/Embperl.pm",
@@ -1301,7 +1348,7 @@ If you done a SVN checkout you need to create the sources first by running
 xsbuilder/source_scan.pl and xsbuilder/xs_generate.pl.
 --------------------------------------------------------------------------
 \n" ;
-print FH Data::Dumper -> Dump ([\%MMARGS, $mp2cfg, $ccdebug], ['MMARGS', 'mp2cfg', 'ccdebug']) ;
+print FH Data::Dumper -> Dump ([\%MMARGS, $mp2cfg, $ccdebug, $addcflags], ['MMARGS', 'mp2cfg', 'ccdebug', 'addcflags']) ;
 close FH ;
 
 
@@ -1322,6 +1369,8 @@ xs/Embperl/Syntax/Syntax
 
 $sublibs =~ s/\//\\/g if ($win32) ;
 $o .= $sublibs ;
+
+$libs =~ s/-lz//g ;
 
 WriteMakefile(
     'NAME'	   => 'Embperl',

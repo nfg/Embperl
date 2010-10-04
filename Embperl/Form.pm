@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -29,9 +29,13 @@ use Embperl::Form::Control::blank ;
 use Embperl::Inline ;
 
 use Data::Dumper ;
+use Storable ;
+use MIME::Base64 ;
 
 our %forms ;
 our %CLEANUP = ('forms' => 0) ;
+
+use vars qw{$epreq} ;
 
 # ---------------------------------------------------------------------------
 #
@@ -58,6 +62,7 @@ sub new
     $self -> {bottom_code}    = [] ;
     $self -> {validate_rules} = [] ;
     $self -> {toplevel}       = $toplevel ;
+    $self -> {checkitems}     = $options -> {checkitems} ;
     $self -> {valign}         = $options -> {valign}   || 'top' ;
     $self -> {jsnamespace}    = $options -> {jsnamespace} || '' ;
     $self -> {jsnamespace}   .= '.' if ($self -> {jsnamespace}) ;
@@ -226,6 +231,7 @@ sub new_controls
         $control -> {type} =~ s/sf_select.+/select/ ;
         $control -> {parentid}   = $id if ($id) ;
         $control -> {id} ||= "$control->{name}-$n" ;
+        $control -> {basename} = $control->{name} ;
         $control -> {formid} = $formid ;
         $control -> {formptr} = "$self" ;
 
@@ -333,6 +339,8 @@ sub layout
     $controls ||= $self -> {controls} ;
     $level    ||= 1 ;
 
+    my $hidden = $self -> {hidden} ||= [] ;
+
     my $x     = 0 ;
     my $max_x = 100 ;
     my $line  = [] ;
@@ -342,13 +350,20 @@ sub layout
     foreach my $control (@$controls)
         {
         next if ($control -> is_disabled) ;
+	if ($control -> is_hidden)
+	    {
+	    $control -> {width_percent} = 0 ;
+            push @$hidden, $control  ;
+	    next ;
+            }
         my $width = $control -> {width_percent} || int($max_x / ($control -> {width} || 2)) ;
+        $width = 21 if ($x == 0 && $width < 21) ;
         if ($x + $width > $max_x || $control -> {newline} > 0 || (($control -> {sublines} || $control -> {subobjects}) && @$line))
             { # new line
             if ($x < $max_x)
                 {
                 push @$line, Embperl::Form::Control::blank -> new (
-                        {width_percent => $max_x - $x, level => $level }) ;
+                        {width_percent => int($max_x - $x), level => $level, x_percent => int($x) }) ;
                 }
             push @lines, $line ;
             $line = [] ;
@@ -356,8 +371,8 @@ sub layout
             $num  = 0 ;
             }
         push @$line, $control  ;
-        $control -> {width_percent} = $width ;
-        $control -> {x_percent}     = $x ;
+        $control -> {width_percent} = int($width) ;
+        $control -> {x_percent}     = int($x) ;
 	$control -> {level}         = $level ;
         $x += $width ;
         $num++ ;
@@ -368,7 +383,9 @@ sub layout
             if ($x < $max_x)
                 {
                 push @$line, Embperl::Form::Control::blank -> new (
-                        {width_percent => $max_x - $x }) ;
+                        {width_percent => int($max_x - $x), level => $level, x_percent => int($x) }) ;
+                $num++ ;
+                $max_num = $num if ($num > $max_num) ;
                 }
             push @lines, $line ;
             $line = [] ;
@@ -392,10 +409,19 @@ sub layout
                 {
                 next if (!$subobj) ;
                 $subobj -> layout ;
+		push @$hidden, @{$subobj -> {hidden}} ;
+	        delete $subobj -> {hidden} ;
                 }
             }
         }
 
+    if ($x > 0 && $x < $max_x)
+                {
+                push @$line, Embperl::Form::Control::blank -> new (
+                        {width_percent => int($max_x - $x), level => $level, x_percent => int($x) }) ;
+                $num++ ;
+                $max_num = $num if ($num > $max_num) ;
+                }
     push @lines, $line if (@$line);
     $self -> {max_num} = $max_num ;
     return $self -> {layout} = \@lines ;
@@ -448,6 +474,8 @@ sub show_controls
         $n{$lineid}++ ;
         }
     $self -> show_controls_end ($req) ;
+    $self -> show_controls_hidden ($req) if ($self -> {hidden}) ;
+    $self -> show_checkitems ($req) if ($self -> {checkitems} && $self -> {toplevel}) ;
 
     return ;
     }
@@ -496,7 +524,7 @@ sub prepare_fdat
 
     {
     my ($self, $req) = @_ ;
-warn "embperl::form::prepare_fdat c=@{$self->{prepare_fdat}}" ;
+
     foreach my $control (@{$self -> {prepare_fdat}})
         {
         $control -> prepare_fdat ($req) ;
@@ -519,18 +547,22 @@ sub validate
 #
 #   add_tabs
 #
-#   fügt ein tab elsement mit subforms zu einem Formular hinzu
+#   fügt ein tab element mit subforms zu einem Formular hinzu
+#   wird nur eine Subform übergeben, werden nur diese Felder zurückgeliefert
+#	ohne tabs
 #
 #   in $subform     array mit hashs
 #                       text => <anzeige text>
 #                       fn   => Dateiname
 #                       fields => Felddefinitionen (alternativ zu fn)
+#      $args	    wird an fields funktionen durchgereicht
+#      $tabs_per_line    anzahl tabs pro Zeile
 #
 
 sub add_tabs
 
     {
-    my ($self, $subforms, $args) = @_ ;
+    my ($self, $subforms, $args, $tabs_per_line) = @_ ;
     my @forms ;
     my @values ;
     my @options ;
@@ -545,13 +577,18 @@ sub add_tabs
         push @options, $file -> {text};
         if ($fn)
             {
-            my $obj = Execute ({object => "./$fn"} ) ;
-            #$subfields = eval {$obj -> fields ($r, {%$file, %$args}) || undef};
+            my $obj = Execute ({object => $fn} ) ;
+            $subfields = $obj -> fields ($epreq, {%$file, %$args}) ;
             }
         push @forms,  $subfields;
         push @grids,  $file -> {grid};
         push @values, $file -> {value} ||= scalar(@forms);
         }
+
+    if (@forms == 1)
+	{
+	return @{$forms[0]} ;
+	}
 
     return {
             section => 'cSectionText',
@@ -562,6 +599,7 @@ sub add_tabs
             options => \@options,
             subforms=> \@forms,
             width   => 1,
+            'tabs_per_line' => $tabs_per_line,
             },
     }
 
@@ -604,12 +642,8 @@ sub add_sublines
     {
     my ($self, $object_data, $subforms, $type) = @_;
 
-    my $name    = $object_data->{name};
-    my $text    = $object_data->{text};
-    my $width   = $object_data->{width};
-    my $section = $object_data->{section};
-
-    $text ||= $name;
+    $object_data ||= {} ;
+    $object_data -> {text} ||= $object_data -> {name} ;
 
     my @forms ;
     my @values ;
@@ -621,17 +655,17 @@ sub add_sublines
         my $subfields = $file -> {fields} ;
         if ($fn)
             {
-            my $obj = Execute ({object => "./$fn"} ) ;
-            #$subfields = eval {$obj -> fields ($r,$file) || undef};
+            my $obj = Execute ({object => "$fn"} ) ;
+            $subfields = $obj -> fields ($epreq, $file) ;
             }
         push @forms,   $subfields || [];
         push @values,  $file->{value} || $file->{name};
         push @options, $file -> {text} || $file->{value} || $file->{name};
         }
 
-    return { section => $section , width => $width, name => $name , text => $text, type => $type || 'select',
+    return { %$object_data, type => $type || 'select',
              values => \@values, options => \@options, sublines => \@forms,
-             class  => $object_data->{class}, controlclass  => $object_data->{controlclass}};
+	     };
 
     }
 
@@ -687,6 +721,92 @@ sub add_checkbox_subform
 
     }
 
+#------------------------------------------------------------------------------------------
+#
+#   convert_label
+#
+#   converts the label of a control to the text that should be outputed.
+#   By default does return the text or name paramter of the control.
+#   Can be overwritten to allow for example internationalization.
+#
+#   in $ctrl        Embperl::Form::Control object
+#      $name        optional: name to translate, if not given take $ctrl -> {text}
+#
+
+sub convert_label
+    {
+    my ($self, $ctrl, $name, $text) = @_ ;
+    
+    return $text || $ctrl->{text} || $name || $ctrl->{name} ;
+    }
+
+#------------------------------------------------------------------------------------------
+#
+#   convert_options
+#
+#   converts the values/options of a control to the text that should be outputed.
+#   By default does nothing.
+#   Can be overwritten to allow for example internationalization.
+#
+#   in  $ctrl        Embperl::Form::Control object
+#       $values     values of the control i.e. values that are submitted
+#       $options    options of the control i.e. text that should be displayed
+#
+
+sub convert_options
+    {
+    my ($self, $ctrl, $values, $options) = @_ ;
+    
+    return $options ;
+    }
+
+#------------------------------------------------------------------------------------------
+#
+#   convert_text
+#
+#   converts the text of a controls like transparent to the text that should be outputed.
+#   By default does nothing.
+#   Can be overwritten to allow for example internationalization.
+#
+#   in  $ctrl        Embperl::Form::Control object
+#       $value       value that is shown
+#
+
+sub convert_text
+    {
+    my ($self, $ctrl, $value) = @_ ;
+    
+    return $value || $ctrl->{text} || $ctrl->{name} ;
+    }
+
+
+#------------------------------------------------------------------------------------------
+#
+#   diff_checkitems
+#
+#   Takes the posted form data and the checkitems, compares them and return the
+#   fields that have changed
+#
+#   in  $check  optional: arrayref with fieldnames that should be checked
+#   ret \%diff  fields that have changed
+#
+
+sub diff_checkitems
+    {
+    my ($self, $check) = @_ ;
+    
+    my %diff ;
+    my $checkitems = eval { Storable::thaw(MIME::Base64::decode ($Embperl::fdat{-checkitems})) } ;
+
+    foreach ($check?@$check:keys %Embperl::fdat)
+        {
+        next if ($_ eq '-checkitems') ;
+        $diff{$_} = 1 if ($checkitems -> {$_} ne $Embperl::fdat{$_}) ;
+        }
+
+    return \%diff ;    
+    }
+
 
 1;
 
@@ -731,13 +851,20 @@ onSubmit="v=doValidate; doValidate=1; return ( (!v) || epform_validate_[+ $self-
 [$ sub show_controls_begin  ($self, $req, $activeid)
 
 my $parent = $self -> parent_form ;
-my $class = $parent -> {noframe}?'cTableDivU':'cTableDiv' ;
+my $class  = $self -> {options}{classdiv} || ($parent -> {noframe}?'cTableDivU':'cTableDiv') ;
 $]
 <div  id="[+ $self->{id} +]"
 [$if ($activeid && $self->{id} ne $activeid) $] style="display: none" [$endif$]
 >
 [$if (!$self -> {noframe}) $]<table class="[+ $class +]"><tr><td class="cTabTD"> [$endif$]
-<table class="cBase cTable">
+<table class="cBase cTable cTableInput">
+[# -- this row is necessary for fixed table layout -- #]
+<tr style="display: none">
+<td class="cLabelGroup" colspan="20"></td>
+<td class="cControlGroup" colspan="30"></td>
+<td class="cLabelGroup" colspan="20"></td>
+<td class="cControlGroup" colspan="30"></td>
+</tr>
 [$endsub$]
 
 [# ---------------------------------------------------------------------------
@@ -758,6 +885,32 @@ $]
 [$ if ($self -> {toplevel} && @{$self -> {fields2empty}}) $]
 <input type="hidden" name="-fields2empty" value="[+ join (' ', @{$self -> {fields2empty}}) +]">
 [$endif$]
+[$endsub$]
+
+[# ---------------------------------------------------------------------------
+#
+#   show_controls_hidden - output hidden controls and the end of form
+#]
+
+[$sub show_controls_hidden ($self, $req) $]
+
+[$ foreach my $ctl (@{$self->{hidden}}) $]
+[- $ctl -> show ($req) ; -]
+[$ endforeach $]
+
+[$endsub$]
+
+[# ---------------------------------------------------------------------------
+#
+#   show_checkitems - output data to allow verifying if any data has changed
+#]
+
+[$sub show_checkitems ($self, $req)
+ 
+my $checkitems = MIME::Base64::encode (Storable::freeze (\%idat)) ; 
+$]
+<input type="hidden" name="-checkitems" value="[+ $checkitems +]">
+
 [$endsub$]
 
 
@@ -893,6 +1046,15 @@ Example:
 
     jsnamespace => 'top'
 
+=item * classdiv
+
+Gives the CSS class of the DIV arround the form. Default cTableDiv.
+
+=item * checkitems
+
+If set to true, allow to call the function diff_checkitems after the data is
+posted and see which form fields are changed.
+
 =back
 
 =back
@@ -901,6 +1063,59 @@ Example:
 
 =head2 show
 
+=head2 convert_label
+
+Converts the label of a control to the text that should be outputed.
+By default does return the text or name paramter of the control.
+Can be overwritten to allow for example internationalization.
+
+=over
+
+=item $ctrl
+
+Embperl::Form::Control object
+
+=item $name
+
+optional: name to translate, if not given take $ctrl -> {name}
+
+=back
+
+=head2 convert_text
+
+Converts the text of a control to the text that should be outputed.
+By default does return the text or name paramter of the control.
+Can be overwritten to allow for example internationalization.
+
+=over
+
+=item $ctrl
+
+Embperl::Form::Control object
+
+=back
+
+=head2 convert_options
+
+Converts the values of a control to the text that should be outputed.
+By default does nothing.
+Can be overwritten to allow for example internationalization.
+
+=over
+
+=item $ctrl
+
+Embperl::Form::Control object
+
+=item $values
+
+values of the control i.e. values that are submitted
+
+=item $options
+
+options of the control i.e. text that should be displayed
+
+=back
 
 =head1 AUTHOR
 

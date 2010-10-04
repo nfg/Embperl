@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Object.pm 344310 2005-11-15 05:22:19Z richter $
+#   $Id: Object.pm 1004025 2010-10-03 18:50:24Z richter $
 #
 ###################################################################################
 
@@ -48,7 +48,7 @@ use vars qw(
 @ISA = qw(Exporter DynaLoader);
 
 
-$VERSION = '2.1.0';
+$VERSION = '2.4.0';
 
 
 $volume = (File::Spec -> splitpath ($Embperl::cwd))[0] ;

@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -32,14 +32,50 @@ sub show_control_readonly
     my ($self, $req) = @_ ;
 
     my $name     = $self -> {name} ;
-    $self -> show_control ($req, "^\Q$fdat{$name}\\E\$") ;
+    
+    my ($values, $options) = $self -> get_values ($req) ;
+    my $initval ;
+    my $fdatval = $fdat{$name} ;
+    my $i = 0 ;
+    foreach (@$values)
+        {
+        if ($_ eq $fdatval)
+            {
+            $initval = $options->[$i] ;
+            last ;
+            }
+        $i++ ;
+        }
+    
+    $self -> {value} = $initval ;
+    $self -> show_hidden ($req) ;
+    $self -> SUPER::show_control_readonly ($req) ;    
     }
 
+
+# ---------------------------------------------------------------------------
+
+sub show_control_addons
+    {
+    my ($self, $req) = @_ ;
+
+    }
+    
+    
 
 
 1 ;
 
 __EMBPERL__
+
+[# ---------------------------------------------------------------------------
+#
+#   show_hidden - out hidden field
+#]
+
+[$ sub show_hidden ($self, $req) $]
+<input type="hidden" name="[+ $self -> {name} +]">
+[$endsub$]
 
 [# ---------------------------------------------------------------------------
 #
@@ -77,7 +113,8 @@ __EMBPERL__
             }
         $i++ ;
         }
-
+    $target = '' ;
+    $target = "parent.frames.$self->{link_target}." if ($self -> {link_target}) ;
 $]
 
 <div class="cAutoCompDiv">
@@ -85,10 +122,22 @@ $]
 [# --- Popup --- #]
 <div class="cPopupMenu" id="_menu_[+ $jsname +]"
 style="display:none; position: absolute; top: 15px; z-index: 99; margin: 0px; padding: 0px;
-border: 2px grey outset; background: white; text-align: center;"
+border: 2px grey outset; background: white; text-align: left;"
 >
 
-<a href="#" onClick="location.href='ldapTreeData.epl?-id=' + encodeURIComponent([+ $jsname +]Popup.idval)">Anzeigen</a>&nbsp;
+<a href="#" onClick="[+ $target +]location.href='ldapTreeData.epl?-id=' + encodeURIComponent([+ $jsname +]Popup.idval)">Anzeigen</a>&nbsp;
+
+[*
+    my $datasrc_ctrls      = $self -> get_datasource_controls ($req) ;
+*]
+[$if $datasrc_ctrls $]
+[$foreach my $ctrl (@$datasrc_ctrls) $]
+<a href="[+ do { local $escmode = 0 ; $ctrl->{href} } +]" target="[+ $self->{link_target} +]" onClick="[+ $ctrl->{onclick} +]">[+ $ctrl -> {text} +]</a>&nbsp;
+[#<a class="cControlAddonA" href="[+ $ctrl->{href} +]" onClick="[+ $ctrl->{onclick} +]">[$if $ctrl -> {icon} $]<img class="cControlAddonImg" src="[+ $ctrl -> {icon} +]" title="[+ $ctrl -> {text} +]" alt="[+ $ctrl -> {text} +]">[$else$][+ $ctrl -> {text} +][$endif$]</a>#]
+[$endforeach$]
+[$endif$]
+
+
 [#
 <a href="#" onClick="alert('ldapTreeData.epl?-id=' + [+ $jsname +]Popup.idval)">Durchsuchen</a>&nbsp;
 <a href="ldapTreeData?-id=">Neu</a>
@@ -102,12 +151,16 @@ border: 2px grey outset; background: white; text-align: center;"
 </div>
 
 [# --- input --- #]
-<input class="cBase cControl cAutoCompInput" id="_inp_[+ $jsname +]" type="text"
+<input class="cBase cControl cAutoCompInput cControlWidthSelectDyn" id="_inp_[+ $jsname +]" type="text"
 [$if $self -> {size} $]size="[+ $self->{size} +]"[$endif$]
 value="[+ $initval +]"
+onDblClick="u='ldapTreeData.epl?-id=' + encodeURIComponent(document.getElementById('[+ $name +]').value);[+ $target +]location.href=u;"
+onContextMenu="[+ $jsname +]Popup.showPopup(); return false ;"
 >
+[#
 <div  class="cAutoCompArrow" onclick="[+ $jsname +]Popup.showPopup()"
 >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+#]
 <input type="hidden" name="[+ $name +]" id="[+ $name +]" >
 </div>
 

@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -34,7 +34,7 @@ __EMBPERL__
 
 my $span = ($self->{width_percent})  ;
 $]
-<td class="cBase cTransparentBox" colspan="[+ $span +]">[+ $self->{text} +]&nbsp;</td>
+<td class="cBase cTransparentBox" colspan="[+ $span +]">[+ $self -> {showtext}?($self->{text}):$self -> form -> convert_text ($self) +]&nbsp;</td>
 [$endsub$]
 
 

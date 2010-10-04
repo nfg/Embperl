@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -53,7 +53,15 @@ sub show_control_readonly
             }
         }
 
-    $self -> show_control ($req, "^\Q$fdat{$name}\\E\$", $values, $options) ;
+    $self -> show_control ($req, "^\Q$fdat{$name}\E\$", $values, $options) ;
+    }
+
+# ---------------------------------------------------------------------------
+
+sub show_control_addons
+    {
+    my ($self, $req) = @_ ;
+
     }
 
 1 ;
@@ -104,11 +112,11 @@ $]
     ></td><td>[+ $val ->[1] || $val -> [0] +]</td>[+ do { local $escmode = 0 ; $trend }+]
     [$endif$]
 [$endforeach$]
-[$ foreach $val (@$values) $]
+[$ foreach $val (@$values) $][- $x = ($val =~ /$filter/i) -]
     [$if !defined ($filter) || ($val =~ /$filter/i) $]
     [- $fdat{$name} = $val, $set = 0 if ($set) ;
        $fdat{$name} = $val if ($ignorecase && lc($fdat{$name}) eq lc($val)) ; -]
-    [+ do { local $escmode = 0 ; $tr }+]<td><input type="radio" name="[+ $name +]" value="[+ $val +]"
+    [+ do { local $escmode = 0 ; $tr }+]<td><input type="radio" name="[+ $name +]" value="[+ $val +]" id="[+ "$name-_-$val" +]"
     [$if ($self -> {sublines} || $self -> {subobjects}) $] OnClick="[+ $nsprefix +]show_radio_checked(document, this,[+ $i +],[+ $max +])" [$endif$]
     ></td><td>[+ $options ->[$i] || $val +]</td>[+ do { local $escmode = 0 ; $trend }+]
     [$endif$]

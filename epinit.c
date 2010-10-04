@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epinit.c 498941 2007-01-23 06:58:44Z richter $
+#   $Id: epinit.c 1004025 2010-10-03 18:50:24Z richter $
 #
 ###################################################################################*/
 
@@ -598,7 +598,9 @@ int    embperl_SetupApp     (/*in*/ pTHX_
     if (pPerlParam && SvROK(pPerlParam))
         {
         pParam = (HV *)SvRV(pPerlParam) ;
-        sAppName        = GetHashValueStr (aTHX_ pParam, "appname", NULL) ;
+        sAppName        = GetHashValueStr (aTHX_ pParam, "app_name", NULL) ;
+        if (!sAppName) // backward compability to broken appname 
+            sAppName        = GetHashValueStr (aTHX_ pParam, "appname", NULL) ;
         }
 
     if (!sAppName)
@@ -2043,6 +2045,8 @@ int    embperl_SetupComponent  (/*in*/ tReq *                 r,
         }
 
     c -> sCWD = pPrev?pPrev -> sCWD:r -> sInitialCWD ;
+    if (c -> sCWD == NULL)
+        c -> sCWD = "" ;
 
     NewEscMode (r, NULL) ;
     c -> bEscModeSet = 0 ;

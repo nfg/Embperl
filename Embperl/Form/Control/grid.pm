@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -72,12 +72,13 @@ sub init_data
     
     my $ldap    = $req->{ldap};
     my $name    = $self->{name} ;
-    my @entries = split("\t",$fdat{$name});
+    my @entries = ref $fdat{$name} eq 'ARRAY'?@{$fdat{$name}}:split("\t",$fdat{$name});
     my $fields  = $self -> {fields} ;
 
     my @data;
     my $i = 0 ;
     my $j ;
+    my $col ;
     foreach my $entry (@entries)
         {
         @data = ecos::LdapBase -> splitAttrValue($entry);
@@ -85,13 +86,32 @@ sub init_data
         $j = 0 ;
         foreach my $field (@$fields)
             {
-            $fdat{"$name-$field->{name}-$i"} = $data[$j++] ;
+            $col = exists $field -> {col}?$field -> {col}:$j ;
+            $fdat{"$name-$field->{name}-$i"} = $data[$col] ;
+            if ($field -> can ('init_data'))
+                {
+                local $field->{name} = "$name-$field->{name}-$i" ;
+                $field -> init_data ($req, $self)  ;
+                }
+            $j++ ;    
             }
         $i++ ;
         }
     $fdat{"$name-max"} = $i?$i:1;
     }
 
+# ------------------------------------------------------------------------------------------
+#
+#   prepare_fdat_sub - wird aufgerufen nachdem die einzelen Controls abgearbeitet sind abd
+#                   bevor die daten zusammenfuehrt werden
+#
+
+sub prepare_fdat_sub
+    {
+    my ($self, $req) = @_ ;
+    
+    }
+    
 # ------------------------------------------------------------------------------------------
 #
 #   prepare_fdat - daten zusammenfuehren
@@ -101,6 +121,8 @@ sub prepare_fdat
     {
     my ($self, $req) = @_ ;
     
+    return if ($self -> {readonly}) ;
+    
     my $ldap    = $req->{ldap};
     my $name    = $self->{name} ;
     my $fields  = $self -> {fields} ;
@@ -108,14 +130,43 @@ sub prepare_fdat
 
     my @rows;
     my $j ;
+    my $i ;
     my $val ;
+    my $col ;
+    my %orders ;
+    my $order ;
     for (my $i = 0; $i < $max; $i++)
         {
+	my $ok = 0 ;
+        foreach my $field (@$fields)
+            {
+            if ((ref ($field) =~ /::/) && $field -> can ('prepare_fdat'))
+                {
+                local $field->{name} = "$name-$field->{name}-$i" ;
+                $field -> prepare_fdat ($req)  ;
+                }
+	    $ok++ ;
+            }
+        
+	next if (!$ok) ;
+
+        $order = $fdat{"$name-#row#-$i"} ;
+        $order = $i + 10000 if (!defined($order)) ;
+        $orders{$order} = $i ;
+        }
+
+    $self -> prepare_fdat_sub ($req) if ((ref ($self) =~ /::/));
+
+    foreach my $order (sort keys %orders)
+        {
+        $i = $orders{$order} ;
         $j = 0 ;
         my @data = ($i+1) ;
         foreach my $field (@$fields)
             {
-            push @data, $fdat{"$name-$field->{name}-$i"} ;
+            $col = exists $field -> {col}?$field -> {col}:$j ;
+            $data[$col+1] = $fdat{"$name-$field->{name}-$i"} ;
+            $j++ ;
             }
         $val = ecos::LdapBase -> joinAttrValue(\@data) ;
         push @rows, $val if ($val ne '') ;    
@@ -180,11 +231,15 @@ $]
 $]
 <table class="cBase cGridTitle">
   <tr class="cTableRow">
-    <td class="cBase cGridLabelBox">[+ $self->{text} +]</td>
+    <td class="cBase cGridLabelBox">[+ $self -> form -> convert_label ($self) +]</td>
+    [$if !($self -> {readonly}) $]
     <td class="cBase cGridControlBox">
-        <img src="/images/button_neu.gif" id="cmdAdd" name="-add" title="Zeile Hinzuf&uuml;gen" onclick="[+ $jsname +].addRow()">
-        <img src="/images/button_loeschen.gif"  id="cmdDelete"  name="-delete" title="Markierte Zeile L&ouml;schen" onclick="[+ $jsname +].delRow()">
+        <img src="/images/toup.gif" id="cmdUp" name="-up" title="Zeile Hoch" onclick="[+ $jsname +].upRow()">
+        <img src="/images/todown.gif"  id="cmdDown"  name="-down" title="Zeile runter" onclick="[+ $jsname +].downRow()">
+        <img src="/images/button_neu.gif" id="cmdAdd" name="-add" title="Zeile Hinzuf&uuml;gen  Alt-NUM+" onclick="[+ $jsname +].addRow()">
+        <img src="/images/button_loeschen.gif"  id="cmdDelete"  name="-delete" title="Markierte Zeile L&ouml;schen  Alt-NUM-" onclick="[+ $jsname +].delRow()">
     </td>
+    [$endif$]
   </tr>
 </table>
 [$ endsub $]
@@ -200,7 +255,7 @@ $]
  $]
          <tr class="cGridHeader">
          [$ foreach my $field (@$fields) $]
-            <td class="cGridHeader" [$if($width = $field->{width})$]width="[+$width+]"[$endif$]>[+$field->{text}+]</td>
+            <td class="cGridHeader" [$if($width = $field->{width})$]width="[+$width+]"[$endif$]>[+ $self -> form -> convert_label ($self, $field->{name}, $field->{text}) +]</td>
          [$ endforeach $]
          </tr>
 [$ endsub $]
@@ -212,17 +267,24 @@ $]
 
 [$ sub show_grid_table_row ($self, $req, $i) 
 
-    $fields = $self -> {fields} ;
-    $id     = $self -> {id};
-    $name   = $self -> {name} ;
+    my $fields = $self -> {fields} ;
+    my $id     = $self -> {id};
+    my $name   = $self -> {name} ;
+    my $n      = 0 ;
     $]
 
     <tr class="cGridRow" id="[+ "$id-row-$i" +]">
-
         [$foreach $field (@$fields)$]
-            <td class="cGridCell">[-
+            <td class="cGridCell">[$if $n++ == 0$]<input type="hidden" name="[+ "$name-#row#-$i" +]" value="[+ $i +]">[$endif$][-
                 local $field -> {name} = "$name-$field->{name}-$i" ;
-                $field -> show_control ($req)
+                if ($self -> {readonly})
+                    {
+                    $field -> show_control_readonly ($req)
+                    }
+                else    
+                    {
+                    $field -> show_control ($req)
+                    }
                 -]</td>
         [$endforeach$]     
     </tr>             
@@ -274,7 +336,17 @@ Needs to be 'grid'
 
 =head3 fields
 
-Array ref with field definitions
+Array ref with field definitions. Should look like any normal field definition.
+
+The following extra attributes are available:
+
+=over
+
+=item col
+
+Column number inside the @data array, which should be used for this cell
+
+=back
 
 =head3 header_bottom
 

@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcache.c 396402 2006-04-24 03:44:17Z richter $
+#   $Id: epcache.c 960450 2010-07-05 05:46:23Z richter $
 #
 ###################################################################################*/
 
@@ -265,7 +265,7 @@ int Cache_New (/*in*/ req *             r,
 
     /* lprintf (r -> pApp, "XXXXX Cache_New [%d/%d] pProviders=%x %s  pCacheItems=%x %s  pCachesToRelease=%x %s\n", _getpid(), GetCurrentThreadId(), pProviders, IsBadReadPtr (pProviders,4 )?"bad":"ok", pCacheItems, IsBadReadPtr (pCacheItems, 4)?"bad":"ok", pCachesToRelease, IsBadReadPtr (pCachesToRelease, 4)?"bad":"ok") ; */
 
-    if (SvTYPE(pParam) == SVt_RV)
+    if (SvROK(pParam))
         pParam = SvRV (pParam) ;
 
     if (SvTYPE(pParam) == SVt_PV)
@@ -435,7 +435,7 @@ int Cache_AppendKey               (/*in*/ req *              r,
         }
 
     
-    if (SvTYPE(pParam) == SVt_RV)
+    if (SvROK(pParam))
         pParam = SvRV (pParam) ;
 
     if (SvTYPE(pParam) == SVt_PV)

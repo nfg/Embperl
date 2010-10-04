@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -35,7 +35,7 @@ __EMBPERL__
 my $span = ($self->{width_percent});
 my $section = $self->{section};
 $]
-<td class="cBase cInfoBox" colspan="[+ $span +]">[$ if $section $]<b>[$ endif $][+ $self->{text} +][$ if $section $]</b>[$ endif $]</td>
+<td class="cBase cInfoBox" colspan="[+ $span +]">[$ if $section $]<b>[$ endif $][+ $self -> {showtext}?($self->{text}):$self -> form -> convert_text ($self) +]&nbsp;[$ if $section $]</b>[$ endif $]</td>
 [$endsub$]
 
 

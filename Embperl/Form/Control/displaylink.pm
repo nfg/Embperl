@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -21,6 +21,18 @@ use base 'Embperl::Form::Control' ;
 
 use Embperl::Inline ;
 
+# ---------------------------------------------------------------------------
+#
+#   show_control_readonly - output readonly control
+#
+
+sub show_control_readonly
+    {
+    my ($self, $req) = @_ ;
+
+    $self -> show_control ($req) ;
+    }
+
 1 ;
 
 __EMBPERL__
@@ -37,6 +49,8 @@ my $hrefs    = $self -> {href} ;
 my $targets  = $self -> {target} ;
 my $opens    = $self -> {open} ;
 my $displays = $self -> {link} || $self -> {value} ;
+my $form     = $self -> form ;
+my $showoptions = $self -> {showoptions} ;
 
 $hrefs     = [$hrefs] if (!ref $hrefs) ;
 $targets   = [$targets] if ($targets && !ref $targets) ;
@@ -48,11 +62,11 @@ $]
 
 [$ foreach $display (@$displays) $]
     [$if $opens -> [$dispn] $]
-        <a href="#" onclick="[+ $opens -> [$dispn] +]('[+ $hrefs -> [$dispn] +]')">
+        <a href="#" onclick="[+ $opens -> [$dispn] +][$if $hrefs -> [$dispn] $]('[+ $hrefs -> [$dispn] +]')[$endif$]">
     [$else$]
         <a href="[+ do {local $escmode=0;$hrefs -> [$dispn]} +]"
 	    [$if $targets -> [$dispn] $]target="[+ $targets -> [$dispn] +]"[$endif$]>
-    [$endif$][+ $display +]</a>&nbsp;
+    [$endif$][+ $showoptions?$display:$form -> convert_text ($self, $display) +]</a>&nbsp;
     [- $dispn++ -]
 [$endforeach$]
 
@@ -106,6 +120,10 @@ argument.
 =head3 target
 
 Arrayref with targets
+
+=head3 showtext
+
+If set the texts from the link parameter will not be passed thru convert_text
 
 =head1 Author
 

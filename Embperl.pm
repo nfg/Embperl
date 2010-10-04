@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Embperl.pm 580573 2007-09-29 11:05:54Z richter $
+#   $Id: Embperl.pm 1004025 2010-10-03 18:50:24Z richter $
 #
 ###################################################################################
 
@@ -49,7 +49,7 @@ use vars qw(
 
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = '2.3.0' ;
+$VERSION = '2.4.0' ;
 
 
 if ($modperl  = $ENV{MOD_PERL})
@@ -318,8 +318,8 @@ sub get_multipart_formdata
     foreach ( @$ffld )
 	{
     	# the param_fetch needs CGI.pm 2.43
-	#$params = $cgi->param_fetch( $_ ) ;
-    	$params = $cgi->{$_} ;
+	$params = $cgi->param_fetch( $_ ) ;
+    	#$params = $cgi->{$_} ;
 	if ($#$params > 0)
 	    {
 	    $fdat->{ $_ } = join ("\t", @$params) ;

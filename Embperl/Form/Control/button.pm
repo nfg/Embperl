@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -37,12 +37,20 @@ $self->{button} ||= [{}] ;
 $]
 <td class="cBase cControlBox cControlButtonBox" colspan="[+ $span +]">
 [$ foreach my $button (@{$self->{button}}) $]
+  [$if $self -> {symbol} $]
+    <div class="cControlButtonDiv" 
+  title="[+ $self -> {showtext}?($self->{text}):$self -> form -> convert_label ($self) +]"
+  [$if $self -> {onclick} $] onClick="[+ do { local $escmode = 0 ; $self -> {onclick} } +]" [$endif$]
+   ><img class="cControlButtonSymbol" src="[+ $self -> {symbol} +]">
+   [+ $self -> {showvalue}?($self -> {value} || $self->{text}):$self -> form -> convert_label ($self) +]
+    </div>	
+[$else$]
   [# Workaround around segfault in Embperl 2.1.1-dev *grmpf* #]
   <[# #]input
   class="cBase cControl cControlButton"  name="[+ $self->{name} +]"
-  value="[+ $self->{value} || $self->{text} +]"
-  title="[+ $self->{text} +]"
-  [$if $self -> {onclick} $] onClick="[+ $self -> {onclick} +]" [$endif$]
+  value="[+ $self -> {showvalue}?($self -> {value} || $self->{text}):$self -> form -> convert_label ($self) +]"
+  title="[+ $self -> {showtext}?($self->{text}):$self -> form -> convert_label ($self) +]"
+  [$if $self -> {onclick} $] onClick="[+ do { local $escmode = 0 ; $self -> {onclick} } +]" [$endif$]
   [$if $self -> {image} $]
   type="image" src="[+ $self -> {image} +]"
   [$else$]
@@ -57,6 +65,7 @@ $]
         [+ $attr +]="[+ $button->{$attr} +]"
       [$ endif $]
     [$ endforeach $]>
+  [$endif$]
 [$ endforeach $]
 
 </td>

@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -33,14 +33,15 @@ __EMBPERL__
 [$ sub show_control ($self)
 
 my $name = $self->{name};
+my $id   = $self->{id};
 my $value = exists $self->{value} ? $self->{value} : $fdat{$name};
 $value = [ split /\t/, $value ] if $self->{split};
 $value = [ split /\n/, $value ] if $self->{splitlines};
 
-$][$ if ref $value eq 'ARRAY' $][$ foreach $v (@$value) $][+ $v +]<br />[$ endforeach
+$]<span id="[+ $id +]">[$ if ref $value eq 'ARRAY' $][$ foreach $v (@$value) $][+ $v +]<br />[$ endforeach
 $][$ elsif ref $value eq 'HASH' $][$ foreach $k (keys %$value) $][+ $k +]: [+ $value->{$k} +]<br />[$ endforeach
 $][$ elsif ref $value $]<em>[+ ref $value +]</em>[$ 
-     else $][+ $value +][$ endif $] 
+     else $][+ $value +][$ endif $]</span> 
 
 [$ if $self->{hidden} $]
 <input type="hidden" name="[+ $name +]" value="[+ $value +]">

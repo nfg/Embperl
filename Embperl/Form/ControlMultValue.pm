@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -41,6 +41,8 @@ sub init
         $self -> {datasrcobj} = $form -> new_object ($packages, $self -> {datasrc}, $self) ;
         }
 
+    $self -> SUPER::init ;
+
     return $self ;
     }
 
@@ -56,7 +58,27 @@ sub get_values
     my ($self, $req) = @_ ;
 
     return $self -> {datasrcobj} -> get_values ($req, $self) if ($self -> {datasrcobj}) ;
-    return ($self -> {values}, $self -> {options}) ;
+
+    my $options =  $self -> {options} ;
+    $options = $self -> form -> convert_options ($self, $self -> {values}, $options)
+        if (!$self -> {showoptions}) ;
+
+    return ($self -> {values}, $options) ;
+    }
+
+# ---------------------------------------------------------------------------
+#
+#   get_datasource_controls - returns additional controls provided by the
+#   datasource object e.g. a browse button
+#
+
+sub get_datasource_controls
+
+    {
+    my ($self, $req) = @_ ;
+
+    return $self -> {datasrcobj} -> get_datasource_controls ($req, $self) if ($self -> {datasrcobj}) ;
+    return ;
     }
 
 
@@ -95,6 +117,26 @@ sub get_active_id
 # damit %fdat etc definiert ist
 __EMBPERL__
 
+
+[# ---------------------------------------------------------------------------
+#
+#   show_control_addons - output additional things after the control
+#]
+
+[$ sub show_control_addons ($self, $req)
+ 
+my $datasrc_ctrls  ;
+$datasrc_ctrls = $self -> get_datasource_controls ($req)
+    unless ($self -> {no_datasource_controls}) ;
+
+$][$if $datasrc_ctrls $]
+[$foreach my $ctrl (@$datasrc_ctrls) $]
+<a class="cControlAddonA" href="[+ $ctrl->{href} +]" onClick="[+ $ctrl->{onclick} +]">[$if $ctrl -> {icon} $]<img class="cControlAddonImg" src="[+ $ctrl -> {icon} +]" title="[+ $ctrl -> {text} +]" alt="[+ $ctrl -> {text} +]">[$else$][+ $ctrl -> {text} +][$endif$]</a>
+[$endforeach$]
+[$endif$]
+[$endsub$]
+
+
 __END__
 
 =pod
@@ -123,6 +165,11 @@ that could be overwritten to customize the behaviour of your controls.
 
 returns the values and options
 
+=head2 get_datasource_controls
+
+returns additional controls provided by the
+datasource object e.g. a browse button
+
 =head2 get_active_id
 
 get the id of the value which is currently active
@@ -144,6 +191,10 @@ Name of an class which provides the values for the
 values and options parameters. Either a full package name or
 a name, in which case all packages which are returned
 by Embperl::Form::get_datasrc_packages are searched.
+
+=head3 no_datasource_controls
+
+Disables the output of the additional controls
 
 =head1 AUTHOR
 

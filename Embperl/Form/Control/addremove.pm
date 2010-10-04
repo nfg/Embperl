@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -60,11 +60,10 @@ __EMBPERL__
 
 $]
 
-<td class="cBase cControlBox" colspan="[+ $span +]">
+<td class="cBase cControlBox cControlAddRemoveBox" colspan="[+ $span +]">
 <input type="hidden" id="[+ $name +]" name="[+ $name +]">
-<img src="toleft.gif" title="Hinzufügen" onClick="[+ $nsprefix +]addremoveAddOption (document, document.getElementById('[+ $self->{src} +]'), document.getElementById('[+ $self->{dest} +]'), document.getElementById('[+ $name +]'), [+ $self->{removesource} +])">
-<br>
-<img src="toright.gif" title="Entfernen" onClick="[+ $nsprefix +]addremoveRemoveOption (document, document.getElementById('[+ $self->{src} +]'), document.getElementById('[+ $self->{dest} +]'), document.getElementById('[+ $name +]'), [+ $self->{removesource} +])">
+<img src="/images/toleft.gif" title="Hinzufügen" onClick="[+ $nsprefix +]addremoveAddOption (document, document.getElementById('[+ $self->{src} +]'), document.getElementById('[+ $self->{dest} +]'), document.getElementById('[+ $name +]'), [+ $self->{removesource} +])">
+<img src="/images/toright.gif" title="Entfernen" onClick="[+ $nsprefix +]addremoveRemoveOption (document, document.getElementById('[+ $self->{src} +]'), document.getElementById('[+ $self->{dest} +]'), document.getElementById('[+ $name +]'), [+ $self->{removesource} +])">
 
 [#
     print "<input class="cStandardButton" type=button value="Hinzufügen" onClick="[+ $nsprefix +]addremoveAddOption (document, this.form.elements['$self->{src}'], this.form.elements['$self->{dest}'], this.form.elements['$self->{name}'], $self->{removesource})">\n" ;

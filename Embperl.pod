@@ -1729,10 +1729,11 @@ and developers to share ideas, solve problems and discuss things related to Embp
 To subscribe to this list, send mail to embperl-subscribe@perl.apache.org.
 To unsubscribe send email to embperl-unsubscribe@perl.apache.org . 
 
-There is an archive for the Embperl mailing list at http://www.ecos.de/~mailarc/embperl/
+There is an archive for the Embperl mailing list at 
+http://mail-archives.apache.org/mod_mbox/perl-embperl
 
 For mod_perl related questions you may search the mod_perl mailing list
-archive at http://forum.swarthmore.edu/epigone/modperl
+archive at http://mail-archives.apache.org/mod_mbox/perl-modperl
 
 
 =head2 Commerical Support
@@ -1793,7 +1794,7 @@ Embperl                 http://perl.apache.org/embperl/
 
 Embperl (german)        http://www.ecos.de/embperl/
 
-DBIx::Recordset	        ftp://ftp.dev.ecos.de/pub/perl/dbi
+DBIx::Recordset	        http://www.embperl.org/pub/perl/dbi
 
 Apache web server       http://www.apache.org/
 
@@ -1803,9 +1804,9 @@ mod_perl                http://perl.apache.org/dist/
 
 Apache Perl Modules     http://www.perl.com/CPAN/modules/by-module/Apache/
 
-Embperl                 ftp://ftp.dev.ecos.de/pub/perl/embperl
+Embperl                 http://www.embperl.org/pub/perl/embperl
 
-DBIx::Recordset	        ftp://ftp.dev.ecos.de/pub/perl/dbi
+DBIx::Recordset	        http://www.embperl.org/pub/perl/dbi
 
 PPM for ActiveState  
 
@@ -1856,7 +1857,7 @@ be found at http://www.somewhere.com/software/
 
 =head1 AUTHOR
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 
 =head1 SEE ALSO

@@ -1,5 +1,5 @@
 
-# $Id: httpd.conf.src 441950 2006-09-10 13:19:35Z richter $
+# $Id: httpd.conf.src 925098 2010-03-19 05:38:32Z richter $
 
 print OFH <<EOD ;
 #
@@ -759,6 +759,35 @@ Alias /ckwiki $EPPATH/eg/kwiki
    SetHandler  cgi-script
 </Location>
 
+########## forms example ############
+
+SetEnv PERL5LIB \"$EPPATH/eg/forms\"
+
+AddType text/html .epl 
+
+<Location /eg/forms/pages>
+    SetHandler perl-script
+    PerlHandler Embperl
+    Options ExecCGI
+    #EMBPERL_INPUT_ESCMODE 7
+    #EMBPERL_OPTIONS 262288
+</Location>
+
+
+<Location /eg/forms/wizard>
+    SetHandler perl-script
+    PerlHandler Embperl::Object 
+
+    Options ExecCGI
+    Embperl_Appname setupwizard
+    Embperl_Object_Base base.epl
+    Embperl_Object_App  wizard.pl
+
+    EMBPERL_OBJECT_ADDPATH  \"$EPPATH/eg/forms/lib\"
+    # optAllFormData + optRawInput
+    EMBPERL_OPTIONS 0x2010
+    EMBPERL_ALLOW .epl
+</Location>
 
 
 

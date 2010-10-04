@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -63,6 +63,21 @@ sub get_values
     die "Please overwrite get_values in " . ref $self ;
     }
 
+# ---------------------------------------------------------------------------
+#
+#   get_datasource_controls - returns additional controls provided by the
+#   datasource object e.g. a browse button
+#
+
+sub get_datasource_controls
+
+    {
+    my ($self, $req, $ctrl) = @_ ;
+
+    return ;
+    }
+
+
 1 ;
 
 __END__
@@ -92,6 +107,10 @@ that could be overwritten to customize the behaviour of your controls.
 
 returns the values and options. Must be overwritten.
 
+=head3 get_datasource_controls 
+
+returns additional controls provided by the
+datasource object e.g. a browse button
 
 =head1 AUTHOR
 

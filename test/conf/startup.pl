@@ -48,6 +48,8 @@ BEGIN
     $ENV{EMBPERL_SRC} =~ /^(.*?)$/;
     my $cwd       = $1 ;
 
+    eval "use lib \"$cwd/eg/forms\"" ;
+
     if ($ENV{TEST_PRELOAD})
         {
         $Embperl::initparam{debug} = 0x7fffffff ;

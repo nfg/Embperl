@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcomp.c 580492 2007-09-28 21:44:19Z richter $
+#   $Id: epcomp.c 960450 2010-07-05 05:46:23Z richter $
 #
 ###################################################################################*/
 
@@ -143,7 +143,7 @@ int embperl_CompileInitItem      (/*i/o*/ register req * r,
 
     ppSV = hv_fetch(pHash, "perlcode", 8, 0) ;  
     if (ppSV != NULL && *ppSV != NULL && 
-        SvTYPE(*ppSV) == SVt_RV && SvTYPE((pAV = (AV *)SvRV(*ppSV))) == SVt_PVAV)
+        SvROK(*ppSV)  && SvTYPE((pAV = (AV *)SvRV(*ppSV))) == SVt_PVAV)
 	{ /* Array reference  */
 	int f = AvFILL(pAV) + 1 ;
         int i ;
@@ -176,7 +176,7 @@ int embperl_CompileInitItem      (/*i/o*/ register req * r,
 
     ppSV = hv_fetch(pHash, "compiletimeperlcode", 19, 0) ;  
     if (ppSV != NULL && *ppSV != NULL && 
-        SvTYPE(*ppSV) == SVt_RV && SvTYPE((pAV = (AV *)SvRV(*ppSV))) == SVt_PVAV)
+        SvROK(*ppSV) && SvTYPE((pAV = (AV *)SvRV(*ppSV))) == SVt_PVAV)
 	{ /* Array reference  */
 	int f = AvFILL(pAV) + 1 ;
         int i ;
@@ -420,7 +420,7 @@ static void embperl_CompilePushStack    (/*in*/  tReq * r,
     if (ppSV == NULL)
         return  ;
 
-    if (*ppSV == NULL || SvTYPE (*ppSV) != SVt_RV)
+    if (*ppSV == NULL || !SvROK (*ppSV))
 	{
 	if (*ppSV)
 	    SvREFCNT_dec (*ppSV) ;
@@ -456,7 +456,7 @@ static void embperl_CompilePopStack    (/*in*/  tReq * r,
     SV *    pSV ;
 
     ppSV = hv_fetch((HV *)(pDomTree -> pSV), (char *)sStackName, strlen (sStackName), 0) ;  
-    if (ppSV == NULL || *ppSV == NULL || SvTYPE (*ppSV) != SVt_RV)
+    if (ppSV == NULL || *ppSV == NULL || !SvROK (*ppSV))
         return  ;
 
     pSV = av_pop ((AV *)SvRV (*ppSV)) ;
@@ -486,7 +486,7 @@ static int embperl_CompileMatchStack (/*in*/  tReq * r,
     char *  s ;
 
     ppSV = hv_fetch((HV *)(pDomTree -> pSV), (char *)sStackName, strlen (sStackName), 0) ;  
-    if (ppSV == NULL || *ppSV == NULL || SvTYPE (*ppSV) != SVt_RV)
+    if (ppSV == NULL || *ppSV == NULL || !SvROK (*ppSV))
         {
         strcpy (r -> errdat1, "CompileMatchStack") ;
         strncat (r -> errdat1, (char *)sStackName, sizeof (r -> errdat1) - 20) ;
@@ -541,7 +541,7 @@ static int embperl_CompileAddStack    (/*in*/  tReq * r,
 
 
     ppSV = hv_fetch((HV *)(pDomTree -> pSV), (char *)p, e - p, 0) ;  
-    if (ppSV == NULL || *ppSV == NULL || SvTYPE (*ppSV) != SVt_RV)
+    if (ppSV == NULL || *ppSV == NULL || !SvROK (*ppSV))
         return  op == '!'?1:0 ;
 
     pAV = (AV *)SvRV (*ppSV) ;

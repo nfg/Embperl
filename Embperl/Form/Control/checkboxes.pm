@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -32,7 +32,15 @@ sub show_control_readonly
     my ($self, $req) = @_ ;
 
     my $name     = $self -> {name} ;
-    $self -> show_control ($req, "^\Q$fdat{$name}\\E\$") ;
+    $self -> show_control ($req, "^\Q$fdat{$name}\E\$") ;
+    }
+
+# ---------------------------------------------------------------------------
+
+sub show_control_addons
+    {
+    my ($self, $req) = @_ ;
+
     }
 
 1 ;
@@ -53,34 +61,51 @@ __EMBPERL__
     my $addbottom= $self -> {addbottom} || [] ;
     my $max      = @$values ;
     my $set      = !defined ($fdat{$name})?1:0 ;
+    my $tab      = $self -> {tab} ;
+    my $colcnt   = 0 ;
+    push @{$self -> form -> {fields2empty}}, $name ;
 
     my $val ;
     my $i = 0 ;
 $]
+[$if $tab $]<[# #]table>[$ endif $]
 [$ foreach $val (@$addtop) $]
     [$if !defined ($filter) || ($val->[0] =~ /$filter/i) $]
-    [- $fdat{$name} = $val -> [0], $set = 0 if ($set) ; -]
-    <input type="checkboxes" name="[+ $name +]" value="[+ $val -> [0] +]"
-    >[+ $val ->[1] || $val -> [0] +]
+    [$ if $tab $][$ if $colcnt == 0 $]<[# #]tr>[- $colcnt = $tab -][$endif$]<td>[$endif$] 
+    [#- $fdat{$name} = $val -> [0], $set = 0 if ($set) ; -#]
+    <input type="checkbox" name="[+ $name +]" value="[+ $val -> [0] +]"
+    >
+    [$ if $tab $]</td><td>[$endif$] 
+    [+ $val ->[1] || $val -> [0] +]
+    [$ if $tab $]</td>[$ if $colcnt-- < 1 $]<[# #]/tr>[$endif$][$endif$] 
     [$endif$]
 [$endforeach$]
 [$ foreach $val (@$values) $]
     [$if !defined ($filter) || ($val =~ /$filter/i) $]
-    [- $fdat{$name} = $val, $set = 0 if ($set) ; -]
+    [$ if $tab $][$ if $colcnt == 0 $]<[# #]tr>[- $colcnt = $tab -][$endif$]<td>[$endif$] 
+    [#- $fdat{$name} = $val, $set = 0 if ($set) ; -#]
     <input type="checkbox" name="[+ $name +]" value="[+ $val +]"
     [$if ($self -> {sublines} || $self -> {subobjects}) $] OnClick="show_checkboxes_checked(this,[+ $i +],[+ $max +])" [$endif$]
-    >[+ $options ->[$i] || $val +]
+    >
+    [$ if $tab $]</td><td>[$endif$] 
+    [+ $options ->[$i] || $val +]
     [- $vert = $self -> {vert} -][$while $vert-- > 0 $]<br/>[$endwhile$]
+    [$ if $tab $]</td>[$ if $colcnt-- < 1 $]<[# #]/tr>[$endif$][$endif$] 
     [$endif$]
     [* $i++ ; *]
 [$endforeach$]
 [$ foreach $val (@$addbottom) $]
     [$if !defined ($filter) || ($val->[0] =~ /$filter/i) $]
-    [- $fdat{$name} = $val -> [0], $set = 0 if ($set) ; -]
-    <input type="checkboxes" name="[+ $name +]" value="[+ $val -> [0] +]"
-    >[+ $val ->[1] || $val -> [0] +]
+    [$ if $tab $][$ if $colcnt == 0 $]<[# #]tr>[- $colcnt = $tab -][$endif$]<td>[$endif$] 
+    [#- $fdat{$name} = $val -> [0], $set = 0 if ($set) ; -#]
+    <input type="checkbox" name="[+ $name +]" value="[+ $val -> [0] +]"
+    >
+    [$ if $tab $]</td><td>[$endif$] 
+    [+ $val ->[1] || $val -> [0] +]
+    [$ if $tab $]</td>[$ if $colcnt-- < 1 $]<[# #]/tr>[$endif$][$endif$] 
     [$endif$]
 [$endforeach$]
+[$if $tab $]<[# #]/table>[$ endif $]
 
 [$endsub$]
 
@@ -137,6 +162,11 @@ If no options are given, the values from values are used.
 
 If specified arranges the checkboxes button vertically. The number given specifies
 the number of <br>'s used the separate the checkboxes buttons.
+
+=head3 tab
+
+if specified arranges the checkboxes in a table. The number given 
+specifies the number of columns in one table row.
 
 =head3 addtop
 

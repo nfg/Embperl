@@ -40,7 +40,7 @@ hope they are useful, or at least spur you on to develop your own
 frameworks and share these with others.
 
 If you have any Tips & Tricks you want to share with the public
-please send them to richter@dev.ecos.de .
+please send them to richter at embperl dot org .
 
 =head1 Alternative Way To Do Global Variables, using __PACKAGE__
 

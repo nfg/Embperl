@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epprovider.c 294756 2005-08-07 00:03:03Z richter $
+#   $Id: epprovider.c 924970 2010-03-18 19:53:48Z richter $
 #
 ###################################################################################*/
 
@@ -722,9 +722,18 @@ static int ProviderMem_GetContentSV (/*in*/ req *             r,
         if ((*pData = SvREFCNT_inc(((tProviderMem *)pProvider) -> pSource)))
             {
             SvREFCNT_inc (*pData) ;
-            r -> Component.pBuf = SvPVX (*pData) ;
-            r -> Component.pEndPos = r -> Component.pBuf + SvCUR(*pData) ;
-            r -> Component.pCurrPos = r -> Component.pBuf ;
+            if (SvPOK(*pData))
+                {
+                r -> Component.pBuf = SvPVX (*pData) ;
+                r -> Component.pEndPos = r -> Component.pBuf + SvCUR(*pData) ;
+                r -> Component.pCurrPos = r -> Component.pBuf ;
+                }
+            else
+                {
+                r -> Component.pBuf = "" ;
+                r -> Component.pEndPos = r -> Component.pBuf  ;
+                r -> Component.pCurrPos = r -> Component.pBuf ;
+                }    
             }
         }
     return ok ;

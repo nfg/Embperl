@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -72,14 +72,11 @@ sub init_data
     my $ldap    = $req->{ldap};
     my $name    = $self->{name} ;
     my @entries = split("\t",$fdat{$name});
-use Data::Dumper ;
-print STDERR 'init_data', Dumper (\%fdat, $name, \@entries) ;
 
     my $i = 0 ;
     foreach my $entry (@entries)
         {
-            $fdat{"$name--$i"} = $entry ;
-warn "init_data mult     field=$name--$i fd=" . $fdat{"$name--$i"} ;
+        $fdat{"$name--$i"} = $entry ;
             
         $i++ ;
         }
@@ -97,20 +94,15 @@ sub prepare_fdat
     my $ldap    = $req->{ldap};
     my $name    = $self->{name} ;
     my $max     = $fdat{"$name-max"} || 1 ;
-warn "prepare_dat mult     name =$name, max=$max" ;
-use Data::Dumper ;
-print STDERR Dumper (\%fdat) ;
 
     my @rows;
     my $val ;
     for (my $i = 0; $i < $max; $i++)
         {
-warn "prepare_dat mult     field=$name--$i fd=" . $fdat{"$name--$i"} ;
         $val = $fdat{"$name--$i"} ;
         push @rows, $val if ($val ne '') ;
         }
     $fdat{$name} = \@rows ;    
-print STDERR Dumper (\%fdat, \@rows) ;
     }
 
 sub show { Embperl::Form::Control::show (@_) } 

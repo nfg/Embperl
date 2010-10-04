@@ -1,6 +1,6 @@
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -22,32 +22,37 @@ use Embperl::Inline ;
 
 sub noframe { return 1; }
 
+# ---------------------------------------------------------------------------
+#
+#   is_hidden - returns true if this is a hidden control
+#
+
+sub is_hidden
+
+    {
+    my ($self, $req) = @_ ;
+
+    return  1 ;
+    }
+
+
+
 1 ;
 
 __EMBPERL__
-
-[$ sub show_sub_begin ($self) $][$ endsub $]
-[$ sub show_sub_end ($self) $][$ endsub $]
-[$ sub show_label ($self) $][$ endsub $]
-[$ sub show_label_icon ($self) $][$ endsub $]
-[$ sub show_label_cell ($self) $][$ endsub $]
-
-[$ sub show_control_cell ($self, $x) $]
-  [* my @ret = $self->show_control; return @ret; *]
-[$ endsub $]
 
 [# ---------------------------------------------------------------------------
 #
 #   show_control - output the control
 #]
 
-[$ sub show_control ($self)
+[$ sub show ($self, $req)
 
 my $name = $self->{name};
 my $value = exists $self->{value} ? $self->{value} : $fdat{$name};
 
 $]
-<input type="hidden" name="[+ $name +]" value="[+ $value +]">
+<input type="hidden" name="[+ $name +]" value="[+ $value +]" id="[+ $self->{id} +]">
 [$endsub$]
 
 __END__

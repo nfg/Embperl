@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -31,13 +31,15 @@ __EMBPERL__
 #]
 
 [$ sub show_control ($self) 
+
 $self -> {size} ||= 80 / ($self -> {width} || 2) ;
+$class = $self -> {class} ||= 'cControlWidthInput' ;
 $]
 
-<input type="text"  class="cBase cControl"  name="[+ $self->{name} +]" id="[+ $self->{name} +]"
+<input type="text"  class="cBase cControl [+ $class +]"  name="[+ $self->{name} +]" id="[+ $self->{name} +]"
 [$if $self -> {size} $]size="[+ $self->{size} +]"[$endif$]
 [$if $self -> {maxlength} $]maxlength="[+ $self->{maxlength} +]"[$endif$]
->
+[+ do { local $escmode = 0 ; $self -> {eventattrs} } +]>
 [$endsub$]
 
 __END__
@@ -85,6 +87,10 @@ Gives the size in characters
 =head3 maxlength
 
 Gives the maximum possible input length in characters
+
+=head3 class
+
+Alternative CSS class name
 
 =head1 Author
 

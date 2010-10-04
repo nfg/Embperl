@@ -265,11 +265,11 @@
 
 #define epxs_CHAR_2obj(x) sv_2mortal(newSVnv(x))
 
-#define epxs_sv2_AVREF(sv) (AV*)SvRV(sv)
+#define epxs_sv2_AVREF(sv) (!SvOK(sv) || !SvROK(sv) || SvTYPE(SvRV(sv)) != SVt_PVAV?(Perl_croak(aTHX_ "Need an Array reference"),NULL):(AV*)SvRV(sv))
 
 #define epxs_AVREF_2obj(x) (x?sv_2mortal(newRV((SV*)x)):&PL_sv_undef)
 
-#define epxs_sv2_HVREF(sv) (HV*)SvRV(sv)
+#define epxs_sv2_HVREF(sv) (!SvOK(sv) || !SvROK(sv) || SvTYPE(SvRV(sv)) != SVt_PVHV?(Perl_croak(aTHX_ "Need an Hash reference"),NULL):(HV*)SvRV(sv))
 
 #define epxs_HVREF_2obj(x) (x?sv_2mortal(newRV((SV*)x)):&PL_sv_undef)
 

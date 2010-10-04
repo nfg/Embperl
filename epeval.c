@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epeval.c 294756 2005-08-07 00:03:03Z richter $
+#   $Id: epeval.c 960450 2010-07-05 05:46:23Z richter $
 #
 ###################################################################################*/
 
@@ -350,12 +350,12 @@ static int EvalAll (/*i/o*/ register req * r,
 	sRef = "; \\&" ;
     
     if (r -> Component.bStrict)
-        if (flags & G_ARRAY)
+        if ((flags & G_ARRAY) != G_SCALAR)
             pSVCmd = newSVpvf(sFormatStrictArray, r -> Component.sEvalPackage, sName, r -> Component.nSourceline, r -> Component.sSourcefile, sArg, sRef, sName) ;
         else
             pSVCmd = newSVpvf(sFormatStrict, r -> Component.sEvalPackage, sName, r -> Component.nSourceline, r -> Component.sSourcefile, sArg, sRef, sName) ;
     else
-        if (flags & G_ARRAY)
+        if ((flags & G_ARRAY) != G_SCALAR)
             pSVCmd = newSVpvf(sFormatArray, r -> Component.sEvalPackage, sName, r -> Component.nSourceline, r -> Component.sSourcefile, sArg, sRef, sName) ;
         else
             pSVCmd = newSVpvf(sFormat, r -> Component.sEvalPackage, sName, r -> Component.nSourceline, r -> Component.sSourcefile, sArg, sRef, sName) ;
@@ -624,7 +624,7 @@ int EvalOnly           (/*i/o*/ register req * r,
     if (ppSV && *ppSV)
 	 SvREFCNT_dec (*ppSV) ;
 
-    if (rc == ok && pSub != NULL && SvTYPE (pSub) == SVt_RV)
+    if (rc == ok && pSub != NULL && SvROK (pSub))
         {
         /*sv_setsv (*ppSV, pSub) ;*/
         *ppSV = SvRV(pSub) ;

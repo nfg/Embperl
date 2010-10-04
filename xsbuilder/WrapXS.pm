@@ -73,10 +73,12 @@ sub pm_text { undef } ;
 sub makefilepl_text {
     my $self = shift ;
 
-    my $code = "local \$mp2cfg ;\nlocal \$ccdebug ;\n" .
+    my $code = "local \$mp2cfg ;\nlocal \$ccdebug ;\nlocal \$addcflags;\n" .
                 $self -> SUPER::makefilepl_text (@_) ;
 
     $code .= q[
+
+
 
 sub MY::top_targets
 	{
@@ -97,12 +99,12 @@ sub MY::cflags
             $txt =~ s/-O\d//g if ($ccdebug =~ /-O\d/) ;
             $txt =~ /CCFLAGS\s*=(.*?)\n/s ;
 	    my $flags = $mp2cfg->{MODPERL_CCOPTS} || $1 ;
-            $txt =~ s/CCFLAGS\s*=(.*?)\n/CCFLAGS = $ccdebug $flags\n/s ;
+            $txt =~ s/CCFLAGS\s*=(.*?)\n/CCFLAGS = $ccdebug $flags $addcflags\n/s ;
             }
         else
             {
             $txt =~ s/-O\d//g if ($ccdebug =~ /-O\d/) ;
-	    $txt =~ s/CCFLAGS\s*=/CCFLAGS = $ccdebug / ;
+	    $txt =~ s/CCFLAGS\s*=/CCFLAGS = $ccdebug $addcflags/ ;
             }
 
         

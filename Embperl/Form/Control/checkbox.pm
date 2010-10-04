@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -41,6 +41,35 @@ sub get_active_id
     }
 
 
+# ---------------------------------------------------------------------------
+#
+#   has_auto_label_size - returns true if label should be auto sized for this control
+#
+
+sub has_auto_label_size
+    {
+    return 0 ;
+    }
+
+# ---------------------------------------------------------------------------
+#
+#   show_control_readonly - output readonly control
+#
+
+sub show_control_readonly
+    {
+    my ($self, $req) = @_ ;
+
+    my $name     = $self -> {name} ;
+    my $val      = $self -> {value} ;
+    $val = 1 if ($val eq '') ;
+
+    $self -> {value} = $fdat{$name} eq $val?'X':'-' ;
+    $self -> SUPER::show_control_readonly ($req) ;
+    }
+
+
+
 1 ;
 
 __EMBPERL__
@@ -60,7 +89,7 @@ __EMBPERL__
 $]
 <input type="checkbox"   class="cBase cControlCheckbox"  name="[+ $name +]" value="[+ $val +]"
 [$if ($self -> {sublines} || $self -> {subobjects}) $] OnClick="[+ $nsprefix +]show_checked(document, this)" [$endif$]
->
+[+ do { local $escmode = 0 ; $self -> {eventattrs} } +]>
 [$endsub$]
 
 __END__

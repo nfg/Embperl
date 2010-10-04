@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -9,7 +9,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcmd2.c 580573 2007-09-29 11:05:54Z richter $
+#   $Id: epcmd2.c 960450 2010-07-05 05:46:23Z richter $
 #
 ###################################################################################*/
 
@@ -426,7 +426,7 @@ SV * Node_replaceChildWithUrlDATA (/*in*/ tReq *        r,
     HV *   pHV ;    
     tDomTree * pDomTree = DomTree_self(xDomTree) ;
 
-    if (SvTYPE(sText) == SVt_RV && SvTYPE((pAV = (AV *)SvRV(sText))) == SVt_PVAV)
+    if (SvROK(sText) && SvTYPE((pAV = (AV *)SvRV(sText))) == SVt_PVAV)
 	{ /* Array reference inside URL */
 	SV ** ppSV ;
 	int i ;
@@ -453,7 +453,7 @@ SV * Node_replaceChildWithUrlDATA (/*in*/ tReq *        r,
     
 	}
 
-    else if (SvTYPE(sText) == SVt_RV && SvTYPE((pHV = (HV *)SvRV(sText))) == SVt_PVHV)
+    else if (SvROK(sText) && SvTYPE((pHV = (HV *)SvRV(sText))) == SVt_PVHV)
 	{ /* Hash reference inside URL */
         HE *	    pEntry ;
         char *	    pKey ;

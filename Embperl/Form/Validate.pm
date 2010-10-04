@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -1030,7 +1030,7 @@ only the server-side validation is performed.
 
     <p><hr>
 
-    <small>Embperl (c) 1997-2005 G.Richter / ecos gmbh <a href="http://www.ecos.de">www.ecos.de</a></small>
+    <small>Embperl (c) 1997-2010 G.Richter / ecos gmbh <a href="http://www.ecos.de">www.ecos.de</a></small>
 
     </body>
     </html>

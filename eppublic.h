@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eppublic.h 294778 2005-10-02 13:30:14Z richter $
+#   $Id: eppublic.h 922545 2010-03-13 12:20:28Z richter $
 #
 ###################################################################################*/
 
@@ -68,7 +68,7 @@ const char * embperl_GetText (tReq *       r,
 char * embperl_GetDateTime (char * sResult) ;
 
 
-#define ERRDATLEN 1024
+#define ERRDATLEN 4096
 
 #ifdef WIN32
 #define pid_t int

@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epmain.c 355598 2005-12-09 20:59:37Z richter $
+#   $Id: epmain.c 1004099 2010-10-04 03:49:25Z richter $
 #
 ###################################################################################*/
 
@@ -179,6 +179,7 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
         case rcUnknownOption:           msg ="[%d]ERR:  %d: %s Unkown option '%s' in configuration directive '%s'" ; break ; 
         case rcTimeFormatErr:           msg ="[%d]ERR:  %d: %s Format error in %s = %s" ; break ;
         case rcSubCallNotRequest:       msg ="[%d]ERR:  %d: %s A Embperl sub is called and no Embperl request is running  %s %s" ; break ;
+        case rcNotScalarRef:            msg ="[%d]ERR:  %d: %s %s need scalar in '%s'" ; break ; 
 
 	default:                        msg ="[%d]ERR:  %d: %s Error (no description) %s %s" ; break ; 
         }
@@ -1058,10 +1059,19 @@ static int OutputToMem (/*i/o*/ register req * r)
 
     {
     epTHX_
-    SV * pOut = SvRV (r -> Component.Param.pOutput) ;
+    SV * pOut ;
     char * pData ;
     STRLEN    l ;
             	
+    if (!SvROK (r -> Component.Param.pOutput))
+        {
+        strcpy (r -> errdat1, "OutputToMem") ;
+        strcpy (r -> errdat2, "parameter output") ;
+        
+        return rcNotScalarRef ;
+        }
+    
+    pOut = SvRV (r -> Component.Param.pOutput) ;
     if (!r -> bError && r -> Component.pOutputSV && !r -> Component.pImportStash)
 	{
 	sv_setsv (pOut, r -> Component.pOutputSV) ;

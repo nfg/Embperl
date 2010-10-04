@@ -1,0 +1,47 @@
+[! sub frames  { 0} !]
+[! sub subhead { 0} !]
+[! sub title   { 'Setup' } !]
+[! sub extrahelp { undef } !]
+
+[$sub subhead $]
+<center>
+<h2>BB-5000 - Setup&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h2>
+</center>
+[$endsub$]
+
+[-
+$r = shift ;
+-]
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+          "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>[+ $r -> title +]</title>
+
+<link rel="stylesheet" type="text/css" href="/forms/css/EmbperlForm.css">
+<script language="JavaScript" type="text/javascript" src="/forms/js/prototype.js"></script>
+<script language="JavaScript" type="text/javascript" src="/forms/js/EmbperlForm.js"></script>
+
+</head>
+<body class="cBody">
+
+[- Execute ('header.epl') -]
+
+<hr>
+<div class="cSetupWizardDiv">
+[$if $fdat{-msg} $]
+<center><span class="cError">[- @msg = split /\n/, $fdat{-msg} -][$foreach $m (@msg)$]<br>[+ $m +][$endforeach$]</span></center>
+[- delete $fdat{-msg} ; -]
+[$endif$]
+[-
+Execute ({isa => 'wizard.epl'}) ;
+$r -> display ;
+-]
+</div>
+
+[- Execute ('footer.epl') -]
+
+</body>
+</html>
+
+

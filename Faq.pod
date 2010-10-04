@@ -1467,7 +1467,7 @@ some links here
 
 =head1 AUTHOR
 
-Gerald Richter <richter@ecos.de>
+Gerald Richter <richter at embperl dot org>
 
 Edited by Nora Mikes <nora@radio.cz>
 

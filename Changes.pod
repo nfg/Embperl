@@ -1,5 +1,30 @@
 =pod
 
+=head 2.4.0  4. Oct 2010
+
+    - Support for CGI.pm 3.43 (included within Perl 5.10.1)
+      for file uplaods. CGI.pm < 2.43 is not supported anymore.
+    - A lot of enhancements for Embperl::Form
+    - Add example for usage of Embperl::Form. See 
+      eg/forms/README.txt. Can be viewed used using "make start"
+    - Increased size limit for errormessage from 1024 to 4096
+    - Makefile.PL can now handle compiling 32Bit code on 64Bit 
+      sytsem if Perl was compiled as 32Bit application
+    - Adaption of tests to changed error messages of perl 5.10
+    - Makefile.PL can now cope with OpenSuSE 11.2, if perl,
+      mod_perl and apache are installed from OpenSuSE packages.
+    - Fix make test error for Perl compiled with DEBUGGING on
+    - Support for internationalization in Emberl::Form
+    - Do not link against unused libz
+    - Supports now Perl 5.12: Cope with changed flags G_ARRAY
+      and G_SCALAR, SVt_RV is now SVt_IV
+    - Fix Execute parameter app_name (was appname, but app_name
+      is correct, appname is still accepted, but might not always
+      work)
+    - Add parameter checks for Execute parameters to avoid segfaults
+      in case of non refs where refs are expected.
+    - Add more controls to Embperl::Form
+
 =head1 2.3.0  30. Sept. 2007
 
     - Added support for Code ref in language message lookup hash.

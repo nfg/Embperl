@@ -1,7 +1,7 @@
 
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: embperl.h 331995 2005-11-09 08:11:00Z richter $
+#   $Id: embperl.h 1004099 2010-10-04 03:49:25Z richter $
 #
 ###################################################################################*/
 
@@ -97,6 +97,7 @@ enum tRc
     rcTimeFormatErr,
     rcSubCallNotRequest,
     rcTokenNotFound,  
+    rcNotScalarRef,
     rcForbidden = 403,
     rcNotFound  = 404,
     rcDecline   = -1

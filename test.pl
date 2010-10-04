@@ -2,7 +2,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -11,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: test.pl 498924 2007-01-23 05:31:44Z richter $
+#   $Id: test.pl 1004099 2010-10-04 03:49:25Z richter $
 #
 ###################################################################################
 
@@ -70,6 +70,14 @@
         'errors'     => 5,
         'version'    => 2,
         'cgi'        => 0,
+        'condition'  => '$] < 5.010000',
+        },
+    'error.htm' => { 
+        'repeat'     => 3,
+        'errors'     => 6,
+        'version'    => 2,
+        'cgi'        => 0,
+        'condition'  => '$] >= 5.010000',
         },
     'error.htm' => { 
         'repeat'     => 3,
@@ -83,7 +91,14 @@
         'errors'     => 6,
         'version'    => 2,
         'cgi'        => 1,
-        'condition'  => '$MP2',
+        'condition'  => '$MP2 && $] < 5.010000',
+        },
+    'error.htm' => { 
+        'repeat'     => 3,
+        'errors'     => 7,
+        'version'    => 2,
+        'cgi'        => 1,
+        'condition'  => '$MP2 && $] >= 5.010000',
         },
     'errormismatch.htm' => { 
         'errors'     => '1',
@@ -119,6 +134,14 @@
         'errors'     => 5,
         'version'    => 2,
         'modperl'    => 1,
+        'condition'  => '$] < 5.010000',
+        },
+    'errdoc/errdoc.htm' => { 
+        'option'     => '262144',
+        'errors'     => 6,
+        'version'    => 2,
+        'modperl'    => 1,
+        'condition'  => '$] >= 5.010000',
         },
     'errdoc/epl/errdoc2.htm' => { 
         'option'     => '262144',
@@ -135,6 +158,16 @@
         'cgi'        => 0,
         'noloop'     => 1,
         'modperl'    => 1,
+        'condition'  => '$] < 5.010000',
+        },
+    'errdoc/epl/errdoc2.htm' => { 
+        'option'     => '262144',
+        'errors'     => 6,
+        'version'    => 2,
+        'cgi'        => 0,
+        'noloop'     => 1,
+        'modperl'    => 1,
+        'condition'  => '$] >= 5.010000',
         },
     'rawinput/rawinput.htm' => { 
         'option'     => '16',
@@ -1122,7 +1155,7 @@ use vars qw ($httpconfsrc $httpconf $EPPORT $EPPORT2 *SAVEERR *ERR $EPHTTPDDLL $
             $opt_multchild $opt_memcheck $opt_exitonmem $opt_exitonsv $opt_config $opt_nostart $opt_uniquefn
             $opt_quite $opt_qq $opt_ignoreerror $opt_tests $opt_blib $opt_help $opt_dbgbreak $opt_finderr
             $opt_ddd $opt_gdb $opt_ab $opt_abpre $opt_abverbose $opt_start $opt_startinter $opt_kill $opt_showcookie $opt_cache
-            $opt_cfgdebug) ;
+            $opt_cfgdebug $opt_verbosecmp) ;
 
     {
     local $^W = 0 ;
@@ -1222,7 +1255,7 @@ $ret = GetOptions ("offline|o", "ep1|1", "cgi|c", "cache|a", "modperl|httpd|h", 
             "multchild|m", "memcheck|v", "exitonmem|g", "exitonsv", "config|f=s", "nostart|x", "uniquefn|u",
             "quite|q",  "qq", "ignoreerror|i", "tests|t", "blib|b", "help", "dbgbreak", "finderr",
 	    "ddd", "gdb", "ab:s", "abverbose", "abpre", "start", "startinter", "kill", "showcookie",
-            "cfgdebug") ;
+            "cfgdebug", "verbosecmp|V") ;
 
 $opt_help = 1 if ($ret == 0) ;
 
@@ -1287,6 +1320,7 @@ if ($opt_help)
     print "-q       set debug to 0\n" ;
     print "-i       ignore errors\n" ;
     print "-t       list tests\n" ;
+    print "-V       verbose compare, show diff\n" ;
 #    print "-b      use uninstalled version (from blib/..)\n" ;
     print "--ddd    start apache under ddd\n" ;
     print "--gdb    start apache under gdb\n" ;
@@ -1420,6 +1454,7 @@ sub CmpFiles
     {
     my ($f1, $f2, $errin) = @_ ;
     my $line = 0 ;
+    my $line2 = 0 ;
     my $err  = 0 ;
     local $^W = 0 ;
 
@@ -1435,10 +1470,12 @@ sub CmpFiles
 	{
 	$line++ ;
         chompcr ($l1) ;
+        printf ("<<<#%3d: %s\n", $line, $l1) if ($opt_verbosecmp) ;
         while (($l1 =~ /^\s*$/) && defined ($l1 = <F1>))
             { 
 	    $line++ ;
             chompcr ($l1) ; 
+            printf ("<<<#%3d: %s\n", $line, $l1) if ($opt_verbosecmp) ;
             } 
 
 
@@ -1446,8 +1483,14 @@ sub CmpFiles
 	    {
 	    $l2 = <F2> ;
 	    chompcr ($l2) ;
+	    $line2++ ;
+            printf ("-->#%3d: %s\n", $line2, $l2) if ($opt_verbosecmp) ;
             while (($l2 =~ /^\s*$/) && defined ($l2 = <F2>))
-                { chompcr ($l2) ; } 
+                { 
+                chompcr ($l2) ; 
+	        $line2++ ;
+                printf ("-->#%3d: %s\n", $line2, $l2) if ($opt_verbosecmp) ;
+                } 
 	    }
 	last if (!defined ($l2) && !defined ($l1)) ;
 
@@ -1472,6 +1515,8 @@ sub CmpFiles
                 }
             $l2 = <F2> if (!$eq) ;
 	    chompcr ($l2) ;
+            $line2++ ;
+            printf ("-->#%3d: %s\n", $line2, $l2) if ($opt_verbosecmp) ;
 	    }
 
 	if (!$eq)
@@ -1504,6 +1549,8 @@ sub CmpFiles
 	while (defined ($l2 = <F2>))
 	   {
 	   chompcr ($l2) ;
+           $line2++ ;
+           printf ("-->#%3d: %s\n", $line2, $l2) if ($opt_verbosecmp) ;
 	   if (!($l2 =~ /^\s*$/))
 		{
 		print "\nError in Line $line\nIs:\t\nShould:\t$l2\n" ;
@@ -1709,6 +1756,8 @@ sub CheckError
 	    !($_ =~ /SES\:/) &&
 	    !($_ =~ /gcache started/) &&
             !($_ =~ /EmbperlDebug: /) &&
+            !($_ =~ /not available until httpd/) &&
+            !($_ =~ /Init: Session Cache is not configured/) &&
             $_ ne 'Use of uninitialized value.')
 	    {
 		# count literal \n as newline,
@@ -2264,7 +2313,7 @@ do
                 				}) ;
 		$t_exec += 0 ; # Embperl::Clock () - $t1 ; 
 		    
-                $err = CheckError ($EP2?5:8) if ($err == 0) ;
+                $err = CheckError ($EP2?($] >= 5.010000?6:5):8) if ($err == 0) ;
 
                 if (@errors != ($EP2?4:12))
                     {
@@ -2276,6 +2325,81 @@ do
 		print FH $outdata ;
 		close FH ;
 		$err = CmpFiles ($outfile, $org)  if ($err == 0) ;
+		print "ok\n" unless ($err) ;
+		}
+
+	    if (0) #$err == 0 || $opt_ignoreerror)
+		{
+		$txt2 = "errornous parameter (path) ...";
+		$txt2 .= ' ' x (30 - length ($txt2)) ;
+		print $txt2 ; 
+
+		$err = eval { Embperl::Execute ({'inputfile'  => 'xxxx0',
+		                                'errors'     => \@errors,
+						'debug'      => $defaultdebug,
+                                                input_escmode => 7, 
+                                                path => "not an array ref",
+                				}) ; } ;
+                $err ||= 0 ;       				    
+                if ($@ !~ /^Need an Array reference/)
+                    {
+                    print "\n\n\$@ is wrong, is = '$@', should 'Need an Array reference'\n" ;
+                    $err = 1 ;
+                    }
+
+		print "ok\n" unless ($err) ;
+		}
+
+	    if ($err == 0 || $opt_ignoreerror)
+		{
+		$txt2 = "errornous parameter (input) ...";
+		$txt2 .= ' ' x (30 - length ($txt2)) ;
+		print $txt2 ; 
+		my $out ;
+		@errors = () ;
+		
+		$err = Embperl::Execute ({'inputfile'  => 'xxxx1',
+		                                'errors'     => \@errors,
+						'debug'      => $defaultdebug,
+                                                input_escmode => 7, 
+                                                input => $out,
+                                                output => \$out,
+                				}) ;
+                $err = CheckError (1)  ;
+
+                if (@errors != 1)
+                    {
+                    print "\n\n\@errors does not return correct number of errors (is " . scalar(@errors) . ", should 1)\n" ;
+                    $err = 1 ;
+                    }
+
+
+		print "ok\n" unless ($err) ;
+		}
+
+	    if ($err == 0 || $opt_ignoreerror)
+		{
+		$txt2 = "errornous parameter (output) ...";
+		$txt2 .= ' ' x (30 - length ($txt2)) ;
+		print $txt2 ; 
+		my $out ;
+		@errors = () ;
+
+		$err = Embperl::Execute ({'inputfile'  => 'xxxx2',
+		                                'errors'     => \@errors,
+						'debug'      => $defaultdebug,
+                                                input_escmode => 7, 
+                                                output => $out,
+                				}) ;
+                $err = CheckError (2)  ;
+
+                if (@errors != 2)
+                    {
+                    print "\n\n\@errors does not return correct number of errors (is " . scalar(@errors) . ", should 2)\n" ;
+                    $err = 1 ;
+                    }
+
+
 		print "ok\n" unless ($err) ;
 		}
 
@@ -2316,7 +2440,7 @@ do
 		    $err = Embperl::Object::Execute ({'inputfile'  => "$EPPATH/$inpath/$src",
 						    'object_base' => 'epobase.htm',    
 						    ($app?('object_app' => $app):()),    
-                                                    'appname'     => "eo_$app",
+                                                    'app_name'     => "eo_$app",
                                                     'debug'      => $defaultdebug,
 					            'outputfile' => $outfile,
 		                                    'errors'     => \@errors,
@@ -2365,8 +2489,8 @@ do
                     },
                     { 
                     text  => 'No cache 2',
-                    param => { param => [2], },
-                    'cmp'   => 2,
+                    param => { param => [99], },
+                    'cmp'   => 99,
                     },
                     { 
                     text  => 'Expires in 1 sec',
@@ -2726,7 +2850,7 @@ do
                 }
             }
         eval {	<ERR> ;  } ; # skip first line and ignore errors
-	
+
         $httpduid = getpwnam ($EPUSER) if (!$EPWIN32) ;
         }
     elsif ($err == 0 && $EPHTTPD eq '')
@@ -2985,6 +3109,12 @@ else
 
  View $EPPATH/eg/web/README for more details about localy 
  setting up the Embperl website.
+
+ To see some example of Embperl::Form use 
+ 
+    http://localhost:$EPPORT/eg/forms/wizard/action.epl
+
+ More information can be found at $EPPATH/eg/forms/README.txt
 
  To stop the test server again run
 

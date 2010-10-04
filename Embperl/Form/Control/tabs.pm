@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -39,6 +39,8 @@ sub new
     bless $self, $class ;
 
     $self -> {width} = 1 ;
+    $self -> {nameprefix} ||= 'tab:' ;
+
     return $self ;
     }
 
@@ -101,15 +103,27 @@ __EMBPERL__
     my $dataval  = $fdat{$name} || $values -> [0] ;
     my $activeid = $self -> get_active_id ;
     my $nsprefix = $self -> form -> {jsnamespace} ;
+    my $tabs_per_line = $self -> {'tabs_per_line'} || 99;
+    $tabs_per_line = [$tabs_per_line, $tabs_per_line, $tabs_per_line, $tabs_per_line] 
+	if (!ref $tabs_per_line) ;
 
     my $val ;
     my $i = 0 ;
+    my $more = 1 ;
+    my $start_i = 0 ;
+    my $line = 0 ;
 $]
 
 <td class="cBase cTabTD" colspan="[+ $span +]">
-    <table  class="cBase cTabTable" ><tr  class="cBase cTabRow">
-    [$ foreach $val (@$values) $]
+    [$ while ($more) $]
+      <table  class="cBase cTabTable" ><tr  class="cBase cTabRow">
+      [* 
+      $more = 0 ; 
+      my $tabs = $tabs_per_line -> [$line++] ;
+      *]
+      [$ while ($i < @$values) $]
         [*
+	$val = $values -> [$i] ;
         my $id        = $self -> {subids}[$i] ;
         my $cellclass = $id eq $activeid?'cTabCellOn':'cTabCellOff' ;
         my $divclass  = $id eq $activeid?'cTabDivOn':'cTabDivOff' ;
@@ -125,14 +139,22 @@ $]
         my $js = join (';', @switch_code) ;
         *]
         <td class="cBase [+ $cellclass +]"><div class="cBase [+ $divclass +]" 
-              [$ if $i == 0 $]style="border-left: black 1px solid" [$endif$]
+              [$ if $i - $start_i == 0 $]style="border-left: black 1px solid" [$endif$]
               id="__tabs_[+ $id +]">
         <a href="#" onClick="[+ $nsprefix +]tab_selected(document, '[+ $id +]','[+ $name +]'); [+ do { local $escmode = 0 ; $js } +]" style="color:black; text-decoration: none;">[+ $options ->[$i] || $val +]</a></div></td>
-        [* $i++ *]
-    [$endforeach $]
-    <td class="cBase cTabCellBlank">&nbsp;</td>
+        [* $i++ ;
+           if ($i - $start_i >= $tabs && @$values > $i)
+	      {
+	      $more = 1 ;
+	      $start_i = $i ;
+	      last ;
+	      }
+	*]
+      [$endwhile $]
+      [$if ($i == @$values) $]<td class="cBase cTabCellBlank">&nbsp;</td>[$endif$]
+      </tr></table>
+    [$endwhile$]
     <input type="hidden" name="[+ $name +]" id="[+ $name +]" value="[+ $activeid +]">
-    </tr></table>
 </td>
 [$endsub$]
 

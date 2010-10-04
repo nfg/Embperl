@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -33,10 +33,12 @@ __EMBPERL__
 [$ sub show_control ($self)
 
     $self->{size}      ||= 10 ;
-    $self->{css_width} ||= '50%' ;
+    $self->{class}     ||= 'cControlWidthNumber' ;
+
+    my $unit = $self->{unit} ;
 $]
 [-     $self -> SUPER::show_control ; -]
-[$if ($self->{unit}) $][+ $self ->{unit} +][$endif$]
+[$if ($unit) $][+ $self -> form -> convert_text ($self, ($unit =~ /:/)?$unit:"unit:$unit", $unit) +][$endif$]
 [$endsub$]
 
 __END__

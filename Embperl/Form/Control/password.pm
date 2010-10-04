@@ -1,7 +1,7 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -32,7 +32,7 @@ __EMBPERL__
 
 [$ sub show_control ($self) $]
 
-<input type="password"  class="cBase cControl"  name="[+ $self->{name} +]"
+<input type="password"  class="cBase cControl cControlWidthInput"  name="[+ $self->{name} +]"
 [$if $self -> {size} $]size="[+ $self->{size} +]"[$endif$]
 [$if $self -> {maxlength} $]size="[+ $self->{maxlength} +]"[$endif$]
 >

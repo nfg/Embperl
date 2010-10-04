@@ -1,6 +1,6 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2005 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcmd.c 294756 2005-08-07 00:03:03Z richter $
+#   $Id: epcmd.c 960450 2010-07-05 05:46:23Z richter $
 #
 ###################################################################################*/
 
@@ -637,7 +637,7 @@ static int CmdForeach (/*i/o*/ register req * r,
 	    if (pRV == NULL)
                 return rcMissingArgs ;
 
-            if (SvTYPE (pRV) != SVt_RV)
+            if (!SvROK (pRV))
                 {
                 SvREFCNT_dec (pRV) ;
                 return rcNotAnArray ;
