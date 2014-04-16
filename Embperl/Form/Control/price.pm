@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -34,7 +35,7 @@ sub init
     my ($self) = @_ ;
 
     $self -> {use_comma} = 1 if (!defined $self -> {use_comma}) ;
-    $self->{unit}      = '€' if (!exists ($self->{unit}) && !defined ($self->{unit} ));
+    $self->{unit}      = '€' if (!defined ($self->{unit} ));
     
     return $self ;
     }
@@ -46,12 +47,13 @@ sub init
 
 sub init_data
     {
-    my ($self, $req, $parentctrl) = @_ ;
+    my ($self, $req, $parentctrl, $force) = @_ ;
     
+    my $fdat  = $req -> {docdata} || \%fdat ;
     delete $self -> {unit} if ($parentctrl) ;
     my $name    = $self->{name} ;
-    my $val     = $fdat{$name} ;
-    return if ($val eq '') ;
+    my $val     = $fdat->{$name} ;
+    return if ($val eq '' || (!$force && $req -> {"ef_price_init_done_$name"})) ;
 
     my $sep ;
     my $dec ;
@@ -81,7 +83,8 @@ sub init_data
     $int[0] =~ s/^0+// ;
     $int[0] = '0' if (@int == 1 && !$int[0]) ;
     $frac   = substr ($frac . '00', 0, 2) ;
-    $fdat{$name} = ($minus?'-':'') . join ($sep, @int) . $dec . $frac ;
+    $fdat->{$name} = ($minus?'-':'') . join ($sep, @int) . $dec . $frac ;
+    $req -> {"ef_price_init_done_$name"} = 1 ;
     }
 
 # ------------------------------------------------------------------------------------------
@@ -93,8 +96,9 @@ sub prepare_fdat
     {
     my ($self, $req) = @_ ;
 
+    my $fdat  = $req -> {form} || \%fdat ;
     my $name    = $self->{name} ;
-    my $val     = $fdat{$name} ;
+    my $val     = $fdat->{$name} ;
     return if ($val eq '') ;
     
     $val =~ s/\s+//g ;
@@ -104,7 +108,20 @@ sub prepare_fdat
         $val =~ s/\,/./ ;
         }
         
-    $fdat{$name} = $val + 0 ;
+    $fdat->{$name} = $val + 0 ;
+    }
+    
+# ---------------------------------------------------------------------------
+#
+#   get_validate_auto_rules - get rules for validation, in case user did
+#                             not specify any
+#
+
+sub get_validate_auto_rules
+    {
+    my ($self, $req) = @_ ;
+    
+    return [ $self -> {required}?(required => 1):(emptyok => 1), -type => 'Number' ] ;
     }
 
 1 ;
@@ -170,7 +187,7 @@ If set the decimal character is comma instead of point (Default: on)
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

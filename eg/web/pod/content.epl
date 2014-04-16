@@ -1,4 +1,4 @@
-<table><tr><td  valign="top" width="95%">
+<table width="100%"><tr><td  valign="top" width="95%">
 [- $r = shift -]
 [$if $r -> param -> uri !~ /html?$|\/$/ $]
 
@@ -20,6 +20,7 @@
 </pre>
 [$endif$]
 </td>
+[#
 <td width=130 align="center" valign="top">
 <script type="text/javascript"><!--
 google_ad_client = "pub-6848064800813254";
@@ -38,5 +39,6 @@ google_color_text = "000000";
 <script type="text/javascript"
   src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
 </script></td>
+#]
 </tr>
 </table>

@@ -1,6 +1,7 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epio.c 294776 2005-09-25 13:43:39Z richter $
+#   $Id: epio.c 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################*/
 
@@ -69,6 +70,7 @@
 #endif
 
 #define HANDLE_GV(name) gv_fetchpv(name, TRUE, SVt_PVIO)
+//#define HANDLE_GV(name) gv_fetchpv(name, GV_ADD, SVt_PVIO)
 
 
 
@@ -698,10 +700,11 @@ int OpenOutput (/*i/o*/ register req * r,
 
 
     
-    if (r -> Component.pOutput -> ofd && r -> Component.pOutput -> ofd != PerlIO_stdoutF)
+    if (r -> Component.pOutput -> ofd && r -> Component.pOutput -> ofd != PerlIO_stdoutF && !r -> Component.pOutput -> no_ofd_close)
         PerlIO_close (r -> Component.pOutput -> ofd) ;
 
     r -> Component.pOutput -> ofd = NULL ;
+    r -> Component.pOutput -> no_ofd_close = 0 ;
 
     if (sFilename == NULL || *sFilename == '\0')
         {
@@ -729,6 +732,13 @@ int OpenOutput (/*i/o*/ register req * r,
 		    }
 	        return ok ;
 	        }
+
+            r -> Component.pOutput -> ofd = IoOFP(GvIOn(handle)) ;
+            if (r -> Component.pOutput -> ofd)
+                {
+                r -> Component.pOutput -> no_ofd_close = 1 ;
+                return ok ;
+                }
             }
         
 	r -> Component.pOutput -> ofd = PerlIO_stdoutF ;
@@ -796,7 +806,7 @@ int CloseOutput (/*in*/ tReq *             r,
 	}
 #endif
 
-    if (pOutput -> ofd && pOutput -> ofd != PerlIO_stdoutF)
+    if (pOutput -> ofd && pOutput -> ofd != PerlIO_stdoutF && !pOutput -> no_ofd_close)
         PerlIO_close (pOutput -> ofd) ;
 
     pOutput -> ofd = NULL ;

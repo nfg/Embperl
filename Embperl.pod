@@ -41,7 +41,7 @@ configure Embperl and how to access the different Embperl objects and
 their data. Also take a look at L<perldoc Embperl::Object|EmbperlObject.pod>
 to learn how to use Embperl page as objects.
 
-Additionaly there are a few introductions documents should consider to read:
+Additionally there are a few introductions documents should consider to read:
 L<Intro.pod>, L<IntroEmbperl2.pod> and L<IntroEmbperlObject.pod>.
 
 
@@ -259,21 +259,21 @@ first B<Arg> accordingly.
 =item B<next>
 
 Inside of looks same as Perl next statement. You could also use the following
-syntax, which allows to add an addtional condition (or any other Perl code):
+syntax, which allows you to add an addtional condition (or any other Perl code):
 
     [* next if ($foo) *]
 
 =item B<last>
 
 Inside of looks same as Perl last statement. You could also use the following
-syntax, which allows to add an addtional condition (or any other Perl code):
+syntax, which allows you to add an addtional condition (or any other Perl code):
 
     [* last if ($foo) *]
 
 =item B<redo>
 
 Inside of looks same as Perl redo statement. You could also use the following
-syntax, which allows to add an addtional condition (or any other Perl code):
+syntax, which allows you to add an addtional condition (or any other Perl code):
 
     [* redo if ($foo) *]
 
@@ -401,7 +401,7 @@ In addtion you can define some initial Perl code for the subroutine:
    [$ endsub $]
 
 If you have a couple of commonly used subroutines you can define then in one
-file and import them into the modules where they are neccesary:
+file and import them into the modules where they are necessary:
 
   [- Execute ({ inputfile => 'mylib.htm', import => 1 }) -]
 
@@ -433,11 +433,11 @@ Output to embperl log file
 
 =item err
 
-Output to stderr, which normaly goes to the httpd error log.
+Output to stderr, which normally goes to the httpd error log.
 
 =back
 
-If the output paramter is omitted, C<pre> is assumed.
+If the output parameter is omitted, C<pre> is assumed.
 
 The following parameter can be a literal text (in quotes) or a list
 of variables.
@@ -569,7 +569,7 @@ http-headers can also be set by the function B<header_out>
 
     This is the same as using the Apache function
 
-    [- $req_rec -> header_out("Language" => "DE"); -]
+    [- $req_rec -> header_out("Language" => "DE"); -]
 
 
 =item B<A>, B<EMBED>, B<IMG>, B<IFRAME>, B<FRAME>, B<LAYER>
@@ -677,7 +677,7 @@ POST.
 
 If multiple fields with the same name are sent to a Embperl page, they will 
 put in the same hash element and separated be tabs. You can split it up in 
-an array, by writting:
+an array, by writing:
 
   @array = split (/\t/, $fdat{'fieldname'}) ;
 
@@ -828,10 +828,10 @@ together.
 Turn HTML and URL escaping on and off.  The default is on ($escmode =
 3).
 
-B<NOTE:> Normaly you can disable escaping by preceeding the item that
-normaly is escaped with a backslash. While this is a handy thing, it could
+B<NOTE:> Normaly you can disable escaping by preceding the item that
+normally is escaped with a backslash. While this is a handy thing, it could
 be very dangerous in situations, where content that is inserted by some
-user is redisplayed, because they can enter arbitary HTML and preceed them
+user is redisplayed, because they can enter arbitrary HTML and preceed them
 with a backslash to avoid correct escaping when their input is redisplayed
 again. To avoid this problem, add 4 to the values below. This will cause
 Embperl to ignore the backslash when it does output escaping at all.
@@ -913,7 +913,7 @@ for further docs)
 You can put any http headers you want to send into this hash. 
 
 If you set a location header,
-Embperl will automaticly set the status to 301 (Redirect). Example:
+Embperl will automatically set the status to 301 (Redirect). Example:
 
   [- $http_headers_out{'Location'} = "http://www.ecos.de/embperl/" -]
 
@@ -1135,8 +1135,8 @@ a Embperl::Req object, which is passed as first parameter to every Embperl page 
 
 
 Must be called by scripts that use C<SetupSession>,
-but do not call L<Embperl::Execute|Execute>. This is neccessary to set the cookie
-for the user session id, in case a new session is created, which is normaly done by 
+but do not call L<Embperl::Execute|Execute>. This is necessary to set the cookie
+for the user session id, in case a new session is created, which is normally done by
 L<Embperl::Execute|Execute>. 
 
 SetSessionCookie does only set the cookie for the user session and it works only
@@ -1267,7 +1267,7 @@ without the need to reparse/recompile it over and over again.
 
 Another nice thing about recipes is that they are not static. A recipe
 is defined by a recipe object. When a request comes in, Embperl calls
-the get_recipe method of teh application object, which by default
+the get_recipe method of the application object, which by default
 calls the get_recipe of the named recipe object, which should return a array
 that describes what Embperl has to do. The get_recipe methods can of course
 build the array dynamically, looking, for example, at the request parameters
@@ -1410,7 +1410,7 @@ Here is an example:
         (
         'de' =>
             {
-            'heading' => 'Überschrift',
+            'heading' => '\[:U]berschrift',
             'bar'     => 'Absenden',
             },
         'en' =>
@@ -1646,33 +1646,17 @@ performance.
 
 None known.
 
-Under perl5.004 there are memory leaks.  This is not an Embperl bug,
-but can cause your httpd to grow endlessly when running under
-mod_perl.  Please upgrade to perl5.004_04 to fix this.  You should
-also upgrade to a mod_perl version higher than 1.07_01 as soon as
-possible, because until 1.07_01 there is a memory leak in
-Apache->push_handler.
-
-
 =head1 Compatibility
 
 I have tested Embperl successfully
 
-=head2 on Linux 2.x with
+=head2 on Linux 2.x/3.x with
 
 =over 4
 
-=item perl5.004_04
+=item perl5.005_03, 5.6.x, 5.8.x, 5.10.x, 5.12.x, 5.14.x, 5.16.x, 5.18.x
 
-=item perl5.005_03
-
-=item perl5.6.0
-
-=item perl5.6.1
-
-=item perl5.8.5
-
-=item apache_1.3.0 - apache_1.3.31, apache 2.0.50
+=item apache_1.3.0 - apache_1.3.31, apache 2.0.x, apache 2.2.x, apache 2.4.x
 
 =item apache_ssl (Ben SSL)
 
@@ -1743,7 +1727,7 @@ you need commercial support, ecos can provide it for you. We offer:
 
 =over 4
 
-=item * Consulting and assitance for you and your programmers
+=item * Consulting and assistance for you and your programmers
 
 =item * Planning of your dynamic website
 
@@ -1758,9 +1742,9 @@ you need commercial support, ecos can provide it for you. We offer:
 You can reach us via http://www.ecos.de or info@ecos.de 
 
 
-=head2 How to Support the Developement of Embperl
+=head2 How to Support the Development of Embperl
 
-If you use and like Embperl and want to support it's ongoing developement
+If you use and like Embperl and want to support it's ongoing development
 you have two possibilities:
 
 =over 4
@@ -1779,7 +1763,7 @@ Buy commercial support (see above). Also you B<may> get the same answers
 to your questions on the mailing list, by buying the commercial support
 you not only buy support for yourself and can be sure you get an answer,
 you also give us the possibility to put more power in the further
-developement of Embperl.
+development of Embperl.
 
 =back
 
@@ -1794,7 +1778,7 @@ Embperl                 http://perl.apache.org/embperl/
 
 Embperl (german)        http://www.ecos.de/embperl/
 
-DBIx::Recordset	        http://www.embperl.org/pub/perl/dbi
+DBIx::Recordset	        http://search.cpan.org/~grichter/
 
 Apache web server       http://www.apache.org/
 
@@ -1804,9 +1788,9 @@ mod_perl                http://perl.apache.org/dist/
 
 Apache Perl Modules     http://www.perl.com/CPAN/modules/by-module/Apache/
 
-Embperl                 http://www.embperl.org/pub/perl/embperl
+Embperl                 http://www.embperl.org/downloads
 
-DBIx::Recordset	        http://www.embperl.org/pub/perl/dbi
+DBIx::Recordset	        http://search.cpan.org/~grichter/
 
 PPM for ActiveState  
 

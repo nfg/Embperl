@@ -18,9 +18,26 @@ $r = shift ;
 <head>
 <title>[+ $r -> title +]</title>
 
+
+<link type="text/css" href="/form/css/jquery-ui-1.8.7.custom.css" rel="stylesheet" />       
+<link type="text/css" href="/form/css/jquery.qtip.css" rel="stylesheet" />  
 <link rel="stylesheet" type="text/css" href="/forms/css/EmbperlForm.css">
-<script language="JavaScript" type="text/javascript" src="/forms/js/prototype.js"></script>
-<script language="JavaScript" type="text/javascript" src="/forms/js/EmbperlForm.js"></script>
+
+<script type="text/javascript" src="/forms/js/calendar.js"></script>
+<script type="text/javascript" src="/forms/js/calendar-de.js"></script>
+<script type="text/javascript" src="/forms/js/calendar-setup.js"></script>
+
+<script type="text/javascript" src="/forms/js/jquery-1.4.4.min.js"></script>
+<script type="text/javascript" src="/forms/js/jquery-ui-1.8.7.custom.min.js"></script>
+<script type="text/javascript" src="/forms/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="/forms/js/jquery.qtip.js"></script>
+<script type="text/javascript" src="/forms/js/jquery.dynatree.js"></script>
+<script type="text/javascript" src="/forms/js/jquery.layout-latest.js"></script>
+
+<script type="text/javascript" src="/forms/js/EmbperlForm.js"></script>
+
+
+
 
 </head>
 <body class="cBody">

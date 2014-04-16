@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -30,13 +31,16 @@ __EMBPERL__
 #   show - output the control
 #]
 
-[$ sub show ($self, $data)
+[$ sub show ($self, $req)
 
 my $span = ($self->{width_percent});
-my $section = $self->{section};
-$]
-<td class="cBase cInfoBox" colspan="[+ $span +]">[$ if $section $]<b>[$ endif $][+ $self -> {showtext}?($self->{text}):$self -> form -> convert_text ($self) +]&nbsp;[$ if $section $]</b>[$ endif $]</td>
-[$endsub$]
+my $state   = $self -> {state} ;
+$state =~ s/[^-a-zA-Z0-9_]/_/g ;
+$]<table class="ef-element ef-element-width-[+ $self -> {width_percent} +][+ ' '+][+ $state +]">
+  <tr>
+<td [+ do { local $escmode = 0 ; $self -> get_std_control_attr($req, undef, 'readonly', 'ef-control-info') } +] >[$ if $self -> {image} $]<img class="cControlButtonSymbol" src="[+ $self -> {image} +]">[$endif$][+ $self -> {showtext}?($self->{text}):$self -> form -> convert_text ($self, undef, undef, $req) +]&nbsp;</td>
+</tr>
+  </table>[$endsub$]
 
 
 __END__
@@ -52,7 +56,8 @@ Embperl::Form::Control::blank - A info area inside an Embperl Form
 
   { 
   type => 'info',
-  text => 'blabla' 
+  text => 'blabla',
+  image => '/images/symbol.png'
   }
 
 =head1 DESCRIPTION
@@ -70,10 +75,17 @@ Needs to be 'info'
 
 Could be used to give a text that should be displayed inside the blank area
 
+=head3 image (optional)
+
+Add image to start of info area
+
+=head3 class
+
+css class
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

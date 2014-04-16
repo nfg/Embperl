@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -30,16 +31,15 @@ __EMBPERL__
 #   show_control - output the control
 #]
 
-[$ sub show_control ($self) 
+[$ sub show_control ($self, $req) 
 
-$self -> {size} ||= 80 / ($self -> {width} || 2) ;
-$class = $self -> {class} ||= 'cControlWidthInput' ;
+#$self -> {size} ||= 80 / ($self -> {width} || 2) ;
+my $class = $self -> {class} ;
 $]
-
-<input type="text"  class="cBase cControl [+ $class +]"  name="[+ $self->{name} +]" id="[+ $self->{name} +]"
+<input type="text" name="[+ $self -> {force_name} || $self -> {name} +]" [+ do { local $escmode = 0 ; $self -> get_std_control_attr($req) } +]
 [$if $self -> {size} $]size="[+ $self->{size} +]"[$endif$]
 [$if $self -> {maxlength} $]maxlength="[+ $self->{maxlength} +]"[$endif$]
-[+ do { local $escmode = 0 ; $self -> {eventattrs} } +]>
+>
 [$endsub$]
 
 __END__
@@ -94,7 +94,7 @@ Alternative CSS class name
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Validate.pm 474140 2006-11-13 04:41:09Z richter $
+#   $Id: Validate.pm 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################
 
@@ -18,9 +19,16 @@
 package Embperl::Form::Validate;
 
 use strict;
-use vars qw($VERSION);
+use vars qw($VERSION $has_encode);
 
-$VERSION = '2.0.0' ;
+BEGIN
+    {
+    eval "require Encode" ;
+    $has_encode = $@?0:1 ;
+    } 
+
+
+$VERSION = '2.5.0' ;
 
 =head1 NAME
 
@@ -182,7 +190,7 @@ Embperl. C<default_language> defaults to the one given with C<new>.
 The method verifies the content $fdat according to the rules given 
 to the Embperl::Form::Validate
 constructor and added by the add_rule() method and returns an 
-array refernce to error informations. If there is no error it
+array refernce to error information. If there is no error it
 returns undef. Each element of the returned array contains a hash with
 the following keys:
 
@@ -396,7 +404,18 @@ sub build_message
     $txt ||= "Missing Message $id: %0 %1 %2 %3" ;                 
     $id = $param -> [0] ;
     $param -> [0] = $name ;
-    $txt =~ s/%(\d+)/$param->[$1]/g ;
+    my @param ;
+    eval "require Encode" ;
+    if ($charset && $has_encode)
+        {
+        @param = map { Encode::encode($charset, $_) } @$param ;
+        }
+    else
+        {
+        @param =  @$param ;
+        }
+    
+    $txt =~ s/%(\d+)/$param[$1]/g ;
     $param -> [0] = $id ;
 
     return $txt ;
@@ -578,17 +597,17 @@ sub gather_script_code
                 if ($msgparam && !$break)
                     {
                     my $txt = $self -> build_message ($msgparam -> [0], $key, $nametxt, $msgtxt, $msgparam, $typeobj, $pref, $epreq) ;
-                    $setmsg = "msgs[i++]='$txt';" 
+                    $setmsg = "ids[i] = '$key' ; msgs[i++]='$txt';" 
                     }
                 if (!ref $key)
                     {
-                    $script .= "obj = document.$form\['$key'\] ; if (!($code)) { $setmsg " . ($param{fail}?'fail=1;break;':($param{cont}?'':'break;')) . "}\n" ;
+                    $script .= "obj = formelem\['$key'\] ; if (obj && !($code)) { $setmsg " . ($param{fail}?'fail=1;break;':($param{cont}?'':'break;')) . "}\n" ;
                     }
                 else
                     {
                     foreach my $k (@$keys)
                         {
-                        $script .= "obj = document.$form\['$k'\] ; if (!($code)) {" ;
+                        $script .= "obj = formelem\['$k'\] ; if (obj && !($code)) {" ;
                         }
                      
                     $script .= " $setmsg " . ($param{fail}?'fail=1;break;':($param{cont}?'':'break;')) . "\n" ;
@@ -652,17 +671,53 @@ sub get_script_code
 
     return qq{
 
-function epform_validate_$fname()
+function epform_validate_$fname(return_msgs, failed_class, formelem)
     {
     var msgs = new Array ;
+    var ids  = new Array ;
     var fail = 0 ;
     var i = 0 ;
     var obj ;
 
+    if (!formelem)
+	formelem = document.$fname ;
+    
     do {
     $script ;
     }
     while (0) ;
+    if (failed_class)
+        {
+        var key ;
+        var i ;
+        for (key in ids)
+            {
+            var elems = formelem\[ids[key]\] ;
+            if (elems)
+                {
+                if (!(elems instanceof NodeList))
+                    elems = [elems] ;
+                if (elems[0] instanceof NodeList)
+                    elems = elems[0] ;
+                for (i = 0; i < elems.length ;i++)
+                    {
+                    var elem = elems[i] ;
+                    if (elem.getAttribute('type') == 'radio')
+                        elem = elem.parentElement ;
+                    var eclass = elem.getAttribute('class') ;
+                    elem.setAttribute ('class', eclass + ' ' + failed_class) ;
+                    elem.setAttribute ('title', msgs[key]) ;
+                    }    
+                }
+            }    
+        }
+        
+    if (return_msgs)
+        {
+        var ret = [msgs, ids] ;
+        return ret ;
+        }
+        
     if (i)
         alert (msgs.join('\\n')) ;
 
@@ -710,7 +765,7 @@ without a dash are tests to perform.
 =item -key
 
 gives the key in the passed form data hash which should be tested. -key
-is normaly the name given in the HTML name attribute within a form field.
+is normally the name given in the HTML name attribute within a form field.
 C<-key> can also be a arrayref, in which case B<only one of> the given keys
 must statisfy the following test to succeed.
 
@@ -736,7 +791,7 @@ The following types are available:
 
 =item Default
 
-This one is used when no type is specified. It contains all the standart
+This one is used when no type is specified. It contains all the standard
 tests.
 
 =item Number
@@ -747,6 +802,10 @@ Input must be a floating point number.
 
 Input must be a integer number.
 
+=item PosInteger
+
+Input must be a integer number and greater or equal zero.
+
 =item TimeHHMM
 
 Input must be the time in the format hh::mm
@@ -755,6 +814,10 @@ Input must be the time in the format hh::mm
 
 Input must be the time in the format hh::mm:ss
 
+=item TimeValue
+
+Input must be a number followed by s, m, h, d or w.
+
 =item EMail
 
 Input must be a valid email address including a top level domain
@@ -762,7 +825,7 @@ e.g. user@example.com
 
 =item EMailRFC
 
-Input must be a valid email adress, no top level domain is required,
+Input must be a valid email address, no top level domain is required,
 so user@foo is also valid.
 
 =item IPAddr
@@ -777,6 +840,11 @@ Input must be an ip-address and network mask in the form nnn.nnn.nnn.nnn/mm
 
 Input must be an ip-address or an fqdn (host.domain)
 
+=item select
+
+This used together with required and causes Embperl::Form::Validate
+to test of a selected index != 0 instead of a non empty input.
+
 =back
 
 
@@ -786,7 +854,7 @@ make sure to send them back, so they can be part of the next distribution.
 =item -msg
 
 Used to give messages which should be used when the test fails. This message
-overrides the standart messages provided by Embperl::Form::Validate and
+overrides the standard messages provided by Embperl::Form::Validate and
 by Embperls message management. Can also be a hash with messages for multiple
 languages. The -msg parameter must preceed the test for which it should be
 displayed. You can have multiple different messages for different tests, e.g.
@@ -804,9 +872,6 @@ displayed. You can have multiple different messages for different tests, e.g.
          
 	-msg => 'The E-Mail address must contain at least one period.',
 	must_contain_one_of => '.',
-        
-	-msg => 'The E-Mail-Address is invalid. It must only not contain any special charaters.',
-	must_not_contain => '¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ',
        ],
 
 
@@ -859,7 +924,7 @@ The following test are currently defined:
 
 =item same
 
-Value must be the same as in field given as argument. This is usefull
+Value must be the same as in field given as argument. This is useful
 if you want for example verify that two passwords are the same. The 
 Text displayed to the user for the second field maybe added to the argument
 separeted by a colon. Example:
@@ -1046,5 +1111,5 @@ See also L<Embperl>.
 =head1 AUTHOR
 
 Axel Beckert (abe@ecos.de)
-Gerald Richter (richter@dev.ecos.de)
+Gerald Richter (richter at embperl dot org)
 

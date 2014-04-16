@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: RTF.pm 355574 2005-12-09 18:15:54Z richter $
+#   $Id: RTF.pm 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################
  
@@ -429,6 +430,9 @@ sub Var2Code
 
 
 =pod
+
+=begin comment
+
     'RTF first paragraph' => {
 	'text' => '\pard',
 	'end'  => '}',
@@ -443,6 +447,8 @@ sub Var2Code
                 },
             },
         },
+
+=end comment
 
 =cut
 
@@ -630,6 +636,9 @@ sub Var2Code
 
 1;
 =pod
+
+=begin comment
+
                             #$Embperl::req -> component -> code ($_ep_rtf_code) ;
 
                             my $x = $Embperl::req -> component -> code ;
@@ -650,6 +659,9 @@ sub Var2Code
                             print "result=$_ep_rtf_code\n" ;
                             
                             warn "RTF IF syntax error. Missing operator" if (!$op) ;
+
+=end comment
+
 =cut
 
 
@@ -660,7 +672,7 @@ __END__
 
 =head1 NAME
 
-Embperl::Syntax::RTF
+Embperl::Syntax::RTF - define syntax for RTF files
 
 =head1 SYNOPSIS
 
@@ -669,7 +681,7 @@ Embperl::Syntax::RTF
 
 Class derived from Embperl::Syntax to define the syntax for 
 RTF files. RTF files can be read and written by various word processing
-programms. This allows you to create dynamic wordprocessing documents or
+programs. This allows you to create dynamic wordprocessing documents or
 let process serial letters thru Embperl.
 
 Currently Embperl regocnices the fields C<DOCVARIABLE>, C<MERGEFIELD> and
@@ -734,7 +746,7 @@ See I<Embperl::Syntax> for a definition of procinfo.
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

@@ -1,6 +1,7 @@
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -9,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Mail.pm 344310 2005-11-15 05:22:19Z richter $
+#   $Id: Mail.pm 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################
 
@@ -245,8 +246,8 @@ Default is B<localhost>.
 =item mailhelo
 
 Specifies which host/domain to use in the HELO/EHLO command.
-A reasonable default is normaly choosen by I<Net::SMTP>, but
-depending on your installation it may neccessary to set it
+A reasonable default is normally chosen by I<Net::SMTP>, but
+depending on your installation it may necessary to set it
 manualy.
 
 =item maildebug
@@ -272,7 +273,7 @@ this parameter C<Execute> will die when an error occurs.
 
 =head2 Configuration
 
-Some default values could be setup via environement variables.
+Some default values could be setup via environment variables.
 
 B<IMPORTANT:> For now Embperl::Mail does B<not> honour the Embperl
 configuration directives in your httpd.conf. Only values set via the
@@ -287,8 +288,8 @@ Default is B<localhost>.
 =head2 EMBPERL_MAILHELO
 
 Specifies which host/domain to use in the HELO/EHLO command.
-A reasonable default is normaly choosen by I<Net::SMTP>, but
-depending on your installation it may neccessary to set it
+A reasonable default is normally chosen by I<Net::SMTP>, but
+depending on your installation it may necessary to set it
 manualy.
 
 =head2 EMBPERL_MAILFROM 
@@ -302,7 +303,7 @@ Debug setting for Net::SMTP. Default is 0.
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

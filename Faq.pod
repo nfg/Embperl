@@ -4,7 +4,7 @@
 
 =head1 NAME
 
-Embperl FAQ - embed Perl code in your HTML docs
+Embperl::Faq - How to embed Perl code in your HTML docs
 
 =head1 CONTENTS
 
@@ -256,7 +256,7 @@ The eaiest way is
 To get some more information it would be a good idea to compile Embperl with
 debugging infomation enabled. Therefor do
 
-=head2 How do I build Embperl with debugging informations
+=head2 How do I build Embperl with debugging information
 
 =over 4
 
@@ -530,9 +530,9 @@ be reloaded, regardless if the source changes or not.
 
 So far this is just standard Perl. Things get's a little bit more difficult
 when running under mod_perl (only Unix), because Apache forks a set of child
-processes as neccessary and from the moment they are forked, they run on their
+processes as necessary and from the moment they are forked, they run on their
 own and don't know of each other. So if a module is loaded at server startup
-time (before the fork), it is loaded in all childs (this can be used to save
+time (before the fork), it is loaded in all children (this can be used to save
 memory, because the code will actually only reside once in memory), but when
 the modul is loaded inside the child and the source changes, it could be
 happen, that one child has loaded an ealier version and another child has
@@ -540,8 +540,8 @@ loaded a later version of that module, depending on the time the module
 is actualy loaded by the child.
 
 That explains, why sometimes it works and sometimes it doesn't, simply because
-different childs has loaded different versions of the same module and when you
-reload your page you hit different childs of Apache!
+different children has loaded different versions of the same module and when you
+reload your page you hit different children of Apache!
 
 Now there is one point that is special to Embperl to add.
 Since Embperl compiles every page in a different namespace,
@@ -566,7 +566,7 @@ has to do for every module.
 
 =item * Use C<do> instead of C<require>. C<do> will execute your file everytime
 it is used. This also adds overhead, but this may be accpetable for small files
-or in a debugging environement. (B<NOTE:> Be sure to check C<$@> after a C<do>,
+or in a debugging environment. (B<NOTE:> Be sure to check C<$@> after a C<do>,
 because do works like C<eval>)
 
 =back
@@ -815,7 +815,7 @@ The following way works with mod_perl and as cgi:
 
   [- $http_headers_out{'Location'} = "http://www.ecos.de/embperl/" -]
 
-the status of the request will automaticly set to 301.
+the status of the request will automatically set to 301.
 
 or use the mod_perl function Apache::header_out.
 
@@ -1376,7 +1376,7 @@ The distribution contain already an C<epchar.c.iso-latin-2> from Jiri Novak whic
 is an replacement for epchar.c for the iso-8859-2 (iso-latin-2) character set.
 If you want to use iso-latin-2, simply renmae C<epchar.c.iso-latin-2> to C<epchar.c>.
 There is also an file C<epchar.c.min> from Sangmook Yi, which leaves all
-chars above 128 untouch, which is especialy usefull for two byte charsets.
+chars above 128 untouched, which is especially useful for two byte charsets.
 
 This file contains three tables:
 

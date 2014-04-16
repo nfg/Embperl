@@ -136,6 +136,7 @@ void
 embperl_exit(...)
 CODE:
     /* from mod_perl's perl_util.c */
+    /* does not work with Perl >= 5.18
     struct ufuncs umg;
 
     umg.uf_val = errgv_empty_set;
@@ -143,17 +144,18 @@ CODE:
     umg.uf_index = (IV)0;
 
     sv_magic(ERRSV, Nullsv, 'U', (char*) &umg, sizeof(umg));
+    */
 
     ENTER;
     SAVESPTR(diehook);
     diehook = Nullsv; 
     if (items > 0)
-        croak("request %d", SvIV(ST(0)));
+        croak(">embperl_exit< request %d", SvIV(ST(0)));
     else
-        croak("component");
+        croak(">embperl_exit< component");
     LEAVE; /* we don't get this far, but croak() will rewind */
 
-    sv_unmagic(ERRSV, 'U');
+    /* sv_unmagic(ERRSV, 'U'); */
 
 
 

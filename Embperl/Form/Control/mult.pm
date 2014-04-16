@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -54,8 +55,9 @@ sub init
     
     my $form = $self -> form ;
     $self -> {fields} ||= [$self -> {field}] ;
-    $self -> {class}  ||= 'cMult' ;
-    $form -> new_controls ($self -> {fields}, $form -> {options}) ;
+    $self -> {class}  ||= 'ef-control-mult' ;
+    my $options = $form -> {options} ;
+    $form -> new_controls ($self -> {fields}, $options, undef, undef, $options -> {masks}, $options -> {defaults}, 1) ;
 
     return $self ;
     }
@@ -69,18 +71,25 @@ sub init_data
     {
     my ($self, $req) = @_ ;
     
-    my $ldap    = $req->{ldap};
+    my $fdat  = $req -> {docdata} || \%fdat ;
     my $name    = $self->{name} ;
-    my @entries = split("\t",$fdat{$name});
+    my @entries = ref $fdat->{$name} eq 'ARRAY'?@{$fdat->{$name}}:split("\t",$fdat->{$name});
 
+    my $field = $self -> {fields}[0] ;    
     my $i = 0 ;
     foreach my $entry (@entries)
         {
-        $fdat{"$name--$i"} = $entry ;
+        $fdat->{"__${name}__$i"} = $entry ;
+        if ($field -> can ('init_data'))
+            {
+            local $field->{name} = "__${name}__$i" ;
+            local $field -> {fullid} = "$self->{fullid}__$i" ;
+            $field -> init_data ($req, $self)  ;
+            }
             
         $i++ ;
         }
-    $fdat{"$name-max"} = $i?$i:1;
+    $fdat->{"__${name}_max"} = $i?$i:1;
     }
 
 # ------------------------------------------------------------------------------------------
@@ -91,26 +100,82 @@ sub init_data
 sub prepare_fdat
     {
     my ($self, $req) = @_ ;
-    my $ldap    = $req->{ldap};
+    my $fdat  = $req -> {form} || \%fdat ;
     my $name    = $self->{name} ;
-    my $max     = $fdat{"$name-max"} || 1 ;
+    my $max     = $fdat->{"__${name}_max"} || 1 ;
 
+    my $field = $self -> {fields}[0] ;    
     my @rows;
     my $val ;
     for (my $i = 0; $i < $max; $i++)
         {
-        $val = $fdat{"$name--$i"} ;
+        if ((ref ($field) =~ /::/) && $field -> can ('prepare_fdat'))
+            {
+            local $field->{name} = "__${name}__$i" ;
+            local $field -> {fullid} = "$self->{fullid}__$i" ;
+            $field -> prepare_fdat ($req)  ;
+            }
+
+        $val = $fdat->{"__${name}__$i"} ;
         push @rows, $val if ($val ne '') ;
         }
-    $fdat{$name} = \@rows ;    
+    $fdat->{$name} = \@rows if (@rows > 1 || defined ($rows[0]) || $fdat->{"__${name}_max"} > 0) ;    
+
+    foreach my $key (keys %$fdat)
+        {
+        delete $fdat->{$key} if ($key =~ /^__\Q$name\E__/) ;
+        }
     }
 
-sub show { Embperl::Form::Control::show (@_) } 
+# ------------------------------------------------------------------------------------------
+#
+#   get_display_text - returns the text that should be displayed
+#
+
+sub get_display_text
+    {
+    my ($self, $req, $value) = @_ ;
+
+    my $field = $self -> {fields}[0] ;
+    return if (!$field) ;
+    
+    return $field -> get_display_text ($req, $value) ;
+    }
+
+# ------------------------------------------------------------------------------------------
+
+sub show 
+    { 
+    $_[0] -> {fullid} = $_[1] -> {uuid} . '_' . $_[0] -> {id} ;
+    Embperl::Form::Control::show (@_) 
+    }
+    
+#sub show_control_readonly { my $self = shift ; $self -> show_control (@_) }
 
 1 ;
 
 __EMBPERL__
 
+[# ---------------------------------------------------------------------------
+#
+#   show - output the whole control including the label
+#]
+
+[$sub show ($self, $req) 
+
+$fdat{$self -> {name}} = $self -> {default} if ($fdat{$self -> {name}} eq '' && exists ($self -> {default})) ;
+my $span = 0 ;
+
+$]<table class="ef-element ef-element-width-[+ $self -> {width_percent} +] ef-element-[+ $self -> {type} +] [+ $self -> {state} +]"
+    [$     if (!$self -> is_readonly($req) ) $]_ef_attach="ef_mult"[$endif$] >
+  <tr>
+    [-
+    $span += $self -> show_label_cell ($req, $span);
+    $self -> show_control_cell ($req, $span) ;
+    -]
+  </tr>
+  </table>[$  
+ endsub $]
 
 [# ---------------------------------------------------------------------------
 #
@@ -120,32 +185,39 @@ __EMBPERL__
 [$ sub show_control ($self, $req)
 
     my $name     = $self -> {name} ;
+    my $max    = $fdat{"__${name}_max"} ||= 1 ;
+
     my $span = ($self->{width_percent})  ;
     my $nsprefix = $self -> form -> {jsnamespace} ;
     my $jsname = $name ;
     $jsname =~ s/[^a-zA-Z0-9]/_/g ;
     $jsname .= 'Grid' ;
-    my $max    = $fdat{"$name-max"} ;
 $]
+[$     if ($max == 1 && $self -> is_readonly($req) ) $]
+[-
+        my $field = $self -> {fields}[0] ;    
+        local $field -> {name} = "__${name}__0" ;
+        $field -> show_control_readonly ($req) ;
+-]
+[$else$]
+
   [-
     $fdat{$name} = $self -> {default} if ($fdat{$name} eq '' && exists ($self -> {default})) ;
     my $span = 0 ;
   -]
-  <input type="hidden" name="[+ $self -> {name} +]-max" id="[+ $self -> {id} +]-max">
-  <table class="[+ $self -> {class} +]Table cBase" id="[+ $self -> {id} +]">
+  <div [+ do { local $escmode = 0 ; $self -> get_std_control_attr($req) } +]>
+  <input type="hidden" class="ef-control-mult-max" name="__[+ $self -> {name} +]_max" >
+  <table class="ef-control-mult-table" >
     [- $self -> show_grid_table ($req) ; -]
   </table>
-  <table id="[+ $self -> {id} +]-newrow" style="display: none">
+  <table class="ef-control-mult-newrow" style="display: none">
     [-
     local $req -> {epf_no_script} = 1 ;
     $self -> show_grid_table_row ($req, '%row%') ;
     -]
   </table>
-  <script>
-      [+ $jsname +] = new [+ $nsprefix +]Grid (document.getElementById('[+ $self -> {id} +]'),
-                                               document.getElementById('[+ $self -> {id} +]-newrow'),
-                                               document.getElementById('[+ $self -> {id} +]-max')) ;
-  </script>
+  </div>
+[$endif$]  
 [$endsub$]
   
 
@@ -158,19 +230,27 @@ $]
 [$ sub show_grid_table_row ($self, $req, $i) 
 
     $field = $self -> {fields}[0] ;
-    $id     = $self -> {id};
+    $id     = $self -> {fullid};
     $name   = $self -> {name} ;
     my $jsname = $name ;
     $jsname =~ s/[^a-zA-Z0-9]/_/g ;
     $jsname .= 'Grid' ;
+    my $ro = $self -> is_readonly ($req) ;
     $]
 
-    <tr class="cGridRow" id="[+ "$id-row-$i" +]">
+    <tr class="cGridRow" id="[+ "${id}_mult-row-$i" +]">
 
             <td class="[+ $self -> {class} +]Cell">
               [-
-                local $field -> {name} = "$name--$i" ;
-                $field -> show_control ($req)
+                local $field -> {name} = "__${name}__$i" ;
+                if ($ro)
+                    {
+                    $field -> show_control_readonly ($req)
+                    }
+                else    
+                    {
+                    $field -> show_control ($req)
+                    }
                 -]
             </td>
     </tr>             
@@ -185,8 +265,11 @@ $]
  
  
  $]
-              <img src="/images/button_plus.gif" id="cmdAdd" name="-add" title="Zeile Hinzuf&uuml;gen" onclick="[+ $jsname +].addRow()">
-              <img src="/images/button_kreuz.gif"  id="cmdDelete"  name="-delete" title="Zeile L&ouml;schen" onclick="[+ $jsname +].delRow()">
+[$if (! $self -> is_readonly ($req)) $]
+              <span class="ui-icon ui-icon-circle-plus ef-icon ef-control-mult-add" title="Zeile Hinzuf&uuml;gen"></span>
+              <span class="ui-icon ui-icon-circle-minus ef-icon ef-control-mult-del" title="Zeile L&ouml;schen"></span>
+              
+[$endif$]              
 [$endsub$]
              
 [# ---------------------------------------------------------------------------
@@ -197,9 +280,9 @@ $]
 [$ sub show_grid_table ($self, $req) 
     my $name    = $self->{name} ;
     my $fields = $self -> {fields} ;
-    my $id     = $self -> {id};
+    my $id     = $self -> {fullid};
     my $i      = 0 ;
-    my $max    = $fdat{"$name-max"} || 1 ;
+    my $max    = $fdat{"__${name}_max"} || 1 ;
     $]
 
     [* for ($i = 0; $i < $max ; $i++ ) { *]
@@ -259,7 +342,7 @@ header at the bottom.
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

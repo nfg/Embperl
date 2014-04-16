@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -17,6 +18,21 @@
 
 package Embperl::Inline ;
 
+use strict ;
+use vars qw{$options} ;
+
+sub import
+    {
+    if (ref $_[1] eq 'HASH')
+	{
+	$options = $_[1] ;
+	}
+    else
+	{
+	$options = undef ;
+	}	
+    }
+
 sub compile
 
     {
@@ -28,7 +44,7 @@ sub compile
         #$debug = $Embperl::req -> config -> debug ;
         }
 
-    #print STDERR "compile: $file, code = $code\n" ;
+    #print STDERR "compile: $file, code = $code, options = $options\n" ;
 
     Embperl::Execute ({ 'inputfile' => $file, 
 		        'input'     => $code,
@@ -37,6 +53,7 @@ sub compile
 		        'firstline' => $line,
 		        'package'   => $package,
 		        #'debug'     => $debug,
+			 ($options?(%$options):()),
                         'use_env'   => 1}) ;
     }
 
@@ -46,7 +63,7 @@ use Embperl ;
 
 FILTER 
     { 
-    s/\n__EMBPERL__(.+)$/\nBEGIN { my \$line = __LINE__ - 2 ; my \$code = q{$1}; Embperl::Inline::compile (\\\$code, \$line, __FILE__, __PACKAGE__)}/s ;
+    s/\n__EMBPERL__(.+)$/\nBEGIN { my \$line = __LINE__ - 1 ; my \$code = q{$1}; Embperl::Inline::compile (\\\$code, \$line, __FILE__, __PACKAGE__)}/s ;
     } ; 
 
 
@@ -78,21 +95,25 @@ Embperl::Inline - Inline Embperl code in Perl modules
 
 =head1 DESCRIPTION
 
-Embperl::Inline allow to inline Embperl code in Perl modules.
+Embperl::Inline allows you to inline Embperl code in Perl modules.
 The benfit is that you are able to install it like a normal
 Perl module and it's available site wide, without the need
-for any programm to know where it resides.
+for any program to know where it resides.
 
-Also it allows to add markup sections to Perl objects and
+Also it allows you to add markup sections to Perl objects and
 calling (and overriding it) like normal Perl methods.
 
 The only thing that needs to be done for using it, is to
 use Embperl::Inline and to place your Embperl code after
 the C<__EMBPERL__> keyword.
 
+After the use Embperl::Inline it is possible to specify Embperl parameters e.g.:
+
+  use Embperl::Inline { options => &Embperl::Constant::optKeepSpaces };
+
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

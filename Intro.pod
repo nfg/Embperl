@@ -39,7 +39,7 @@ into HTML and has grown to
 a full featured system to build dynamic content (not only) under 
 mod_perl. The version 1.x focus on HTML documents, also it could be
 used for any sort of ascii files, and brings a lot of features
-especialy usefull in a web-environment. This features includes
+especially useful in a web-environment. This features includes
 handling of form data and dynamic HTML tables/lists, session management
 and context sensitv escaping and unescaping. More over you can
 break up your documents in small reusable components/objects and build
@@ -692,5 +692,5 @@ features of Embperl 2
 For a full documenation read L<"perldoc Embperl"|"Embperl.pod"> and
 L<"perldoc Config"|"Config.pod">.
 
-You find additional informations on http://perl.apache.org/embperl
+You can find additional information on http://perl.apache.org/embperl
 

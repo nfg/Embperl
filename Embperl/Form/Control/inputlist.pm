@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -37,7 +38,7 @@ __EMBPERL__
 my $class     = $self -> {class} ;
 my $opts      = $self -> {options} ;
 my $vals      = $self -> {values} ;
-my $sep       = $self -> {seperator};
+my $sep       = $self -> {separator} || $self -> {seperator};
 my $sizes     = $self -> {sizes} ;
 $sizes        ||= [];
 $sep          ||= ' ';
@@ -69,7 +70,7 @@ Embperl::Form::Control::inputjoin - A number of text input controls inside an Em
   name      => 'foo',
   size      => 10,
   class     => 'bar',
-  seperator => '.',
+  separator => '.',
   sizes     => [2,4,5],
   }
 

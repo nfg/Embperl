@@ -40,7 +40,7 @@ sub aborturl
 
 # -------------------------------------------------------
 #
-# app_isa allows to define a base class for the wizard application object
+# app_isa allows one to define a base class for the wizard application object
 #
 
 sub app_isa

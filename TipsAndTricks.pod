@@ -25,6 +25,9 @@ Embperl::TipsAndTricks - Embperl Tips and Tricks
 
 =back
 
+=head1 NAME
+
+Embperl::TipsAndTricks - Embperl Tips and Tricks
 
 =head1 Tips and Tricks
 
@@ -78,7 +81,7 @@ into the same package as F</base.html>.
 
 The thing you need to be careful of here is that if one of these files
 is included more than once elsewhere on the website, then it will be
-seperately compiled for that instance - thus taking up more
+separately compiled for that instance - thus taking up more
 memory. This is the big caveat. As a rule, if your files are all just
 included once by F</base.html>, then you should be fine. Note that
 you'll also need to change any calls to parent files, for example:

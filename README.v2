@@ -1,6 +1,7 @@
 Embperl - Building dynamic Websites with Perl
 
-Copyright (c) 1997-2010 Gerald Richter / ecos gmbh  www.ecos.de
+Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+Copyright (c) 2008-2014 Gerald Richter
 
 You may distribute under the terms of either the GNU General Public 
 License or the Artistic License, as specified in the Perl README file.
@@ -9,7 +10,7 @@ THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF 
 MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-$Id: README.v2 294756 2005-08-07 00:03:03Z richter $
+$Id: README.v2 1578075 2014-03-16 14:01:14Z richter $
 
 
 
@@ -32,7 +33,7 @@ The standard Embperl recipe contains the following providers:
     4 executing
     5 outputing
 
-The providers works in a similar way as Unix shell programm which are
+The providers work in a similar way as Unix shell programs which are
 processing a single source in a pipeline towards the output. In
 Embperl is is not only a smimple pipeline, but a tree structure,
 so multiple sources can be incorpoarted in one result.
@@ -94,7 +95,7 @@ Debugging
 
 Starting with 2.0b2 Embperl files can debugged via the interactive debugger.
 The debugger shows the Embperl page source along with the correct linenumbers. 
-You can do anything you can do inside a normal Perl programm via the debugger,
+You can do anything you can do inside a normal Perl program via the debugger,
 e.g. show variables, modify variables, single step, set breakpoints etc.
 
 You can use the Perl interacive command line debugger via
@@ -128,7 +129,7 @@ The following differences to Embperl 1.x apply:
   inside of a startup script.
   You can use the Embperl configuration directives now
   directly, (without PerlSetEnv/SetEnv). If you still
-  want to use enviroment varibales to configure Embperl, write
+  want to use environment varibales to configure Embperl, write
 
   Embperl_UseEnv on
 
@@ -193,7 +194,7 @@ The following differences to Embperl 1.x apply:
   and because it won't reliable work with threads under mod_perl 2.0.
   You can use $req -> component -> cwd to get the directory of the
   sourcefile (where $req is Embperl request object, which is the first
-  paramter passed to the page i.e. $_[0])
+  parameter passed to the page i.e. $_[0])
 
 - safe namespaces are not supported anymore, since are are not really 
   safe anyway

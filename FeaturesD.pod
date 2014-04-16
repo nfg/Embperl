@@ -1,5 +1,9 @@
 =pod
 
+=head1 NAME
+
+Embperl::Features - Features von Embperl 2.0
+
 =head1 Features von Embperl 2.0
 
 =over 4

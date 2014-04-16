@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -33,8 +34,11 @@ __EMBPERL__
 [$ sub show ($self, $req)
 
 my $span = ($self->{width_percent})  ;
+my $state   = $self -> {state} ;
 $]
-<td class="cBase cTransparentBox" colspan="[+ $span +]"><hr class="cControlLine"></td>
+<table class="ef-element ef-element-width-[+ $self -> {width_percent} +] ef-element-[+ $self -> {type} +] [+ $self -> {state} +]">
+  <tr>  <td class="cBase cTransparentBox" colspan="[+ $span +] [+ $state +]"><hr class="cControlLine"></td>
+  </tr></table>
 [$endsub$]
 
 
@@ -67,7 +71,7 @@ Needs to be 'line'
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

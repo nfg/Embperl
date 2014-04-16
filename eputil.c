@@ -1,6 +1,7 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: eputil.c 580492 2007-09-28 21:44:19Z richter $
+#   $Id: eputil.c 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################*/
 
@@ -386,7 +387,7 @@ int   TransHtml (/*i/o*/ register req * r,
     char * s ;
     char * e ;
     struct tCharTrans * pChar ;
-    bool  bInUrl    = r -> Component.bEscInUrl ;
+    int   bInUrl    = r -> Component.bEscInUrl ;
     bool  bUrlEsc   = r -> Component.Config.nInputEscMode & iescUrl ;
     bool  bHtmlEsc  = r -> Component.Config.nInputEscMode & iescHtml ;
     bool  bRemove   = r -> Component.Config.nInputEscMode & iescRemoveTags ;
@@ -1369,14 +1370,14 @@ void UndefSub    (/*i/o*/ register req * r,
     strcpy (sFullname, sPackage) ; 
     strcat (sFullname, "::") ; 
     strcat (sFullname, sName) ; 
-
-    if (!(pCV = perl_get_cv (sFullname, FALSE)))
+    if (!(pCV = perl_get_cv (sFullname, 0)))
 	{
 	_free (r, sFullname) ;
 	return ;
 	}
 
     _free (r, sFullname) ;
+ 
     cv_undef (pCV) ;
     }
 
@@ -1562,6 +1563,108 @@ void embperl_SetCWDToFile  (/*i/o*/ register req * r,
         *p = '\0' ;
     }
 
+/* ------------------------------------------------------------------------- */
+/*                                                                           */
+/* Dirname                                                                   */
+/*                                                                           */
+/* returns dir name of file                                                  */
+/*                                                                           */
+/* ------------------------------------------------------------------------- */
+
+
+
+void Dirname (/*in*/ const char * filename,
+              /*out*/ char *      dirname,
+              /*in*/  int         size)
+
+    {
+    char * p = strrchr (filename, '/') ;
+
+    if (p == NULL)
+        {
+        strncpy (dirname, ".", size) ;
+        return ;
+        }
+
+    if (size - 1 > p - filename)
+        size = p - filename ;
+
+    strncpy (dirname, filename, size) ;
+    dirname[size] = '\0' ;
+
+    return ;
+    }
+
+/* ---------------------------------------------------------------------------- */
+/*                                                                              */
+/* Change Dir to sourcefile dir                                                 */
+/*                                                                              */
+/* ---------------------------------------------------------------------------- */
+
+void ChdirToSource (/*i/o*/ register req * r,
+                    /*in*/  char *         sInputfile)
+
+    {
+    if ((r -> Component.Config.bOptions & optDisableChdir) == 0 &&
+        sInputfile != NULL && *sInputfile != '\0' && 
+        !r -> Component.Param.pInput && !r -> Component.sResetDir[0])
+        {
+        char dir[PATH_MAX];
+#ifdef WIN32
+        char drive[_MAX_DRIVE];
+        char fname[_MAX_FNAME];
+        char ext[_MAX_EXT];
+        char * c = sInputfile ;
+
+        while (*c)
+            { /* convert / to \ */
+            if (*c == '/')
+                *c = '\\' ;
+            c++ ;
+            }
+
+        r -> nResetDrive = _getdrive () ;
+        getcwd (r -> Component.sResetDir, sizeof (r -> Component.sResetDir) - 1) ;
+
+        _splitpath(sInputfile, drive, dir, fname, ext );
+        _chdrive (drive[0] - 'A' + 1) ;
+#else
+        Dirname (sInputfile, dir, sizeof (dir) - 1) ;
+        getcwd (r -> Component.sResetDir, sizeof (r -> Component.sResetDir) - 1) ;
+#endif
+        if (dir[0])
+            {
+            if (chdir (dir) < 0)
+                {
+                strncpy (r -> errdat1, dir, sizeof(r -> errdat1) - 1) ;
+                LogError (r, rcChdirError) ;
+                }
+            else
+                {
+                if (!(dir[0] == '/'  
+            #ifdef WIN32
+                    ||
+                    dir[0] == '\\' || 
+                        (isalpha(dir[0]) && dir[1] == ':' && 
+                          (dir[2] == '\\' || dir[2] == '/')) 
+            #endif                  
+                    ))            
+                    {
+                    strcpy (r->Component.sCWD,r -> Component.sResetDir) ;
+                    strcat (r->Component.sCWD,"/") ;
+                    strcat (r->Component.sCWD,dir) ;
+                    }
+                else
+                    strcpy (r->Component.sCWD,dir) ;
+                }
+            }
+        else
+            r -> Component.Config.bOptions |= optDisableChdir ;
+        }
+    else
+        r -> Component.Config.bOptions |= optDisableChdir ;
+    }
+    
 /* ---------------------------------------------------------------------------- */
 /*                                                                              */
 /* Path serach                                                                  */

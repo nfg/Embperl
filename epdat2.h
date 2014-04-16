@@ -1,6 +1,7 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdat2.h 580573 2007-09-29 11:05:54Z richter $
+#   $Id: epdat2.h 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################*/
 
@@ -202,7 +203,7 @@ typedef struct tThreadData
 
     /* --- Embperl special hashs/arrays --- */
 
-    HV *    pEnvHash ;	 /* environement from CGI Script */
+    HV *    pEnvHash ;	 /* environment from CGI Script */
     HV *    pFormHash ;  /* Formular data */
     GV *    pFormHashGV ;  
     HV *    pFormSplitHash ;  /* Formular data split up at \t */
@@ -262,6 +263,7 @@ typedef struct tComponentOutput
     int     nMarker ;               /*  Makers for rollback output */
 
     FILEIO *  ofd  ;                /* output file descriptor */
+    int	      no_ofd_close ;	    /* do not close output file handle, because it's ownd by perl */
 
     SV *    ofdobj ;	            /* perl object that is tied to stdout, if any */
     } tComponentOutput ;
@@ -285,6 +287,10 @@ struct tComponent
     int	    bExit ;		/* We should exit the page */
     int	    nPathNdx ;		/* gives the index in the path where the current file is found */
     char *  sCWD ;              /**< Current working directory */
+    char    sResetDir[PATH_MAX] ; /**< Reset directory to */
+#ifdef WIN32
+    char    nResetDrive ;       /**< Reset drive to */
+#endif
 
     bool    bEP1Compat ;	/* run in Embperl 1.x compatible mode */    
     int     nPhase ;		/* which phase of the request we are in */
@@ -348,7 +354,7 @@ struct tComponent
     /* --- compiler --- */    
 
     char *  sCurrPackage ;      /**< Package name for current sourcefile */
-    char *  sEvalPackage ;      /**< Package for eval (normaly same sCurrPackage,
+    char *  sEvalPackage ;      /**< Package for eval (normally same sCurrPackage,
 			             differs when running in a safe namespace */
     STRLEN  nEvalPackage ;      /**< Length of package name for eval */
     char *  sMainSub ;          /**< Name of sub to call when executing the current source */

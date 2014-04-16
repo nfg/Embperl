@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -30,27 +31,29 @@ __EMBPERL__
 #   show - output the control
 #]
 
-[$ sub show ($self, $data)
+[$ sub show ($self, $req)
 
 my $span = ($self->{width_percent})  ;
 $self->{button} ||= [{}] ;
-$]
-<td class="cBase cControlBox cControlButtonBox" colspan="[+ $span +]">
+my $state   = $self -> {state} ;
+$]<table class="ef-element ef-element-width-[+ $self -> {width_percent} +] ef-element-[+ $self -> {type} +] [+ $self -> {state} +]">
+  <tr>  <td class="ui-label-box" >
 [$ foreach my $button (@{$self->{button}}) $]
   [$if $self -> {symbol} $]
     <div class="cControlButtonDiv" 
-  title="[+ $self -> {showtext}?($self->{text}):$self -> form -> convert_label ($self) +]"
+  title="[+ $self -> {showtext}?($self->{text}):$self -> form -> convert_label ($self, undef, undef, $req) +]"
   [$if $self -> {onclick} $] onClick="[+ do { local $escmode = 0 ; $self -> {onclick} } +]" [$endif$]
-   ><img class="cControlButtonSymbol" src="[+ $self -> {symbol} +]">
-   [+ $self -> {showvalue}?($self -> {value} || $self->{text}):$self -> form -> convert_label ($self) +]
+    [+ do { local $escmode = 0 ; $self -> {eventattrs} } +]><img class="cControlButtonSymbol" src="[+ $self -> {symbol} +]">
+   [+ $self -> {showvalue}?($self -> {value} || $self->{text}):$self -> form -> convert_label ($self, undef, undef, $req) +]
     </div>	
 [$else$]
   [# Workaround around segfault in Embperl 2.1.1-dev *grmpf* #]
   <[# #]input
   class="cBase cControl cControlButton"  name="[+ $self->{name} +]"
-  value="[+ $self -> {showvalue}?($self -> {value} || $self->{text}):$self -> form -> convert_label ($self) +]"
-  title="[+ $self -> {showtext}?($self->{text}):$self -> form -> convert_label ($self) +]"
+  value="[+ $self -> {showvalue}?($self -> {value} || $self->{text}):$self -> form -> convert_label ($self, undef, undef, $req) +]"
+  title="[+ $self -> {showtext}?($self->{text}):$self -> form -> convert_label ($self, undef, undef, $req) +]"
   [$if $self -> {onclick} $] onClick="[+ do { local $escmode = 0 ; $self -> {onclick} } +]" [$endif$]
+  [+ do { local $escmode = 0 ; $self -> {eventattrs} } +]
   [$if $self -> {image} $]
   type="image" src="[+ $self -> {image} +]"
   [$else$]
@@ -68,8 +71,8 @@ $]
   [$endif$]
 [$ endforeach $]
 
-</td>
-[$endsub$]
+  </td></tr>
+  </table>[$endsub$]
 
 __END__
 
@@ -147,7 +150,7 @@ hashref of the key-value pairs of all attribute the button needs.
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de), A. Beckert (beckert@ecos.de)
+G. Richter (richter at embperl dot org), A. Beckert (beckert@ecos.de)
 
 =head1 See Also
 

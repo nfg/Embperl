@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -22,36 +23,60 @@ use base 'Embperl::Form::ControlMultValue' ;
 
 use Embperl::Inline ;
 
-# ---------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------
+
+sub get_std_control_attr
+    {
+    my ($self, $req, $id, $type, $addclass) = @_ ;
+
+    if ($type eq 'readonly')
+        {
+        $id = $req -> {uuid} . '_' . $self -> {name} ;
+        my $url  = $self -> {showurl} ;
+        $url =~ s/<id>/$self -> get_id_from_value ($Embperl::fdat{$self -> {name}})/e ;
+        my $attr = $self -> SUPER::get_std_control_attr ($req, $id, $type, 'ef-control-selectdyn-readonly') ;
+        return $attr . qq{ onDblClick="\$('#$self->{use_ajax}').ef_document ('load', '$url');"} ;
+        }
+	
+    return $self -> SUPER::get_std_control_attr ($req, $id, $type, $addclass) ;
+    }
+    
+# ------------------------------------------------------------------------------------------
 #
-#   show_control_readonly - output readonly control
+#   init_data - daten aufteilen
 #
 
-sub show_control_readonly
+sub init_data
     {
     my ($self, $req) = @_ ;
 
-    my $name     = $self -> {name} ;
-    
-    my ($values, $options) = $self -> get_values ($req) ;
-    my $initval ;
-    my $fdatval = $fdat{$name} ;
-    my $i = 0 ;
-    foreach (@$values)
+    my $val = $self -> get_value ($req) ;
+    if ($val ne '')
         {
-        if ($_ eq $fdatval)
-            {
-            $initval = $options->[$i] ;
-            last ;
-            }
-        $i++ ;
+        my $name = $self -> {name} ;
+        my $fdat = $req -> {docdata} || \%Embperl::fdat ;
+        $fdat -> {'_opt_' . $name} = $self -> get_option_from_value ($val, $req) ;
+        $fdat -> {'_id_' .  $name} = $self -> get_id_from_value ($val, $req) ;
         }
-    
-    $self -> {value} = $initval ;
-    $self -> show_hidden ($req) ;
-    $self -> SUPER::show_control_readonly ($req) ;    
     }
+    
+# ------------------------------------------------------------------------------------------
+#
+#   prepare_fdat - daten zusammenfuehren
+#
 
+sub prepare_fdat
+    {
+    my ($self, $req) = @_ ;
+
+    return if ($self -> is_readonly ($req)) ;
+
+    my $fdat  = $req -> {form} || \%fdat ;
+    my $name    = $self->{name} ;
+    $fdat -> {$name} = '' if (exists ($fdat -> {"_opt_$name"}) && $fdat -> {"_opt_$name"} eq '') ;
+    delete $fdat -> {"_opt_$name"} ;
+    delete $fdat -> {"_id_$name"} ;
+    }
 
 # ---------------------------------------------------------------------------
 
@@ -61,21 +86,11 @@ sub show_control_addons
 
     }
     
-    
-
 
 1 ;
 
 __EMBPERL__
 
-[# ---------------------------------------------------------------------------
-#
-#   show_hidden - out hidden field
-#]
-
-[$ sub show_hidden ($self, $req) $]
-<input type="hidden" name="[+ $self -> {name} +]">
-[$endsub$]
 
 [# ---------------------------------------------------------------------------
 #
@@ -84,115 +99,39 @@ __EMBPERL__
 
 [$ sub show_control ($self, $req, $filter)
 
-    my ($values, $options) = $self -> get_values ($req) ;
-    my $name     = $self -> {name} ;
-    #$filter      ||= $self -> {filter} ;
-    #my $addtop   = $self -> {addtop} || [] ;
-    #my $addbottom= $self -> {addbottom} || [] ;
-    my $noscript  = $req -> {epf_no_script} ;
-    my $nsprefix = $self -> form -> {jsnamespace} ;
-    my $jsname = $name ;
-    if ($noscript)
-        {
-        $jsname =~ s/[^a-zA-Z0-9%]/_/g ;
-        }
-    else
-        {
-        $jsname =~ s/[^a-zA-Z0-9]/_/g ;
-        }
-    $self -> {size} ||= 75 / ($self -> {width} || 2) ;
-    my $initval ;
-    my $fdatval = $fdat{$name} ;
-    my $i = 0 ;
-    foreach (@$values)
-        {
-        if ($_ eq $fdatval)
-            {
-            $initval = $options->[$i] ;
-            last ;
-            }
-        $i++ ;
-        }
-    $target = '' ;
-    $target = "parent.frames.$self->{link_target}." if ($self -> {link_target}) ;
+my $name     = $self -> {name} ;
+my $class = $self -> {class} ;
 $]
 
-<div class="cAutoCompDiv">
-
-[# --- Popup --- #]
-<div class="cPopupMenu" id="_menu_[+ $jsname +]"
-style="display:none; position: absolute; top: 15px; z-index: 99; margin: 0px; padding: 0px;
-border: 2px grey outset; background: white; text-align: left;"
+<input name="_opt_[+ $name +]" [+ do { local $escmode = 0 ; $self -> get_std_control_attr($req) } +]
+type="text" _ef_attach="ef_selectdyn"
+[$if $self -> {size}            $]size="[+ $self->{size} +]" [$endif$]
+[$if $self -> {showurl}         $]_ef_show_url="[+ $self -> {showurl} +]" [$endif$] 
+[$if $self -> {popupurl}        $]_ef_popup_url="[+ $self -> {popupurl} +]" [$endif$] 
+[$if $self -> {datasrcurl}      $]_ef_datasrc_url="[+ $self -> {datasrcurl} +]" [$endif$] 
+[$if $self -> {datasrc}         $]_ef_datasrc_nam="[+ $self -> {datasrc} +]" [$endif$] 
+[$if $self -> {datasrctermmax}  $]_ef_datasrc_term_max="[+ $self -> {datasrctermmax} +]" [$endif$] 
+[$if $self -> {use_ajax}        $]_ef_use_ajax="[+ $self -> {use_ajax} +]" [$endif$] 
+[$if $self -> {show_on_select}  $]_ef_show_on_select="[+ $self -> {show_on_select}?'1':'' +]" [$endif$] 
 >
-
-<a href="#" onClick="[+ $target +]location.href='ldapTreeData.epl?-id=' + encodeURIComponent([+ $jsname +]Popup.idval)">Anzeigen</a>&nbsp;
-
-[*
-    my $datasrc_ctrls      = $self -> get_datasource_controls ($req) ;
-*]
-[$if $datasrc_ctrls $]
-[$foreach my $ctrl (@$datasrc_ctrls) $]
-<a href="[+ do { local $escmode = 0 ; $ctrl->{href} } +]" target="[+ $self->{link_target} +]" onClick="[+ $ctrl->{onclick} +]">[+ $ctrl -> {text} +]</a>&nbsp;
-[#<a class="cControlAddonA" href="[+ $ctrl->{href} +]" onClick="[+ $ctrl->{onclick} +]">[$if $ctrl -> {icon} $]<img class="cControlAddonImg" src="[+ $ctrl -> {icon} +]" title="[+ $ctrl -> {text} +]" alt="[+ $ctrl -> {text} +]">[$else$][+ $ctrl -> {text} +][$endif$]</a>#]
-[$endforeach$]
-[$endif$]
-
-
-[#
-<a href="#" onClick="alert('ldapTreeData.epl?-id=' + [+ $jsname +]Popup.idval)">Durchsuchen</a>&nbsp;
-<a href="ldapTreeData?-id=">Neu</a>
-#]
-<div class="cPopupContainer" id="_info_[+ $jsname +]" style="margin: 0px; padding: 0px;">
-</div>
-</div>
-
-[# --- Autocomplete --- #]
-<div class="cAutoCompContainer" id="_cont_[+ $jsname +]" style="display:none">
-</div>
-
-[# --- input --- #]
-<input class="cBase cControl cAutoCompInput cControlWidthSelectDyn" id="_inp_[+ $jsname +]" type="text"
-[$if $self -> {size} $]size="[+ $self->{size} +]"[$endif$]
-value="[+ $initval +]"
-onDblClick="u='ldapTreeData.epl?-id=' + encodeURIComponent(document.getElementById('[+ $name +]').value);[+ $target +]location.href=u;"
-onContextMenu="[+ $jsname +]Popup.showPopup(); return false ;"
->
-[#
-<div  class="cAutoCompArrow" onclick="[+ $jsname +]Popup.showPopup()"
->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
-#]
-<input type="hidden" name="[+ $name +]" id="[+ $name +]" >
-</div>
-
-[# --- interface --- #]
-<[$if $noscript $]x-[$endif$]script type="text/javascript">
-
-        [+ $jsname +]Popup = new [+ $nsprefix +]Popup (document.getElementById('_menu_[+ $jsname +]'),
-                                        document.getElementById('[+ $name +]'),
-                                        document.getElementById('_info_[+ $jsname +]'),
-                                        document.getElementById('_inp_[+ $jsname +]')) ;
-
-        [+ $jsname +]AutoComp = new [+ $nsprefix +]Ajax.Autocompleter(document.getElementById('_inp_[+ $jsname +]'),document.getElementById('_cont_[+ $jsname +]'),
-            '/epfctrl/datasrc.exml', {paramName: "query", parameters: "datasrc=[+ $self -> {datasrc} +]", frequency: 0.3, update: document.getElementById('[+ $name +]')}) ; 
-        [+ $jsname +]AutoComp.updateChoices ;
-
-</[$if $noscript $]x-[$endif$]script>
-
+<input type="hidden" name="[+ $name +]">
+<input type="hidden" name="_id_[+ $name +]">
 [$endsub$]
 
+
 __END__
-, afterUpdateElement: [+ $jsname +]savevalue
+
 =pod
 
 =head1 NAME
 
-Embperl::Form::Control::select - A select control inside an Embperl Form
+Embperl::Form::Control::selectdyn - A dynamic select control inside an Embperl Form
 
 
 =head1 SYNOPSIS
 
   {
-  type    => 'select',
+  type    => 'selectdyn',
   text    => 'blabla',
   name    => 'foo',
   values  => [1,2,3],
@@ -258,10 +197,42 @@ value (first entry)is displayed. Example:
 If given, only items where the value matches the regex given in
 C<filter> are displayed.
 
+=head3 showurl
+
+This URL will be requested if the user clicks on SHOW in the popup or
+double clicks the control. The value of the selected option will be
+appended to that url. Should be something like '/foo/bar.epl?id='.
+NOTE: This URL is not encoded in anyway, so make sure it is properly
+url encoded.
+
+=head3 datasrcurl
+
+This URL will be requested when the user types any input to request
+the data for the control. The characters the users has typed will be
+passed by the parameter query and the name of the datasrc attribute
+will be passed in the datasrc parameter.
+NOTE: This URL is not encoded in anyway, so make sure it is properly
+url encoded.
+
+=head3 show_on_select
+
+If true show the selected item as soon as it is selected (useses showurl)
+
+=head3 use_ajax
+
+If set to an id of an html element, documents that are loaded via showurl
+are fetch via ajax into this html container, instead of fetching a whole page.
+
+=head3 $fdat{-init-<name>}
+
+If set this value is used to prefill the input box, if not set get_values
+method of the datasource object is call, which might be take a long time
+in case of many options.
+
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

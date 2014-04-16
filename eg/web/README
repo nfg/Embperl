@@ -32,7 +32,7 @@ pod/*           This dirtory contains the index pages for POD display
                 are taken from the Embperl main directory, to avoid duplication
                 of files. How files are mapped to URIs is described in config.pl
 
-db/*            Database related pages, to display and add informations
+db/*            Database related pages, to display and add information
 db/epwebapp.pl  This application object overrides the one from the base directory
                 and adds functionality for database access.
 

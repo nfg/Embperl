@@ -1,5 +1,64 @@
 =pod
 
+=head 2.5.0  16. March 2014
+
+    - Do not clear old code before compiling a Embperl page
+      in Perl >= 5.14.x because it causes seg faults. This
+      leads to "subroutine redifined" warings, when a
+      page was changed and is reloaded.
+    - Corrected use of G_KEEPERR when calling eval, because
+      of changed meaning, which cause the message "Compiling
+      error" instead of the real error message.
+    - Adapted tests to Perl 5.14 & 5.16  
+    - Fixed a refcounting problem cause message "Attempt to 
+      free unreferenced scalar" during mod_perl startup
+      with Perl 5.14.x
+    - Fix some dependencies on hash order inside the parser
+      which causes Embperl to fail with Perl >= 5.18 because
+      of hash randomisation.
+    - Changed the way exit passed through internaly, so it
+      works with Perl >= 5.18
+    - Adapted tests to Perl 5.18
+    - Adapted test httpd.conf to Apache 2.4. Embperl fully supports
+      Apache 2.4 
+    - Makefile.PL now uses apache2 or httpd2 as Apache binary
+    - Makefile.PL now autodetects if mpm needs to loaded as 
+      module for tests.
+    - Fix output inside of Registry script for mod_perl 2.0.4+
+    - Fix problem with error output on stderr for Windows 64Bit
+    - removed support for XALAN XML parser. It was outdated 
+      anyway. libxml2 is still supported.
+    - Fixed a C type declaration which caused RTF files to not
+      correctly escaped with newer GCC's.
+    - Embperl::Form is totally overhauled with many new features.
+      It uses now jQuery as javascript library, instead
+      of prototype. NOTE: This is an incompatible change. If
+      you are using Embperl::Form before, you need to
+      adapt your html code!
+    - Fix some Unicode issues in Embperl::Form::Validate
+    - Embperl::Form::Validate is now able to highlight input
+      fields with wrong input
+    - Applied the following debian patches: delay.patch,
+      fix-string-typo.patch, fix-pod-errors.patch, fix-whatis.patch,
+      new_process_group.patch, fix-pod-unescaped-unicode.patch,
+      german.patch and utf8.patch which mainly corrects
+      spelling and typo errors. NOTE: modperl.patch and 
+      Makefile.PL.patch are not applied, because they are
+      debian specific. Thanks to Florian Schlichting for
+      providing uptodate information about the patches
+      and adaptions for Embperl 2.5.
+    - Applied further spell corrections from Florian Schlichting.  
+    - Log Errors form Embperl::Syntax::Mail to error log
+    - Fix compile problem on non intel plattforms due to missing
+      -m32 flag.    
+    - Added support for utf8 sourcefiles. By setting
+      input_charset => 'utf8' sponsored by Perlover.
+    - Added optChdirToSource = 0x10000000 which will cause
+      Embperl to change to the directory of the source file
+      prior to execution.
+    
+    Adaptions to Perl 5.14/16 were sponsored by NUREG GmbH
+
 =head 2.4.0  4. Oct 2010
 
     - Support for CGI.pm 3.43 (included within Perl 5.10.1)

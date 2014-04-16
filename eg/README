@@ -7,7 +7,7 @@ eg/web          This directory contains the new Embperl website.
                 working you need to have libxml installed and a 
                 database called "embperl", which should be setup with
                 the script setupdb.pl in eg/webutil.
-                Look at eg/web/README for more informations and setup
+                Look at eg/web/README for more information and setup
                 instructions.
 
 eg/x		Here are the following html files
@@ -64,4 +64,4 @@ You can also look at the directory test/html. The files found here
 will transformed to the files found in test/cmp, the request for that can
 be found at the beginning of test.pl.
 NOTE: Files in test/html are tests, some things don't make sense for real usage
- 
+

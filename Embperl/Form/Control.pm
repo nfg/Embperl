@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -50,16 +51,17 @@ sub init
     {
     my ($self) = @_ ;
 
-    my $eventattrs = '' ;	
+    my $eventattrs = '' ;
     if (my $e = $self -> {event}) 
-	{
-	for (my $i = 0; $i < @$e; $i += 2) 
-	    {
-	    $eventattrs .= $e -> [$i] . '="' . $e -> [$i+1] . '" ' ;
-	    }
-	}
+        {
+        for (my $i = 0; $i < @$e; $i += 2) 
+            {
+            $eventattrs .= $e -> [$i] . '="' . $e -> [$i+1] . '" ' ;
+            }
+        }
     $self -> {eventattrs} = $eventattrs ;
-
+    $self -> {imagedir} ||= '/images' ;
+    
     return $self ;
     }
 
@@ -85,7 +87,26 @@ sub is_disabled
     {
     my ($self, $req) = @_ ;
 
-    return $self -> {disable} ;
+    my $disable = $self -> {disable} || $req -> {form_options_masks}{$self->{name}}{disable} || $req -> {form_options_masks}{'*'}{disable} ;
+    $disable = &{$disable}($self, $req) if (ref ($disable) eq 'CODE') ;
+
+    return $disable ;
+    }
+
+# ---------------------------------------------------------------------------
+#
+#   is_blanked - display this control as blank field
+#
+
+sub is_blanked
+
+    {
+    my ($self, $req) = @_ ;
+
+    my $disable = $self -> {blank} || $req -> {form_options_masks}{$self->{name}}{blank} || $req -> {form_options_masks}{'*'}{blank} ;
+    $disable = &{$disable}($self, $req) if (ref ($disable) eq 'CODE') ;
+
+    return $disable ;
     }
 
 # ---------------------------------------------------------------------------
@@ -98,7 +119,23 @@ sub is_readonly
     {
     my ($self, $req) = @_ ;
 
-    return $self -> {readonly} ;
+    my $readonly = $self -> {readonly}  || $req -> {form_options_masks}{$self->{name}}{readonly} || $req -> {form_options_masks}{'*'}{readonly}  ;
+    $readonly = &{$readonly}($req) if (ref ($readonly) eq 'CODE') ;
+
+    return $readonly ;
+    }
+
+# ---------------------------------------------------------------------------
+#
+#   is_with_id - returns true if the control shows something that has an internal id
+#
+
+sub is_with_id
+
+    {
+    my ($self, $req) = @_ ;
+
+    return 0 ;
     }
 
 # ---------------------------------------------------------------------------
@@ -116,18 +153,43 @@ sub is_hidden
 
 # ---------------------------------------------------------------------------
 #
-#   show - output the whole control including the label
+#   has_code_refs - returns true if is_readonly or is_disabled are coderefs
 #
 
-sub show
+sub has_code_refs
 
     {
     my ($self, $req) = @_ ;
 
-    $fdat{$self -> {name}} = $self -> {default} if ($fdat{$self -> {name}} eq '' && exists ($self -> {default})) ;
-    my $span = 0 ;
-    $span += $self -> show_label_cell ($req, $span);
-    return $self -> show_control_cell ($req, $span) ;
+    return  ref ($self -> {readonly}) eq 'CODE' || ref ($self -> {disable}) eq 'CODE'  || ref ($self -> {blank}) eq 'CODE'  ;
+    }
+
+
+# ---------------------------------------------------------------------------
+#
+#   code_ref_fingerprint - returns fingerprint of is_readonly and is_disabled
+#
+
+sub code_ref_fingerprint
+
+    {
+    my ($self, $req) = @_ ;
+
+    return  ($self -> is_readonly($req)?'R':'W') . ($self -> is_disabled($req)?'D':'E') . ($self -> is_blanked($req)?'B':'S') ;
+    }
+
+# ---------------------------------------------------------------------------
+#
+#   constrain_attrs - returns attrs that might change the form layout
+#                     if there value changes
+#
+
+sub constrain_attrs
+
+    {
+    my ($self, $req) = @_ ;
+
+    return () ;
     }
 
 # ---------------------------------------------------------------------------
@@ -167,20 +229,92 @@ sub form
 
 # ---------------------------------------------------------------------------
 #
+#   load_form - load a form to a given formptr.
+#
+#   This class method should be overwritten, to load a form to a given
+#   formptr, in case it is not already loaded
+#   The formptr maybe passed in the options hash during form creation
+#
+#   in  $formptr
+#
+
+
+sub load_form
+    {
+    my ($class, $formptr) = @_ ;
+    
+    }
+    
+# ---------------------------------------------------------------------------
+#
+#   get_control_from_id
+#
+
+sub get_control_from_id
+    {
+    my ($class, $id) = @_ ;
+    
+    my ($formptr, $ctlid) = split /#/, $id ;
+    my $form = $Embperl::FormData::forms{$formptr} ;
+    
+    if (!$form)
+        {
+        $class -> load_form ($formptr) ;
+        $form = $Embperl::FormData::forms{$formptr} ;
+        die "Form for '$formptr' is not available" if (!$form) ;
+        }
+    
+    my $ctl  = $form -> {controlids}{$ctlid} ;
+    die "Control '$ctlid' in Form '$formptr' is not available" if (!$ctl) ;
+    
+    return $ctl ;
+    }
+    
+# ---------------------------------------------------------------------------
+#
+#   get_id_for_control
+#
+
+sub get_id_for_control
+    {
+    my ($self, $reqdata) = @_ ;
+    
+    return "$self->{formptr}#$self->{id}" ;
+    }
+    
+# ---------------------------------------------------------------------------
+#
 #   label_text - return text of label
 #
 
 sub label_text
     {
-    my ($self) = @_ ;
+    my ($self, $req) = @_ ;
 
-    return $self -> {label_text} if ($self -> {label_text}) ;
+    my $key = 'label_text' . ($req -> {form_options}{language_fingerprint} || $req -> {form_options}{language}) ;
 
-    return $self -> {label_text} = $self -> {showtext}?($self->{text} ||
-			$self->{name}):$self -> form -> convert_label ($self) ;
+    return $self -> {$key} if ($self -> {$key}) ;
+
+    return $self -> {$key} = $self -> {showtext}?($self->{text} ||
+                                   $self->{name}):$self -> form -> convert_label ($self, undef, undef, $req) ;
     }
 
 
+# ---------------------------------------------------------------------------
+#
+#   get_validate_auto_rules - get rules for validation, in case user did
+#                             not specify any
+#                             should be overwritten by control
+#
+
+sub get_validate_auto_rules
+    {
+    my ($self, $req) = @_ ;
+    
+    return if (!$self -> {required}) ;
+    return [ required => 1 ] ;
+    }
+    
 # ---------------------------------------------------------------------------
 #
 #   get_validate_rules - get rules for validation
@@ -193,12 +327,46 @@ sub get_validate_rules
     my @local_rules ;
     if ($self -> {validate})
         {
-
         @local_rules = ( -key => $self->{name} );
-        push @local_rules, -name => $self -> label_text ;
+        push @local_rules, -name => $self -> label_text ($req);
         push @local_rules, @{$self -> {validate}};
         }
+    else
+        {
+        my $auto = $self -> get_validate_auto_rules ($req) ;
+        if ($auto)
+            {
+            @local_rules = ( -key => $self->{name} );
+            push @local_rules, -name => $self -> label_text ($req) ;
+            push @local_rules, @{$auto};
+            }
+        }    
     return \@local_rules ;
+    }
+
+# ---------------------------------------------------------------------------
+#
+#   has_validate_rules - check if there is anything to validate and
+#                        create auto rules
+#
+
+sub has_validate_rules
+    {
+    my ($self, $req) = @_ ;
+
+    if ($self -> {validate})
+        {
+        return scalar(@{$self -> {validate}}) ;   
+        }
+    my $auto = $self -> get_validate_auto_rules ($req) ;
+    if ($auto)
+        {
+        $self -> {validate} = $auto ;
+        return scalar(@$auto) ;
+        }
+        
+    $self -> {validate} = [] ;
+    return 0 ;
     }
 
 # ---------------------------------------------------------------------------
@@ -211,6 +379,86 @@ sub has_auto_label_size
     return 1 ;
     }
 
+    
+# ---------------------------------------------------------------------------
+#
+#   get_value - return the current value for the control
+#               if dataprefix is set, every hash key within dataprefix is tried
+#
+
+sub get_value
+    {
+    my ($self, $req) = @_ ;
+    
+    my $fdat       = $req -> {docdata} || \%Embperl::fdat ;
+    my $name       = $self -> {srcname} || $self -> {force_name} || $self -> {name} ;
+    return $fdat -> {$name} ;
+    my $dataprefix = $self -> {dataprefix} ;
+
+    return $fdat -> {$name} if (!$dataprefix) ;
+    
+    foreach my $prefix (@$dataprefix)
+        {
+        my $item = $prefix?$fdat -> {$prefix}{$name}:$fdat -> {$name} ;
+        return $item if (defined ($item)) ;
+        }
+    
+    return ;
+    }
+
+
+# ---------------------------------------------------------------------------
+#
+#   get_std_control_attr - return the default attributes for the control
+#
+#   ret     string with all standard attribute, already html escaped
+#
+
+sub get_std_control_attr
+    {
+    my ($self, $req, $id, $type, $addclass) = @_ ;
+
+    my $name    = $self -> {force_name} || $self -> {name} ;
+    my $ctrlid  = $id || ($req -> {uuid} . '_' . $name) ;
+    my $class   = $self -> {class} ;
+    my $width   = $self -> {width_percent} ;
+    my $events  = $self -> {eventattrs} ;
+    $type     ||= $self -> {type} ;
+    my $state   = $self -> {state} ;
+    $state =~ s/[^-a-zA-Z0-9_]/_/g ;
+    
+    my $attrs = qq{class="ef-control ef-control-width-$width ef-control-$type ef-control-$type-width-$width $addclass $class $state"  id="$ctrlid" $events} ;
+    return wantarray?($attrs, $ctrlid, $name):$attrs ;
+    }
+
+# ------------------------------------------------------------------------------------------
+#
+#   get_display_text - returns the text that should be displayed
+#
+
+sub get_display_text
+    {
+    my ($self, $req, $value) = @_ ;
+    
+    $value = $self -> get_value ($req) if (!defined ($value)) ;
+
+    return $value ;
+    }
+    
+# ---------------------------------------------------------------------------
+#
+#   get_id_from_value - returns id for a given value
+#
+
+sub get_id_from_value
+
+    {
+    #my ($self, $value) = @_ ;
+
+    return ;
+    }
+
+    
 1 ;
 
 # ===========================================================================
@@ -218,6 +466,30 @@ sub has_auto_label_size
 __EMBPERL__
 
 [$syntax EmbperlBlocks $]
+
+
+
+[# ---------------------------------------------------------------------------
+#
+#   show - output the whole control including the label
+#]
+
+[$sub show ($self, $req) 
+
+$fdat{$self -> {name}} = $self -> {default} if ($fdat{$self -> {name}} eq '' && exists ($self -> {default})) ;
+my $span = 0 ;
+
+$]<table class="ef-element ef-element-width-[+ $self -> {width_percent} +] ef-element-[+ $self -> {type} +] [+ $self -> {state} +]">
+  <tr>
+    [$ if ($self -> is_blanked ($req)) $]
+    <td class="ef-label-box ef-label-box-width-100"> </td>    
+    [$else$][-
+    $span += $self -> show_label_cell ($req, $span);
+    $self -> show_control_cell ($req, $span) ;
+    -][$endif$]
+  </tr>
+  </table>[$  
+ endsub $]
 
 [# ---------------------------------------------------------------------------
 #
@@ -228,7 +500,7 @@ __EMBPERL__
 
 my $span = $self->{width_percent}  ;
 $]
-</tr><tr><td class="cBase cTabTD" colspan="[+ $span +]">
+<!-- sub begin --></tr><tr><td class="cBase cTabTD" colspan="[+ $span +]">
 [$endsub$]
 
 [# ---------------------------------------------------------------------------
@@ -237,7 +509,7 @@ $]
 #]
 
 [$sub show_sub_end ($self, $req) $]
-</td>
+</td><!-- sub end -->
 [$endsub$]
 
 [# ---------------------------------------------------------------------------
@@ -248,12 +520,12 @@ $]
 [$ sub show_label ($self, $req) $][-
 
     if ($self -> {showoptionslabel})
-	{
-	my $opts = $self -> form -> convert_options ($self, [$self -> {value}]) ;
-	$self -> {text} = $opts -> [0] ;
-	$self -> {showtext} = 1 ;
-	}
--][+ $self -> label_text +][$endsub$]
+        {
+        my $opts = $self -> form -> convert_options ($self, [$self -> {value}], undef, $req) ;
+        $self -> {text} = $opts -> [0] ;
+        $self -> {showtext} = 1 ;
+        }
+-][+ $self -> label_text ($req) +][$endsub$]
 
 [# ---------------------------------------------------------------------------
 #
@@ -273,29 +545,17 @@ $]
 [$ sub show_label_cell ($self, $req)
 
 my $style = '';
-my $addclass = '' ;
-my $span = 20 ;
-if ($self -> {width} > 2 && $self -> has_auto_label_size ())
-    {
-    $span = int(40 / $self -> {width}) if ($self -> {x_percent} != 0) ;
-    }
-
 $style = 'white-space:nowrap; ' if ($self->{labelnowrap}) ;
-if ($self -> {width_precent} && !$self -> {width})
-    {
-    $style .= 'width: 20%; '  ;
-    }
-else
-    {
-    $addclass = 'cLabelBoxWidth' . ($self->{width} || 2 ) ;
-    }
+$addclass = 'ef-label-box-width-' . ($self->{width_percent}) ;
+$addclass2 = 'ef-label-width-' . ($self->{width_percent}) ;
 $]
-  <td class="cLabelBox [+ $addclass +] [$ if $self->{labelclass} $][+ " $self->{labelclass}" +][$ endif $]"
-      colspan="[+ $span +]" [$ if $style $]style="[+ $style +]"[$ endif $]>
+   <td class="ef-label-box  [+ $addclass +] [$ if $self->{labelclass} $][+ " $self->{labelclass}" +][$ endif $]" [$ if $style $]style="[+ $style +]"[$ endif $]>
+    <div class="ef-label [+ $addclass2 +]">
     [-
     $self -> show_label ($req);
     $self -> show_label_icon ($req) ;
     -]
+    </div>
   </td>
   [- return $span ; -]
 [$endsub$]
@@ -305,14 +565,52 @@ $]
 #   show_control - output the control itself
 #]
 
-[$ sub show_control ($self, $req) $][+ $self->{value} +][$endsub$]
+[$ sub show_control ($self, $req) $]<div [+ do { local $escmode = 0 ; $self -> get_std_control_attr($req) } +]>[+ $self->{value} +]</div>[$endsub$]
 
 [# ---------------------------------------------------------------------------
 #
 #   show_control_readonly - output the control as readonly
 #]
 
-[$ sub show_control_readonly ($self, $req) $][+ $self -> {value} || $fdat{$self -> {name}} +][$endsub$]
+[$ sub show_control_readonly ($self, $req, $value) 
+
+my $text  = $self -> get_display_text ($req, $value)  ;
+my $name  = $self -> {force_name} || $self -> {name} ;
+$]
+<div [+ do { local $escmode = 0 ; $self -> get_std_control_attr($req, '', 'readonly') } +] _ef_divname="[+ $name +]">[+ $text +]</div>
+[$ if $self->{hidden} $]
+<input type="hidden" name="[+ $name +]" value="[+ $value +]">
+[$endif$]
+[$endsub$]
+
+[# ---------------------------------------------------------------------------
+#
+#   show_control_readonly_array - output the control as readonly, multiple
+#                                 times in case of array
+#]
+
+[!
+ 
+sub show_control_readonly_array
+    {
+     my ($self, $req, $value) = @_ ;
+
+    $value  = $self -> get_value ($req) if (!defined ($value)) ;
+
+    if (ref ($value) eq 'ARRAY')
+        {
+        foreach my $subval (@$value)
+            {
+            
+            $self -> show_control_readonly ($req, defined ($subval)?$subval:'') ;    
+            }
+        }
+    else
+        {
+        $self -> show_control_readonly ($req, $value) ;    
+        }
+    }
+!]
 
 [# ---------------------------------------------------------------------------
 #
@@ -329,22 +627,14 @@ $]
 
 [$ sub show_control_cell ($self, $req, $x)
 
-    my $span = $self->{width_percent} - $x ;
-    my $addclass = '' ;
-    my $style    = '' ;
-    if ($self -> {width_precent} && !$self -> {width})
-        {
-        $style = "width: " . int($self -> {width_precent} * 100 / 80) . '; '  ;
-        }
-    else
-        {
-        $addclass = 'cControlBoxWidth' . ($self->{width} || 2 ) ;
-        }
+    my $ro = $self -> is_readonly ($req) ;
+    my $addclass = 'ef-control-box-width-' . ($self->{width_percent} || 50 ) ;
+    $addclass .= ' ef-control-box-readonly' if ($ro) ;    
 $]
-    <td class="cControlBox [+ $addclass +]" colspan="[+ $span +]" [$ if $style $]style="[+ $style +]"[$ endif $]>
+    <td class="ef-control-box [+ $addclass +]">
     [*
-     my @ret = $self -> is_readonly?$self -> show_control_readonly($req):$self -> show_control ($req);
-     $self -> show_control_addons ($req) ;
+    my @ret = $ro?$self -> show_control_readonly_array($req):$self -> show_control ($req);
+    $self -> show_control_addons ($req) ;
      *]
     </td>
 [* return @ret ; *]
@@ -505,16 +795,54 @@ is 2.
 =head2 width_percent
 
 With this parameter you can also specify the width of
-the control in percent. This parameter take precendence over
+the control in percent. This parameter take precedence over
 C<width>
 
 =head2 default
 
 Default value of the control
 
+=head2 imagedir
+
+Basepath where to find images, in case the control uses images.
+Default value is /images
+
+=head2 trigger
+
+When set will trigger state changes of other controls. See "state".
+
+=head2 state
+
+Can be used to hide/show disable/enable the control trigger by
+other controls.
+
+Checkbox define the following states:
+
+=over
+
+=item * <id-of-checkbox>-show
+
+Show control if checkbox checked
+
+=item * <id-of-checkbox>-hide
+
+Hide control if checkbox checked
+
+=item * <id-of-checkbox>-enable
+
+Enable control if checkbox checked
+
+=item * <id-of-checkbox>-disable
+
+Disable control if checkbox checked
+
+=back
+
+
+
 =head1 AUTHOR
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 SEE ALSO
 

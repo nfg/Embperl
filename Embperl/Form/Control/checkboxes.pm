@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -32,7 +33,8 @@ sub show_control_readonly
     my ($self, $req) = @_ ;
 
     my $name     = $self -> {name} ;
-    $self -> show_control ($req, "^\Q$fdat{$name}\E\$") ;
+    my @values = split (/\t/, $fdat{$name}) ;
+    $self -> show_control ($req, "^(?:" . join ('|', map { "\Q$_\E" } @values) . ")\$") ;
     }
 
 # ---------------------------------------------------------------------------
@@ -43,6 +45,23 @@ sub show_control_addons
 
     }
 
+# ------------------------------------------------------------------------------------------
+#
+#   init_data - daten aufteilen
+#
+
+sub init_data
+    {
+    my ($self, $req) = @_ ;
+    
+    my $fdat  = $req -> {docdata} || \%fdat ;
+    my $name    = $self->{name} ;
+    if (ref $fdat -> {$name})
+        {
+        $fdat -> {$name} = join ("\t", @{$fdat -> {$name}}) ;    
+        }
+
+    }
 1 ;
 
 __EMBPERL__
@@ -53,6 +72,35 @@ __EMBPERL__
 #]
 
 [$ sub show_control ($self, $req, $filter)
+
+    my $name     = $self -> {name} ;
+    $filter      ||= $self -> {filter} ;
+    my $val ;
+    my $i = 0 ;
+    my ($values, $options) = $self -> get_all_values ($req) ;
+    my ($ctlattrs, $ctlid, $ctlname) =  $self -> get_std_control_attr($req) ;
+    my $tab      = $self -> {tab} ;
+
+$]
+[$if $tab $]<[# #]table style="width: 100%">[$ endif $]
+[* $i = 0 ; *]
+[$ foreach $val (@$values) $]
+    [$if !defined ($filter) || ($val =~ /$filter/i) $]
+    [$ if $tab $][$ if $colcnt == 0 $]<[# #]tr>[- $colcnt = $tab -][$endif$]<td style="width: 3%">[$endif$] 
+    <input type="checkbox" name="[+ $name +]" value="[+ $val +]" [+ do { local $escmode = 0 ; $ctlattrs } +]
+    [$if ($self -> {trigger}) $]_ef_attach="ef_checkbox"[$endif$] >
+    [$ if $tab $]</td><td style="width: [+ int((100 - ($tab * 3)) / $tab) +]%">[$endif$] 
+    [+ $options ->[$i] || $val +]
+    [- $vert = $self -> {vert} -][$while $vert-- > 0 $]<br/>[$endwhile$]
+    [$ if $tab $]</td>[$ if $colcnt-- < 1 $]<[# #]/tr>[$endif$][$endif$] 
+    [$endif$]
+    [* $i++ ; *]
+[$endforeach$]
+[$if $tab $]<[# #]/table>[$ endif $]
+[$endsub$]
+
+
+[$ sub xxshow_control ($self, $req, $filter)
 
     my ($values, $options) = $self -> get_values ($req) ;
     my $name     = $self -> {name} ;
@@ -68,7 +116,7 @@ __EMBPERL__
     my $val ;
     my $i = 0 ;
 $]
-[$if $tab $]<[# #]table>[$ endif $]
+[$if $tab $]<[# #]table width=100% style="width: 100%" >[$ endif $]
 [$ foreach $val (@$addtop) $]
     [$if !defined ($filter) || ($val->[0] =~ /$filter/i) $]
     [$ if $tab $][$ if $colcnt == 0 $]<[# #]tr>[- $colcnt = $tab -][$endif$]<td>[$endif$] 
@@ -195,7 +243,7 @@ C<filter> are displayed.
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

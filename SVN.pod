@@ -62,7 +62,7 @@ http://svn.apache.org/snapshots/embperl/
 
 =head2 Embperl 1.x
 
-There is no further developement in the Embperl 1.x branch, but case it
+There is no further development in the Embperl 1.x branch, but case it
 will become necessary you can access the Embperl 1.x code via the branch
 B<ep1>, so when you checkout just run
 
@@ -74,7 +74,7 @@ B<ep1>, so when you checkout just run
 
 There is a SVN mailing list for Embperl (This is SVN - B<not> a list for asking
 questions about Embperl!!!). This list receives all changes which are
-commited to the SVN. If you want to know what's going on which Embperl,
+committed to the SVN. If you want to know what's going on which Embperl,
 you can subscribe by sending a mail to B<embperl-CVS-request@perl.apache.org>
 with B<subscribe> in the body.
 

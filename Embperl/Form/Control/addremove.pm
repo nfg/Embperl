@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -37,7 +38,7 @@ sub new
     bless $self, $class ;
 
     $self -> {removesource} ||= 0 ;
-    $self -> form -> add_code_at_bottom("addremoveInitOptions (document.getElementById('$self->{src}'), document.getElementById('$self->{dest}'), document.getElementById('$self->{name}'), $self->{removesource})") ;
+    $self -> form -> add_code_at_bottom("ef_addremoveInitOptions (document, document.getElementsByName('$self->{src}')[0], document.getElementsByName('$self->{dest}')[0], document.getElementsByName('$self->{name}')[0], $self->{removesource})") ;
     return $self ;
     }
 
@@ -47,29 +48,26 @@ sub new
 
 __EMBPERL__
 
+
 [# ---------------------------------------------------------------------------
 #
 #   show - output the control
 #]
 
-[$ sub show ($self)
+[$ sub show ($self, $req)
 
-    my $span = $self->{width_percent}  ;
-    my $name = $self->{name} ;
-    my $nsprefix = $self -> form -> {jsnamespace} ;
+my $name = $self -> {name} ;
 
-$]
-
-<td class="cBase cControlBox cControlAddRemoveBox" colspan="[+ $span +]">
+$]<table class="ef-element ef-element-width-[+ $self -> {width_percent} +] ef-element-[+ $self -> {type}  +] [+ ' ' . $self -> {state} +]">
+  <tr>
+    <td class="cBase cControlBox cControlAddRemoveBox">
 <input type="hidden" id="[+ $name +]" name="[+ $name +]">
-<img src="/images/toleft.gif" title="Hinzufügen" onClick="[+ $nsprefix +]addremoveAddOption (document, document.getElementById('[+ $self->{src} +]'), document.getElementById('[+ $self->{dest} +]'), document.getElementById('[+ $name +]'), [+ $self->{removesource} +])">
-<img src="/images/toright.gif" title="Entfernen" onClick="[+ $nsprefix +]addremoveRemoveOption (document, document.getElementById('[+ $self->{src} +]'), document.getElementById('[+ $self->{dest} +]'), document.getElementById('[+ $name +]'), [+ $self->{removesource} +])">
+<img src="[+ $self -> {imagedir} +]/toleft.gif" title="Hinzufügen" onClick="ef_addremoveAddOption (document, document.getElementsByName('[+ $self->{src} +]')[0], document.getElementsByName('[+ $self->{dest} +]')[0], document.getElementsByName('[+ $name +]')[0], [+ $self->{removesource} +])">
+<img src="[+ $self -> {imagedir} +]/toright.gif" title="Entfernen" onClick="ef_addremoveRemoveOption (document, document.getElementsByName('[+ $self->{src} +]')[0], document.getElementsByName('[+ $self->{dest} +]')[0], document.getElementsByName('[+ $name +]')[0], [+ $self->{removesource} +])">
 
-[#
-    print "<input class="cStandardButton" type=button value="Hinzufügen" onClick="[+ $nsprefix +]addremoveAddOption (document, this.form.elements['$self->{src}'], this.form.elements['$self->{dest}'], this.form.elements['$self->{name}'], $self->{removesource})">\n" ;
-    print "<input class="cStandardButton" type=button value="Entfernen" onClick="[+ $nsprefix +]addremoveRemoveOption (document, this.form.elements['$self->{src}'], this.form.elements['$self->{dest}'], this.form.elements['$self->{name}'], $self->{removesource})">\n" ;
-#]
 </td>
+</tr>
+</table>
 [$endsub$]
 
 __END__
@@ -121,7 +119,7 @@ move to the destionation box. If set to false, the items will be copied.
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

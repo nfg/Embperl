@@ -6,7 +6,7 @@ sub new
     my ($self, $r) = @_ ;
 
     # The following two values must be changed to meet your local setup
-    # Additionaly DBI and DBIx::Recordset must be installed
+    # Additionally DBI and DBIx::Recordset must be installed
    
     $self -> {dbdsn}      = $^O eq 'MSWin32'?'dbi:ODBC:embperl':'dbi:mysql:embperl' ;
     $self -> {dbuser}     = 'www' ;
@@ -14,7 +14,7 @@ sub new
     $self -> {adminemail} = 'richter@ecos.de';
     $self -> {emailfrom}   = 'embperl@ecos.de';
 
-    # There is normaly no need to change anything below this line
+    # There is normally no need to change anything below this line
 
     $self -> {basepath}  = '/eg/web/' ;
     $self -> {baseuri}   = $ENV{EMBPERL_BASEURI} || '/eg/web/' ;
@@ -229,19 +229,19 @@ BEGIN
                   desc => { en => 'Full list of all news.',
                             de => 'Vollständige Liste aller Neuigkeiten.' }},
             { menu => 'Sites using Embperl',     uri => 'sites/sites.htm',        file => 'eg/web/db/data.epd', fdat => { 'category_id' => 2 },
-                  desc => { en => 'Descriptions of Websites that use Embperl.',
+                  desc => { en => 'Description of Websites that use Embperl.',
                             de => 'Beschreibung von Websites die Embperl einsetzen.' }},
             { menu => 'Books',     uri => 'sites/books.htm',        file => 'eg/web/db/data.epd', fdat => { 'category_id' => 3 },
-                  desc => { en => 'Books that contains informations about Embperl.',
+                  desc => { en => 'Books that contain information about Embperl.',
                             de => 'Bücher die Embperl behandeln.' }},
             { menu => 'Articles',     uri => 'sites/articles.htm',        file => 'eg/web/db/data.epd', fdat => { 'category_id' => 4 },
-                  desc => { en => 'Articles that covers Embperl.',
+                  desc => { en => 'Articles that cover Embperl.',
                             de => 'Artikel die Embperl behandeln.' }},
             { menu => 'Modules & Examples',     uri => 'sites/examples.htm',        file => 'eg/web/db/data.epd', fdat => { 'category_id' => 6 },
-                  desc => { en => 'Modules and Examples with sourcecode for use/that uses Embperl.',
+                  desc => { en => 'Modules and Examples with source code for use/that uses Embperl.',
                             de => 'Modules und Beispiele incl. Quelltext zur/unter Benutzung von Embperl.' }},
             { menu => 'Editorsupport',     uri => 'sites/editors.htm',        file => 'eg/web/db/data.epd', fdat => { 'category_id' => 5 },
-                  desc => { en => 'Syntaxhighligthing and other support for editors.',
+                  desc => { en => 'Syntax highlighting and other support for editors.',
                             de => 'Syntaxhervorhebungen unter Unterstützung für Editoren.' }},
             { menu => 'Conferences',     uri => 'sites/conferences.htm',        file => 'eg/web/db/data.epd', fdat => { 'category_id' => 7 },
                   desc => { en => 'Talks about Embperl.',

@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Mail.pm 294756 2005-08-07 00:03:03Z richter $
+#   $Id: Mail.pm 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################
  
@@ -85,10 +86,12 @@ sub Init
                     use Embperl::Mail ;
 
                     my $txt = XML::Embperl::DOM::Node::iChildsText (%$n%) ;
+                    my @errors ;
                     $? = Embperl::Mail::Execute (
                         {
                         'input'       => \$txt,
                         'inputfile'   => 'mail',
+                        'errors'      => \@errors,
                         'syntax'      => 'Text',
                         'from'        => %&'from%,
                         'to'          => %&'to%,
@@ -101,6 +104,7 @@ sub Init
                         'maildebug'   => %&'maildebug%,
                         'mailheaders' => [ (( %&'content-type% ) ? ('Content-Type: '.%&'content-type%) : ()) ],
                         }) ;
+                    print STDERR join ('; ', @errors) if (@errors) ;
                     }
                   },
                 stackname   => 'mail_send',
@@ -126,7 +130,7 @@ __END__
 
 =head1 NAME
 
-Embperl Taglib for sending mail
+Embperl::Syntax::Mail - tag library for sending mail
 
 =head1 SYNOPSIS
 
@@ -183,7 +187,7 @@ On success it sets C<$?> to zero, otherwise to a value other then zero.
 
 =head1 Author
 
-Gerald Richter <richter@dev.ecos.de>
+Gerald Richter <richter at embperl dot org>
 
 =head1 See Also
 

@@ -82,16 +82,16 @@ $app  = $r -> app ;
     <tr> 
         <td><img src="[+ $r -> {imageuri} +]linie-nav.gif" width="152" height="1"></td>
     </tr>
-    [- menuitem ($r -> {baseuri} . 'pod/doc/Embperl.-page-19-.htm', 'Stable 2.2.0', 0, 1) -]
+    [- menuitem ($r -> {baseuri} . 'pod/doc/Embperl.-page-19-.htm', 'Stable 2.4.0', 0, 1) -]
     <tr> 
         <td><img src="[+ $r -> {imageuri} +]linie-nav.gif" width="152" height="1"></td>
     </tr>
-[#
-    [- menuitem ($r -> {baseuri} . 'pod/doc/Embperl.-page-18-.htm', 'Beta 2.1b1', 0, 1) -]
+
+    [- menuitem ($r -> {baseuri} . 'pod/doc/Embperl.-page-19-.htm', 'Beta 2.5.0_3', 0, 1) -]
     <tr>
         <td><img src="[+ $r -> {imageuri} +]linie-nav.gif" width="152" height="1"></td>
     </tr>
-#]
+
 
     <tr>
         <td align="left" valign="top">
@@ -106,6 +106,7 @@ $app  = $r -> app ;
 [$endif$]
 </tr></table>
 
+[#
 <script type="text/javascript"><!--
 google_ad_client = "pub-6848064800813254";
 google_alternate_color = "ffffff";
@@ -122,6 +123,7 @@ google_color_text = "6F6F6F";
 <script type="text/javascript"
   src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
 </script>
+#]
         </td>
     </tr>
 

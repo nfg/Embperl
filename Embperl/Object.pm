@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Object.pm 1004025 2010-10-03 18:50:24Z richter $
+#   $Id: Object.pm 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################
 
@@ -482,11 +483,11 @@ To include the original requested file, you need to call C<Execute> with a C<'*'
 To call the the same file, but in an upper directory you can use the
 special shortcut C<../*>.
 
-Additionaly I<Embperl::Object> sets up a inherence hierachie for you: The requested page
+Additionally I<Embperl::Object> sets up a inherence hierachie for you: The requested page
 inherit from the base page and the base page inherit from a class which could be
 specified by C<EMBPERL_OBJECT_HANDLER_CLASS>, or if C<EMBPERL_OBJECT_HANDLER_CLASS> is
 not set, from C<Embperl::Req>. That allows you to define methods in base page and
-overwrite them as neccessary in the original requested files. For this purpose a request
+overwrite them as necessary in the original requested files. For this purpose a request
 object, which is blessed into the package of the requested page, is given as first 
 parameter to each page (in C<$_[0]>). Because this request object is a hashref, you can
 also use it to store additional data, which should be available in all components. 
@@ -547,7 +548,7 @@ methods from this class. This class must contain C<Embperl::Req> in his
 Filename of the application object. The file should contain the Perl code for 
 the application object. The must be no package name given (as the package is set
 by Embperl::Object), but the @ISA should point to Embperl::App.
-If set this file is searched throught the same search path as any content file.
+If set this file is searched through the same search path as any content file.
 After a successfull load the init method is called with the Embperl request object
 as parameter. The init method can change the parameters inside the request object
 to influence the current request.
@@ -559,7 +560,7 @@ and set the location header in %http_headers_out)
 
 You can use I<Embperl::Object> also offline. You can do this by calling the function
 C<Embperl::Object::Execute>. C<Execute> takes a hashref as argument, which can
-contains the same parameters as the C<Embperl::Execute> function. Additionaly
+contains the same parameters as the C<Embperl::Execute> function. Additionally
 you may specify the following parameters:
 
 =over 4
@@ -780,7 +781,7 @@ B</foo/sub/page2.htm:>
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

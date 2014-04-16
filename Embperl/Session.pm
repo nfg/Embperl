@@ -10,7 +10,7 @@
 
 =head1 NAME
 
-HTML::Embperl::Session 
+HTML::Embperl::Session - adaptation of Apache::Session to work with HTML::Embperl
 
 =head1 DESCRIPTION
 
@@ -24,7 +24,7 @@ An adaptation of Apache::Session to work with HTML::Embperl
 
 =item lazy
 
-By Specifing this attribute, you tell Apache::Session to not do any
+By Specifyng this attribute, you tell Apache::Session to not do any
 access to the object store, until the first read or write access to
 the tied hash. Otherwise the B<tie> function will make sure the hash
 exist or creates a new one.
@@ -110,7 +110,7 @@ Writes any pending data, releases all locks and deletes all data from memory.
 
 =head1 AUTHORS
 
-Gerald Richter <richter@dev.ecos.de> is the current maintainer.
+Gerald Richter <richter at embperl dot org> is the current maintainer.
 
 This class was written by Jeffrey Baker (jeffrey@kathyandjeffrey.net)
 but it is taken wholesale from a patch that Gerald Richter

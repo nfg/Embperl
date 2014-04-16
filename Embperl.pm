@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Embperl.pm 1004025 2010-10-03 18:50:24Z richter $
+#   $Id: Embperl.pm 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################
 
@@ -49,7 +50,7 @@ use vars qw(
 
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = '2.4.0' ;
+$VERSION = '2.5.0' ;
 
 
 if ($modperl  = $ENV{MOD_PERL})
@@ -318,7 +319,7 @@ sub get_multipart_formdata
     foreach ( @$ffld )
 	{
     	# the param_fetch needs CGI.pm 2.43
-	$params = $cgi->param_fetch( $_ ) ;
+	$params = $cgi->param_fetch( -name => $_ ) ;
     	#$params = $cgi->{$_} ;
 	if ($#$params > 0)
 	    {
@@ -500,6 +501,7 @@ sub export
 
     use strict ;
     }
+
 
 #######################################################################################
 

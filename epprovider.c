@@ -1,6 +1,7 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epprovider.c 924970 2010-03-18 19:53:48Z richter $
+#   $Id: epprovider.c 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################*/
 
@@ -1253,7 +1254,7 @@ static int ProviderEpCompile_AppendKey (/*in*/ req *              r,
 *   \_en
 *   Get the whole content from the provider. 
 *   The Embperl compile provider compiles the source DomTRee and generates
-*   a Perl programm and a compiled DomTRee
+*   a Perl program and a compiled DomTRee
 *   
 *   @param  r               Embperl request record
 *   @param  pProvider       The provider record
@@ -1325,7 +1326,7 @@ static int ProviderEpCompile_GetContentIndex (/*in*/ req *             r,
 *   \_en
 *   Get the whole content from the provider. 
 *   The Embperl compile provider compiles the source DomTRee and generates
-*   a Perl programm and a compiled DomTRee
+*   a Perl program and a compiled DomTRee
 *   
 *   @param  r               Embperl request record
 *   @param  pProvider       The provider record
@@ -1745,7 +1746,7 @@ static int ProviderEpRun_UpdateParam(/*in*/ req *              r,
 /*! 
 *   \_en
 *   Get the whole content from the provider. 
-*   The Embperl Run provider executes the compiled DomTree & Perl programm
+*   The Embperl Run provider executes the compiled DomTree & Perl program
 *   
 *   @param  r               Embperl request record
 *   @param  pProvider       The provider record

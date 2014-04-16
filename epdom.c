@@ -1,6 +1,7 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -9,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epdom.c 552019 2007-06-29 20:11:56Z richter $
+#   $Id: epdom.c 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################*/
 
@@ -136,7 +137,7 @@ tNodeData * dom_malloc (/*in*/ tApp * a,
     if (pMemLast == NULL)
         {
         char buf[256] ;
-        sprintf (buf, "dom_malloc: Out of memory (%u bytes)", sizeof (tPad)) ;
+        sprintf (buf, "dom_malloc: Out of memory (%u bytes)", (unsigned int)sizeof (tPad)) ;
     	mydie (a, buf) ;
     	}
     	
@@ -242,11 +243,11 @@ void * str_malloc (/*in*/ tApp * a,
     else
         {
         char buf[256] ;
-        /*
-        sprintf (buf, "%u bytes", n) ;
+	/*
+        sprintf (buf, "%zu bytes", n) ;
         LogErrorParam (a, rcOutOfMemory, "str_malloc failed", buf) ;
         */
-        sprintf (buf, "str_malloc: Out of memory (%u bytes)", n + sizeof (size_t)) ;
+        sprintf (buf, "str_malloc: Out of memory (%u bytes)", (unsigned int)(n + sizeof (size_t))) ;
     	mydie (a, buf) ;
     	}
 
@@ -274,7 +275,7 @@ void * str_malloc_dbg (/*in*/ tApp * a,
         {
         char buf[256] ;
 	/*
-        sprintf (buf, "%u bytes", n) ;
+        sprintf (buf, "%zu bytes", n) ;
         LogErrorParam (a, rcOutOfMemory, "str_malloc_dbg failed", buf) ;
         */
         sprintf (buf, "str_malloc: Out of memory (%u bytes)", n + sizeof (size_t)) ;
@@ -309,7 +310,7 @@ void * str_realloc (/*in*/ tApp * a,
         sprintf (buf, "%zu bytes", n) ;
         LogErrorParam (a, rcOutOfMemory, "str_realloc failed", buf) ;
         */
-        sprintf (buf, "str_realloc: Out of memory (%u bytes)", n + sizeof (size_t)) ;
+        sprintf (buf, "str_realloc: Out of memory (%u bytes)", (unsigned int)(n + sizeof (size_t))) ;
     	mydie (a, buf) ;
     	}
     
@@ -1624,9 +1625,9 @@ int DomTree_clone (/*in*/ tApp * a,
 /*!
 *
 * \_en									   
-* Compare checkpoint from programm execution with list build during        
+* Compare checkpoint from program execution with list build during        
 * compilation and change the DomTree and repeat level according to the     
-* programm flow                                                            
+* program flow                                                            
 *                                                                          
 * @param   r               Embperl request data                            
 * @param   xDomTree	   current DomTree we are working on              
@@ -2246,10 +2247,10 @@ tNodeData * Node_selfLevelItem (/*in*/ tApp * a,
 *   @param  pDomTree	    current DomTree we are working on              
 *   @param  pNode           node that should be cloned
 *   @param  nRepeatLevel    repeat level for new node
-*   @param  bDeep           determines how childs are handled
-*                           - 1 clone childs also 
-*                           - 0 clone no childs 
-*                           - -1 clone no attributes and no childs
+*   @param  bDeep           determines how children are handled
+*                           - 1 clone children also 
+*                           - 0 clone no children 
+*                           - -1 clone no attributes and no children
 *   \endif                                                                       
 *
 *   \_de									   
@@ -2335,10 +2336,10 @@ tNodeData * Node_selfCloneNode (/*in*/ tApp * a,
 *   @param  pDomTree	    current DomTree we are working on              
 *   @param  xNode           node that should be cloned
 *   @param  nRepeatLevel    repeat level for new node
-*   @param  bDeep           determines how childs are handled
-*                           - 1 clone childs also 
-*                           - 0 clone no childs 
-*                           - -1 clone no attributes and no childs
+*   @param  bDeep           determines how children are handled
+*                           - 1 clone children also 
+*                           - 0 clone no children 
+*                           - -1 clone no attributes and no children
 *   \endif                                                                       
 *
 *   \_de									   
@@ -2595,7 +2596,7 @@ tNodeData * Node_newAndAppend (/*in*/ tApp * a,
     pNewChild -> nRepeatLevel = nRepeatLevel ;
 
     if (xChilds)
-        { /* --- attribute has already childs, get the first and last one --- */
+        { /* --- attribute has already children, get the first and last one --- */
 	tNodeData * pFirstChild = Node_selfLevel (a, pDomTree, xChilds, nRepeatLevel) ;
         tNodeData * pLastChild  = Node_selfLevel (a, pDomTree, pFirstChild -> xPrev, nRepeatLevel) ;
 	pFirstChild = Node_selfCondCloneNode (a, pDomTree, pFirstChild, nRepeatLevel) ;
@@ -2607,7 +2608,7 @@ tNodeData * Node_newAndAppend (/*in*/ tApp * a,
         pLastChild -> xNext     = xNdx ;    
         }
     else
-        /* --- attribute has no childs, get a new one --- */
+        /* --- attribute has no children, get a new one --- */
         {
         pNewChild -> xPrev   = xNdx ;
         pNewChild -> xNext   = xNdx ;
@@ -3212,7 +3213,6 @@ tNode Node_insertAfter          (/*in*/ tApp * a,
     tNodeData *	pNewNode      = Node_selfLevel (a, pNewNodeDomTree, xNewNode, nNewRepeatLevel) ;
     tNodeData *	pRefNode      = Node_selfLevel (a, pRefNodeDomTree, xRefNode, nRefRepeatLevel) ;
     tNodeData *	pNxtNode      = Node_selfNextSibling (a, pRefNodeDomTree, pRefNode, nRefRepeatLevel) ;
-    tNode	xOrgNode ;
 
 
     if (pNewNodeDomTree != pRefNodeDomTree)
@@ -3243,7 +3243,6 @@ tNode Node_insertAfter          (/*in*/ tApp * a,
             pNxtNode = NULL ;
         }
 
-    xOrgNode = pNewNode -> xNdx ;
     if (pNxtNode)
         {
         pNxtNode -> xPrev = pNewNode -> xNdx ;
@@ -3684,6 +3683,9 @@ static tNodeData * Node_toString2 (/*i/o*/ register req *   r,
     tNodeData * pLast ;
     struct tCharTrans * pChar2Html  ;
 
+    if (!pNode)
+        return NULL ;
+            
     if (r -> Config.nOutputEscCharset == ocharsetLatin1)
     	pChar2Html = Char2Html ;
     else if (r -> Config.nOutputEscCharset == ocharsetLatin2)

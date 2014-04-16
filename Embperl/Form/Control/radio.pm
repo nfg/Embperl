@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -22,39 +23,6 @@ use base 'Embperl::Form::ControlMultValue' ;
 
 use Embperl::Inline ;
 
-# ---------------------------------------------------------------------------
-#
-#   show_control_readonly - output readonly control
-#
-
-sub show_control_readonly
-    {
-    my ($self, $req) = @_ ;
-
-    my ($values, $options) = $self -> get_values ;
-    my $name     = $self -> {name} ;
-    my $addtop   = $self -> {addtop} || [] ;
-    my $addbottom= $self -> {addbottom} || [] ;
-    my $set      = !defined ($fdat{$name})?1:0 ;
-    my $filter   = $self -> {filter} ;
-
-    my $val ;
-    my $i = 0 ;
-
-    if ($set)
-        {
-        foreach $val ((@$addtop, @$values, @$addbottom))
-            {
-            if (!defined ($filter) || (ref $val?$val -> [0]:$val =~ /$filter/i))
-                {
-                $fdat{$name} = ref $val?$val -> [0]:$val  ;
-                last ;
-                }
-            }
-        }
-
-    $self -> show_control ($req, "^\Q$fdat{$name}\E\$", $values, $options) ;
-    }
 
 # ---------------------------------------------------------------------------
 
@@ -77,14 +45,11 @@ __EMBPERL__
 
     ($values, $options) = $self -> get_values ($req) if (!$values) ;
     my $name     = $self -> {name} ;
-    $filter    ||= $self -> {filter} ;
-    my $addtop   = $self -> {addtop} || [] ;
-    my $addbottom= $self -> {addbottom} || [] ;
     my $ignorecase= $self -> {ignorecase} ;
     my $max      = @$values ;
     my $set      = !defined ($fdat{$name})?1:0 ;
     my $nsprefix = $self -> form -> {jsnamespace} ;
-
+    my $ctrlid  = ($req -> {uuid} . '_' . $name) ;
     my $val ;
     my $i = 0 ;
 
@@ -104,30 +69,15 @@ else
     }
 
 $]
-<table class="cRadioTab">[+ do { local $escmode = 0 ; $trglob }+]
-[$ foreach $val (@$addtop) $]
-    [$if !defined ($filter) || ($val->[0] =~ /$filter/i) $]
-    [- $fdat{$name} = $val -> [0], $set = 0 if ($set) ; -]
-    [+ do { local $escmode = 0 ; $tr }+]<td><input type="radio" name="[+ $name +]" value="[+ $val -> [0] +]"
-    ></td><td>[+ $val ->[1] || $val -> [0] +]</td>[+ do { local $escmode = 0 ; $trend }+]
-    [$endif$]
-[$endforeach$]
+<table class="ef-control-radiotab  [+ $self -> {state} +]"
+[$if ($self -> {trigger}) $]_ef_attach="ef_radio" name="[+ $self -> {force_name} || $self -> {name} +]"[$endif$]
+>[+ do { local $escmode = 0 ; $trglob }+]
 [$ foreach $val (@$values) $][- $x = ($val =~ /$filter/i) -]
-    [$if !defined ($filter) || ($val =~ /$filter/i) $]
     [- $fdat{$name} = $val, $set = 0 if ($set) ;
        $fdat{$name} = $val if ($ignorecase && lc($fdat{$name}) eq lc($val)) ; -]
-    [+ do { local $escmode = 0 ; $tr }+]<td><input type="radio" name="[+ $name +]" value="[+ $val +]" id="[+ "$name-_-$val" +]"
-    [$if ($self -> {sublines} || $self -> {subobjects}) $] OnClick="[+ $nsprefix +]show_radio_checked(document, this,[+ $i +],[+ $max +])" [$endif$]
+    [+ do { local $escmode = 0 ; $tr }+]<td><input type="radio"  name="[+ $self -> {force_name} || $self -> {name} +]" [+ do { local $escmode = 0 ; $self -> get_std_control_attr($req, "$ctlid-_-$val") } +] value="[+ $val +]" 
     ></td><td>[+ $options ->[$i] || $val +]</td>[+ do { local $escmode = 0 ; $trend }+]
-    [$endif$]
     [* $i++ ; *]
-[$endforeach$]
-[$ foreach $val (@$addbottom) $]
-    [$if !defined ($filter) || ($val->[0] =~ /$filter/i) $]
-    [- $fdat{$name} = $val -> [0], $set = 0 if ($set) ; -]
-    [+ do { local $escmode = 0 ; $tr }+]<td><input type="radio" name="[+ $name +]" value="[+ $val -> [0] +]"
-    ></td><td>[+ $val ->[1] || $val -> [0] +]</td>[+ do { local $escmode = 0 ; $trend }+]
-    [$endif$]
 [$endforeach$]
 [+ do { local $escmode = 0 ; $trendglob }+]</table>
 [$endsub$]
@@ -218,7 +168,7 @@ C<filter> are displayed.
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

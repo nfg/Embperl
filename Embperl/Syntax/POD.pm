@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: POD.pm 355574 2005-12-09 18:15:54Z richter $
+#   $Id: POD.pm 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################
  
@@ -732,7 +733,7 @@ __END__
 
 =head1 NAME
 
-Embperl::Syntax::POD
+Embperl::Syntax::POD - convert POD to XML on-the-fly
 
 =head1 SYNOPSIS
 
@@ -778,7 +779,7 @@ See I<Embperl::Syntax> for a definition of procinfo.
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

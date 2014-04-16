@@ -1,6 +1,7 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -9,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epparse.c 387723 2006-03-22 05:02:29Z richter $
+#   $Id: epparse.c 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################*/
 
@@ -45,6 +46,17 @@ static int CmpToken (/*in*/ const void *  p1,
     }
     
 /* ------------------------------------------------------------------------ */
+/* compare tokens                                                           */
+/* ------------------------------------------------------------------------ */
+
+static int RevCmpToken (/*in*/ const void *  p1,
+                     /*in*/ const void *  p2)
+
+    {
+    return strcmp (*((const char * *)p2), *((const char * *)p1)) ;
+    }
+    
+/* ------------------------------------------------------------------------ */
 /* compare tokens for descending order                                      */
 /* ------------------------------------------------------------------------ */
 
@@ -62,7 +74,7 @@ static int CmpTokenDesc (/*in*/ const void *  p1,
 /*                                                                          */
 /* CheckProcInfo                                                            */
 /*                                                                          */
-/* Check for processor informations                                         */
+/* Check for processor information                                         */
 /*                                                                          */
 /* ------------------------------------------------------------------------ */
 
@@ -80,6 +92,14 @@ static int CheckProcInfo      (/*i/o*/ register req * r,
     I32		    l	 ;
     HV *            pHVProcInfo ;
     int             n ;
+    int             i ;
+    int             m ;
+    typedef struct tSortToken
+        {
+        char *	    pKey ;
+        SV *	    pSVValue ;
+        } tSortToken ;
+    tSortToken * pSortTokenHash ;    
     epTHX ;
     
     ppSV = hv_fetch(pHash, "procinfo", sizeof ("procinfo") - 1, 0) ;  
@@ -94,11 +114,28 @@ static int CheckProcInfo      (/*i/o*/ register req * r,
 
 	pHVProcInfo = (HV *)SvRV (*ppSV) ;
 
-	hv_iterinit (pHVProcInfo ) ;
-	while ((pEntry = hv_iternext (pHVProcInfo)))
-	    {
-	    pKey     = hv_iterkey (pEntry, &l) ;
-	    pSVValue = hv_iterval (pHVProcInfo , pEntry) ;
+        m = 0 ;
+        n = HvKEYS (pHVProcInfo) ;
+        pSortTokenHash = (tSortToken *)malloc (sizeof (struct tSortToken) * n) ;
+        hv_iterinit (pHVProcInfo) ;
+        while ((pEntry = hv_iternext (pHVProcInfo)))
+            {
+            pKey     = hv_iterkey (pEntry, &l) ;
+            pSVValue   = hv_iterval (pHVProcInfo, pEntry) ;
+    
+            pSortTokenHash[m].pKey = pKey ;    
+            pSortTokenHash[m].pSVValue = pSVValue ;    
+            m++ ;
+            }
+    
+        qsort (pSortTokenHash, m, sizeof (struct tSortToken), RevCmpToken) ;
+    
+        i = 0 ;
+        while (i < m)
+            {
+            pKey     = pSortTokenHash[i].pKey ;
+            pSVValue   = pSortTokenHash[i].pSVValue ;
+            i++ ;
         
 	    if (pSVValue == NULL || !SvROK (pSVValue) || SvTYPE (SvRV (pSVValue)) != SVt_PVHV)
 		{
@@ -226,7 +263,14 @@ int BuildTokenTable (/*i/o*/ register req *	  r,
     I32		    l	 ;
     STRLEN	    len	 ;
     int		    n ;
+    int             m ;
     int		    i ;
+    typedef struct tSortToken
+        {
+        char *	    pKey ;
+        SV *	    pToken ;
+        } tSortToken ;
+    tSortToken * pSortTokenHash ;    
     unsigned char * pStartChars = pTokenTable -> cStartChars ;
     unsigned char * pAllChars	= pTokenTable -> cAllChars ;
     epTHX ;
@@ -296,17 +340,37 @@ int BuildTokenTable (/*i/o*/ register req *	  r,
 	    }
         }
 
-    n = 0 ;
+    m = 0 ;
+    n = HvKEYS (pTokenHash) ;
+    pSortTokenHash = (tSortToken *)malloc (sizeof (struct tSortToken) * n) ;
     hv_iterinit (pTokenHash) ;
     while ((pEntry = hv_iternext (pTokenHash)))
+        {
+        pKey     = hv_iterkey (pEntry, &l) ;
+        pToken   = hv_iterval (pTokenHash, pEntry) ;
+
+        pSortTokenHash[m].pKey = pKey ;    
+        pSortTokenHash[m].pToken = pToken ;    
+        m++ ;
+        }
+
+    qsort (pSortTokenHash, m, sizeof (struct tSortToken), CmpToken) ;
+
+    n = 0 ;
+    i = 0 ;
+    while (i < m)
         {
         HV *   pHash ;
 	struct tTokenTable * pNewTokenTable ;
 	char *  sContains ;
 	char *  sC ;
         
-        pKey     = hv_iterkey (pEntry, &l) ;
-        pToken   = hv_iterval (pTokenHash, pEntry) ;
+        pKey     = pSortTokenHash[i].pKey ;
+        pToken   = pSortTokenHash[i].pToken ;
+        i++ ;
+	    if (r -> Component.Config.bDebug & dbgBuildToken)
+                lprintf (r -> pApp,  "[%d]TOKENKey: %s\n", r -> pThread -> nPid, pKey) ; 
+        
 	if (*pKey != '-')
 	    {
 	    if (!SvROK (pToken) || SvTYPE (SvRV (pToken)) != SVt_PVHV)
@@ -403,6 +467,8 @@ int BuildTokenTable (/*i/o*/ register req *	  r,
 	    }
 	}
 
+    free (pSortTokenHash) ;
+    
     qsort (pTable, numTokens - 1, sizeof (struct tToken), pTokenTable -> bLSearch?CmpTokenDesc:CmpToken) ;
 
 

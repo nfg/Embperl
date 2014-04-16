@@ -1,6 +1,7 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epmain.c 1004099 2010-10-04 03:49:25Z richter $
+#   $Id: epmain.c 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################*/
 
@@ -32,8 +33,8 @@
 * @param    r       the request object (maybe NULL)
 * @param    a       the application object (maybe NULL)
 * @param    rc      the error code
-* @param    errdat1 addtional informations
-* @param    errdat2 addtional informations
+* @param    errdat1 addtional information
+* @param    errdat2 addtional information
 * \endif                                                                       
 *
 * \_de									   
@@ -176,7 +177,7 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
         case rcRefcntNotOne:            msg ="[%d]ERR:  %d: %s There is still %s reference(s) to the %s object, while there shouldn't be any." ; break ; 
         case rcApacheErr:               msg ="[%d]ERR:  %d: %s Apache returns Error: %s %s" ; break ; 
         case rcTooDeepNested:           msg ="[%d]ERR:  %d: %s Source data is too deep nested %s %s" ; break ; 
-        case rcUnknownOption:           msg ="[%d]ERR:  %d: %s Unkown option '%s' in configuration directive '%s'" ; break ; 
+        case rcUnknownOption:           msg ="[%d]ERR:  %d: %s Unknown option '%s' in configuration directive '%s'" ; break ; 
         case rcTimeFormatErr:           msg ="[%d]ERR:  %d: %s Format error in %s = %s" ; break ;
         case rcSubCallNotRequest:       msg ="[%d]ERR:  %d: %s A Embperl sub is called and no Embperl request is running  %s %s" ; break ;
         case rcNotScalarRef:            msg ="[%d]ERR:  %d: %s %s need scalar in '%s'" ; break ; 
@@ -259,14 +260,15 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
     else
 #endif
         {
-        /*
+#ifdef WIN32
         PerlIO_printf (PerlIO_stderr(), "%s\n", sText) ;
         PerlIO_flush (PerlIO_stderr()) ;
-        */
+#else
 #undef fprintf
 #undef fflush
         fprintf (stderr, "%s\n", sText) ;
         fflush (stderr) ; 
+#endif
         }
     
     if (r)
@@ -300,8 +302,8 @@ static char * DoLogError (/*i/o*/ struct tReq * r,
 *                                                                          
 * @param    a       the application object
 * @param    rc      the error code
-* @param    errdat1 addtional informations
-* @param    errdat2 addtional informations
+* @param    errdat1 addtional information
+* @param    errdat2 addtional information
 * \endif                                                                       
 *
 * \_de									   
@@ -333,7 +335,7 @@ char * LogErrorParam   (/*i/o*/ struct tApp * a,
 *
 * \_en									   
 * Logs the occurence of an error to the embperl logfile and the httpd error log
-* Addtional informations, like stack backtrace, is taken from the request object
+* Addtional information, like stack backtrace, is taken from the request object
 *                                                                          
 * @param    r       the request object
 * @param    rc      the error code
@@ -706,7 +708,7 @@ static int StartOutput (/*i/o*/ register req * r)
             	send_http_header (r -> pApacheReq) ;
 #endif
 #ifndef WIN32
-	    /* shouldn't be neccessary for newer mod_perl versions !? */
+	    /* shouldn't be necessary for newer mod_perl versions !? */
 	    /* mod_perl_sent_header(r -> pApacheReq, 1) ; */
 #endif
             if (r -> pApacheReq -> header_only)
@@ -817,10 +819,12 @@ static int GenerateErrorPage (/*i/o*/ register req * r,
         SPAGAIN ;
 #ifdef APACHE
 	if (r -> pApacheReq)
+	    {
 	    if (rc >= 400)
 	        r -> pApacheReq -> status = rc ;
             else
                 r -> pApacheReq -> status = 500 ;
+	    }
 #endif
         
 	SetHashValueInt (r, r -> pThread -> pHeaderHash, "Content-Length", GetContentLength (r) ) ;

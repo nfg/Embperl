@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -30,7 +31,7 @@ __EMBPERL__
 #   show_control - output the control
 #]
 
-[$ sub show_control ($self)
+[$ sub show_control ($self, $req, $value)
 
 my $name    = $self->{name};
 my $value   = exists $self->{value} ? $self->{value} : $fdat{$name};
@@ -43,7 +44,7 @@ $options = [ split /\t/, $value ] if $self->{split};
 $options = [ split /\n/, $value ] if $self->{splitlines};
 $options = [$options] if (!ref $options) ;
 
-$options = $self -> form -> convert_options ($self, $options, $options) 
+$options = $self -> form -> convert_options ($self, $options, $options, $req) 
            if (ref $options eq 'ARRAY' && !$self -> {showoptions}) ;
 
 $][$ if ref $options eq 'ARRAY' $][- $n = @$options -][$ foreach $v (@$options) $][+ $v +][$ if $n-- > 1 $]<br />[$endif$][$ endforeach
@@ -62,7 +63,7 @@ __END__
 
 =head1 NAME
 
-Embperl::Form::Control::display - A text display control inside an Embperl Form
+Embperl::Form::Control::show - A text display control inside an Embperl Form
 
 
 =head1 SYNOPSIS
@@ -84,7 +85,7 @@ See Embperl::Form on how to specify parameters.
 
 =head3 type
 
-Needs to be set to 'display'.
+Needs to be set to 'show'.
 
 =head3 text 
 
@@ -117,7 +118,7 @@ on a new line.
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de), A. Beckert (beckert@ecos.de)
+G. Richter (richter at embperl dot org), A. Beckert (beckert@ecos.de)
 
 =head1 See Also
 

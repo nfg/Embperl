@@ -111,7 +111,7 @@ __END__
 #   convert_label
 #
 #   converts the label of a control to the text that should be outputed.
-#   By default does return the text or name paramter of the control.
+#   By default does return the text or name parameter of the control.
 #   Can be overwritten to allow for example internationalization.
 #
 #   in $ctrl        Embperl::Form::Control object
@@ -133,7 +133,7 @@ sub convert_label
 #   convert_text
 #
 #   converts the text of a control to the text that should be outputed.
-#   By default does return the text or name paramter of the control.
+#   By default does return the text or name parameter of the control.
 #   Can be overwritten to allow for example internationalization.
 #
 #   in $ctrl        Embperl::Form::Control object

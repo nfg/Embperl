@@ -1,6 +1,7 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -9,7 +10,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epcomp.c 960450 2010-07-05 05:46:23Z richter $
+#   $Id: epcomp.c 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################*/
 
@@ -949,8 +950,12 @@ static int embperl_CompileCmd  (/*in*/	tReq *	       r,
     SV *        args[4] ;
     int nCodeLen = 0 ;
     int found = 0 ;
+    char *use_utf8 = "" ;
 
-    r -> Component.pCodeSV = NULL ;
+    if (strcmp (r -> Component.Config.sInputCharset, "utf8") == 0)
+        use_utf8 = "use utf8;" ;
+        
+   r -> Component.pCodeSV = NULL ;
 
     Ndx2StringLen (pDomTree -> xFilename, sSourcefile, nSourcefile) ;
 
@@ -1025,8 +1030,8 @@ static int embperl_CompileCmd  (/*in*/	tReq *	       r,
 		        }
                     }		
 
-                pSV = newSVpvf("package %s ;\n#line %d \"%s\"\n%*.*s",
-			r -> Component.sEvalPackage, pNode ->	nLinenumber, sSourcefile, l,l, pCTCode) ;
+                pSV = newSVpvf("package %s ; %s\n#line %d \"%s\"\n%*.*s",
+			r -> Component.sEvalPackage, use_utf8, pNode ->	nLinenumber, sSourcefile, l,l, pCTCode) ;
 		newSVpvf2(pSV) ;
 		args[0] = r -> _perlsv ;
 		if (pCode)
@@ -1223,6 +1228,10 @@ static int embperl_CompileCmdEnd (/*in*/  tReq *	 r,
     char *          pCTCode = NULL ; 
     SV *	    args[4] ;
     STRLEN	    nCodeLen  = 0 ;
+    char *use_utf8 = "" ;
+
+    if (strcmp (r -> Component.Config.sInputCharset, "utf8") == 0)
+        use_utf8 = "use utf8;" ;
 
 
     if (pCmd -> nNodeType != pNode -> nType)
@@ -1266,8 +1275,8 @@ static int embperl_CompileCmdEnd (/*in*/  tReq *	 r,
                     }		
 
 		
-		pSV = newSVpvf("package %s ;\n#line %d \"%s\"\n%*.*s",
-			r -> Component.sEvalPackage, pNode ->	nLinenumber, sSourcefile, l,l, pCTCode) ;
+		pSV = newSVpvf("package %s ; %s\n#line %d \"%s\"\n%*.*s",
+			r -> Component.sEvalPackage, use_utf8, pNode ->	nLinenumber, sSourcefile, l,l, pCTCode) ;
 		newSVpvf2(pSV) ;
 		args[0] = r -> _perlsv ;
 		if (pCode)
@@ -1372,7 +1381,7 @@ static int embperl_CompileCmdEnd (/*in*/  tReq *	 r,
 /*                                                                          */
 /* embperl_CompileNode                                                      */
 /*                                                                          */
-/* Compile one node and his childs                                          */
+/* Compile one node and his children                                          */
 /*                                                                          */
 /* ------------------------------------------------------------------------ */
 
@@ -1551,7 +1560,7 @@ int embperl_CompileNode (/*in*/  tReq *         r,
 /*                                                                          */
 /* embperl_CompileDomTree						    */
 /*                                                                          */
-/* Compile root node and his childs					    */
+/* Compile root node and his children					    */
 /*                                                                          */
 /* ------------------------------------------------------------------------ */
 
@@ -1628,11 +1637,16 @@ int embperl_Compile                 (/*in*/  tReq *	  r,
         nStep = 4096 ;
     */
     int nStep = 8192 ;
+    char *use_utf8 = "" ;
+
+    if (strcmp (r -> Component.Config.sInputCharset, "utf8") == 0)
+        use_utf8 = "use utf8;" ;
 
     if (r -> Component.Config.bDebug & dbgCompile)
 	lprintf (r -> pApp,  "[%d]EPCOMP: Start compiling %s DomTree = %d\n", r -> pThread -> nPid, sSourcefile, xDomTree) ; 
 
-    /* ChdirToSource (r, sSourcefile) ;    */
+    if (r -> Component.Config.bOptions & optChdirToSource)
+        ChdirToSource (r, sSourcefile) ; 
 
     r -> Component.nPhase  = phCompile ;
 
@@ -1693,7 +1707,7 @@ int embperl_Compile                 (/*in*/  tReq *	  r,
 
     if (l > 1)
 	{
-	pSV = newSVpvf("package %s ; \n%*.*s", r -> Component.sEvalPackage, l,l, r -> Component.pProgDef) ;
+	pSV = newSVpvf("package %s ; %s\n%*.*s", r -> Component.sEvalPackage, use_utf8, (int)l,(int)l, r -> Component.pProgDef) ;
 	newSVpvf2(pSV) ;
 	args[0] = r -> _perlsv ;
 	args[1] = pDomTree -> pDomTreeSV ;
@@ -1739,9 +1753,15 @@ int embperl_Compile                 (/*in*/  tReq *	  r,
 	    lprintf (r -> pApp,  "Setup source code for interactive debugger\n") ;
 	}    
     
-    UndefSub (r, r -> Component.sMainSub, r -> Component.sCurrPackage) ;
+    /*
+     * Does not work with perl >= 5.14
+     */
+#if PERL_VERSION < 14
+     UndefSub (r, r -> Component.sMainSub, r -> Component.sCurrPackage) ;
+#endif
+
     rc = EvalOnly (r, r -> Component.pProgRun, pProg, G_SCALAR, r -> Component.sMainSub) ;
-        
+    
     StringFree (r -> pApp, &r -> Component.pProgRun) ;
     StringFree (r -> pApp, &r -> Component.pProgDef) ;
 
@@ -1893,7 +1913,7 @@ int embperl_Execute	            (/*in*/  tReq *	  r,
     {
     epTHX_
     int	    rc  = ok ;
-    /* char *  sSourcefile = r -> Component.sSourcefile  ; */
+    char *  sSourcefile = r -> Component.sSourcefile  ; 
     
     tainted         = 0 ;
 
@@ -1908,7 +1928,8 @@ int embperl_Execute	            (/*in*/  tReq *	  r,
             SetHashValueInt (r, r -> pCleanupPackagesHV, r -> Component.sCurrPackage, 1) ;
         
         /* --- change working directory --- */
-        /* ChdirToSource (r, sSourcefile) ;    */
+        if (r -> Component.Config.bOptions & optChdirToSource)
+            ChdirToSource (r, sSourcefile) ; 
 
 
         if (c -> Param.pParam)
@@ -1965,7 +1986,6 @@ int embperl_Execute	            (/*in*/  tReq *	  r,
 
 
 	/* --- restore working directory --- */
-	/*
         if (r -> Component.sResetDir[0])
 	    {
 #ifdef WIN32
@@ -1975,7 +1995,6 @@ int embperl_Execute	            (/*in*/  tReq *	  r,
 	    strcpy (r -> Component.sCWD,r -> Component.sResetDir) ;
 	    r -> Component.sResetDir[0] = '\0' ;
             }
-        */
         }
     else
         *pResultDomTree = 0 ;

@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -52,30 +53,41 @@ sub init
 
 sub init_data
     {
-    my ($self, $req, $parentctrl) = @_ ;
-    
-    my $name    = $self->{name} ;
-    my $time    = $fdat{$name} ;
-    return if ($time eq '') ;
+    my ($self, $req, $parentctrl, $force) = @_ ;
 
+    my $fdat  = $req -> {docdata} || \%fdat ;
+    my $name    = $self->{name} ;
+    my $time    = $fdat->{$name} ;
+    return if ($time eq '' || ($req -> {"ef_datetime_init_done_$name"} && !$force)) ;
+
+    if ($self -> {dynamic} && ($time =~ /^\s*((?:d|m|y|q)(?:\+|-)?(?:\d+)?)\s*$/))
+        {
+        $fdat->{$name} = $1 ;
+
+        $req -> {"ef_datetime_init_done_$name"} = 1 ;
+        return ;
+        }
+    
+    
     my ($y, $m, $d, $h, $min, $s, $z) = ($time =~ /^(\d\d\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(.)/) ;
 
     # Getting the local timezone
 
     my $date = eval
-       {
-       my @time = gmtime(timegm_nocheck($s,$min,$h,$d,$m-1,$y-1900)+($tz_local*60));
+        {
+        my @time = gmtime(timegm_nocheck($s,$min,$h,$d,$m-1,$y-1900)+($tz_local*60));
 
-       my $format = $s == 0 && $h == 0 && $min == 0?'%d.%m.%Y':'%d.%m.%Y, %H:%M' ;
-       strftime ($format, @time[0..5]) ;
-       } ;
+        my $format = $self -> {notime} || ($s == 0 && $h == 0 && $min == 0)?'%d.%m.%Y':'%d.%m.%Y, %H:%M' ;
+        strftime ($format, @time[0..5]) ;
+        } ;
 
     if ($time && !$date && ($time =~ /\d+\.\d+\.\d+/))
-	{
-	$date = $time ;
-	}
+        {
+        $date = $time ;
+        }
 
-    $fdat{$name} = $date ;
+    $fdat->{$name} = $date ;
+    $req -> {"ef_datetime_init_done_$name"} = 1 ;
     }
 
 # ------------------------------------------------------------------------------------------
@@ -87,11 +99,20 @@ sub prepare_fdat
     {
     my ($self, $req) = @_ ;
 
-    return if ($self -> {readonly}) ;
+    return if ($self -> is_readonly ($req)) ;
     
+    my $fdat  = $req -> {form} || \%fdat ;
     my $name    = $self->{name} ;
-    my $date    = $fdat{$name} ;
+    my $date    = $fdat -> {$name} ;
     return if ($date eq '') ;
+
+    if ($self -> {dynamic} && ($date =~ /^\s*((?:d|m|y|q)\s*(?:\+|-)?\s*(?:\d+)?)\s*$/))
+        {
+        $fdat->{$name} = $1 ;
+        $fdat->{$name} =~ s/\s//g ;
+        return ;
+        }
+    
     
     my ($year, $mon, $day, $hour, $min, $sec) ;
     if ($date eq '*' || $date eq '.')
@@ -140,7 +161,20 @@ sub prepare_fdat
                             0, 0, -$tz_local, 0) if ($hour || $min || $sec) ;
         }
 
-    $fdat{$name} = $year?sprintf ('%04d%02d%02d%02d%02d%02dZ', $year, $mon, $day, $hour, $min, $sec):'' ;
+    $fdat -> {$name} = $year?sprintf ('%04d%02d%02d%02d%02d%02dZ', $year, $mon, $day, $hour, $min, $sec):'' ;
+    }
+
+# ---------------------------------------------------------------------------
+#
+#   get_validate_auto_rules - get rules for validation, in case user did
+#                             not specify any
+#
+
+sub get_validate_auto_rules
+    {
+    my ($self, $req) = @_ ;
+    
+    return [ $self -> {required}?(required => 1):(emptyok => 1), -type => 'DateTime' ] ;
     }
 
 1 ;
@@ -156,25 +190,23 @@ __EMBPERL__
 [$ sub show_control ($self)
 
 $self -> {size} ||= 80 / ($self -> {width} || 2) ;
-my $class = $self -> {class} ||= 'cControlWidthInput' ;
-my $nsprefix = $self -> form -> {jsnamespace} ;
+my $class = $self -> {class} ||= '' ;
+my $fullid   = $req -> {uuid} . '_' . $self ->{id} ;
 $]
 
-<input type="text"  class="cBase cControl [+ $class +]"  name="[+ $self->{name} +]" id="[+ $self->{id} +]"
+<input type="text" name="[+ $self -> {force_name} || $self -> {name} +]"  [+ do { local $escmode = 0 ; $self -> get_std_control_attr($req, $fullid) } +]
 [$if $self -> {size} $]size="[+ $self->{size} +]"[$endif$]
 [$if $self -> {maxlength} $]maxlength="[+ $self->{maxlength} +]"[$endif$]
+_ef_attach="ef_datetime" _ef_dynamic="[+ $self -> {dynamic}?'true':'' +]"
 >
+[#
 <script type="text/javascript">
-  [+ $nsprefix +]Calendar.setup(
-    {
-      inputField  : document.getElementById('[+ $self -> {id} +]'),         // ID of the input field
-      ifFormat    : "%d.%m.%Y",    // the date format
-      //button      : "trigger"       // ID of the button
-    }
-  );
+    $('#[+ $fullid +]').datepicker ({ showWeek: true,
+                                    [$if $self -> {dynamic} $]constrainInput: false, [$endif$]
+                                    showButtonPanel: true
+                                    }) ;
 </script>
-
-
+#]
 
 [$endsub$]
 
@@ -199,16 +231,17 @@ Embperl::Form::Control::price - A price input control with optional unit inside 
 
 =head1 DESCRIPTION
 
-Used to create a price input control inside an Embperl Form.
-Will format number as a money ammout.
-Optionaly it can display an unit after the input field.
+Used to create a datetime input control inside an Embperl Form.
+Will format number as a date/time.
 See Embperl::Form on how to specify parameters.
+
+Datetime format in %fdat is excpected as YYYYMMTTHHMMSSZ
 
 =head2 PARAMETER
 
 =head3 type
 
-Needs to be 'price'
+Needs to be 'datetime'
 
 =head3 name
 
@@ -222,22 +255,22 @@ Will be used as label for the numeric input control
 
 Gives the size in characters. (Default: 10)
 
-=head3 maxlength
+=head3 notime
 
-Gives the maximun length in characters
+does not display time
 
-=head3 unit
+=head3 dynamic
 
-Gives a string that should be displayed right of the input field.
-(Default: €)
+allows the following values to be entered:
 
-=head3 use_comma
+d, m, y, d-N, d+N, m-N, m+N, y-N, y+N
 
-If set the decimal character is comma instead of point (Default: on)
+N is any number. This values are simply passed through and need
+to be process somewhere else.
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

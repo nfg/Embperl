@@ -127,7 +127,7 @@ Open
 
     http://localhost:8080/forms/wizard/action.epl
 
-This will show you a wizard where you can enter setup informations. The wizard will
+This will show you a wizard where you can enter setup information. The wizard will
 ask page by page what is necssary. It will ask different things depending on your input.
 
 For example you can choose different ways to get to the internet and it will ask the

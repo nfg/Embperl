@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: EmbperlHTML.pm 294756 2005-08-07 00:03:03Z richter $
+#   $Id: EmbperlHTML.pm 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################
  
@@ -180,7 +181,7 @@ __END__
 
 =head1 NAME
 
-Embperl::Syntax::EmbperlHTML
+Embperl::Syntax::EmbperlHTML - syntax for HTML tags that Embperl processes
 
 =head1 SYNOPSIS
 
@@ -196,7 +197,7 @@ I<Embperl::Syntax::EmbperlHTML> does not defines any methods.
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

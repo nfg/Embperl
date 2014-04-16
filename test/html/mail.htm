@@ -6,7 +6,7 @@
 
 <body>
   [-
-  $fdat{Email} = 'richter@dev.ecos.de' ;
+  $fdat{Email} = 'richter at embperl dot org' ;
   -]
 
 
@@ -14,7 +14,7 @@
 
   <mail:send to="richter@ecos.de" 
      [$ if $fdat{Email} $] reply-to="[+ $fdat{Email} +]" [$endif$]
-     subject="Testmail" mailhost="mail.i.ecos.de">
+     subject="Testmail">
     Hi,
     this is a test for a new mail tag
     it is send at [+ scalar(localtime) +]

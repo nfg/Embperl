@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: Default.pm 474140 2006-11-13 04:41:09Z richter $
+#   $Id: Default.pm 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################
 
@@ -150,7 +151,7 @@ sub getscript_required
     {
     my ($self, $arg, $pref) = @_ ;
     
-    return ('obj.value', ['validate_required']) ;
+    return ('obj instanceof NodeList?obj[0].value:obj.value', ['validate_required']) ;
     }
 
 # --------------------------------------------------------------

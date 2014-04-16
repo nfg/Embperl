@@ -77,31 +77,12 @@ they are mainly nesseccary for debugging I<Embperl> itself.
 
 =head2 XML and XSLT support
 
-Starting with Embperl 2.0b4 it has a build in XSLT support. You can either
-use the Apache Xerces-C and Xalan-C and/or Gnome libxml and libxslt.
-Embperl is currently tested with Xalan 1.2 and libxslt 1.0.4.
-
-To install Xalan, download the Xalan archive for your OS from 
-http://xml.apache.org/dist/xalan-c/
- 
-For Linux it is Xalan-C_1_2-linux.tar.gz
-For Solaris it is Xalan-C_1_2-solaris.tar.gz
- 
-Extract the archive and make the shared libraries available to the system,
-either by adding the directories to LD_LIBRARY_PATH or by coping them to
-a library directory, e.g. /usr/local/lib and run ldconfig -v. The two
-ncessary libraries can be found under
- 
-    xerces-c1_5_1-linux/lib/libxerces-c1_5_1.so
-    xml-xalan/c/lib/libxalan-c1_2.so
-
-Now you only have to enter the basepath of where you have extraced the 
-Xalan archive, when Makefile.PL asks you for it and proceed as normal.
-
-B<NOTE:> For special hints on compiling XALAN see below
+Starting with Embperl 2.0b4 it has a build in XSLT support. You can
+use Gnome libxml and libxslt.
+Embperl is currently tested with libxslt 1.0.4 and newer.
 
 To use libxml/libxslt, download them from http://xmlsoft.org/ and install
-them on your system. Makefile.PL will automaticly detect the installed
+them on your system. Makefile.PL will automatically detect the installed
 libraries and linked them into Embperl. (you have to make sure
 that xml2-config and xslt-config can be found and run by Makefile.PL)
 
@@ -109,8 +90,10 @@ that xml2-config and xslt-config can be found and run by Makefile.PL)
 =head2 Debian packages
 
 The Debian packages "libhtml-embperl-perl" and "libembperl-perl" are
-maintained by Angus Lees and are available from the usual Debian
+are available from the usual Debian
 mirrors.
+
+To compile Embperl you need to install apache2-dev and libapache2-mod-perl2-dev.
 
 =head2 UNIX (without Apache Source)
 
@@ -138,6 +121,10 @@ For example in SuSE Linux 7.1 they could be found at
 =item /usr/lib/apache/mod_env.so
 
 =back
+
+In most cases it is sufficent to have to apache-dev and mod_perl-dev packages
+from your favourite Linux distribution installed.
+
 
 Now go to the Embperl directory and start 
 
@@ -383,72 +370,4 @@ around Embperl.
 or you can view it online on http://perl.apache.org/embperl/
 and http://www.ecos.de/embperl/
 
-
-=head2 Compiling XALAN
-
-Normaly you should be fine with the binary packages that are provided for 
-XALAN. If you want to compile XALAN from the sources there should be normaly
-no problem as long as you use GNU gcc on Unix or Microsoft VC++ on Windows.
-
-Here are some hints how to compile XALAN 1.2 with the sun C++ 5.1:
-
-=over 4
-
-=item * Get the sources for XERCES and XALAN
-
-=item * Untar the files 
-
-Use GNU tar, solaris tar doesn't work! GNU tar can be found at
-ftp://ftp.mcc.ac.uk/pub/gnu/tar/tar-1.13.tar.gz
-
-=item * Set the root directories
-
-    export XERCESCROOT=/path/to/xerces-c-src1_5_1
-    export XALANCROOT=/path/to/xml-xalan/c
-
-=item * Compile XERCES
-
-    cd xerces-c-src1_5_1/src
-    sh runConfigure -p solaris -c cc -x CC
-    make
-
-=item * Patch XALAN
-
-There must be one typecast inserted in the following three files:
-
- "c/src/XSLT/ExtensionFunctionHandler.cpp", line 156
- 156c156
- < return m_functions.find(function) != m_functions.end();
- ---
- > return StringSetType::const_iterator(m_functions.find(function)) != m_functions.end();
-
- "c/src/XSLT/ExtensionNSHandler.cpp", line 200
- 200c200
- < return (m_elements.find(element) != m_elements.end());
- ---
- > return (ExtensionSetType::const_iterator(m_elements.find(element)) !=  m_elements.end());
-
- "c/src/XSLT/NamespacesHandler.cpp", line 366
- 366c366
- < || m_extensionNamespaceURIs.find(theURI) != m_extensionNamespaceURIs.end()
- ---
- > || ExtensionNamespaceURISetType::const_iterator(m_extensionNamespaceURIs.find(theURI)) 
- >    != m_extensionNamespaceURIs.end()
-
-
-=item * Compile XALAN
-
-    cd xml-xalan/c/src
-    sh runConfigure -p solaris -c cc -x CC -z "-D__GNUC__"
-    make
-
-B<NOTE:> I found that only the above parameters to configure work.
-Don't worry that __GNUC__ is defined. It works with sun C++ 5.1.
-When using sun C++ 5.1 you don't need the STLPort template library.
-
-=item * Make the libraries available
-
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/xerces-c-src1_5_1/lib:/path/to/xml-xalan/c/lib 
-
-=item * Now you can run Embperl's Makefile.PL as described above
 

@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-Configuration and calling
+Embperl::Config - Embperl configuration and calling
 
 =head1 Operating-Modes
 
@@ -24,14 +24,14 @@ using Embperl together with FastCGI. (http://www.fastcgi.com).
 
 =item Offline
 
-You can use Embperl also on the command line. This is usefull for generating
-static content out of dynamic pages and can sometime be helpfull for testing.
+You can use Embperl also on the command line. This is useful for generating
+static content out of dynamic pages and can sometime be helpful for testing.
 
-=item Call it from other Perl programms
+=item Call it from other Perl programs
 
 If you have your own application and want to use Embperl's capbilities you can
-do so by calling Embperl::Execute. This allows to build your own application
-logic and useing Embperl possibilites for rendering content.
+do so by calling Embperl::Execute. This allows you to build your own application
+logic and use Embperl possibilities for rendering content.
 
 =back
 
@@ -107,7 +107,7 @@ For more information see: L<"perldoc Embperl::Object"|"EmbperlObject.pod">.
 Embperl accepts a lot of configuration directives to customize it's behaviour. See the next
 section for a description.
 
-B<NOTE:> If mod_perl is staticly linked into Apache you can not use B<ClearModuleList>
+B<NOTE:> If mod_perl is statically linked into Apache you can not use B<ClearModuleList>
 in your httpd.conf
 
 =head3 Preloading pages
@@ -138,7 +138,7 @@ supply the same parameter like L<Execute> accpets (see below).
 
 B<NOTE:> Preloading is not supported under Apache 1.3, when mod_perl is 
 loaded as DSO. To use preloading under Apache 1.3 you need to compile
-mod_perl staticly into Apache.
+mod_perl statically into Apache.
 
 
 =head2 CGI/FastCGI
@@ -313,7 +313,7 @@ configuration section and parameter section.
 
 Starting with 2.0b2 Embperl files can debugged via the interactive debugger.
 The debugger shows the Embperl page source along with the correct linenumbers. 
-You can do anything you can do inside a normal Perl programm via the debugger,
+You can do anything you can do inside a normal Perl program via the debugger,
 e.g. show variables, modify variables, single step, set breakpoints etc.
 
 You can use the Perl interacive command line debugger via
@@ -341,11 +341,11 @@ to the Apache configuration, so you can set them in your F<httpd.conf>.
 When you run Embperl as CGI it takes the configuration from environment variables. 
 For compatibility reason that
 can also be turned on under mod_perl, by adding C<Embperl_UseEnv on> in your 
-F<httpd.conf>. When you call Embperl from another Perl programm, by calling
+F<httpd.conf>. When you call Embperl from another Perl program, by calling
 the C<Execute> function, you can pass your configuration along with other parameters
 as a hash reference. If you pass C<use_env =&lt; 1> als parameter Embperl will
-also scan the environment for configuration informations. Last but not least
-you can pass configuration informations as options when you run Embperl via
+also scan the environment for configuration information. Last but not least
+you can pass configuration information as options when you run Embperl via
 embpexec.pl from the command line. Some of the configuration options are
 also setable inside the page via the Empberl objects and you can read the 
 current configuration from these objects.
@@ -412,7 +412,7 @@ off unless runing as CGI script
 
 
 Tells Embperl to scan the enviromemt for configuration settings which has the
-prefix C<REDIRECT_>. This is normaly the case when the request is not the main request,
+prefix C<REDIRECT_>. This is normally the case when the request is not the main request,
 but a subrequest.
 
 =head2 Embperl_Appname
@@ -748,7 +748,7 @@ Session Handling
 
 
 Set the secure flag of cookie that Embperl uses for the session id. If set the
-cookie will only be transfered over a secured connection.
+cookie will only be transferred over a secured connection.
 
 =head2 Embperl_Log
 
@@ -919,7 +919,7 @@ Logs things related to XSLT processing
 =item dbgCheckpoint = 0x40000000
 
 Logs things related to checkpoints which are internaly used during execution.
-This information is only usefull if you have a deep knowledge of Embperl
+This information is only useful if you have a deep knowledge of Embperl
 internals.
 
 
@@ -984,7 +984,7 @@ $application -> config -> mailhelo
 
 =item Default:
 
-choosen by Net::SMTP
+chosen by Net::SMTP
 
 =item Since:
 
@@ -995,8 +995,8 @@ choosen by Net::SMTP
 
 Specifies which host/domain all mailrealted function uses
 in the HELO/EHLO command.
-A reasonable default is normaly choosen by I<Net::SMTP>, but
-depending on your installation it may neccessary to set it
+A reasonable default is normally chosen by I<Net::SMTP>, but
+depending on your installation it may necessary to set it
 manualy.
 
 
@@ -1041,7 +1041,7 @@ $application -> config -> mail_errors_to
 =back
 
 
-If set all errors will be send to the email adress given.
+If set all errors will be send to the email address given.
 
 
 =head2 Embperl_Mail_Errors_Limit
@@ -1159,7 +1159,7 @@ Filename of the application object that Embperl::Object searches for.
 The file should contain the Perl code for 
 the application object. There must be no package name given (as the package is set
 by Embperl::Object) inside the file, but the @ISA should point to Embperl::App.
-If set this file is searched throught the same search path as any content file.
+If set this file is searched through the same search path as any content file.
 After a successfull load the init method is called with the Embperl request object
 as parameter. The init method can change the parameters inside the request object
 to influence the current request.
@@ -1220,7 +1220,7 @@ $application -> config -> object_reqpath
 Additional directories where Embperl::Object searches for files for the inital request.
 
 If a file is requested, but cannot be found at the given location, the directories
-given in the this path are additionaly searched for the file. This applies only to
+given in the this path are additionally searched for the file. This applies only to
 the initial filename given to Embperl::Object and B<not> to files called via
 Execute.  
 
@@ -1366,7 +1366,7 @@ off unless runing as CGI script
 
 
 Tells Embperl to scan the enviromemt for configuration settings which has the
-prefix C<REDIRECT_>. This is normaly the case when the request is not the main request,
+prefix C<REDIRECT_>. This is normally the case when the request is not the main request,
 but a subrequest.
 
 =head2 Embperl_Allow
@@ -1453,7 +1453,7 @@ $request -> config -> mult_field_sep I<[read only]>
 =back
 
 
-Specifies the charachter that is used to separate multiple form values with the
+Specifies the character that is used to separate multiple form values with the
 same name.
 
 =head2 Embperl_Path
@@ -1743,7 +1743,7 @@ off unless runing as CGI script
 
 
 Tells Embperl to scan the enviromemt for configuration settings which has the
-prefix C<REDIRECT_>. This is normaly the case when the request is not the main request,
+prefix C<REDIRECT_>. This is normally the case when the request is not the main request,
 but a subrequest.
 
 =head2 Embperl_Package
@@ -1895,6 +1895,10 @@ value is a blank string.
 Disable the removal of spaces and empty lines from the output. This is useful
 for sources other than HTML.
 
+=item optChdirToSource = 0x10000000 (only 2.5 and above) 
+
+Change current working directory to the directory of the sourcefile,
+before executing the source.
 
 =back
 
@@ -1958,10 +1962,10 @@ No escaping takes place.
 =item escEscape = 4
 
 If you add this value to the above Embperl will always perform the
-escaping. Without it is possible to disable escaping by preceeding the item that
-normaly is escaped with a backslash. While this is a handy thing, it could
+escaping. Without it is possible to disable escaping by preceding the item that
+normally is escaped with a backslash. While this is a handy thing, it could
 be very dangerous in situations, where content that is inserted by some
-user is redisplayed, because they can enter arbitary HTML and preceed them
+user is redisplayed, because they can enter arbitrary HTML and preceed them
 with a backslash to avoid correct escaping when their input is redisplayed
 again.
 
@@ -2021,7 +2025,7 @@ unescape html and url escapes, depending on the context
 
 =back
 
-Add 4 to remove html tags inside of Perl code. This is helpfull when
+Add 4 to remove html tags inside of Perl code. This is helpful when
 an html editor insert html tags like <br> inside your Perl code.
 
 Set EMBPERL_INPUT_ESCMODE to 7 to get the old default of Embperl < 2.0b6
@@ -2044,10 +2048,9 @@ $component -> config -> input_charset
 =back
 
 
-NOT YET IMPLEMENTED!
-
-
-
+If set to the value "utf8" the source is interpreted as utf8 encoded so
+you can use utf8 literals. It has the same effect as adding "use utf8"
+to a normal Perl script.
 
 
 =head2 Embperl_Top_Include
@@ -2334,7 +2337,7 @@ You can also specify multiple syntaxes e.g.
 
     Execute ({inputfile => '*', syntax => 'Embperl ASP'}) ;
 
-The 'syntax' metacommand allows to switch the syntax or to 
+The 'syntax' metacommand allows you to switch the syntax or to
 add or subtract syntaxes e.g.
 
     [$ syntax + Mail $]
@@ -2425,8 +2428,8 @@ are supported by Embperl, but they must be compiled in to be available.
 Parameters gives addtionaly information about the current request
 or the execution of the current component. So we have two sorts of
 parameters I<Request> and I<Component> parameters. Request
-parameters are automaticly setup by Embperl with information
-Embperl takes from the current running enviroment. When
+parameters are automatically setup by Embperl with information
+Embperl takes from the current running environment. When
 Embperl is invoked via the C<Execute> function, you can pass any of
 the parameters to Execute. Component parameters mainly reflect
 the parameters given to C<Execute>.
@@ -2907,9 +2910,9 @@ $component -> param -> object I<[read only]>
 
 
 Takes a filename and returns an hashref that is blessed into the package of 
-the given file. That's usefull, if you want to call the subs inside the 
+the given file. That's useful, if you want to call the subs inside the
 given file, as methods. By using the C<isa> parameter (see below) you
-are able to provide an inherence tree. Additionaly you can use the returned
+are able to provide an inherence tree. Additionally you can use the returned
 hashref to store data for that object. Example:
 
   [# the file eposubs.htm defines two subs: txt1 and txt2 #]
@@ -2939,7 +2942,7 @@ $component -> param -> isa I<[read only]>
 
 Takes a name of a file and pushes the package of that file into the @ISA
 array of the current file. By using this you can setup an inherence tree
-between Embperl documents. Is is also usefull within I<Embperl::Object>.
+between Embperl documents. Is is also useful within I<Embperl::Object>.
 Example:
 
     [! Execute ({'isa' => '../eposubs.htm'}) !]
@@ -2981,7 +2984,7 @@ $component -> param -> xsltparam
 =back
 
 
-Takes a reference to hash which contains key/value pair that are accessable inside
+Takes a reference to hash which contains key/value pair that are accessible inside
 the stylesheet via <xsl:param>.
 
 
@@ -2991,7 +2994,7 @@ the stylesheet via <xsl:param>.
 There are three major objects in Embperl: I<application>, I<request> and I<component>.
 Each of these objects can be used to get information about the processing and
 control the execution. Each of these objects has a config sub-object, which makes
-the configuration accessable and, where possible, changeable at runtime. The C<config>
+the configuration accessible and, where possible, changeable at runtime. The C<config>
 method of these three objects returns a reference to the configuation object. The methods
 of these configurations objects are described in the section L<Configuration>.
 The request and the component object have addtionaly a parameter sub-object, which holds
@@ -3016,7 +3019,7 @@ $application -> thread I<[read only]>
 =back
 
 
-Returns a reference to a object which hold per threads informations. There is only one
+Returns a reference to a object which hold per threads information. There is only one
 such object per thread.
 
 =head2 curr_req
@@ -3317,7 +3320,7 @@ $request -> thread I<[read only]>
 =back
 
 
-Returns a reference to a object which hold per threads informations. There is only one
+Returns a reference to a object which hold per threads information. There is only one
 such object per thread.
 
 =head2 request_count
@@ -3524,7 +3527,7 @@ $request -> errdat1
 =back
 
 
-Additional informations passed to the error handler when an error is reported.
+Additional information passed to the error handler when an error is reported.
 
 =head2 errdat2
 
@@ -3541,7 +3544,7 @@ $request -> errdat2
 =back
 
 
-Additional informations passed to the error handler when an error is reported.
+Additional information passed to the error handler when an error is reported.
 
 =head2 lastwarn
 
@@ -3576,7 +3579,7 @@ $request -> errobj
 
 
 The object passed to the last die, if any. 
-This is usefully when you pass an object to die inside an Execute. After the Execute you
+This is useful when you pass an object to die inside an Execute. After the Execute you
 can check $epreq -> errobj, to get the object. The object is also push to the array
 passed to the L<errors> parameter of Execute.
 
@@ -3824,7 +3827,7 @@ $component -> path_ndx I<[read only]>
 
 
 Tells Embperl how much parts of the L<path> should be ignored when searching
-throught the path.
+through the path.
 
 =head2 cwd
 

@@ -1,6 +1,7 @@
 ##############################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: db.schema 294768 2005-08-13 16:53:24Z richter $
+#   $Id: db.schema 1578075 2014-03-16 14:01:14Z richter $
 #
 ##############################################################################
 
@@ -256,7 +257,7 @@
             { id =>  3, category_id => 2, language_id => 'de', 'category' => 'Websites die Embperl nutzen',
                         add_info    => 'Bitte geben Sie eine Kurzbeschreibung der Site, sowie Informationen zu deren Realisierung ein.' } ,
             { id =>  4, category_id => 2, language_id => 'en', 'category' => 'Sites using Embperl',
-                        add_info    => 'Please enter a short description of the Site and some informations how it has been setup.' } ,
+                        add_info    => 'Please enter a short description of the Site and some information how it has been setup.' } ,
 
             { id =>  5, category_id => 3, language_id => 'de', 'category' => 'Bücher die Embperl behandeln' } ,
             { id =>  6, category_id => 3, language_id => 'en', 'category' => 'Books that talk about Embperl' } ,

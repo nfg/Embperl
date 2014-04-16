@@ -31,7 +31,7 @@ $parm = ".-$parm-" if ($parm) ;
 		    <td align="right" valign="middle">
 
 [- 
-$site = 'www.ecos.de' ;
+$site = 'www.embperl.org' ;
 $site = $1 if ($ENV{HTTP_USER_AGENT} =~ /^search:(.*?)$/) ;
 -]
 

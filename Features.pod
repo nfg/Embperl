@@ -17,7 +17,7 @@ All available Perl modules can be used without any restriction.
 
 =item *
 
-Allows to build Web sites out of small reusable components in an object-oriented way. 
+Allows one to build Web sites out of small reusable components in an object-oriented way.
 Components can call and/or embed each other and inherit from other objects.
 
 
@@ -40,8 +40,8 @@ containing the display code. Simple applications can still embed all the code in
 
 =item *
 
-Source-code for each component can come from a different source, for eg. 
-from file, memory or sub-request which allows to act on the output from another Apache 
+Source-code for each component can come from a different source, e.g.
+from file, memory or sub-request which allows one to act on the output from another Apache
 application like PHP, JSP, CGI Script etc.
 
 
@@ -107,7 +107,7 @@ I<Embperl::Mail> enables redirecting the result output to a mail-recipient.
 
 =item *
 
-I<Embperl::Inline> allows to embedd Embperl code in normal Perl code
+I<Embperl::Inline> allows one to embedd Embperl code in normal Perl code
 
 
 

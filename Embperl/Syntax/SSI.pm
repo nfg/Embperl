@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: SSI.pm 580573 2007-09-29 11:05:54Z richter $
+#   $Id: SSI.pm 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################
  
@@ -432,7 +433,7 @@ __END__
 
 =head1 NAME
 
-SSI syntax module for Embperl 
+Embperl::Syntax::SSI - define SSI syntax for Embperl 
 
 =head1 SYNOPSIS
 
@@ -489,7 +490,7 @@ in SSI syntax. It looks like
 
 =head1 Author
 
-Gerald Richter <richter@dev.ecos.de>
+Gerald Richter <richter at embperl dot org>
 
 Some ideas and parts of the code are taken from Apache::SSI by Ken Williams. 
 

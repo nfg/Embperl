@@ -1,6 +1,7 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2004 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epinit.c 1004025 2010-10-03 18:50:24Z richter $
+#   $Id: epinit.c 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################*/
 
@@ -251,30 +252,31 @@ int    embperl_SetupThread  (/*in*/ pTHX_
         pThread -> pMainPool     = pMainPool ;
         pThread -> nPid          = getpid () ; 
         pThread -> pApplications = newHV () ;
-        pThread -> pFormHash     = perl_get_hv (EMBPERL_FDAT_NAME, TRUE) ;
+        pThread -> pFormHash     = perl_get_hv (EMBPERL_FDAT_NAME, GV_ADD | GV_ADDMULTI) ;
+        SvREFCNT_inc(pThread -> pFormHash) ;
         pThread -> pFormHashGV   = *((GV **)hv_fetch    (pStash, FDAT_NAME, sizeof (FDAT_NAME) - 1, 0)) ;
-        pThread -> pFormSplitHash = perl_get_hv (EMBPERL_SPLIFDAT_NAME, TRUE) ;
-        pThread -> pFormArray    = perl_get_av (EMBPERL_FFLD_NAME, TRUE) ;
+        pThread -> pFormSplitHash = perl_get_hv (EMBPERL_SPLIFDAT_NAME,  GV_ADD | GV_ADDMULTI) ;
+        SvREFCNT_inc(pThread -> pFormSplitHash) ;
+        pThread -> pFormArray    = perl_get_av (EMBPERL_FFLD_NAME,  GV_ADD | GV_ADDMULTI) ;
+        SvREFCNT_inc(pThread -> pFormArray) ;
         pThread -> pFormArrayGV  = *((GV **)hv_fetch    (pStash, FFLD_NAME, sizeof (FFLD_NAME) - 1, 0)) ;
-        pThread -> pHeaderHash   = perl_get_hv (EMBPERL_HDR_NAME, TRUE) ;
-        pThread -> pInputHash    = perl_get_hv (EMBPERL_IDAT_NAME, TRUE) ;
+        pThread -> pHeaderHash   = perl_get_hv (EMBPERL_HDR_NAME,  GV_ADD | GV_ADDMULTI) ;
+        SvREFCNT_inc(pThread -> pHeaderHash) ;
+        pThread -> pInputHash    = perl_get_hv (EMBPERL_IDAT_NAME,  GV_ADD | GV_ADDMULTI) ;
+        SvREFCNT_inc(pThread -> pInputHash) ;
 #ifdef DMALLOC
-        pThread -> pEnvHash      = Perl_get_hv(aTHX_ EMBPERL_ENV_NAME, TRUE) ;
+        pThread -> pEnvHash      = Perl_get_hv(aTHX_ EMBPERL_ENV_NAME,  GV_ADD | GV_ADDMULTI) ;
 #else
-        pThread -> pEnvHash      = perl_get_hv (EMBPERL_ENV_NAME, TRUE) ;
+        pThread -> pEnvHash      = perl_get_hv (EMBPERL_ENV_NAME,  GV_ADD | GV_ADDMULTI) ;
 #endif        
-        pThread -> pParamArray   = perl_get_av (EMBPERL_PARAM_NAME, TRUE) ;
+        SvREFCNT_inc(pThread -> pEnvHash) ;
+        pThread -> pParamArray   = perl_get_av (EMBPERL_PARAM_NAME,  GV_ADD | GV_ADDMULTI) ;
+        SvREFCNT_inc(pThread -> pParamArray) ;
         pThread -> pParamArrayGV = *((GV **)hv_fetch    (pStash, PARAM_NAME, sizeof (PARAM_NAME) - 1, 0)) ;
-        pThread -> pReqRV        = perl_get_sv (EMBPERL_REQ_NAME, TRUE) ;
-        pThread -> pAppRV        = perl_get_sv (EMBPERL_APP_NAME, TRUE) ;
-        /* avoid warnings */
-        perl_get_hv (EMBPERL_FDAT_NAME, TRUE) ;
-        perl_get_hv (EMBPERL_SPLIFDAT_NAME, TRUE) ;
-        perl_get_av (EMBPERL_FFLD_NAME, TRUE) ;
-        perl_get_hv (EMBPERL_HDR_NAME, TRUE) ;
-        perl_get_hv (EMBPERL_IDAT_NAME, TRUE) ;
-        perl_get_hv (EMBPERL_ENV_NAME, TRUE) ;
-        perl_get_hv (EMBPERL_PARAM_NAME, TRUE) ;
+        pThread -> pReqRV        = perl_get_sv (EMBPERL_REQ_NAME,  GV_ADD | GV_ADDMULTI) ;
+        SvREFCNT_inc(pThread -> pReqRV) ;
+        pThread -> pAppRV        = perl_get_sv (EMBPERL_APP_NAME,  GV_ADD | GV_ADDMULTI) ;
+        SvREFCNT_inc(pThread -> pAppRV) ;
         *ppSV = pThreadRV ;
         }
     else
@@ -345,7 +347,6 @@ int    embperl_EndPass1  (void)
     {
     tThreadData * pThread  ;
     dTHX ;
-    
     pThread = embperl_GetThread  (aTHX) ;
     
     hv_clear (pThread -> pApplications) ;
@@ -1025,6 +1026,7 @@ static int embperl_GetFormData (/*i/o*/ register req * r,
     bool    bNoUtf8         = (r -> Config.bOptions & optFormDataNoUtf8) != 0 ;
     bool    bDebug          = (r -> Config.bDebug   & dbgForm) != 0 ;
     int     mayutf8  = 0 ;
+    bool    bInValue = 0 ;
     char    c ;
     epTHX ;
 
@@ -1072,16 +1074,9 @@ static int embperl_GetFormData (/*i/o*/ register req * r,
                     }
                 *p++ = num ;
                 break ;
-            case '=':
-                nKey = p - pKey ;
-                *p++ = r -> Config.cMultFieldSep ;
-                nVal = 0 ;
-                pVal = p ;
-                pQueryString++ ;
-                nLen-- ;
-                break ;
             case ';':
             case '&':
+                bInValue = 0 ;
                 pQueryString++ ;
                 nLen-- ;
             case '\0':
@@ -1126,7 +1121,7 @@ static int embperl_GetFormData (/*i/o*/ register req * r,
 			    { /* New Field -> store it */
 			    pSVV = newSVpv (pVal, nVal) ;
 #ifdef UTF8_IS_START
-			    if (mayutf8 && is_utf8_string(pVal, nVal))
+			    if (mayutf8 && is_utf8_string((U8*)pVal, nVal))
 			    	SvUTF8_on (pSVV) ;
 #endif
 			    if (hv_store (pFormHash, pKey, nKey, pSVV, 0) == NULL)
@@ -1158,6 +1153,19 @@ static int embperl_GetFormData (/*i/o*/ register req * r,
                 
                 
                 break ;
+            case '=':
+                if (!bInValue)
+                    {
+                    nKey = p - pKey ;
+                    *p++ = r -> Config.cMultFieldSep ;
+                    nVal = 0 ;
+                    pVal = p ;
+                    pQueryString++ ;
+                    nLen-- ;
+                    bInValue = 1 ;
+                    break ;
+                    }
+                /* fall through */    
             default:
                 c = *p++ = *pQueryString++ ;
                 nLen-- ;
@@ -2245,8 +2253,6 @@ int     embperl_InitRequest (/*in*/ pTHX_
     tApp  *          pApp ;
     tReq  *          r ;
     tApacheDirConfig * pApacheCfg = NULL ;
-
-    
 
     
     /* get our thread & Application object */

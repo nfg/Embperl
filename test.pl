@@ -2,7 +2,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -11,7 +12,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: test.pl 1004099 2010-10-04 03:49:25Z richter $
+#   $Id: test.pl 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################
 
@@ -108,11 +109,27 @@
         'errors'     => '1',
         'version'    => 2,
         },
+    'errorfirstrun.htm' => { 
+        'errors'     => 1,
+        'version'    => 2,
+        'condition'  => '$] < 5.006000',
+        },
+    'errorfirstrun.htm' => { 
+        'errors'     => 2,
+        'version'    => 2,
+        'condition'  => '$] >= 5.006000',
+        },
     'unclosed.htm' => { 
         'errors'     => '1',
         },
     'notfound.htm' => { 
         'errors'     => '1',
+        'cgi'        => 1,
+        'condition'  => '$EPAPACHEVERSION !~ /2\.4\./',
+        },
+    'notfound.htm' => { 
+        'errors'     => '1',
+        'cgi'        => 0,
         },
     'notallow.xhtm' => { 
         'errors'     => '1',
@@ -141,7 +158,7 @@
         'errors'     => 6,
         'version'    => 2,
         'modperl'    => 1,
-        'condition'  => '$] >= 5.010000',
+        'condition'  => '$] >= 5.010000', 
         },
     'errdoc/epl/errdoc2.htm' => { 
         'option'     => '262144',
@@ -293,7 +310,7 @@
         'repeat' => 2,
         },
     'hidden.htm' => { 
-        'query_info' => 'feld1=Wert1&feld2=Wert2&feld3=Wert3&feld4=Wert4',
+        'query_info' => 'feld1=Wert1&feld2=Wert2&feld3=Wert3&feld4=Wert4?foo=bar',
         },
     'java.htm' => { },
     'inputjava.htm' => { },
@@ -405,10 +422,36 @@
         'errors'     => 5,
         'version'    => 2,
         'repeat'     => 2,
-        'condition'  => '$] >= 5.006001', 
+        'condition'  => '$] >= 5.006001 && $] < 5.014000', 
+        },
+    'includeerr2.htm' => { 
+        'errors'     => 3,
+        'version'    => 2,
+        'repeat'     => 2,
+        'condition'  => '$] >= 5.014000 && $] < 5.018000', 
+        'cmpext'     => '514',
+        },
+    'includeerr2.htm' => { 
+        'errors'     => 9,
+        'version'    => 2,
+        'repeat'     => 2,
+        'condition'  => '$] >= 5.018000', 
+        'cmpext'     => '518',
         },
     'includeerr3.htm' => { 
         'errors'     => 2,
+        'condition'  => '$] < 5.014000', 
+        'cgi'        => 0,         
+        },
+    'includeerr3.htm' => { 
+        'errors'     => 2,
+        'condition'  => '$] >= 5.014000', 
+        'cmpext'     => '514',
+        'cgi'        => 0,         
+        },
+    'includeerr3.htm' => { 
+        'errors'     => 2,
+        'cgi'        => 1,         
         },
     'includeerrbt.htm' => { 
         'errors'     => 3,
@@ -536,6 +579,11 @@
         },
     'chdir.htm' => { 
         'query_info' => 'a=1&b=2&c=&d=&f=5&g&h=7&=8&=',
+        },
+    'chdir/chdir2src.htm' => { 
+        'query_info' => 'a=1&b=2&c=&d=&f=5&g&h=7&=8&=',
+        'option'     => 0x10000000,
+        'cgi'        => 0,
         },
     'allform/allform.htm' => { 
         'query_info' => 'a=1&b=2&c=&d=&f=5&g&h=7&=8&=',
@@ -891,20 +939,21 @@
         'offline'    => 1,
         'param'      => { 'Nachname' => 'Richter', Vorname => 'Gerald' },
         },
-    'rtf/rtfadv.asc' => { 
-        'version'    => 2,
-        'syntax'     => 'RTF',
-        'offline'    => 1,
-        'param'      => [
-                        { 'adressen_anrede' => 'Herr', 'adressen_name' => 'Richter', 'adressen_vorname'  => 'Gerald', anschreiben_typ => 'Dienstadresse', adressen_dienststelle => 'adr dienst', adressen_dienstbezeichnung => 'DBEZ', adressen_dienst_strasse => 'dstr 1', adressen_priv_strasse => 'pstr 1' },
-                        { 'adressen_anrede' => 'Herr', 'adressen_name' => 'Richter2', 'adressen_vorname'  => 'Gerald2', anschreiben_typ => 'Dienstadresse', adressen_dienststelle => 'adr dienst 2', adressen_dienstbezeichnung => 'DBEZ2' },
-                        { 'adressen_anrede' => 'Frau', 'adressen_name' => 'Weis',    'adressen_vorname'  => 'Ulrike' },
-                        { 'adressen_anrede' => 'Frau', 'adressen_name' => 'Weis',    'adressen_vorname'  => 'Sarah' },
-                        { 'adressen_anrede' => 'Frau', 'adressen_name' => 'Weis',    'adressen_vorname'  => 'Marissa' },
-                        { 'adressen_anrede' => 'Frau', 'adressen_name' => 'Weis',    'adressen_vorname'  => 'Gerald2', anschreiben_typ => 'Dienstadresse', adressen_dienststelle => 'adr dienst 2', adressen_dienstbezeichnung => 'DBEZ2' },
-                        { 'adressen_anrede' => 'Frau', 'adressen_name' => 'Weis',    'adressen_vorname'  => 'Gerald2', anschreiben_typ => 'Privatadresse', adressen_dienststelle => 'adr dienst 2', adressen_dienstbezeichnung => 'DBEZ2', adressen_dienst_strasse => 'dstr 2', adressen_priv_strasse => 'pstr 2'  },
-                        ]
-        },
+#    'rtf/rtfadv.asc' => { 
+#        'version'    => 2,
+#        'syntax'     => 'RTF',
+#        'offline'    => 1,
+#        'condition'  => '$] < 5.016000', 
+#        'param'      => [
+#                        { 'adressen_anrede' => 'Herr', 'adressen_name' => 'Richter', 'adressen_vorname'  => 'Gerald', anschreiben_typ => 'Dienstadresse', adressen_dienststelle => 'adr dienst', adressen_dienstbezeichnung => 'DBEZ', adressen_dienst_strasse => 'dstr 1', adressen_priv_strasse => 'pstr 1' },
+#                        { 'adressen_anrede' => 'Herr', 'adressen_name' => 'Richter2', 'adressen_vorname'  => 'Gerald2', anschreiben_typ => 'Dienstadresse', adressen_dienststelle => 'adr dienst 2', adressen_dienstbezeichnung => 'DBEZ2' },
+#                        { 'adressen_anrede' => 'Frau', 'adressen_name' => 'Weis',    'adressen_vorname'  => 'Ulrike' },
+#                        { 'adressen_anrede' => 'Frau', 'adressen_name' => 'Weis',    'adressen_vorname'  => 'Sarah' },
+#                        { 'adressen_anrede' => 'Frau', 'adressen_name' => 'Weis',    'adressen_vorname'  => 'Marissa' },
+#                        { 'adressen_anrede' => 'Frau', 'adressen_name' => 'Weis',    'adressen_vorname'  => 'Gerald2', anschreiben_typ => 'Dienstadresse', adressen_dienststelle => 'adr dienst 2', adressen_dienstbezeichnung => 'DBEZ2' },
+#                        { 'adressen_anrede' => 'Frau', 'adressen_name' => 'Weis',    'adressen_vorname'  => 'Gerald2', anschreiben_typ => 'Privatadresse', adressen_dienststelle => 'adr dienst 2', adressen_dienstbezeichnung => 'DBEZ2', adressen_dienst_strasse => 'dstr 2', adressen_priv_strasse => 'pstr 2'  },
+#                        ]
+#        },
     'rtf/rtfloop.asc' => { 
         'version'    => 2,
         'syntax'     => 'RTF',
@@ -1166,6 +1215,7 @@ use vars qw ($httpconfsrc $httpconf $EPPORT $EPPORT2 *SAVEERR *ERR $EPHTTPDDLL $
     }
 
 use File::Spec ;
+use FindBin ;
 
 BEGIN 
     { 
@@ -1982,6 +2032,7 @@ do
     {
     if ($opt_offline || $opt_ep1 || $opt_execute || $opt_cache)
         {   
+        no warnings ;
         open (SAVEERR, ">&STDERR")  || die "Cannot save stderr" ;  
         open (STDERR, ">$offlineerr") || die "Cannot redirect stderr" ;  
         open (ERR, "$offlineerr")  || die "Cannot open redirected stderr ($offlineerr)" ;  ;  
@@ -2284,7 +2335,7 @@ do
 		}
 
 	    $txt = 'error.htm' ;
-	    $org = "$cmppath/$txt" ;
+	    $org = "$cmppath/$txt" ;#. ($] >= 5.014000?'514':'') ;
 	    $org = "$cmppath$version/$txt" if (-e "$cmppath$version/$txt") ;
 	    $src = "$inpath/$txt" ;
 	    $src = "$inpath$version/$txt" if (-e "$inpath$version/$txt") ;
@@ -2470,9 +2521,9 @@ do
 	#############
 
         delete $ENV{EMBPERL_ALLOW} ;
-        $frommem = 1 ;
 	if ($err == 0)
 	    {
+            $frommem = 1 ;
 	    print "\nTesting Ouput Caching...\n\n" ;
     
 	    #Embperl::Init ($logfile, $defaultdebug) ;
@@ -2794,12 +2845,14 @@ do
 	    {
 	    if ($opt_gdb || $opt_ddd)
 		{
-		open FH, ">dbinitembperlapache" or die "Cannot write to dbinitembperlapache ($!)" ;
-		print FH "set args $XX -f $EPPATH/$httpdconf\n" ;
-		print FH "r\n" ;
-		print FH "BT\n" if ($opt_gdb) ;
-		close FH ;
-	        system (($opt_ddd?'ddd':'gdb') . " -x dbinitembperlapache $EPHTTPD " . ($opt_startinter?'':'&')) and die "***Cannot start $EPHTTPD" ;
+		#open FH, ">dbinitembperlapache" or die "Cannot write to dbinitembperlapache ($!)" ;
+		#print FH "set args $XX -f $EPPATH/$httpdconf\n" ;
+		#print FH "r\n" ;
+		#print FH "BT\n" if ($opt_gdb) ;
+		#close FH ;
+	        #system (($opt_ddd?'ddd':'gdb') . " -x dbinitembperlapache $EPHTTPD " . ($opt_startinter?'':'&')) and die "***Cannot start $EPHTTPD" ;
+		print ' ' . ($opt_ddd?'ddd':'gdb') . " --args $EPHTTPD " . ($opt_cfgdebug?"-D EMBPERL_APDEBUG ":'') . " $XX -f $EPPATH/$httpdconf " . "\n" ;
+		system (($opt_ddd?'ddd':'gdb') . " --args $EPHTTPD " . ($opt_cfgdebug?"-D EMBPERL_APDEBUG ":'') . " $XX -f $EPPATH/$httpdconf ") and die "***Cannot start gdb/ddd $EPHTTPD" ;
 		}			
 	    else
 	        {
@@ -2807,7 +2860,7 @@ do
 		}
 	    }
 
-        my $tries = ($opt_gdb || $opt_ddd)?30:15 ;
+        my $tries = ($opt_gdb || $opt_ddd)?30:25 ;
         $httpdpid = 0 ;
         my $herr = 0 ;
 
@@ -3174,6 +3227,7 @@ if ($EPWIN32)
 else
     {
     system "kill `cat $tmppath/httpd.pid`  2> /dev/null" if ($EPHTTPD ne '' && !$opt_nokill) ;
+    #system ("ps xau|grep http ; cat $tmppath/httpd.pid") ;
     }
 
 exit ($err) ;

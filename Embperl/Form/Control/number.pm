@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -21,6 +22,47 @@ use base 'Embperl::Form::Control::input' ;
 
 use Embperl::Inline ;
 
+# ------------------------------------------------------------------------------------------
+
+sub get_std_control_attr
+    {
+    my ($self, $req, $id, $type, $addclass) = @_ ;
+
+    return $self -> SUPER::get_std_control_attr ($req, $id, $type, $type eq 'readonly'?'ef-control-number-readonly':$addclass) ;
+    }
+    
+
+# ---------------------------------------------------------------------------
+#
+#   show_control_readonly - output the control as readonly
+#
+
+sub show_control_readonly 
+    {
+    my ($self, $req, $value) = @_ ;
+
+    my $unit = $self->{unit} ;
+    my $unittext = !$unit?'':$self -> form -> convert_text ($self, ($unit =~ /:/)?$unit:'unit:' . lc($unit), $unit, $req) ;
+    $unittext =~ s/^unit:// ;
+    $value = $self -> {value} || $Embperl::fdat{$self -> {name}} if (!defined($value)) ;
+    $value .= $unittext if ($unit && $value ne '') ;
+
+    $self -> SUPER::show_control_readonly ($req, $value) ;
+    }
+
+# ---------------------------------------------------------------------------
+#
+#   get_validate_auto_rules - get rules for validation, in case user did
+#                             not specify any
+#
+
+sub get_validate_auto_rules
+    {
+    my ($self, $req) = @_ ;
+    
+    return [ $self -> {required}?(required => 1):(emptyok => 1), -type => 'PosInteger' ] ;
+    }
+
 1 ;
 
 __EMBPERL__
@@ -30,15 +72,16 @@ __EMBPERL__
 #   show_control - output the control
 #]
 
-[$ sub show_control ($self)
+[$ sub show_control ($self, $req)
 
     $self->{size}      ||= 10 ;
-    $self->{class}     ||= 'cControlWidthNumber' ;
 
     my $unit = $self->{unit} ;
+    my $unittext = !$unit?'':$self -> form -> convert_text ($self, ($unit =~ /:/)?$unit:'unit:' . lc($unit), $unit, $req) ;
+    $unittext =~ s/^unit:// ;
 $]
 [-     $self -> SUPER::show_control ; -]
-[$if ($unit) $][+ $self -> form -> convert_text ($self, ($unit =~ /:/)?$unit:"unit:$unit", $unit) +][$endif$]
+[$if ($unit) $][+ $unittext +][$endif$]
 [$endsub$]
 
 __END__
@@ -94,7 +137,7 @@ Gives a string that should be displayed right of the input field.
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

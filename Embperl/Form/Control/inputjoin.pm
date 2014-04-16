@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -32,14 +33,15 @@ sub init_data
     {
     my ($self, $req) = @_ ;
     
+    my $fdat  = $req -> {docdata} || \%fdat ;
     my $name  = $self -> {name} ;
     my $split = $self -> {split} || $self -> {join} ;
     my $num   = $self -> {numinputs} || 1 ;
     my $i     = 0 ;
-    my @vals  = split /$split/, $fdat{$name} ;
+    my @vals  = split /$split/, $fdat->{$name} ;
     for (my $i = 0; $i < $num; $i++)
 	{
-	$fdat{"$name-_-$i"} = $vals[$i] ;
+	$fdat->{"$name-_-$i"} = $vals[$i] ;
 	}
     }
 
@@ -52,15 +54,16 @@ sub prepare_fdat
     {
     my ($self, $req) = @_ ;
     
+    my $fdat  = $req -> {form} || \%fdat ;
     my $name  = $self -> {name} ;
     my $join  = $self -> {join} ;
     my $num   = $self -> {numinputs} || 1 ;
     my @vals ;
     for (my $i = 0; $i < $num; $i++)
 	{
-	push @vals, $fdat{"$name-_-$i"} ;
+	push @vals, $fdat->{"$name-_-$i"} ;
 	}
-    $fdat{$name} = join ($join, @vals) ;
+    $fdat->{$name} = join ($join, @vals) ;
     }
 
 
@@ -162,7 +165,7 @@ String to display between the input boxes
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

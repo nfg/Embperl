@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -21,6 +22,50 @@ use base 'Embperl::Form::Control' ;
 
 use Embperl::Inline ;
 
+use vars qw{%fdat} ;
+
+
+# ------------------------------------------------------------------------------------------
+#
+#   init_data - daten aufteilen
+#
+
+sub init_data
+    {
+    my ($self, $req, $parentctrl) = @_ ;
+
+    return if (!$self -> {value2text}) ;
+
+    
+    my $fdat    = $req -> {docdata} || \%fdat ;
+    my $name    = $self->{name} ;
+    my $value   = $fdat->{$name} ;
+
+    my $val ;
+    my $txt ;
+    if (ref $value eq 'ARRAY')
+        {
+        foreach (@$value)
+            {
+            $val = $self -> {value2text} . $_ ;
+            $txt = $self -> form -> convert_text ($self, $val, undef, $req) ;
+            $_ = $txt if ($txt ne $val) ;
+            }
+        }
+    else
+        {
+        $val = $self -> {value2text} . $value ;
+        $txt = $self -> form -> convert_text ($self, $val, undef, $req) ;
+        $fdat->{$name} = $txt if ($txt ne $val) ;
+        }
+    }
+
+# ------------------------------------------------------------------------------------------
+
+
+sub show_control_readonly  { $_[0] -> show_control ($_[1], $_[2]) }
+
+
 1 ;
 
 __EMBPERL__
@@ -30,18 +75,17 @@ __EMBPERL__
 #   show_control - output the control
 #]
 
-[$ sub show_control ($self)
-
+[$ sub show_control ($self, $req, $value)
 my $name = $self->{name};
 my $id   = $self->{id};
-my $value = exists $self->{value} ? $self->{value} : $fdat{$name};
+$value = exists $self->{value} ? $self->{value} : $fdat{$name} if (!defined ($value)) ;
 $value = [ split /\t/, $value ] if $self->{split};
 $value = [ split /\n/, $value ] if $self->{splitlines};
 
-$]<span id="[+ $id +]">[$ if ref $value eq 'ARRAY' $][$ foreach $v (@$value) $][+ $v +]<br />[$ endforeach
+$]<div [+ do { local $escmode = 0 ; $self -> get_std_control_attr($req, '', 'readonly') } +] _ef_divname="[+$name+]">[$ if ref $value eq 'ARRAY' $][$ foreach $v (@$value) $][+ $v +]<br />[$ endforeach
 $][$ elsif ref $value eq 'HASH' $][$ foreach $k (keys %$value) $][+ $k +]: [+ $value->{$k} +]<br />[$ endforeach
 $][$ elsif ref $value $]<em>[+ ref $value +]</em>[$ 
-     else $][+ $value +][$ endif $]</span> 
+     else $][+ $value +][$ endif $]</div> 
 
 [$ if $self->{hidden} $]
 <input type="hidden" name="[+ $name +]" value="[+ $value +]">
@@ -107,9 +151,14 @@ on a new line.
 Splits the value into an array at \n if set and displays every array element
 on a new line.
 
+=head3 value2text
+
+Will run the value prefixed with the given paramenter through convert_text,
+so it can be translated.
+
 =head1 Author
 
-G. Richter (richter@dev.ecos.de), A. Beckert (beckert@ecos.de)
+G. Richter (richter at embperl dot org), A. Beckert (beckert@ecos.de)
 
 =head1 See Also
 

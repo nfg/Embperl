@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -32,7 +33,7 @@ sub init
 
     {
     my ($self) = @_ ;
-print STDERR "durx1\n" ;
+
     $self->{unit}      ||= '' ;
     
     return $self ;
@@ -47,23 +48,22 @@ sub init_data
     {
     my ($self, $req, $parentctrl) = @_ ;
     
-print STDERR "durx2\n" ;
+    my $fdat  = $req -> {docdata} || \%fdat ;
     my $name    = $self->{name} ;
-    my $val     = $fdat{$name} ;
+    my $val     = $fdat->{$name} ;
     return if ($val eq '') ;
 
-    my $sec = $val % 60 ;
-    my $min = (int ($val / 60) % 60) ;
-    my $hour = int($val / 3600) ;
+    my $aval = abs ($val) ;
+    my $sec = $aval % 60 ;
+    my $min = int ($aval / 60) % 60 ;
+    my $hour = int($aval / 3600) ;
     
-    my $duration = $hour?sprintf('%d:%02d', $hour, $min):$min ;
+    my $duration = ($val<0?'-':'') . ($hour?sprintf('%d:%02d', $hour, $min):$min) ;
     if ($sec != 0)
 	{
 	$duration .= sprintf (':%02d', $sec) ;
 	}
-    $fdat{$name} = $duration ;
-
-print STDERR "duration init: $fdat{$name}\n" ;
+    $fdat->{$name} = $duration ;
     }
 
 # ------------------------------------------------------------------------------------------
@@ -75,20 +75,34 @@ sub prepare_fdat
     {
     my ($self, $req) = @_ ;
 
-print STDERR "durx3\n" ;
+    my $fdat  = $req -> {form} || \%fdat ;
     my $name    = $self->{name} ;
-    my $val     = $fdat{$name} ;
+    my $val     = $fdat->{$name} ;
     return if ($val eq '') ;
     
+    my $neg = 0 ;
+    $neg = 1 if ($val =~ s/^\s*-//) ;
     my @vals = split (/:/, $val, 3) ;
      
 
         
-    $fdat{$name} = @vals == 1?$vals[0] * 60:$vals[0] * 3600 + $vals[1] * 60 + $vals[2] ;
-
-print STDERR "duration: (@vals) val = $fdat{$name}\n" ;
-
+    $fdat->{$name} = @vals == 1?$vals[0] * 60:$vals[0] * 3600 + $vals[1] * 60 + $vals[2] ;
+    $fdat->{$name} = - $fdat{$name} if ($neg) ;
     }
+
+# ---------------------------------------------------------------------------
+#
+#   get_validate_auto_rules - get rules for validation, in case user did
+#                             not specify any
+#
+
+sub get_validate_auto_rules
+    {
+    my ($self, $req) = @_ ;
+    
+    return [ $self -> {required}?(required => 1):(emptyok => 1), -type => 'Duration' ] ;
+    }
+
 
 1 ;
 
@@ -153,7 +167,7 @@ If set the decimal character is comma instead of point (Default: on)
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 

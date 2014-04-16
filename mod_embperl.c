@@ -1,6 +1,7 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ecos gmbh   www.ecos.de
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: mod_embperl.c 392518 2006-04-08 12:28:12Z richter $
+#   $Id: mod_embperl.c 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################*/
 
@@ -158,7 +159,7 @@ static const command_rec embperl_cmds[] =
 {
 #include "epcfg.h"
     
-    AP_INIT_FLAG("EMBPERL_USEENV", embperl_Apache_Config_useenv, NULL, RSRC_CONF, "If set to 'on' Embperl will also scan the environment variable for configuration informations"),
+    AP_INIT_FLAG("EMBPERL_USEENV", embperl_Apache_Config_useenv, NULL, RSRC_CONF, "If set to 'on' Embperl will also scan the environment variable for configuration information"),
     {NULL}
 };
 
@@ -248,8 +249,13 @@ static int embperl_ApacheInitUnload (apr_pool_t *p)
 
     {
 #ifdef APACHE2
-    /* apr_pool_sub_make(&subpool, p, NULL); */
-    /* apr_pool_cleanup_register(subpool, NULL, embperl_ApacheInitCleanup, embperl_ApacheInitCleanup); */
+     if (!unload_subpool && p)
+         {    
+         apr_pool_create_ex(&unload_subpool, p, NULL, NULL); 
+         apr_pool_cleanup_register(unload_subpool, NULL, embperl_ApacheInitCleanup, embperl_ApacheInitCleanup); 
+         if (bApDebug)
+             ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: ApacheInitUnload [%d/%d]\n", getpid(), gettid()) ;
+         }
 #else
     if (!unload_subpool && p)
         {            
@@ -407,6 +413,11 @@ static void embperl_ApacheInitCleanup (void * p)
 #endif
 
     {
+#ifdef APACHE2
+    if (bApDebug)
+        ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "EmbperlDebug: embperl_ApacheInitCleanup [%d/%d]\n", getpid(), gettid()) ;
+    return OK ;
+#else
     module * m ;
     /* make sure embperl module is removed before mod_perl in case mod_perl is loaded dynamicly*/
     if ((m = ap_find_linked_module("mod_perl.c")))
@@ -432,8 +443,6 @@ static void embperl_ApacheInitCleanup (void * p)
         embperl_EndPass1 () ;
         }
 
-#ifdef APACHE2
-    return OK ;
 #endif
     }
 

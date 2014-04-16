@@ -1,6 +1,7 @@
 /*###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: epeval.c 960450 2010-07-05 05:46:23Z richter $
+#   $Id: epeval.c 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################*/
 
@@ -53,7 +54,8 @@ int EvalDirect (/*i/o*/ register req *  r,
     epTHX_ /* dTHXsem */ 
     dSP;
     SV *  pSVErr  ;
-    int   num ;         
+    int   num ;
+    int   n ;
 
     tainted = 0 ;
 
@@ -62,8 +64,18 @@ int EvalDirect (/*i/o*/ register req *  r,
 	XPUSHs(pArgs [num]) ;            /* push pointer to argument */
     PUTBACK;
 
-    perl_eval_sv(pArg, G_SCALAR | G_KEEPERR);
+#if PERL_VERSION >= 14
+    n = perl_eval_sv(pArg, G_SCALAR);
+#else
+    n = perl_eval_sv(pArg, G_SCALAR | G_KEEPERR);
+#endif
 
+    SPAGAIN;
+    if (n > 0)
+        pSVErr = POPs;
+    PUTBACK;
+
+    //delap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "eval direct %s  serial=%d", SvPVX(pArg), pSVErr->sv_debug_serial) ;
 
     tainted = 0 ;
     pSVErr = ERRSV ;
@@ -196,6 +208,7 @@ int EvalConfig (/*i/o*/ tApp *          a,
 	    *pCV = (CV *)SvRV (pSV) ;
 	    }
 	}
+    //del ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "eval config %s  serial=%d", s, ((SV *)(*pCV))->sv_debug_serial) ;
 
     if (!*pCV || SvTYPE (*pCV) != SVt_PVCV)
 	{
@@ -294,6 +307,7 @@ int EvalRegEx  (/*i/o*/ tApp *          a,
 #ifdef DMALLOC
         AddDMallocMagic (*ppCV, sRegex?sRegex:"EvalRegEx", __FILE__, __LINE__) ;
 #endif
+//del ap_log_error (APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO, APLOG_STATUSCODE NULL, "eval regex %s  serial=%d", sRegex, ((SV *)(*ppCV))->sv_debug_serial) ;
 	}
     else
       	*ppCV = NULL ;
@@ -322,15 +336,16 @@ static int EvalAll (/*i/o*/ register req * r,
                     /*in*/  const char *  sName,
 		    /*out*/ SV **         pRet)             
     {
-    epTHX_ /* dTHXsem */ 
-    static char sFormat []       = "package %s ; sub %s { \n#line %d \"%s\"\n%s\n} %s%s" ;
-    static char sFormatStrict [] = "package %s ; use strict ; sub %s {\n#line %d \"%s\"\n%s\n} %s%s" ; 
-    static char sFormatArray []       = "package %s ; sub %s { \n#line %d \"%s\"\n[%s]\n} %s%s" ;
-    static char sFormatStrictArray [] = "package %s ; use strict ; sub %s {\n#line %d \"%s\"\n[%s]\n} %s%s" ; 
+    epTHX_ /* dTHXsem */
+    static char sFormat []       = "package %s ; %s sub %s { \n#line %d \"%s\"\n%s\n} %s%s" ;
+    static char sFormatStrict [] = "package %s ; %s use strict ; sub %s {\n#line %d \"%s\"\n%s\n} %s%s" ; 
+    static char sFormatArray []       = "package %s ; %s sub %s { \n#line %d \"%s\"\n[%s]\n} %s%s" ;
+    static char sFormatStrictArray [] = "package %s ; %s use strict ; sub %s {\n#line %d \"%s\"\n[%s]\n} %s%s" ; 
     SV *   pSVCmd ;
     SV *   pSVErr ;
     int    n ;
     char * sRef = "" ;
+    char * use_utf8 = "" ;
 
     dSP;
     
@@ -349,20 +364,27 @@ static int EvalAll (/*i/o*/ register req * r,
     if (*sName)
 	sRef = "; \\&" ;
     
+    if (strcmp (r -> Component.Config.sInputCharset, "utf8") == 0)
+        use_utf8 = "use utf8;" ;
+    
     if (r -> Component.bStrict)
         if ((flags & G_ARRAY) != G_SCALAR)
-            pSVCmd = newSVpvf(sFormatStrictArray, r -> Component.sEvalPackage, sName, r -> Component.nSourceline, r -> Component.sSourcefile, sArg, sRef, sName) ;
+            pSVCmd = newSVpvf(sFormatStrictArray, r -> Component.sEvalPackage, use_utf8, sName, r -> Component.nSourceline, r -> Component.sSourcefile, sArg, sRef, sName) ;
         else
-            pSVCmd = newSVpvf(sFormatStrict, r -> Component.sEvalPackage, sName, r -> Component.nSourceline, r -> Component.sSourcefile, sArg, sRef, sName) ;
+            pSVCmd = newSVpvf(sFormatStrict, r -> Component.sEvalPackage, use_utf8, sName, r -> Component.nSourceline, r -> Component.sSourcefile, sArg, sRef, sName) ;
     else
         if ((flags & G_ARRAY) != G_SCALAR)
-            pSVCmd = newSVpvf(sFormatArray, r -> Component.sEvalPackage, sName, r -> Component.nSourceline, r -> Component.sSourcefile, sArg, sRef, sName) ;
+            pSVCmd = newSVpvf(sFormatArray, r -> Component.sEvalPackage, use_utf8, sName, r -> Component.nSourceline, r -> Component.sSourcefile, sArg, sRef, sName) ;
         else
-            pSVCmd = newSVpvf(sFormat, r -> Component.sEvalPackage, sName, r -> Component.nSourceline, r -> Component.sSourcefile, sArg, sRef, sName) ;
+            pSVCmd = newSVpvf(sFormat, r -> Component.sEvalPackage, use_utf8, sName, r -> Component.nSourceline, r -> Component.sSourcefile, sArg, sRef, sName) ;
     newSVpvf2(pSVCmd) ;
 
     PUSHMARK(sp);
+#if PERL_VERSION >= 14
+    n = perl_eval_sv(pSVCmd, G_SCALAR);
+#else
     n = perl_eval_sv(pSVCmd, G_SCALAR | G_KEEPERR);
+#endif
     SvREFCNT_dec(pSVCmd);
     tainted = 0 ;
 
@@ -388,14 +410,15 @@ static int EvalAll (/*i/o*/ register req * r,
             l-- ;
         r -> errdat1[l] = '\0' ;
          
-        if (pRet && *pRet)
+        /*if (pRet && *pRet)
 	     SvREFCNT_dec (*pRet) ;
-	
+	*/
 	*pRet = newSVpv (r -> errdat1, 0) ;
          
         /* LogError (r, rcEvalErr) ; */
 	sv_setpv(pSVErr, "");
-        return rcEvalErr ;
+
+	return rcEvalErr ;
         }
 
     return ok ;
@@ -533,7 +556,8 @@ int CallCV  (/*i/o*/ register req * r,
         STRLEN l ;
         char * p ;
 
-        if (SvMAGICAL (pSVErr) && mg_find (pSVErr, 'U'))
+        p = SvPV (pSVErr, l) ;
+        if (p && l > 14 && strncmp(p, ">embperl_exit<", 14) == 0)
             {
  	    /* On an Apache::exit call, the function croaks with error having 'U' magic.
  	     * When we get this return, we'll just give up and quit this file completely,
@@ -549,7 +573,6 @@ int CallCV  (/*i/o*/ register req * r,
             if (r -> Component.Config.bDebug & dbgEval)
                 lprintf (r -> pApp,  "[%d]EVAL> exit called\n", r -> pThread -> nPid) ;
             
-            sv_unmagic(pSVErr,'U');
 	    sv_setpv(pSVErr,"");
 
 	    r -> Component.Config.bOptions |= optNoUncloseWarn ;
@@ -558,7 +581,6 @@ int CallCV  (/*i/o*/ register req * r,
             return rcExit ;
             }
 
-        p = SvPV (pSVErr, l) ;
         if (l > sizeof (r -> errdat1) - 1)
             l = sizeof (r -> errdat1) - 1 ;
         strncpy (r -> errdat1, p, l) ;
@@ -821,27 +843,26 @@ int CallStoredCV  (/*i/o*/ register req * r,
         STRLEN l ;
         char * p ;
 
-        if (SvMAGICAL (pSVErr) && mg_find (pSVErr, 'U'))
+        p = SvPV (pSVErr, l) ;
+        if (p && l > 14 && strncmp(p, ">embperl_exit<", 14) == 0)
             {
  	    /* On an Apache::exit call, the function croaks with error having 'U' magic.
  	     * When we get this return, we'll just give up and quit this file completely,
  	     * without error. */
              
 	    /*struct magic * m = SvMAGIC (pSVErr) ;*/
-
             tDomTree * pDomTree = DomTree_self (r -> Component.xCurrDomTree) ;
             tIndex n = ArrayGetSize (r -> pApp, pDomTree -> pCheckpoints) ;
             if (n > 2)
                 DomTree_checkpoint (r, n-1) ;
 
             p = SvPV(ERRSV, l) ;
-            if (l > 0 && strncmp (p, "request ",8) == 0)
+            if (l > 0 && strncmp (p, ">embperl_exit< request ", 23) == 0)
                 r -> bExit = 1 ;
             
             if (r -> Component.Config.bDebug & dbgEval)
                 lprintf (r -> pApp,  "[%d]EVAL> %s exit called (%s)\n", r -> pThread -> nPid, r -> bExit?"request":"component", p?p:"") ;
             
-	    sv_unmagic(pSVErr,'U');
 	    sv_setpv(pSVErr,"");
 
 	    r -> Component.Config.bOptions |= optNoUncloseWarn ;
@@ -850,7 +871,6 @@ int CallStoredCV  (/*i/o*/ register req * r,
             return rcExit ;
             }
 
-        p = SvPV (pSVErr, l) ;
         if (l > sizeof (r -> errdat1) - 1)
             l = sizeof (r -> errdat1) - 1 ;
         strncpy (r -> errdat1, p, l) ;
@@ -1222,7 +1242,7 @@ int EvalSub (/*i/o*/ register req * r,
 	    lprintf (r -> pApp,  "sv_any=%x\n", gv -> sv_any) ;
 	    
 	    SvREFCNT_dec (GvCV (gv)) ;  
-	    GvCV (gv) = (CV *)*ppSV ; 
+	    GvCV_set (gv,(CV *)*ppSV) ; 
 	    SvREFCNT_inc (*ppSV) ;  
 	    */
 	    }

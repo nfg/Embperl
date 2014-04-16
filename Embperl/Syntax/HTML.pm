@@ -1,7 +1,8 @@
 
 ###################################################################################
 #
-#   Embperl - Copyright (c) 1997-2010 Gerald Richter / ECOS
+#   Embperl - Copyright (c) 1997-2008 Gerald Richter / ecos gmbh  www.ecos.de
+#   Embperl - Copyright (c) 2008-2014 Gerald Richter
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -10,7 +11,7 @@
 #   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 #   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#   $Id: HTML.pm 580573 2007-09-29 11:05:54Z richter $
+#   $Id: HTML.pm 1578075 2014-03-16 14:01:14Z richter $
 #
 ###################################################################################
  
@@ -149,14 +150,14 @@ sub AddTag
 
 
     $self -> AddToRoot ({
-                        'HTML Tag' => {
+                        'A HTML Tag' => {
                             'text' => '<',
                             'end'  => '>',
                             }
-                        }) if (!exists $self -> {-root}{'HTML Tag'}) ;
+                        }) if (!exists $self -> {-root}{'A HTML Tag'}) ;
 
 
-    $self -> AddElement ('HTML Tag', @_) ;
+    $self -> AddElement ('A HTML Tag', @_) ;
     }
 
 
@@ -413,7 +414,7 @@ __END__
 
 =head1 NAME
 
-Embperl::Syntax::HTML
+Embperl::Syntax::HTML - define the syntax for HTML
 
 =head1 SYNOPSIS
 
@@ -476,7 +477,7 @@ If set to 2 a hidden input tag with the session id will be added.
 
 Same as AddTag, but tag could be also used inside of another tag. 
 (e.g. <sometag <someothertag> > ). This is not HTML or XML compatible,
-but maybe usefull for implementing tagslibs etc. sometimes.
+but maybe useful for implementing tagslibs etc. sometimes.
 
 =head2 AddComment ($tagname, $attrs, $attrsurl, $attrsnoval, $procinfo)
 
@@ -496,7 +497,7 @@ specified.
 
 =head1 Author
 
-G. Richter (richter@dev.ecos.de)
+G. Richter (richter at embperl dot org)
 
 =head1 See Also
 
